@@ -1,18 +1,39 @@
 # ============================================================================
 # REFERENCE IMPLEMENTATION - COMMENTED OUT FOR GENERICIZATION
 # ============================================================================
-# This file contains a reference PydanticAI agent implementation that has been
+# This file contains a complete PydanticAI agent implementation that has been
 # commented out to create a generic template. The original implementation
-# provides a complete example of how to structure an agent with state, tools,
-# and result validation.
+# provides a fully functional example of a procurement-specific agent.
 #
-# To adapt for your project:
-# 1. Define your state class with domain-specific fields
-# 2. Create dependencies that match your state requirements
-# 3. Configure the agent with appropriate system prompt and model
-# 4. Implement tools that handle your specific business logic
-# 5. Add result validation if needed
-# 6. Uncomment and adapt the code below
+# What this code does:
+# - Defines state management (YourState) for tracking user input, AI responses,
+#   and procurement-specific data fields
+# - Creates a dependency injection layer (StateDeps) for passing state to tools
+# - Configures a PydanticAI Agent with an OpenAI-compatible model
+# - Implements domain-specific tools (your_tool) that the agent can call
+# - Provides result validation (validate_result) for post-processing output
+#
+# Why it was commented out:
+# - The original implementation contains procurement-specific business logic
+#   that is not applicable to a generic template
+# - State fields, tool logic, and system prompts are domain-specific
+# - Commenting out (rather than deleting) preserves the implementation as a
+#   reference example for developers adapting the template
+#
+# How to adapt for your project:
+# 1. Define your state class (YourState) with domain-specific fields
+# 2. Create a dependency class (StateDeps) that wraps your state
+# 3. Configure the Agent with your system prompt and model settings
+# 4. Implement tools decorated with @agent.tool for your business logic
+# 5. Add result validation with @agent.result_validator if needed
+# 6. Uncomment and adapt the relevant sections below
+#
+# Key dependencies preserved (imports and model config remain active):
+# - pydantic: BaseModel for state and type definitions
+# - pydantic_ai: Agent, RunContext for agent framework
+# - pydantic_ai.models.openai: OpenAIModel for LLM integration
+# - dotenv: Environment variable loading
+# - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
 from pydantic import BaseModel
