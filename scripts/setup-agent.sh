@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# This script sets up the Python agent environment. It installs agent
+# dependencies using uv (if available) or pip/venv. It navigates to the
+# agent directory and creates a virtual environment if needed.
+#
+# Adapt this script if your agent structure differs (e.g., different
+# dependency installation command, different virtual environment location).
+#
+# The script tries to find uv in standard locations (PATH, ~/.cargo/bin,
+# VS Code snap). Install uv via 'pip install uv' or
+# 'curl -LsSf https://astral.sh/uv/install.sh | sh' to use it.
+
 # Navigate to the agent directory
 cd "$(dirname "$0")/../agent" || exit 1
 
