@@ -137,8 +137,26 @@ model = OpenAIModel(
 #     return f"Tool output: {input_data}"
 
 
-# Main agent function - customize this
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# RESULT VALIDATION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# The result validator is an optional hook that runs after the agent produces
+# a final response. It allows you to inspect, transform, or reject the
+# agent's output before it is returned to the caller.
+#
+# Current Logic:
+# - Decorated with @agent.result_validator to register with the agent
+# - Receives RunContext with StateDeps and the agent's result string
+# - Returns the (possibly transformed) result string
+# - Can raise exceptions to reject invalid results and trigger retries
+#
+# To adapt for your project:
+# 1. Uncomment and implement validation logic appropriate for your domain
+# 2. Use ctx.deps to access state during validation if needed
+# 3. Transform the result (e.g., format, sanitize, enrich) before returning
+# 4. Raise an exception if the result is invalid (agent will retry)
+# 5. Remove the validator entirely if no post-processing is needed
+# ============================================================================
 # @agent.result_validator
 # def validate_result(ctx: RunContext[StateDeps], result: str) -> str:
 #     """Validate and process agent results"""
