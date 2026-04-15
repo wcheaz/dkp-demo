@@ -85,8 +85,42 @@ model = OpenAIModel(
 # )
 
 
-# Define your tools here
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# TOOL DEFINITION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# This is a sample tool that demonstrates how to implement agent tools using
+# the @agent.tool decorator. Tools are functions the agent can call during
+# conversation to perform actions or retrieve information.
+#
+# Current Logic:
+# - Receives RunContext with StateDeps providing access to shared state
+# - Accepts typed input parameters (e.g., input_data: str)
+# - Returns a string result that the agent can use in its response
+# - Decorated with @agent.tool to register with the agent
+#
+# To adapt for your project:
+# 1. Define tool functions that handle your specific business logic
+# 2. Each tool should be decorated with @agent.tool
+# 3. The first parameter must be ctx: RunContext[YourDepsType]
+# 4. Subsequent parameters are the tool's input (with type hints)
+# 5. Return a value the agent can reason about (str, dict, list, etc.)
+# 6. Write clear docstrings - the agent uses them to decide when to call tools
+#
+# Example:
+#     @agent.tool
+#     async def lookup_customer(ctx: RunContext[StateDeps], customer_id: str) -> str:
+#         \"\"\"Look up a customer by their ID.
+#
+#         Args:
+#             ctx: Agent context with state
+#             customer_id: The customer's unique identifier
+#
+#         Returns:
+#             Customer information as a formatted string
+#         \"\"\"
+#         customer = await db.get_customer(customer_id)
+#         return f"Customer: {customer.name}, Email: {customer.email}"
+# ============================================================================
 # @agent.tool
 # async def your_tool(ctx: RunContext[StateDeps], input_data: str) -> str:
 #     """
