@@ -56,8 +56,23 @@ model = OpenAIModel(
 #     # Add your domain-specific state fields here
 
 
-# Dependencies
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# DEPENDENCY INJECTION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# StateDeps is a dependency injection wrapper that holds the agent's state.
+# It is passed to agent tools via RunContext, allowing tools to access and
+# modify shared state during agent execution.
+#
+# Current Logic:
+# - Wraps YourState instance, providing tools with access to state fields
+# - Passed as deps_type to Agent constructor for type-safe context access
+# - Enables stateful tool interactions (tools can read/write state)
+#
+# To adapt for your project:
+# 1. Update the state type hint to match your state class
+# 2. Add any additional dependencies (API clients, database connections, etc.)
+# 3. Ensure the class matches the deps_type parameter in your Agent constructor
+# ============================================================================
 # class StateDeps:
 #     """Dependencies for your agent"""
 #
