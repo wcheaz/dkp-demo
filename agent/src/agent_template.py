@@ -101,8 +101,28 @@ model = OpenAIModel(
 # )
 
 
-# Define your tools here
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# TOOL IMPLEMENTATION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# Tool functions define the actions your agent can take. Each tool is decorated
+# with @agent.tool and receives a RunContext containing the agent's dependencies.
+# Tools can read and modify state, call external APIs, process data, etc.
+#
+# Current Logic:
+# - your_tool: A sample tool that takes input_data and returns a formatted string
+# - Demonstrates the tool signature pattern: async def tool(ctx, args) -> str
+# - Shows how to access state through ctx.deps.state
+# - Includes docstring for agent self-discovery of available tools
+#
+# To adapt for your project:
+# 1. Define tools that implement your specific business logic
+# 2. Each tool must be an async function decorated with @agent.tool
+# 3. First parameter is always RunContext[StateDeps] for dependency access
+# 4. Additional parameters become the tool's input schema
+# 5. Return type should be a string or a Pydantic model for structured output
+# 6. Write clear docstrings - the agent uses them to decide when to call tools
+# 7. Uncomment and adapt the code below
+# ============================================================================
 # @agent.tool
 # async def your_tool(ctx: RunContext[StateDeps], input_data: str) -> str:
 #     """
