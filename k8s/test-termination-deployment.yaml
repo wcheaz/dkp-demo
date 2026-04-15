@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: termination-test-deployment
+  labels:
+    app: termination-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: termination-test
+  template:
+    metadata:
+      labels:
+        app: termination-test
+    spec:
+      containers:
+      - name: termination-test-container
+        image: localhost:32000/dkp-demo:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        command: ["/bin/sh", "-c"]
+        args: ["echo 'Container terminating for test - this should trigger error detection'; exit 0"]
+        # This command will cause the container to exit with code 0 immediately
+        # This should trigger the container termination error detection
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: termination-test-service
+spec:
+  selector:
+    app: termination-test
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: termination-test-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: termination-test-service
+            port:
+              number: 80

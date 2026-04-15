@@ -1,0 +1,29 @@
+# agent-service Service Configuration
+# ===================================
+#
+# CONFIGURABLE VALUES ANALYSIS:
+# =========================================
+# The following values are appropriately hardcoded for this service:
+# - port: 8000 (matches agent container port)
+# - targetPort: 8000 (matches application container port)
+# - type: ClusterIP (appropriate for internal service access)
+#
+# Note: Service port configuration is typically static for cluster-internal services
+# but could be made configurable if external exposure requirements change.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-service
+  namespace: default
+  labels:
+    app: agent
+spec:
+  type: ClusterIP
+  selector:
+    app: agent
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+    name: http

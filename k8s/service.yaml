@@ -1,0 +1,29 @@
+# dkp-demo Service Configuration
+# ===================================
+#
+# CONFIGURABLE VALUES ANALYSIS (Task 9.3):
+# =========================================
+# The following values are appropriately hardcoded for this service:
+# - port: 80 (standard HTTP port for ClusterIP service)
+# - targetPort: 3000 (matches application container port)
+# - type: ClusterIP (appropriate for internal service access)
+#
+# Note: Service port configuration is typically static for cluster-internal services
+# but could be made configurable if external exposure requirements change.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: dkp-demo-service
+  namespace: default
+  labels:
+    app: dkp-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: dkp-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+    name: http

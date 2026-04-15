@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env
+.venv
+__pycache__
+agent/venv
+agent/.venv
+agent/__pycache__
