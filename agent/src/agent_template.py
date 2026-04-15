@@ -30,8 +30,24 @@ model = OpenAIModel(
 )
 
 
-# Your state class - customize this for your domain
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# STATE CLASS - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# YourState defines the shared state that persists across agent tool calls.
+# It tracks conversation context (user_input, ai_response) and any
+# domain-specific fields needed by your tools.
+#
+# Current Logic:
+# - user_input: Stores the latest user message for tool context
+# - ai_response: Stores the latest agent response for tool context
+# - Additional fields can be added for domain-specific data tracking
+#
+# To adapt for your project:
+# 1. Define fields that represent your domain's state (e.g., order_id, customer_data)
+# 2. Use Optional types for fields that may not always be populated
+# 3. Provide default values so the state can be initialized without all fields
+# 4. Keep state serializable (BaseModel ensures JSON compatibility)
+# ============================================================================
 # class YourState(BaseModel):
 #     """State for your specific application"""
 #
