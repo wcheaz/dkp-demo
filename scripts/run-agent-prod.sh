@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# ============================================================================
+# Production Agent Runner
+# ============================================================================
+# This script runs the PydanticAI agent server in production mode using uv
+# (if available) or pip/venv. The agent listens on 0.0.0.0:8000.
+# Note: Unlike run-agent.sh, this script does NOT use --reload for hot
+# reloading, making it suitable for production deployments.
+#
+# Adapt this script if your agent entry point differs (e.g., different
+# module, different port, different host binding).
+#
+# The script tries to find uv in standard locations (PATH, ~/.cargo/bin,
+# VS Code snap). Install uv via 'pip install uv' or
+# 'curl -LsSf https://astral.sh/uv/install.sh | sh' to use it.
+# ============================================================================
+
 # Navigate to the agent directory
 cd "$(dirname "$0")/../agent" || exit 1
 
