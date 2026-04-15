@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# ============================================================================
+# PydanticAI Agent Server Runner
+# ============================================================================
+# This script runs the agent server using uv (if available) or pip/venv.
+# The agent listens on 0.0.0.0:8000.
+#
+# Adapt this script if your agent entry point differs (e.g., different module,
+# different port). The entry point is defined in src/main.py which creates
+# a FastAPI app with SSE transport.
+#
+# uv package manager detection:
+# The script tries to find uv in standard locations (PATH, ~/.cargo/bin,
+# VS Code snap). Install uv via 'pip install uv' or
+# 'curl -LsSf https://astral.sh/uv/install.sh | sh' to use it.
+# ============================================================================
+
 # Navigate to the agent directory
 cd "$(dirname "$0")/../agent" || exit 1
 
