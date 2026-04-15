@@ -1,7 +1,17 @@
 #!/bin/bash
 
 ################################################################################
-# Kubernetes Deployment Setup Script
+# {{PROJECT_NAME}} Kubernetes Deployment Setup Script
+# ================================================
+#
+# CONFIGURATION REQUIRED:
+# ========================
+# Before running this script, set environment variables or replace placeholders:
+# (1) PROJECT_NAME - your project identifier (e.g., "my-app")
+# (2) REGISTRY_HOST - your container registry address (e.g., "registry.example.com" or "localhost:32000")
+#
+# Default values are generic - override with:
+#   VM_NAME=my-vm REGISTRY=registry.example.com ./scripts/kubernetes-deployment-setup.sh
 #
 # This script automates the manual deployment steps that are part of the
 # human handoff process in the fix-k8s-agent-streaming workflow. It performs
@@ -9,7 +19,7 @@
 # running in a Multipass VM.
 #
 # Purpose:
-# - After making code changes to the frontend (my-ag-ui-app) or agent,
+# - After making code changes to the frontend or agent,
 #   this script rebuilds the Docker images and deploys them to production
 # - Eliminates the need to manually run multiple commands across the host
 #   and VM during the deployment process
@@ -18,7 +28,7 @@
 # 1. Pre-flight validation: Checks that VM exists, Docker is accessible
 # 2. Build phase: Builds Docker images (frontend, agent, or both)
 # 3. Transfer phase: Saves images to tar files, transfers to VM, loads them
-# 4. Registry phase: Tags and pushes images to local registry (localhost:32000)
+# 4. Registry phase: Tags and pushes images to local registry
 # 5. Manifest phase: Applies updated Kubernetes manifests if specified
 # 6. Restart phase: Restarts affected deployments to pick up new images
 # 7. Verification phase: Runs verification script to test the deployment
@@ -40,7 +50,7 @@
 #   scripts/kubernetes-deployment-setup.sh --build agent --restart --delete-old
 #
 # Environment variables:
-#   VM_NAME: Name of the Multipass VM (default: my-ag-ui-app-k8s)
+#   VM_NAME: Name of the Multipass VM (default: {{PROJECT_NAME}}-k8s)
 #
 # Disk space management:
 #   - Without --delete-old: Script checks available disk space and fails if insufficient
@@ -51,11 +61,13 @@
 set -e
 
 # Configuration
-VM_NAME="${VM_NAME:-my-ag-ui-app-k8s}"
-REGISTRY="localhost:32000"
-FRONTEND_IMAGE_NAME="my-ag-ui-app"
+# Replace {{PROJECT_NAME}} with your project identifier (e.g., "my-app")
+# Replace {{REGISTRY_HOST}} with your container registry (e.g., "localhost:32000" or "registry.example.com")
+VM_NAME="${VM_NAME:-{{PROJECT_NAME}}-k8s}"
+REGISTRY="{{REGISTRY_HOST}}"
+FRONTEND_IMAGE_NAME="{{PROJECT_NAME}}"
 AGENT_IMAGE_NAME="agent"
-FRONTEND_DEPLOYMENT="my-ag-ui-app"
+FRONTEND_DEPLOYMENT="{{PROJECT_NAME}}"
 AGENT_DEPLOYMENT="agent"
 
 # Colors for output
@@ -90,7 +102,7 @@ usage() {
     echo "  -h, --help                 Show this help message"
     echo ""
     echo "Environment Variables:"
-    echo "  VM_NAME                    Name of the Multipass VM (default: my-ag-ui-app-k8s)"
+    echo "  VM_NAME                    Name of the Multipass VM (default: {{PROJECT_NAME}}-k8s)"
     echo ""
     echo "Examples:"
     echo "  $0 --build all --manifest k8s/ingress.yaml --restart --verify"
@@ -384,23 +396,23 @@ if [ "$DAEMON_JSON_EXISTS" = "no" ]; then
     multipass exec "$VM_NAME" -- sudo mkdir -p /etc/docker
     multipass exec "$VM_NAME" -- sudo bash -c "cat > /etc/docker/daemon.json <<'DEOF'
 {
-  \"insecure-registries\": [\"localhost:32000\"]
+  \"insecure-registries\": [\"{{REGISTRY_HOST}}\"]
 }
 DEOF"
     NEEDS_DOCKER_RESTART=true
     log_info "Created /etc/docker/daemon.json"
 else
     # Check if insecure-registries already includes our registry
-    HAS_INSECURE=$(multipass exec "$VM_NAME" -- grep -c "localhost:32000" /etc/docker/daemon.json 2>/dev/null || echo "0")
+    HAS_INSECURE=$(multipass exec "$VM_NAME" -- grep -c "{{REGISTRY_HOST}}" /etc/docker/daemon.json 2>/dev/null || echo "0")
     if [ "$HAS_INSECURE" -eq 0 ]; then
-        log_info "Adding localhost:32000 to insecure-registries in existing daemon.json..."
+        log_info "Adding {{REGISTRY_HOST}} to insecure-registries in existing daemon.json..."
         multipass exec "$VM_NAME" -- sudo python3 -c "
 import json, sys
 with open('/etc/docker/daemon.json') as f:
     config = json.load(f)
 ir = config.get('insecure-registries', [])
-if 'localhost:32000' not in ir:
-    ir.append('localhost:32000')
+if '{{REGISTRY_HOST}}' not in ir:
+    ir.append('{{REGISTRY_HOST}}')
 config['insecure-registries'] = ir
 with open('/etc/docker/daemon.json', 'w') as f:
     json.dump(config, f, indent=2)
