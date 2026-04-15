@@ -1,4 +1,20 @@
-# Minimal PydanticAI Agent Template
+# ============================================================================
+# REFERENCE IMPLEMENTATION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# This file contains a reference PydanticAI agent implementation that has been
+# commented out to create a generic template. The original implementation
+# provides a complete example of how to structure an agent with state, tools,
+# and result validation.
+#
+# To adapt for your project:
+# 1. Define your state class with domain-specific fields
+# 2. Create dependencies that match your state requirements
+# 3. Configure the agent with appropriate system prompt and model
+# 4. Implement tools that handle your specific business logic
+# 5. Add result validation if needed
+# 6. Uncomment and adapt the code below
+# ============================================================================
+
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
@@ -15,48 +31,53 @@ model = OpenAIModel(
 
 
 # Your state class - customize this for your domain
-class YourState(BaseModel):
-    """State for your specific application"""
-
-    user_input: str = ""
-    ai_response: str = ""
-    # Add your domain-specific state fields here
+# Commented out for genericization - this is a reference implementation
+# class YourState(BaseModel):
+#     """State for your specific application"""
+#
+#     user_input: str = ""
+#     ai_response: str = ""
+#     # Add your domain-specific state fields here
 
 
 # Dependencies
-class StateDeps:
-    """Dependencies for your agent"""
-
-    def __init__(self, state: YourState):
-        self.state = state
+# Commented out for genericization - this is a reference implementation
+# class StateDeps:
+#     """Dependencies for your agent"""
+#
+#     def __init__(self, state: YourState):
+#         self.state = state
 
 
 # Create agent
-agent = Agent(
-    model, deps_type=StateDeps, system_prompt="You are a helpful AI assistant."
-)
+# Commented out for genericization - this is a reference implementation
+# agent = Agent(
+#     model, deps_type=StateDeps, system_prompt="You are a helpful AI assistant."
+# )
 
 
 # Define your tools here
-@agent.tool
-async def your_tool(ctx: RunContext[StateDeps], input_data: str) -> str:
-    """
-    Your tool description
-
-    Args:
-        ctx: Agent context with state
-        input_data: Input data for your tool
-
-    Returns:
-        Your tool output
-    """
-    # Implement your tool logic here
-    return f"Tool output: {input_data}"
+# Commented out for genericization - this is a reference implementation
+# @agent.tool
+# async def your_tool(ctx: RunContext[StateDeps], input_data: str) -> str:
+#     """
+#     Your tool description
+#
+#     Args:
+#         ctx: Agent context with state
+#         input_data: Input data for your tool
+#
+#     Returns:
+#         Your tool output
+#     """
+#     # Implement your tool logic here
+#     return f"Tool output: {input_data}"
 
 
 # Main agent function - customize this
-@agent.result_validator
-def validate_result(ctx: RunContext[StateDeps], result: str) -> str:
-    """Validate and process agent results"""
-    # Add your validation logic here
-    return result
+# Commented out for genericization - this is a reference implementation
+# @agent.result_validator
+# def validate_result(ctx: RunContext[StateDeps], result: str) -> str:
+#     """Validate and process agent results"""
+#     # Add your validation logic here
+#     return result

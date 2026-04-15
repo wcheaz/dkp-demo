@@ -1,0 +1,45 @@
+# dkp-demo Ingress Configuration
+# ===================================
+#
+# CONFIGURABLE VALUES ANALYSIS (Task 9.3):
+# =========================================
+# The following values are appropriately hardcoded for this ingress:
+# - host: dkp-demo.local (local development hostname)
+# - path: / (root path for application access)
+# - ingressClassName: nginx (using NGINX ingress controller)
+# - rewrite-target: / (standard path rewriting)
+#
+# Note: Ingress configuration is typically environment-specific and would be
+# configured differently for production vs. development environments.
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dkp-demo-ingress
+  namespace: default
+  labels:
+    app: dkp-demo
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # SSE (Server-Sent Events) streaming support
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/connection-proxy-header: "keep-alive"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dkp-demo.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: dkp-demo-service
+            port:
+              name: http
