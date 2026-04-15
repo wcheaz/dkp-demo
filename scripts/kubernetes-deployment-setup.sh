@@ -56,6 +56,27 @@
 #   - Without --delete-old: Script checks available disk space and fails if insufficient
 #   - With --delete-old: Cleans up old Docker images and registry storage before deployment
 #   - Use --delete-old when experiencing disk pressure, rollout loops, or eviction issues
+#
+# Environment requirements:
+#   - Multipass (https://multipass.run) installed on host for VM management
+#   - Docker installed on host machine for building images
+#   - Docker installed inside the Multipass VM for loading images
+#   - microk8s enabled inside the Multipass VM with registry addon
+#   - kubectl configured to access the microk8s cluster
+#
+# Configuration steps:
+#   1. Set VM_NAME to match your Multipass VM name (or use {{PROJECT_NAME}}-k8s default)
+#   2. Set REGISTRY_HOST to match your container registry address
+#   3. Ensure the VM is running: multipass start <VM_NAME>
+#   4. Ensure microk8s is ready: multipass exec <VM_NAME> -- microk8s status
+#
+# Adapting for other Kubernetes environments:
+#   If NOT using Multipass + microk8s (e.g., minikube, k3d, cloud provider):
+#   - Replace multipass exec <VM_NAME> -- <command> with direct kubectl commands
+#   - Remove multipass transfer commands and use direct registry push
+#   - Adjust registry configuration for your environment's container registry
+#   - Modify the VM existence check to use your environment's node discovery
+#   - Update disk space checks for your environment's monitoring tools
 ################################################################################
 
 set -e
