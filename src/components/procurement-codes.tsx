@@ -23,8 +23,9 @@
 // 5. Update styling to match your UI requirements
 // ============================================================================
 
-import { AgentState } from "@/lib/types";
-import { utils, writeFile } from "xlsx";
+// Commented out for genericization - uncomment and adapt when implementing your component
+// import { AgentState } from "@/lib/types";
+// import { utils, writeFile } from "xlsx";
 
 // Commented out for genericization - reference implementation
 // export interface ProcurementCodesProps {
