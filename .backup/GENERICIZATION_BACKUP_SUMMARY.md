@@ -1,0 +1,24 @@
+Backup Summary
+.backup/agent/src/main.py
+.backup/agent/src/agent.py
+.backup/agent/src/agent_template.py
+.backup/agent/pyproject.toml
+.backup/src/components/your-component.tsx
+.backup/src/components/procurement-codes.tsx
+.backup/src/lib/types.ts
+.backup/src/app/page.tsx
+.backup/k8s/deployment.yaml
+.backup/k8s/service.yaml
+.backup/k8s/agent-deployment.yaml
+.backup/k8s/ingress.yaml
+.backup/k8s/secrets.yaml
+.backup/k8s/agent-service.yaml
+.backup/deploy_scripts/common.sh
+.backup/GENERICIZATION_SUMMARY.md
+.backup/.gitkeep
+.backup/scripts/kubernetes-deployment-setup.sh
+.backup/scripts/run-agent.sh
+.backup/scripts/run-agent-prod.sh
+.backup/scripts/setup-agent.sh
+.backup/scripts/setup-vm-docker.sh
+.backup/GENERICIZATION_BACKUP_SUMMARY.md

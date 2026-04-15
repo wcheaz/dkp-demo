@@ -1,21 +1,41 @@
+# {{PROJECT_NAME}} Deployment Configuration
+# ===================================
+#
+# CONFIGURATION REQUIRED:
+# =========================
+# Before deploying, replace the following placeholders:
+#
+# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
+# {{REGISTRY_HOST}}: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
+#
+# Example: if your project is called "my-app" and registry is "registry.example.com":
+# - Replace {{PROJECT_NAME}} with "my-app"
+# - Replace {{REGISTRY_HOST}} with "registry.example.com"
+#
+# Notes:
+# - replicas: 3 (adjust based on your load requirements)
+# - containerPort: 3000 (Next.js default, adjust if your app uses different port)
+# - AGENT_URL: points to agent service (adjust if agent service name changes)
+# ============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dkp-demo
+  name: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
   namespace: default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: dkp-demo
+      app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
   template:
     metadata:
       labels:
-        app: dkp-demo
+        app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
     spec:
       containers:
-      - name: dkp-demo
-        image: localhost:32000/dkp-demo:latest
+      - name: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+        image: {{REGISTRY_HOST}}/{{PROJECT_NAME}}:latest  # Replace {{REGISTRY_HOST}} and {{PROJECT_NAME}}
         ports:
         - containerPort: 3000
         env:
@@ -23,6 +43,6 @@ spec:
           value: "http://agent-service:8000/"
         envFrom:
         - secretRef:
-            name: dkp-demo-secrets
+            name: {{PROJECT_NAME}}-secrets  # Replace {{PROJECT_NAME}} with your project name
         - configMapRef:
-            name: dkp-demo-config
+            name: {{PROJECT_NAME}}-config  # Replace {{PROJECT_NAME}} with your project name
