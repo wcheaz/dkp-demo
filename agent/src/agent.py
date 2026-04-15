@@ -64,8 +64,22 @@ model = OpenAIModel(
 #         self.state = state
 
 
-# Create agent
-# Commented out for genericization - this is a reference implementation
+# ============================================================================
+# AGENT CREATION - COMMENTED OUT FOR GENERICIZATION
+# ============================================================================
+# This is the main Agent instance that orchestrates tool calls and manages
+# conversation flow. The agent is configured with:
+#   - model: The OpenAI-compatible model to use (configured above)
+#   - deps_type: The dependency injection type (StateDeps) for tool context
+#   - system_prompt: Instructions that define the agent's behavior and role
+#
+# To adapt for your project:
+# 1. Update the system_prompt to describe your agent's purpose and domain
+# 2. Ensure deps_type matches your dependency class (StateDeps or equivalent)
+# 3. Add result_type parameter if you need structured output (e.g., result_type=YourOutput)
+# 4. Configure retries, model_settings, or other Agent parameters as needed
+# 5. Uncomment and adapt the code below
+# ============================================================================
 # agent = Agent(
 #     model, deps_type=StateDeps, system_prompt="You are a helpful AI assistant."
 # )
