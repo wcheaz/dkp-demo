@@ -101,8 +101,8 @@ If you create a test suite, choose a directory structure and add it to these gui
 - [x] 2.8 Comment out `StateDeps` class in `agent/src/agent_template.py` — apply same comment strategy as agent.py. Verify syntax and that class is commented out.
 - [x] 2.9 Comment out agent creation in `agent/src/agent_template.py` — apply same comment strategy as agent.py. Verify syntax and that agent creation is commented out.
 - [x] 2.10 Comment out `your_tool` function in `agent/src/agent_template.py` — apply same comment strategy as agent.py. Verify syntax and that tool function is commented out.
-- [ ] 2.11 Comment out `validate_result` function in `agent/src/agent_template.py` — apply same comment strategy as agent.py. Verify syntax and that validator function is commented out.
-- [ ] 2.12 Add comprehensive header comment at top of `agent/src/agent_template.py` — same structure as agent.py header. Verify by checking header is present and complete.
+- [x] 2.11 Comment out `validate_result` function in `agent/src/agent_template.py` — apply same comment strategy as agent.py. Verify syntax and that validator function is commented out.
+- [x] 2.12 Add comprehensive header comment at top of `agent/src/agent_template.py` — same structure as agent.py header. Verify by checking header is present and complete.
 
 **Stop and hand off if**: Python syntax check fails for either agent.py or agent_template.py. Verify by running `cd agent && python -m py_compile src/agent.py && python -m py_compile src/agent_template.py` and checking for any syntax error messages.
 
