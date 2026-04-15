@@ -21,21 +21,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+  name: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
   namespace: default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+      app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
   template:
     metadata:
       labels:
-        app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+        app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
     spec:
       containers:
-      - name: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
-        image: {{REGISTRY_HOST}}/{{PROJECT_NAME}}:latest  # Replace {{REGISTRY_HOST}} and {{PROJECT_NAME}}
+      - name: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
+        image: "{{REGISTRY_HOST}}/{{PROJECT_NAME}}:latest"  # Replace {{REGISTRY_HOST}} and {{PROJECT_NAME}}
         ports:
         - containerPort: 3000
         env:
@@ -43,6 +43,6 @@ spec:
           value: "http://agent-service:8000/"
         envFrom:
         - secretRef:
-            name: {{PROJECT_NAME}}-secrets  # Replace {{PROJECT_NAME}} with your project name
+            name: "{{PROJECT_NAME}}-secrets"  # Replace {{PROJECT_NAME}} with your project name
         - configMapRef:
-            name: {{PROJECT_NAME}}-config  # Replace {{PROJECT_NAME}} with your project name
+            name: "{{PROJECT_NAME}}-config"  # Replace {{PROJECT_NAME}} with your project name
