@@ -1,3 +1,20 @@
+# Agent Deployment Configuration
+# ===================================
+#
+# CONFIGURATION REQUIRED:
+# =========================
+# Before deploying, replace the following placeholders:
+#
+# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
+# {{REGISTRY_HOST}}: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
+#
+# Notes:
+# - This deployment uses the generic "agent" name and labels
+# - Agent secrets and configmaps are shared with the main application
+# - Health checks configured for agent API at /api/health
+# - Resource requests/limits configured for typical agent workload
+# ============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,14 +32,14 @@ spec:
     spec:
       containers:
       - name: agent
-        image: localhost:32000/agent:latest
+        image: {{REGISTRY_HOST}}/agent:latest  # Replace {{REGISTRY_HOST}} with your registry host
         ports:
         - containerPort: 8000
         envFrom:
         - secretRef:
-            name: dkp-demo-secrets
+            name: {{PROJECT_NAME}}-secrets  # Replace {{PROJECT_NAME}} with your project name
         - configMapRef:
-            name: dkp-demo-config
+            name: {{PROJECT_NAME}}-config  # Replace {{PROJECT_NAME}} with your project name
         livenessProbe:
           httpGet:
             path: /api/health
