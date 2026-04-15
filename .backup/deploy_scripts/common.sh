@@ -23,15 +23,7 @@ ERROR_NETWORK=204
 ERROR_VALIDATION=205
 
 # Global variables
-# PROJECT_NAME: Replace with your project name before running deployment scripts
-# This VM name is used for multipass VM creation and access
-# Default is generic - override with: VM_NAME=my-vm ./deploy-to-k8s.sh
-#
-# Note: The deployment scripts are designed for multipass + microk8s environment.
-# If using a different Kubernetes distribution (minikube, k3d, cloud provider),
-# you will need to adapt the scripts to use the appropriate kubectl commands
-# and remove multipass-specific commands.
-VM_NAME="${VM_NAME:-{{PROJECT_NAME}}-k8s}"
+VM_NAME="${VM_NAME:-dkp-demo-k8s}"
 LOG_FILE="${LOG_FILE:-/tmp/deploy-$(date +%Y%m%d-%H%M%S).log}"
 HEALTH_CHECK_PATH="${HEALTH_CHECK_PATH:-/api/health}"
 

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dkp-demo
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dkp-demo
+  template:
+    metadata:
+      labels:
+        app: dkp-demo
+    spec:
+      containers:
+      - name: dkp-demo
+        image: localhost:32000/dkp-demo:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: AGENT_URL
+          value: "http://agent-service:8000/"
+        envFrom:
+        - secretRef:
+            name: dkp-demo-secrets
+        - configMapRef:
+            name: dkp-demo-config
