@@ -32,14 +32,14 @@ spec:
     spec:
       containers:
       - name: agent
-        image: {{REGISTRY_HOST}}/agent:latest  # Replace {{REGISTRY_HOST}} with your registry host
+        image: "{{REGISTRY_HOST}}/agent:latest"  # Replace {{REGISTRY_HOST}} with your registry host
         ports:
         - containerPort: 8000
         envFrom:
         - secretRef:
-            name: {{PROJECT_NAME}}-secrets  # Replace {{PROJECT_NAME}} with your project name
+            name: "{{PROJECT_NAME}}-secrets"  # Replace {{PROJECT_NAME}} with your project name
         - configMapRef:
-            name: {{PROJECT_NAME}}-config  # Replace {{PROJECT_NAME}} with your project name
+            name: "{{PROJECT_NAME}}-config"  # Replace {{PROJECT_NAME}} with your project name
         livenessProbe:
           httpGet:
             path: /api/health
