@@ -420,7 +420,7 @@ Dir structure:
 ```
 
 - [x] 6.1 Process project 041 — create dirs, copy 12 support files with translated names, write translation-notes.txt.
-- [ ] 6.2 Process project 043 — create dirs, copy files, write translation-notes.txt.
+- [x] 6.2 Process project 043 — create dirs, copy files, write translation-notes.txt.
 - [ ] 6.3 Process project 044 — create dirs, copy 10 support files with translated names (includes Czech `Beze jména` → `Untitled`), write translation-notes.txt.
 - [ ] 6.4 Process project 046 — create dirs, copy 18 support files with translated names, write translation-notes.txt.
 - [ ] 6.5 Process project 047 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
