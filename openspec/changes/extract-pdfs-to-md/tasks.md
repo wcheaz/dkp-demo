@@ -32,7 +32,7 @@
 
 ## 6. Full Extraction Run
 
-- [ ] 6.1 Run `python scripts/extract_pdfs_to_md.py` on `hidden/Trusses AI/`. Confirm it produces 196 `.md` files alongside their source PDFs and prints the expected summary (267 found, 196 extracted, 52 skipped images, 19 skipped no text, 0 failed).
+- [x] 6.1 Run `python scripts/extract_pdfs_to_md.py` on `hidden/Trusses AI/`. Confirm it produces 196 `.md` files alongside their source PDFs and prints the expected summary (267 found, 196 extracted, 52 skipped images, 19 skipped no text, 0 failed).
 
 ## 7. Verification and Idempotency Check
 
