@@ -78,7 +78,7 @@ Files in Supporting Documents:
 - [x] 2.2 Process project 002 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [x] 2.3 Process project 003 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [x] 2.4 Process project 006 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
-- [ ] 2.5 Process project 015 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
+- [x] 2.5 Process project 015 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [ ] 2.6 Verify batch — confirm 5 project folders exist in `hidden/Trusses AI/`, spot-check 3 files with `diff` against originals.
 
 **Done when**: All 5 project folders exist with correct English names, all subdirectories contain translated files and `translation-notes.txt`.
