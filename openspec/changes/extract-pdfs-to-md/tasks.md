@@ -27,8 +27,8 @@
 
 ## 5. File Writing and Main Pipeline
 
-- [ ] 5.1 Implement the main pipeline: for each non-skipped PDF, call `extract_text_as_markdown`, then `format_code_blocks`, then write the result to `{pdf_path.with_suffix('.md')}` in the same directory. Wrap each PDF in a try/except so failures are caught and recorded without halting the run.
-- [ ] 5.2 Implement summary output: after processing all PDFs, print to stdout a summary with counts for: total found, extracted, skipped (images), skipped (no text), failed (with file paths for any failures).
+- [x] 5.1 Implement the main pipeline: for each non-skipped PDF, call `extract_text_as_markdown`, then `format_code_blocks`, then write the result to `{pdf_path.with_suffix('.md')}` in the same directory. Wrap each PDF in a try/except so failures are caught and recorded without halting the run.
+- [x] 5.2 Implement summary output: after processing all PDFs, print to stdout a summary with counts for: total found, extracted, skipped (images), skipped (no text), failed (with file paths for any failures).
 
 ## 6. Full Extraction Run
 
