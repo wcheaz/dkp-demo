@@ -218,7 +218,7 @@ Dir structure:
 
 - [x] 4.1 Process project 028 — create full nested directory structure, copy all files with translated names, write translation-notes.txt in every directory (7 directories total including project root).
 - [x] 4.2 Process project 029 — create full nested directory structure, copy all files with translated names, write translation-notes.txt in every directory (4 directories total).
-- [ ] 4.3 Verify batch — confirm 10 project folders total. Spot-check `diff` on `028IK26A.material.pdf` and `Statický posudok - RD Zeleňáková (1).pdf`.
+- [x] 4.3 Verify batch — confirm 10 project folders total. Spot-check `diff` on `028IK26A.material.pdf` and `Statický posudok - RD Zeleňáková (1).pdf`.
 
 **Done when**: Projects 028 and 029 fully nested structures exist with all files translated and notes in every directory.
 **Verify by**: `find "hidden/Trusses AI/028IK26A - BigMat Skalica_REDIP/" -type f -name "translation-notes.txt" | wc -l` returns 7 (one per directory).
