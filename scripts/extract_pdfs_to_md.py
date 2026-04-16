@@ -32,6 +32,23 @@ def should_skip(doc: fitz.Document) -> tuple[bool, str]:
     return (False, "")
 
 
+def extract_text_as_markdown(doc: fitz.Document) -> str:
+    pages_text = []
+    for page in doc:
+        pages_text.append(page.get_text("text").rstrip())
+
+    if len(pages_text) == 1:
+        return pages_text[0] + "\n"
+
+    parts = []
+    for i, text in enumerate(pages_text, 1):
+        if i == 1:
+            parts.append(f"## Page {i}\n\n{text}")
+        else:
+            parts.append(f"---\n## Page {i}\n\n{text}")
+    return "\n".join(parts) + "\n"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract text from PDFs into Markdown files."
@@ -74,6 +91,9 @@ def main() -> None:
                     elif reason == "no text":
                         skipped_no_text.append(pdf_path)
                 else:
+                    md_text = extract_text_as_markdown(doc)
+                    md_path = pdf_path.with_suffix(".md")
+                    md_path.write_text(md_text, encoding="utf-8")
                     extracted.append(pdf_path)
             finally:
                 doc.close()
