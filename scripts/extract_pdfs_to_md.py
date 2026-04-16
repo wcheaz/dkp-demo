@@ -13,6 +13,13 @@ def find_project_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
+def discover_pdfs(directory: Path) -> list[Path]:
+    pdfs = sorted(
+        p for p in directory.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf"
+    )
+    return pdfs
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract text from PDFs into Markdown files."
@@ -37,8 +44,9 @@ def main() -> None:
         print(f"Error: directory does not exist: {target}", file=sys.stderr)
         sys.exit(1)
 
+    pdfs = discover_pdfs(target)
     print(f"Target directory: {target}")
-    print("Script initialized successfully.")
+    print(f"PDFs found: {len(pdfs)}")
 
 
 if __name__ == "__main__":

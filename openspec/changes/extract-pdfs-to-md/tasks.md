@@ -1,7 +1,7 @@
 ## 1. Script Skeleton and CLI Interface
 
 - [x] 1.1 Create `scripts/extract_pdfs_to_md.py` with `argparse` CLI accepting an optional positional `directory` argument (default: `hidden/Trusses AI/`). Resolve the path relative to the project root. Print error to stderr and exit non-zero if the directory does not exist.
-- [ ] 1.2 Implement `discover_pdfs(directory: Path) -> list[Path]` that recursively walks the directory and returns all `.pdf` files (case-insensitive extension match). No other file types are included.
+- [x] 1.2 Implement `discover_pdfs(directory: Path) -> list[Path]` that recursively walks the directory and returns all `.pdf` files (case-insensitive extension match). No other file types are included.
 
 **Verify by:** Running `python scripts/extract_pdfs_to_md.py` with a non-existent path produces an error. Running against `hidden/Trusses AI/` discovers 267 PDFs.
 
