@@ -21,7 +21,7 @@
 ## 4. Text Extraction and Markdown Formatting
 
 - [x] 4.1 Implement `extract_text_as_markdown(doc: fitz.Document) -> str` that iterates pages, calls `page.get_text("text")` on each, and joins them with page separators. For single-page PDFs: no separator, no page heading. For multi-page PDFs: each page preceded by `---\n## Page N\n\n` where N is 1-indexed.
-- [ ] 4.2 Implement `format_code_blocks(text: str) -> str` that detects consecutive lines matching the tabular heuristic (3+ consecutive lines each containing 2+ multi-space gaps of 2+ spaces) and wraps those runs in triple-backtick code fences. Non-matching lines pass through unchanged.
+- [x] 4.2 Implement `format_code_blocks(text: str) -> str` that detects consecutive lines matching the tabular heuristic (3+ consecutive lines each containing 2+ multi-space gaps of 2+ spaces) and wraps those runs in triple-backtick code fences. Non-matching lines pass through unchanged.
 
 **Verify by:** Extract text from `001IK26A.material.pdf` and confirm the lumber table is wrapped in a code fence. Extract from a technical report PDF and confirm prose is NOT wrapped in code fences.
 
