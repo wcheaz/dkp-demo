@@ -722,7 +722,7 @@ Dir structure:
     └── vykaz vystuze Marcinko.xls → Quantity Takeoff Reinforcement Marcinko.xls (contents NOT translated)
 ```
 
-- [ ] 10.1 Process project 065 — create dirs, copy 8 support files with translated names, write translation-notes.txt.
+- [x] 10.1 Process project 065 — create dirs, copy 8 support files with translated names, write translation-notes.txt.
 - [ ] 10.2 Process project 078 — create dirs, copy files, write translation-notes.txt.
 - [ ] 10.3 Process project 083 — create dirs, copy 4 support files with translated names, write translation-notes.txt.
 - [ ] 10.4 Process project 105 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
