@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 60,
+  "minIterations": 1,
+  "maxIterations": 75,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/extract-pdfs-to-md/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/extract-pdfs-to-md/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/extract-pdfs-to-md/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-16T19:18:58.987Z",
+  "resumedAt": "2026-04-16T19:18:58.987Z",
+  "completedAt": "2026-04-16T19:46:15.439Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}
