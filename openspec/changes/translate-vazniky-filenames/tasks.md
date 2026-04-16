@@ -734,7 +734,7 @@ Dir structure:
 
 ## 11. Root Translation Notes and Final Verification
 
-- [ ] 11.1 Create root `translation-notes.txt` in `hidden/Trusses AI/` — list all 33 top-level folder translations in the format `Slovak original → English translation`, one per line.
+- [x] 11.1 Create root `translation-notes.txt` in `hidden/Trusses AI/` — list all 33 top-level folder translations in the format `Slovak original → English translation`, one per line.
 - [ ] 11.2 Verify total project folder count — run `ls "hidden/Trusses AI/" | wc -l` and confirm it returns 33.
 - [ ] 11.3 Verify no Slovak/German/Czech names remain — run `find "hidden/Trusses AI/" -depth -print0 | xargs -0 -I{} basename "{}" | grep -cE '[áäčďéíĺľňóôŕšťúýžÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽüöÜÖß]'` and confirm the count is 0 (no diacritical characters in filenames). Note: proper nouns like `Hrušovská`, `Zeleňáková` in folder names may retain diacritics since they are surnames/placenames — these are acceptable.
 - [ ] 11.4 Verify translation-notes.txt coverage — run `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print` and confirm every directory has a notes file. Expected: all directories should be listed (or use `find "hidden/Trusses AI/" -type d | wc -l` and compare with `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print | wc -l`).
