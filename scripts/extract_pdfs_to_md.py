@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -49,6 +50,38 @@ def extract_text_as_markdown(doc: fitz.Document) -> str:
     return "\n".join(parts) + "\n"
 
 
+def format_code_blocks(text: str) -> str:
+    lines = text.split("\n")
+    result: list[str] = []
+    block: list[str] = []
+
+    def is_tabular(line: str) -> bool:
+        gaps = re.findall(r"  +", line)
+        return len(gaps) >= 2
+
+    def flush_block():
+        if len(block) >= 3:
+            result.append("```")
+            result.extend(block)
+            result.append("```")
+        else:
+            result.extend(block)
+        block.clear()
+
+    for line in lines:
+        if is_tabular(line):
+            block.append(line)
+        else:
+            if block:
+                flush_block()
+            result.append(line)
+
+    if block:
+        flush_block()
+
+    return "\n".join(result)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract text from PDFs into Markdown files."
@@ -92,6 +125,7 @@ def main() -> None:
                         skipped_no_text.append(pdf_path)
                 else:
                     md_text = extract_text_as_markdown(doc)
+                    md_text = format_code_blocks(md_text)
                     md_path = pdf_path.with_suffix(".md")
                     md_path.write_text(md_text, encoding="utf-8")
                     extracted.append(pdf_path)
