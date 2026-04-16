@@ -38,6 +38,6 @@
 
 - [x] 7.1 Spot-check 3 material PDF `.md` files: confirm they contain readable tabular data with correct numeric values in code fences.
 - [x] 7.2 Spot-check 3 Floor Plan + 3D `.md` files: confirm page 1 annotations (load values, dimensions, construction notes) are present and pages are separated with `## Page N` headings.
-- [ ] 7.3 Spot-check 3 supporting document `.md` files: confirm section structure and prose are preserved.
+- [x] 7.3 Spot-check 3 supporting document `.md` files: confirm section structure and prose are preserved.
 - [ ] 7.4 Verify idempotency: checksum all `.md` files, re-run the script, checksum again — confirm all checksums are identical.
 - [ ] 7.5 Verify original PDFs are untouched: spot-check 5 PDFs across different projects by comparing file size and modification timestamp (or checksum) before and after the run.
