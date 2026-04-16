@@ -553,8 +553,8 @@ Dir structure:
     └── zaťaženie vetrom.png → Wind Load.png
 ```
 
-- [ ] 8.1 Process project 058 — create dirs, copy all 11 support files with translated names (7 German → English, 4 Slovak → English), write translation-notes.txt.
-- [ ] 8.2 Verify batch — confirm 27 project folders total. Spot-check `diff` on `Ground Floor 24.09.25.pdf` and `Wind Load.png`.
+- [x] 8.1 Process project 058 — create dirs, copy all 11 support files with translated names (7 German → English, 4 Slovak → English), write translation-notes.txt.
+- [x] 8.2 Verify batch — confirm 27 project folders total. Spot-check `diff` on `Ground Floor 24.09.25.pdf` and `Wind Load.png`.
 
 **Done when**: Project 058 exists with all German and Slovak filenames translated to English.
 **Verify by**: `ls "hidden/Trusses AI/058JO26A - SIPKON_Petruš/Supporting Documents/" | grep -c "Ground Floor"` returns 1, and no German words remain: `ls "hidden/Trusses AI/058JO26A - SIPKON_Petruš/Supporting Documents/" | grep -iE "Ans|EG|OG|Schnitt|Entw"` returns empty.
