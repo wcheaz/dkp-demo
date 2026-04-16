@@ -306,7 +306,7 @@ Dir structure:
 ```
 
 - [x] 5.1 Process project 032 — create dirs including Final Design/Proposal nested structure, copy files, write translation-notes.txt in all 5 directories.
-- [ ] 5.2 Process project 033 — create dirs, copy files with translated names, write translation-notes.txt.
+- [x] 5.2 Process project 033 — create dirs, copy files with translated names, write translation-notes.txt.
 - [ ] 5.3 Process project 035 — create dirs, copy all 12 support files with translated names, write translation-notes.txt.
 - [ ] 5.4 Process project 039 — create dirs, copy files with translated names, write translation-notes.txt.
 - [ ] 5.5 Process project 040 — create dirs, copy files with translated names, write translation-notes.txt.
