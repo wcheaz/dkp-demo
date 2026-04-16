@@ -737,9 +737,9 @@ Dir structure:
 - [x] 11.1 Create root `translation-notes.txt` in `hidden/Trusses AI/` — list all 33 top-level folder translations in the format `Slovak original → English translation`, one per line.
 - [x] 11.2 Verify total project folder count — run `ls "hidden/Trusses AI/" | wc -l` and confirm it returns 33.
 - [x] 11.3 Verify no Slovak/German/Czech names remain — run `find "hidden/Trusses AI/" -depth -print0 | xargs -0 -I{} basename "{}" | grep -cE '[áäčďéíĺľňóôŕšťúýžÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽüöÜÖß]'` and confirm the count is 0 (no diacritical characters in filenames). Note: proper nouns like `Hrušovská`, `Zeleňáková` in folder names may retain diacritics since they are surnames/placenames — these are acceptable.
-- [ ] 11.4 Verify translation-notes.txt coverage — run `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print` and confirm every directory has a notes file. Expected: all directories should be listed (or use `find "hidden/Trusses AI/" -type d | wc -l` and compare with `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print | wc -l`).
-- [ ] 11.5 Spot-check file integrity — run `diff` on 5 PDFs across different projects (e.g., projects 001, 028, 058, 064, 108) and confirm byte-identical.
-- [ ] 11.6 Verify original directory untouched — run `find "hidden/Väzníky AI/" -type f | wc -l` and compare against a baseline count. Confirm no files were added or removed from the original.
+- [x] 11.4 Verify translation-notes.txt coverage — run `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print` and confirm every directory has a notes file. Expected: all directories should be listed (or use `find "hidden/Trusses AI/" -type d | wc -l` and compare with `find "hidden/Trusses AI/" -type d -exec test -f "{}/translation-notes.txt" \; -print | wc -l`).
+- [x] 11.5 Spot-check file integrity — run `diff` on 5 PDFs across different projects (e.g., projects 001, 028, 058, 064, 108) and confirm byte-identical.
+- [x] 11.6 Verify original directory untouched — run `find "hidden/Väzníky AI/" -type f | wc -l` and compare against a baseline count. Confirm no files were added or removed from the original.
 
 **Done when**: Root translation notes exist, all 33 folders verified present, no untranslated names remain, all spot-checks pass, original directory confirmed untouched.
 **Verify by**: All verification commands in tasks 11.2–11.6 pass without errors.
