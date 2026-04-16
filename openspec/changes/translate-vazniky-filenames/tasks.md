@@ -624,8 +624,8 @@ Dir structure:
         └── SIT.001__situacia.pdf → Site Plan 001__Site Plan.pdf
 ```
 
-- [ ] 9.1 Process project 064 — create full 8-directory structure (Truss Design Variant A + Supporting Documents with 6 subdirs), copy and translate all ~50 files, write translation-notes.txt in every directory (8 total).
-- [ ] 9.2 Verify — confirm 28 project folders total. Spot-check `diff` on 3 files across different subdirectories.
+- [x] 9.1 Process project 064 — create full 8-directory structure (Truss Design Variant A + Supporting Documents with 6 subdirs), copy and translate all ~50 files, write translation-notes.txt in every directory (8 total).
+- [x] 9.2 Verify — confirm 28 project folders total. Spot-check `diff` on 3 files across different subdirectories.
 
 **Done when**: Project 064 fully structured with all 6 subdirectories, ~50 translated files, and 8 translation-notes.txt files.
 **Verify by**: `find "hidden/Trusses AI/064IK26A - LŠ_Greguš/" -type f -name "translation-notes.txt" | wc -l` returns 8.
