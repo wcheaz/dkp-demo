@@ -33,10 +33,28 @@ def should_skip(doc: fitz.Document) -> tuple[bool, str]:
     return (False, "")
 
 
+def _extract_page_text(page: fitz.Page) -> str:
+    d = page.get_text("dict")
+    lines_by_y: dict[int, list[tuple[float, str]]] = {}
+    for block in d["blocks"]:
+        if block.get("type") != 0:
+            continue
+        for line in block["lines"]:
+            y_key = round(line["bbox"][1])
+            x_pos = line["bbox"][0]
+            line_text = "".join(span["text"] for span in line["spans"])
+            lines_by_y.setdefault(y_key, []).append((x_pos, line_text))
+    result_lines = []
+    for y_key in sorted(lines_by_y):
+        entries = sorted(lines_by_y[y_key], key=lambda e: e[0])
+        result_lines.append("  ".join(text for _, text in entries))
+    return "\n".join(result_lines)
+
+
 def extract_text_as_markdown(doc: fitz.Document) -> str:
     pages_text = []
     for page in doc:
-        pages_text.append(page.get_text("text").rstrip())
+        pages_text.append(_extract_page_text(page).rstrip())
 
     if len(pages_text) == 1:
         return pages_text[0] + "\n"
