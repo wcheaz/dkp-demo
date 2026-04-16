@@ -1,6 +1,6 @@
 ## 1. Prerequisites and Root Directory
 
-- [ ] 1.1 Verify sufficient disk space — run `df -h hidden/` and confirm at least 300 MB available. Stop and hand off if insufficient.
+- [x] 1.1 Verify sufficient disk space — run `df -h hidden/` and confirm at least 300 MB available. Stop and hand off if insufficient.
 - [ ] 1.2 Create root destination directory — run `mkdir -p "hidden/Trusses AI"` and verify it exists.
 
 **Done when**: Directory `hidden/Trusses AI/` exists and disk space is confirmed sufficient.
