@@ -725,7 +725,7 @@ Dir structure:
 - [x] 10.1 Process project 065 — create dirs, copy 8 support files with translated names, write translation-notes.txt.
 - [x] 10.2 Process project 078 — create dirs, copy files, write translation-notes.txt.
 - [x] 10.3 Process project 083 — create dirs, copy 4 support files with translated names, write translation-notes.txt.
-- [ ] 10.4 Process project 105 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
+- [x] 10.4 Process project 105 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
 - [ ] 10.5 Process project 108 — create dirs, copy 14 support files with translated names, write translation-notes.txt.
 - [ ] 10.6 Verify batch — confirm 33 project folders total. Spot-check 3 files with `diff`.
 
