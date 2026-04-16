@@ -3,6 +3,8 @@ import argparse
 import sys
 from pathlib import Path
 
+import fitz
+
 
 def find_project_root() -> Path:
     current = Path(__file__).resolve().parent
@@ -18,6 +20,16 @@ def discover_pdfs(directory: Path) -> list[Path]:
         p for p in directory.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf"
     )
     return pdfs
+
+
+def should_skip(doc: fitz.Document) -> tuple[bool, str]:
+    total_images = sum(len(page.get_images(full=True)) for page in doc)
+    if total_images > 0:
+        return (True, "images")
+    total_chars = sum(len(page.get_text("text")) for page in doc)
+    if total_chars == 0:
+        return (True, "no text")
+    return (False, "")
 
 
 def main() -> None:
