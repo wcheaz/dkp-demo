@@ -141,7 +141,7 @@ Files in Supporting Documents:
 - [x] 3.1 Process project 022 — create dirs, copy files with translated names, write translation-notes.txt in all directories (including root level of the project).
 - [x] 3.2 Process project 027 — create dirs, copy files with translated names, write translation-notes.txt in all directories.
 - [x] 3.3 Process project 034 — create dirs, copy files with translated names, write translation-notes.txt in all directories.
-- [ ] 3.4 Verify batch — confirm 3 more project folders exist (total 8), spot-check 2 files with `diff`.
+- [x] 3.4 Verify batch — confirm 3 more project folders exist (total 8), spot-check 2 files with `diff`.
 
 **Done when**: 8 project folders total in `hidden/Trusses AI/`, each with correct variant directories and translated filenames.
 **Verify by**: `ls "hidden/Trusses AI/" | wc -l` returns 8.
