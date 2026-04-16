@@ -14,7 +14,7 @@
 
 ## 3. Test with Test PDF
 
-- [ ] 3.1 Run the script against `hidden/` directory and confirm it processes `hidden/test_text.pdf` and produces output matching the expected content in `hidden/test_text.md`. Before running, copy `hidden/test_text.md` to a temporary location for comparison since the script will overwrite it. After the run, diff the script output against the saved expected file — they must match.
+- [x] 3.1 Run the script against `hidden/` directory and confirm it processes `hidden/test_text.pdf` and produces output matching the expected content in `hidden/test_text.md`. Before running, copy `hidden/test_text.md` to `tmp/test_text_expected.md` (the `tmp/` directory in the project root is gitignored and safe for scratch work). Then run the script. After the run, diff the new `hidden/test_text.md` against `tmp/test_text_expected.md` — they must match. Clean up `tmp/test_text_expected.md` when done.
 
 **Verify by:** The script output for `test_text.pdf` is identical to the expected content in `hidden/test_text.md`. Do NOT proceed to the formatting and full extraction steps until this basic extraction test passes.
 
