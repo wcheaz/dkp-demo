@@ -423,7 +423,7 @@ Dir structure:
 - [x] 6.2 Process project 043 — create dirs, copy files, write translation-notes.txt.
 - [x] 6.3 Process project 044 — create dirs, copy 10 support files with translated names (includes Czech `Beze jména` → `Untitled`), write translation-notes.txt.
 - [x] 6.4 Process project 046 — create dirs, copy 18 support files with translated names, write translation-notes.txt.
-- [ ] 6.5 Process project 047 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
+- [x] 6.5 Process project 047 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
 - [ ] 6.6 Verify batch — confirm 20 project folders total. Spot-check `diff` on 3 files.
 
 **Done when**: 20 project folders in `hidden/Trusses AI/`.
