@@ -727,7 +727,7 @@ Dir structure:
 - [x] 10.3 Process project 083 — create dirs, copy 4 support files with translated names, write translation-notes.txt.
 - [x] 10.4 Process project 105 — create dirs, copy 6 support files with translated names, write translation-notes.txt.
 - [x] 10.5 Process project 108 — create dirs, copy 14 support files with translated names, write translation-notes.txt.
-- [ ] 10.6 Verify batch — confirm 33 project folders total. Spot-check 3 files with `diff`.
+- [x] 10.6 Verify batch — confirm 33 project folders total. Spot-check 3 files with `diff`.
 
 **Done when**: 33 project folders in `hidden/Trusses AI/`.
 **Verify by**: `ls "hidden/Trusses AI/" | wc -l` returns 33.
