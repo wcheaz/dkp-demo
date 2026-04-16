@@ -74,7 +74,7 @@ Files in Truss Design Variant A:
 Files in Supporting Documents:
 - `Nový textový dokument.txt` → `New Text Document.txt` (contents NOT translated)
 
-- [ ] 2.1 Process project 001 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
+- [x] 2.1 Process project 001 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [ ] 2.2 Process project 002 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [ ] 2.3 Process project 003 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
 - [ ] 2.4 Process project 006 — create dirs, copy files with translated names, write translation-notes.txt in both subdirectories.
