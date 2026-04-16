@@ -1,0 +1,1 @@
+/home/ncheaz/git/dkp-demo/openspec/changes/translate-vazniky-filenames/tasks.md

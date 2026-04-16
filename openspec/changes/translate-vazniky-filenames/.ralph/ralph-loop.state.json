@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 49,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-vazniky-filenames/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-vazniky-filenames/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-vazniky-filenames/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-16T16:20:08.678Z",
+  "resumedAt": null,
+  "completedAt": "2026-04-16T17:24:49.078Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}
