@@ -138,7 +138,7 @@ Files in Supporting Documents:
 - `rez.jpg` → `Section.jpg`
 - `strecha.jpg` → `Roof.jpg`
 
-- [ ] 3.1 Process project 022 — create dirs, copy files with translated names, write translation-notes.txt in all directories (including root level of the project).
+- [x] 3.1 Process project 022 — create dirs, copy files with translated names, write translation-notes.txt in all directories (including root level of the project).
 - [ ] 3.2 Process project 027 — create dirs, copy files with translated names, write translation-notes.txt in all directories.
 - [ ] 3.3 Process project 034 — create dirs, copy files with translated names, write translation-notes.txt in all directories.
 - [ ] 3.4 Verify batch — confirm 3 more project folders exist (total 8), spot-check 2 files with `diff`.
