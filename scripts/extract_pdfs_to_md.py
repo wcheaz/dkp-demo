@@ -57,8 +57,36 @@ def main() -> None:
         sys.exit(1)
 
     pdfs = discover_pdfs(target)
-    print(f"Target directory: {target}")
-    print(f"PDFs found: {len(pdfs)}")
+
+    extracted: list[Path] = []
+    skipped_images: list[Path] = []
+    skipped_no_text: list[Path] = []
+    failed: list[tuple[Path, str]] = []
+
+    for pdf_path in pdfs:
+        try:
+            doc = fitz.open(str(pdf_path))
+            try:
+                skip, reason = should_skip(doc)
+                if skip:
+                    if reason == "images":
+                        skipped_images.append(pdf_path)
+                    elif reason == "no text":
+                        skipped_no_text.append(pdf_path)
+                else:
+                    extracted.append(pdf_path)
+            finally:
+                doc.close()
+        except Exception as e:
+            failed.append((pdf_path, str(e)))
+
+    print(f"Total PDFs found: {len(pdfs)}")
+    print(f"Extracted: {len(extracted)}")
+    print(f"Skipped (images): {len(skipped_images)}")
+    print(f"Skipped (no text): {len(skipped_no_text)}")
+    print(f"Failed: {len(failed)}")
+    for path, error in failed:
+        print(f"  {path}: {error}")
 
 
 if __name__ == "__main__":

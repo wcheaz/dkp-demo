@@ -8,7 +8,7 @@
 ## 2. PDF Filtering (Image and Zero-Text Skip)
 
 - [x] 2.1 Implement `should_skip(doc: fitz.Document) -> tuple[bool, str]` that returns `(True, "images")` if `sum(len(page.get_images(full=True)) for page in doc) > 0`, returns `(True, "no text")` if total extracted text characters across all pages is zero, and `(False, "")` otherwise.
-- [ ] 2.2 Wire the skip check into the main loop: for each PDF, open with PyMuPDF, run `should_skip`, and categorize into extracted / skipped-images / skipped-no-text / failed lists.
+- [x] 2.2 Wire the skip check into the main loop: for each PDF, open with PyMuPDF, run `should_skip`, and categorize into extracted / skipped-images / skipped-no-text / failed lists.
 
 **Verify by:** Running the script on `hidden/Trusses AI/` produces skip counts of 52 (images) and 19 (no text). Spot-check that the 40 material PDFs and 40 Floor Plan + 3D PDFs are NOT skipped.
 
