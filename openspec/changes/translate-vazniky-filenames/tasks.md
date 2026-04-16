@@ -516,13 +516,13 @@ Dir structure:
     └── viber_image_2026-02-26_10-49-44-560.jpg (unchanged)
 ```
 
-- [ ] 7.1 Process project 053 — create dirs including empty Supporting Documents with translation-notes.txt noting the directory is empty in source.
-- [ ] 7.2 Process project 054 — create dirs, copy files, write translation-notes.txt.
-- [ ] 7.3 Process project 056 — create dirs, copy files, write translation-notes.txt.
-- [ ] 7.4 Process project 057 — create dirs (2 variants), copy files, write translation-notes.txt.
-- [ ] 7.5 Process project 060 — create dirs (2 variants), copy files (including Thumbs.db), write translation-notes.txt.
-- [ ] 7.6 Process project 062 — create dirs, copy files, write translation-notes.txt.
-- [ ] 7.7 Verify batch — confirm 26 project folders total. Spot-check 3 files with `diff`.
+- [x] 7.1 Process project 053 — create dirs including empty Supporting Documents with translation-notes.txt noting the directory is empty in source.
+- [x] 7.2 Process project 054 — create dirs, copy files, write translation-notes.txt.
+- [x] 7.3 Process project 056 — create dirs, copy files, write translation-notes.txt.
+- [x] 7.4 Process project 057 — create dirs (2 variants), copy files, write translation-notes.txt.
+- [x] 7.5 Process project 060 — create dirs (2 variants), copy files (including Thumbs.db), write translation-notes.txt.
+- [x] 7.6 Process project 062 — create dirs, copy files, write translation-notes.txt.
+- [x] 7.7 Verify batch — confirm 26 project folders total. Spot-check 3 files with `diff`.
 
 **Done when**: 26 project folders in `hidden/Trusses AI/`.
 **Verify by**: `ls "hidden/Trusses AI/" | wc -l` returns 26.
