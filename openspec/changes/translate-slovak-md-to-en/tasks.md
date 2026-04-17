@@ -36,9 +36,9 @@ For each of the 33 project folders, translate all `.md` files in that project's 
 
 **Verify by:** The project contains exactly 4 `.md` files (2 in each variant directory). After translation, exactly 4 `_TRANSLATED.md` files exist with matching line counts and structure. Source files unchanged. Both `translation-notes.txt` files have entries.
 
-- [ ] 2.8 Translate all `.md` files in project `028IK26A - BigMat Skalica_REDIP` (directories: `Truss Design Variant A/`, `Supporting Documents/`, and 6 subdirectories under `Supporting Documents/`). Create the `_TRANSLATED.md` companions and append reasoning entries to all 8 directories' `translation-notes.txt` files.
+- [x] 2.8 Translate all `.md` files in project `028IK26A - BigMat Skalica_REDIP` (directories: `Truss Design Variant A/`, `Supporting Documents/`, and 6 subdirectories under `Supporting Documents/`). Create the `_TRANSLATED.md` companions and append reasoning entries to all 8 directories' `translation-notes.txt` files.
 
-**Verify by:** The project contains 8 `.md` files across 8 directories. After translation, exactly 8 `_TRANSLATED.md` files exist, one per source in the same directories. All 8 `translation-notes.txt` files have new entries.
+**Verify by:** The project contains 17 `.md` files across 6 directories (Truss Design Variant A, Construction Section, Electrical Installations, Fire Protection Project, Heating System, Plumbing). After translation, exactly 17 `_TRANSLATED.md` files exist, one per source in the same directories. All 6 `translation-notes.txt` files have new entries. All line counts match between source and translated files.
 
 - [ ] 2.9 Translate all `.md` files in project `029IK26A - Bigmat Skalica_Zeleňáková` (directories: `Truss Design Variant A/`, `Supporting Documents/`, and 2 subdirectories under `Supporting Documents/`). Create the `_TRANSLATED.md` companions and append reasoning entries to all 4 directories' `translation-notes.txt` files.
 
