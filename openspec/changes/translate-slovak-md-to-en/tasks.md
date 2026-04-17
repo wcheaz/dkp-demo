@@ -1,6 +1,6 @@
 ## 1. Discovery and Initial Inventory
 
-- [ ] 1.1 Discover all `.md` files in `hidden/Trusses AI/` that need translation. Count the total number of files. Confirm the count is 196. Verify that none of these files have corresponding `_TRANSLATED.md` companions.
+- [x] 1.1 Discover all `.md` files in `hidden/Trusses AI/` that need translation. Count the total number of files. Confirm the count is 196. Verify that none of these files have corresponding `_TRANSLATED.md` companions.
 
 **Verify by:** Running `find "hidden/Trusses AI" -name "*.md" -not -name "translation-notes*" -not -name "*_TRANSLATED*" | wc -l` returns 196. Running `find "hidden/Trusses AI" -name "*_TRANSLATED.md" | wc -l` returns 0.
 
