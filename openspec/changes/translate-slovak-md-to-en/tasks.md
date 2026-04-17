@@ -52,7 +52,7 @@ For each of the 33 project folders, translate all `.md` files in that project's 
 
 **Verify by:** The project contains exactly 3 `.md` files (2 in `Truss Design Variant A/`, 1 in `Supporting Documents/`). After translation, exactly 3 `_TRANSLATED.md` files exist. Both `translation-notes.txt` files have entries.
 
-- [ ] 2.12 Translate all `.md` files in project `034IK26B - Boča_Vyhnálik` (directories: `Truss Design Variant A/`, `Truss Design Variant B/`). Create the `_TRANSLATED.md` companions and append reasoning entries to both directories' `translation-notes.txt` files.
+- [x] 2.12 Translate all `.md` files in project `034IK26B - Boča_Vyhnálik` (directories: `Truss Design Variant A/`, `Truss Design Variant B/`). Create the `_TRANSLATED.md` companions and append reasoning entries to both directories' `translation-notes.txt` files.
 
 **Verify by:** The project contains exactly 4 `.md` files (2 in each variant directory). After translation, exactly 4 `_TRANSLATED.md` files exist with matching line counts and structure. Source files unchanged. Both `translation-notes.txt` files have entries.
 
