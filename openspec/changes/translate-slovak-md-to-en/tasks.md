@@ -16,7 +16,7 @@ For each of the 33 project folders, translate all `.md` files in that project's 
 
 **Verify by:** The project contains exactly 2 `.md` files. After translation, exactly 2 `_TRANSLATED.md` files exist. Source files are byte-identical to before translation. The `translation-notes.txt` has entries for both files.
 
-- [ ] 2.3 Translate all `.md` files in project `003IK26A - BigMat Dinostav_Domanicka` (directories: `Truss Design Variant A/`, `Supporting Documents/`). For each file across both directories, create the `_TRANSLATED.md` companions and append reasoning entries to each directory's `translation-notes.txt` file.
+- [x] 2.3 Translate all `.md` files in project `003IK26A - BigMat Dinostav_Domanicka` (directories: `Truss Design Variant A/`, `Supporting Documents/`). For each file across both directories, create the `_TRANSLATED.md` companions and append reasoning entries to each directory's `translation-notes.txt` file.
 
 **Verify by:** The project contains exactly 3 `.md` files (2 in `Truss Design Variant A/`, 1 in `Supporting Documents/`). After translation, exactly 3 `_TRANSLATED.md` files exist, one per source in the same directories. Both `translation-notes.txt` files have new entries.
 
