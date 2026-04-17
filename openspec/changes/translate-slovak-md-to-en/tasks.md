@@ -24,7 +24,7 @@ For each of the 33 project folders, translate all `.md` files in that project's 
 
 **Verify by:** The project contains exactly 2 `.md` files. After translation, exactly 2 `_TRANSLATED.md` files exist with matching line counts and structure. Source files unchanged.
 
-- [ ] 2.5 Translate all `.md` files in project `015IK26A - Slážik_Family House Belince` (directory: `Truss Design Variant A/`). Create the `_TRANSLATED.md` companions and append reasoning entries to the `translation-notes.txt` file.
+- [x] 2.5 Translate all `.md` files in project `015IK26A - Slážik_Family House Belince` (directory: `Truss Design Variant A/`). Create the `_TRANSLATED.md` companions and append reasoning entries to the `translation-notes.txt` file.
 
 **Verify by:** The project contains exactly 2 `.md` files. After translation, exactly 2 `_TRANSLATED.md` files exist with matching line counts and structure. Source files unchanged.
 
