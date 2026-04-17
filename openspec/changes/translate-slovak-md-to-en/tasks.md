@@ -8,11 +8,11 @@
 
 For each of the 33 project folders, translate all `.md` files in that project's directories and update the corresponding `translation-notes.txt` files.
 
-- [ ] 2.1 Translate all `.md` files in project `001IK26A - Matlúch_House` (directories: `Truss Design Variant A/`). For each file, create the `_TRANSLATED.md` companion and append reasoning entries to both directories' `translation-notes.txt` files.
+- [x] 2.1 Translate all `.md` files in project `001IK26A - Matlúch_House` (directories: `Truss Design Variant A/`). For each file, create the `_TRANSLATED.md` companion and append reasoning entries to both directories' `translation-notes.txt` files.
 
 **Verify by:** The project contains exactly 2 `.md` files (`001IK26A.material.md`, `Floor Plan + 3D.md`). After translation, exactly 2 `_TRANSLATED.md` files exist. Each `_TRANSLATED.md` has the same line count and Markdown structure as its source. The `translation-notes.txt` in `Truss Design Variant A/` has a new `---`-prefixed entry for each file.
 
-- [ ] 2.2 Translate all `.md` files in project `002IK26A - Matlúch_Garage` (directory: `Truss Design Variant A/`). For each file, create the `_TRANSLATED.md` companion and append reasoning entries to the `translation-notes.txt` file.
+- [x] 2.2 Translate all `.md` files in project `002IK26A - Matlúch_Garage` (directory: `Truss Design Variant A/`). For each file, create the `_TRANSLATED.md` companion and append reasoning entries to the `translation-notes.txt` file.
 
 **Verify by:** The project contains exactly 2 `.md` files. After translation, exactly 2 `_TRANSLATED.md` files exist. Source files are byte-identical to before translation. The `translation-notes.txt` has entries for both files.
 
