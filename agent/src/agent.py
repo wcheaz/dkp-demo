@@ -251,6 +251,23 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
     return result_text
 
 
+@agent.tool
+async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
+    """Get an overview of what information is available in the knowledge base.
+
+    Args:
+        ctx: Agent context with state
+
+    Returns:
+        Summary of knowledge base contents organized by subdirectory
+    """
+    summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    try:
+        return summary_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "Knowledge base summary not found. Please contact the administrator."
+
+
 # ============================================================================
 # RESULT VALIDATION - COMMENTED OUT FOR GENERICIZATION
 # ============================================================================
