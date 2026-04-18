@@ -54,5 +54,5 @@
 - [x] 7.2 Run frontend server and verify "what do you know?" question returns knowledge summary
   **Done when:** Frontend chat responds with overview of knowledge base and list of subdirectories
 
-- [ ] 7.3 Run lint and typecheck on agent code: `cd agent && python -m ruff check . && python -m mypy .`
+- [x] 7.3 Run lint and typecheck on agent code: `cd agent && python -m ruff check . && python -m mypy .`
   **Done when:** Both commands exit with zero exit code and no errors reported
