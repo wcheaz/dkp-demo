@@ -35,7 +35,7 @@
 
 ## 5. Knowledge Summary Tool Implementation
 
-- [ ] 5.1 Implement `get_knowledge_summary` tool in `agent/src/agent.py` that reads `summary.md`
+- [x] 5.1 Implement `get_knowledge_summary` tool in `agent/src/agent.py` that reads `summary.md`
   **Done when:** Tool is decorated with `@agent.tool`, has signature `async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str`, and returns the full content of `agent/knowledge/trusses-ai-english/summary.md`
 
 ## 6. Entry Point and Frontend Integration
