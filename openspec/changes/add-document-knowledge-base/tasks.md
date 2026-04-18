@@ -40,7 +40,7 @@
 
 ## 6. Entry Point and Frontend Integration
 
-- [ ] 6.1 Verify `agent/src/main.py` imports work with uncommented code (imports should already match)
+- [x] 6.1 Verify `agent/src/main.py` imports work with uncommented code (imports should already match)
   **Done when:** File `agent/src/main.py` has no import errors and can be executed
 
 - [ ] 6.2 Add `get_knowledge_summary` as a frontend tool in `src/app/page.tsx` using `useFrontendTool`
