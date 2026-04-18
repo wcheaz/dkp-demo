@@ -8,7 +8,7 @@
 
 ## 2. Knowledge Base Summary Generation
 
-- [ ] 2.1 Scan subdirectories and generate `agent/knowledge/trusses-ai-english/summary.md` with overview section, summary table, and detailed sections
+- [x] 2.1 Scan subdirectories and generate `agent/knowledge/trusses-ai-english/summary.md` with overview section, summary table, and detailed sections
   **Done when:** File `agent/knowledge/trusses-ai-english/summary.md` exists with all required sections: overview, 33-row summary table, and detailed sections for each subdirectory with "Last updated" field
 
 ## 3. Agent State, Dependencies, and Instance
