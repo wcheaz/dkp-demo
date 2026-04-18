@@ -3,7 +3,7 @@
 - [x] 1.1 Create `agent/knowledge/` directory and move `hidden/Trusses AI English` to `agent/knowledge/trusses-ai-english/`
   **Done when:** Directory `agent/knowledge/trusses-ai-english/` exists and contains all 33 subdirectories from the original location
 
-- [ ] 1.2 Add `agent/knowledge/` to `.gitignore`
+- [x] 1.2 Add `agent/knowledge/` to `.gitignore`
   **Done when:** File `.gitignore` contains the line `agent/knowledge/`
 
 ## 2. Knowledge Base Summary Generation
