@@ -1,0 +1,29 @@
+Directory: Supporting Documents/RD MORAVCIK MM/Plumbing
+===
+RD MM JAKUBOV ZTI PODORYS .pdf → RD MM Jakubov Plumbing Floor Plan.pdf (ZTI → Plumbing, PODORYS → Floor Plan)
+RD MM JAKUBOV ZTI SITUÁCIA.pdf → RD MM Jakubov Plumbing Site Plan.pdf (ZTI → Plumbing, SITUÁCIA → Site Plan)
+TS ZTI RD MM.pdf → Technical Report Plumbing RD MM.pdf (TS → Technical Report, ZTI → Plumbing)
+---
+Content translation: RD MM Jakubov Plumbing Floor Plan.md → RD MM Jakubov Plumbing Floor Plan_TRANSLATED.md
+Key decisions:
+- Room legend translated consistently with E2 and fire protection files
+- LEGENDA ZNAČIEK → SYMBOL LEGEND, LEGENDA ZTI → Plumbing LEGEND
+- PVC SN8, DN150 pipe specifications with slope information preserved
+- HDPE100 PN16, DN25 pipe specs with lengths preserved
+- ZTI → Plumbing throughout the file
+- Pôdorys ZTI → Floor plan Plumbing in drawing title
+- All dimension values, pipe sizes, and equipment abbreviations preserved
+---
+Content translation: Technical Report Plumbing RD MM.md → Technical Report Plumbing RD MM_TRANSLATED.md
+Key decisions:
+- Zdravotechnika → Plumbing (technical discipline)
+- TECHNICKÁ SPRAVA → TECHNICAL REPORT
+- Vonkajšia kanalizácia → External sewerage, Dažďová kanalizácia → Rainwater drainage
+- Vonkajší vodovod → External water supply, Vnútorný vodovod → Internal water supply
+- Žumpa → Cesspit with volume calculation preserved
+- Zápachový uzáver → Trap (plumbing), Stupačky → Risers
+- Cirkulácia → Circulation, Príprava TV → Hot water preparation
+- Zariaďovacie predmety → Fixtures with all fixture types listed
+- Spoločné podmienky → General conditions
+- All STN standard references, product names (Geberit, HILTI, Grundfos), and numeric values preserved
+- 278 lines preserved with page separators intact

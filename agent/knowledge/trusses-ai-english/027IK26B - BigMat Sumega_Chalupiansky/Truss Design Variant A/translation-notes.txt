@@ -1,0 +1,40 @@
+Directory: Truss Design Variant A
+===
+[not translated] 027IK26A.material.pdf — project code identifier, kept unchanged
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 027IK26A.material.md → 027IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer: per glossary
+- Výpis řeziva dle skladových → Lumber list by stock items: per glossary
+- Kvalita → Grade, Tl. → Th., Š. → W., Celk. Dl. → Total L., Celk. Kub. → Total Vol.: per glossary
+- Celkem → Total, pomurnica → wall plate: per glossary
+- Kubatura nezahrnuje konstrukci podélného zavětrování → Volume does not include longitudinal bracing structure
+- Cena za styčníkové desky → Price for gusset plates, Cena bez DPH → Price excl. VAT: per glossary
+- Údaje o střeše → Roof data: per glossary
+- All roof dimension labels translated per glossary (Délka okapu → Eave length, etc.)
+- Délka hřebenu (sedlový) → Ridge length (gable), Délka hřebenu (pultový) → Ridge length (mono-pitch): per glossary
+- Výpis závěsů → Hanger list: závěs → Hanger per glossary
+- Popis zakázky → Order description, valba → hip roof: per glossary
+- Celkový počet styčníků → Total joint count, Celkový počet dřevěných prvků → Total timber element count: per glossary
+- All numeric values, dimensions, unit symbols, project codes, and proper nouns preserved verbatim
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: per glossary
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD, ZAŤAŽENIE → LOAD: per glossary
+- STÁLE ZAŤAŽENIE STRECHY → PERMANENT ROOF LOAD, STÁLE ZAŤAŽENIE STROPU → PERMANENT CEILING LOAD: per glossary
+- ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD: per glossary
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT: per glossary
+- VŠETKY STENY A PRIEVLAKY → ALL WALLS AND BEAMS: prievlak translated as beam (structural support element)
+- PRIEČKY → PARTITIONS: priečka → Partition wall per glossary
+- ÚLOŽNÝ PRIESTOR → STORAGE SPACE: per glossary
+- V ČASTI KROVU JE UVAŽOVANÉ S ÚLOŽNÝM PRIESTOROM → IN THE ROOF FRAMING SECTION, A STORAGE SPACE IS PROVIDED
+- PRIESTOR SLÚŽI KU SKLADOVANIU ĽAHKÝCH PREDMETOV → THE SPACE IS FOR STORING LIGHTWEIGHT ITEMS
+- Stále zaťaženie (PODLAHA) → Permanent load (FLOOR), Úžitkové zaťaženie → Live load: per glossary
+- KRESLIL → DRAWN, KONTR. → CHECKED, ČÍSLO ZAKÁZKY → ORDER NUMBER: drawing title block terms
+- MĚŘÍTKO → SCALE, STRANA → PAGE: drawing annotations
+- OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION, ČÍSLO VÝKRESU → DRAWING NUMBER: drawing annotations
+- Navrhl → Designed by: attribution line
+- ALL-CAPS preserved for emphasis in load and support annotations
+- All dimension values, project codes, reference numbers preserved verbatim

@@ -1,0 +1,6 @@
+Directory: (root of 053IK26B - Plecho_Family House Výčapovce)
+===
+053IK26B - Plecho_RD Výčapovce → 053IK26B - Plecho_Family House Výčapovce [RD → Family House, prefix 053IK26B preserved]
+Návrh väzníka A → Truss Design Variant A [directory]
+Návrh väzníka B → Truss Design Variant B [directory]
+podklady → Supporting Documents [directory]

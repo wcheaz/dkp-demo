@@ -1,0 +1,5 @@
+Directory: Supporting Documents
+===
+Čechvala - pôdorys prízemia.jpg → Čechvala - Floor Plan Ground Floor.jpg [pôdorys prízemia → Floor Plan Ground Floor]
+Čechvala - pôdorys strechy.jpg → Čechvala - Floor Plan Roof.jpg [pôdorys strechy → Floor Plan Roof]
+Čechvala - rez.jpg → Čechvala - Section.jpg [rez → Section]

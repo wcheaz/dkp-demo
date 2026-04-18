@@ -1,0 +1,51 @@
+Directory: Supporting Documents
+===
+[not translated] AS00.pdf — already English abbreviation
+pracovná  strecha.pdf → Working Draft Roof.pdf
+pracovné pohľady.pdf → Working Draft Elevations.pdf
+pracovné základy.pdf → Working Draft Foundations.pdf
+pracovný pôdorys.pdf → Working Draft Floor Plan.pdf
+pracovný  rez.pdf → Working Draft Section.pdf
+---
+Content translation: AS00.md → AS00_TRANSLATED.md
+Key decisions:
+- SITUÁCIA OSADENIA → SITE LAYOUT: standard architectural term for site placement plans
+- PRÍPOJKA NN → LV CONNECTION: NN (nízké napětí) is Czech/Slovak for low voltage
+- VEREJNÉ VEDENIE → PUBLIC LINE: standard utility infrastructure terminology
+- NOVOSTAVBA JEDNOBYTOVEJ BUDOVY → NEW BUILDING OF SINGLE-FAMILY HOUSE: standard Slovak planning term
+- ZASTAVANOSŤ → BUILT-UP RATIO: urban planning term for building coverage
+- MIESTO VÝSTAVBY → CONSTRUCTION SITE, PREDMET VÝKRESU → SUBJECT OF DRAWING, VÝKRES Č. → DRAWING NO.
+---
+Content translation: Working Draft Elevations.md → Working Draft Elevations_TRANSLATED.md
+Key decisions:
+- POHĽAD → ELEVATION: standard architectural drawing term
+- JUHOZÁPADNÝ → SOUTHWEST, SEVEROVÝCHODNÝ → NORTHEAST, SEVEROZÁPADNÝ → NORTHWEST, JUHOVÝCHODNÝ → SOUTHEAST
+- IZOLAČNÉ TROJSKLO → TRIPLE INSULATING GLASS, ŠKRIDLOPLECH → METAL TILE
+- OMIETKA → PLASTER, OMIETKA SOKLA → PLINTH PLASTER, SILIKÁTOVÁ OMIETKA → SILICATE PLASTER
+- OKAPOVÉ ŽĽABY → EAVE GUTTERS, ZVODY DAŽĎOVEJ VODY → STORM WATER DOWNSPOUTS
+---
+Content translation: Working Draft Floor Plan.md → Working Draft Floor Plan_TRANSLATED.md
+Key decisions:
+- PÔDORYS 1.NP → 1ST FLOOR PLAN: NP = nadzemné podlažie (above-ground floor)
+- Mierka → Scale, TERASA → TERRACE, KL (kúpelňa) → CL (cloakroom) kept as abbreviation
+- rekuperácia → heat recovery, čerpadlo → pump, práčka → washing machine
+- PREDMET VÝKRESU → SUBJECT OF DRAWING, VYPRACOVAL A KRESLIL → PREPARED AND DRAWN BY
+---
+Content translation: Working Draft Foundations.md → Working Draft Foundations_TRANSLATED.md
+Key decisions:
+- ZÁKLADY → FOUNDATIONS: standard structural engineering term
+- HĹBKA DNA ZÁKLADOVÉHO PÁSU → DEPTH OF STRIP FOUNDATION SOIL
+- HORNÁ ÚROVEŇ ZÁKLADOVÉHO PÁSU → TOP LEVEL OF STRIP FOUNDATION
+- HORNÁ ÚROVEŇ DEBNIACEJ TVÁRNICE → TOP LEVEL OF FORMWORK BLOCK
+---
+Content translation: Working Draft Roof.md → Working Draft Roof_TRANSLATED.md
+Key decisions:
+- PÔDORYS STRECHY → ROOF PLAN: standard architectural drawing term
+- NÁROŽIE → HIP START, ÚŽĽABIE → VALLEY, HREBENÁČ → RIDGE TILE, ŠKRIDLA → TILE
+- ODKVAPOVÝ ŽĽAB → EAVE GUTTER, DAŽĎOVÝ ZVOD → STORM WATER DOWNSPOUT
+- POZNÁMKY → NOTES, LEGENDA → LEGEND
+---
+Content translation: Working Draft Section.md → Working Draft Section_TRANSLATED.md
+Key decisions:
+- REZ A-A´ → SECTION A-A´: standard architectural drawing term
+- Mierka → Scale preserved as structural reference

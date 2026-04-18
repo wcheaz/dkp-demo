@@ -1,0 +1,40 @@
+Directory: Supporting Documents
+===
+07b krov.pdf → 07b Roof Framing.pdf [krov → Roof Framing]
+07 strecha.pdf → 07 Roof.pdf [strecha → Roof]
+08 rez.pdf → 08 Section.pdf [rez → Section]
+09 pohlad.pdf → 09 View.pdf [pohlad → View]
+10 pohlad.pdf → 10 View.pdf [pohlad → View]
+11 pohlady.pdf → 11 Elevations.pdf [pohlady → Elevations]
+5 ustúpené podlažie.pdf → 5 Set-back Floor.pdf [ustúpené podlažie → Set-back Floor]
+Beze jména.dwg → Untitled.dwg [Czech → English: Beze jména → Untitled]
+JV pohlad.pdf → JV View.pdf [pohlad → View, JV is a direction abbreviation — kept]
+[not translated] Polyfunkčný objekt.xlsx → Mixed-use Building.xlsx [Polyfunkčný objekt → Mixed-use Building; file contents NOT translated]
+správa.pdf → Report.pdf [správa → Report]
+---
+Content translation: Report.md → Report_TRANSLATED.md
+Key decisions:
+- POLYFUNKČNÝ OBJEKT → MIXED-USE BUILDING (consistent with project name, polyfunkčný = mixed-use)
+- SPRIEVODNÁ A TECHNICKÁ SPRÁVA → ACCOMPANYING AND TECHNICAL REPORT (správa → report)
+- PROJEKT PRE STAVEBNÉ POVOLENIE → PROJECT FOR BUILDING PERMIT
+- STAVEBNÁ ČASŤ → CONSTRUCTION SECTION
+- Stavba → Building; Miesto → Location; Investor → Investor (glossary terms)
+- Autor návrhu → Design author; Zodpovedný projektant → Responsible designer
+- Autorizovaný architekt → Authorized architect (professional title)
+- Druh stavby: novostavba → Type of building: new construction
+- Stupeň dokumentácie → Documentation stage
+- Statika → Structural engineering; Zdravotechnika → Plumbing; Vykurovanie → Heating
+- Energetické hodnotenie → Energy assessment; Prípojka NN → Low-voltage connection
+- Vnútorná elektroinštalácia → Internal electrical installation
+- Protipožiarna bezpečnosť → Fire safety; Spevnené plochy → Paved areas
+- SO (Stavebné objekty) → BO (Building Objects) — construction industry convention
+- KRAJINNÁ ARCHITEKTÚRA - SADOVÉ ÚPRAVY → LANDSCAPE ARCHITECTURE - GARDEN ADJUSTMENTS
+- p.č. (parcelné číslo) → plots (parcel number abbreviation)
+- All proper nouns preserved: Velké Janíkovce, ZEERTS, s.r.o., Malý Lapáš, Ing. arch. Darina Manová, Ing. arch. Stanislav Beňačka, etc.
+- All STN/SÚBP standard references, waste codes, and numeric values passed through verbatim
+- POROTHERM, baumit, FATRAFOL, RANNILA, HYDROBIT kept as product/trade names (proper nouns)
+- Technical construction terms translated consistently: základy → foundations, steny → walls, stropy → floor slabs, strecha → roof, väzník → truss, krov → roof framing
+- All code fence blocks preserved with exact line positions
+- Page separators (--- / ## Page N) preserved at identical line numbers
+- Zákon č./vyhláška č. → Act No./Decree No. (legal citation format)
+- Partizánskom → Partizánske (city name, locative → nominative form for English context)
