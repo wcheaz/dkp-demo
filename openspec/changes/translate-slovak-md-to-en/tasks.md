@@ -17,7 +17,7 @@ Projects:
 
 ## 3. Translation — Batch 2 (63 files, 5 medium projects)
 
-- [ ] 3.1 Translate all `.md` files in the following projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
+- [x] 3.1 Translate all `.md` files in the following projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
 
 Projects:
 - `108JO26A - Marcinko` (13 files across 2 directories: `Truss Design Variant A/`, `Supporting Documents/`)
@@ -30,7 +30,7 @@ Projects:
 
 ## 4. Translation — Batch 3 (66 files, 25 remaining projects)
 
-- [ ] 4.1 Translate all `.md` files in the following 25 projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
+- [x] 4.1 Translate all `.md` files in the following 25 projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
 
 Projects (file counts in parentheses):
 - `083JO26A - SIPKON_Apartment Building Golianovo` (6: `Truss Design Variant A/`, `Supporting Documents/`)
@@ -63,7 +63,7 @@ Projects (file counts in parentheses):
 
 ## 5. Create English-Only Clean Copy
 
-- [ ] 5.1 Create a clean copy of the `hidden/Trusses AI/` directory tree at `hidden/Trusses AI English/`. The clean copy MUST contain:
+- [x] 5.1 Create a clean copy of the `hidden/Trusses AI/` directory tree at `hidden/Trusses AI English/`. The clean copy MUST contain:
   - The identical directory structure (all 33 project folders and all subdirectories).
   - Every `*_TRANSLATED.md` file, renamed to `.md` by dropping the `_TRANSLATED` suffix (e.g., `001IK26A.material_TRANSLATED.md` becomes `001IK26A.material.md`).
   - Every `translation-notes.txt` file (copied as-is).
@@ -73,6 +73,6 @@ Projects (file counts in parentheses):
 
 ## 6. Final Verification
 
-- [ ] 6.1 Verify the full pipeline: 196 source `.md` files are unchanged, 196 `_TRANSLATED.md` companions exist in `hidden/Trusses AI/`, `translation-notes.txt` files are updated in all 63 directories, and `hidden/Trusses AI English/` contains only translated Markdown and notes.
+- [x] 6.1 Verify the full pipeline: 196 source `.md` files are unchanged, 196 `_TRANSLATED.md` companions exist in `hidden/Trusses AI/`, `translation-notes.txt` files are updated in all 63 directories, and `hidden/Trusses AI English/` contains only translated Markdown and notes.
 
 **Verify by:** Running `find "hidden/Trusses AI" -name "*_TRANSLATED.md" | wc -l` returns 196. Running `find "hidden/Trusses AI English" -name "*.md" -not -name "translation-notes*" | wc -l` returns 196. For 3 random files, `diff` the source `.md` in `hidden/Trusses AI/` against its pre-translation state shows no differences. For 3 random files, `diff` the `_TRANSLATED.md` in `hidden/Trusses AI/` against the corresponding `.md` in `hidden/Trusses AI English/` shows identical content.
