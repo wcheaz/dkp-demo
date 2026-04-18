@@ -42,6 +42,7 @@ from pathlib import Path
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
 import os
 from dotenv import load_dotenv
 from typing import List, Optional
@@ -52,10 +53,12 @@ KNOWLEDGE_BASE_DIR = (
 
 load_dotenv(dotenv_path="../.env")
 
-# Model configuration
 model = OpenAIModel(
-    model=os.getenv("OPENAI_MODEL", "gpt-4"),
-    base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+    model_name=os.getenv("OPENAI_MODEL", "gpt-4"),
+    provider=OpenAIProvider(
+        base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+        api_key=os.getenv("OPENAI_API_KEY"),
+    ),
 )
 
 
