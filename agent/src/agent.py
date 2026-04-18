@@ -41,6 +41,7 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 import os
 from dotenv import load_dotenv
+from typing import List, Optional
 
 load_dotenv(dotenv_path="../.env")
 
@@ -49,6 +50,12 @@ model = OpenAIModel(
     model=os.getenv("OPENAI_MODEL", "gpt-4"),
     base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
 )
+
+
+class KnowledgeQuery(BaseModel):
+    query: str
+    result: str
+    timestamp: str
 
 
 # Your state class - customize this for your domain
