@@ -41,6 +41,14 @@ export default function CopilotKitPage() {
     },
   });
 
+  useFrontendTool({
+    name: "get_knowledge_summary",
+    parameters: [],
+    handler() {
+      return "Please provide an overview of the knowledge base.";
+    },
+  });
+
   return (
     <main
       style={
@@ -59,6 +67,10 @@ export default function CopilotKitPage() {
           {
             title: "Get Started",
             message: "How can you help me?",
+          },
+          {
+            title: "What do you know?",
+            message: "What do you know?",
           },
         ]}
         Input={CustomInput}

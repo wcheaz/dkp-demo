@@ -43,7 +43,7 @@
 - [x] 6.1 Verify `agent/src/main.py` imports work with uncommented code (imports should already match)
   **Done when:** File `agent/src/main.py` has no import errors and can be executed
 
-- [ ] 6.2 Add `get_knowledge_summary` as a frontend tool in `src/app/page.tsx` using `useFrontendTool`
+- [x] 6.2 Add `get_knowledge_summary` as a frontend tool in `src/app/page.tsx` using `useFrontendTool`
   **Done when:** `useFrontendTool` hook is added with name `get_knowledge_summary`, parameters empty, and handler returns a message invoking the agent tool
 
 ## 7. Verification and Testing
