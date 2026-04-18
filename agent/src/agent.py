@@ -36,12 +36,19 @@
 # - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
+from datetime import datetime, timezone
+from pathlib import Path
+
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 import os
 from dotenv import load_dotenv
 from typing import List, Optional
+
+KNOWLEDGE_BASE_DIR = (
+    Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-english"
+)
 
 load_dotenv(dotenv_path="../.env")
 
@@ -158,20 +165,90 @@ agent = Agent(
 #         customer = await db.get_customer(customer_id)
 #         return f"Customer: {customer.name}, Email: {customer.email}"
 # ============================================================================
-# @agent.tool
-# async def your_tool(ctx: RunContext[StateDeps], input_data: str) -> str:
-#     """
-#     Your tool description
-#
-#     Args:
-#         ctx: Agent context with state
-#         input_data: Input data for your tool
-#
-#     Returns:
-#         Your tool output
-#     """
-#     # Implement your tool logic here
-#     return f"Tool output: {input_data}"
+@agent.tool
+async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
+    """Query truss and roof engineering knowledge base by reading relevant documents.
+
+    Args:
+        ctx: Agent context with state
+        query: The user's question or topic to search for
+
+    Returns:
+        Relevant document contents with source file references
+    """
+    summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    try:
+        summary_content = summary_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "Knowledge base summary not found. Please contact the administrator."
+
+    query_lower = query.lower()
+    query_words = query_lower.split()
+
+    subdirs = [
+        d
+        for d in KNOWLEDGE_BASE_DIR.iterdir()
+        if d.is_dir() and not d.name.startswith(".")
+    ]
+
+    summary_lower = summary_content.lower()
+
+    scored = []
+    for subdir in subdirs:
+        subdir_lower = subdir.name.lower()
+        name_score = sum(1 for w in query_words if w in subdir_lower)
+        header = f"### {subdir.name}"
+        try:
+            header_idx = summary_lower.index(header.lower())
+            section_end = summary_lower.find("\n### ", header_idx + 1)
+            if section_end == -1:
+                section_end = len(summary_lower)
+            section_text = summary_lower[header_idx:section_end]
+            section_score = sum(1 for w in query_words if w in section_text)
+        except ValueError:
+            section_score = 0
+        total_score = name_score * 2 + section_score
+        if total_score > 0:
+            scored.append((total_score, subdir))
+
+    if not scored:
+        scored = [(0, d) for d in subdirs[:3]]
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    matched = scored[:3]
+
+    results: list[str] = []
+    missing_files: list[str] = []
+
+    for _, subdir in matched:
+        md_files = list(subdir.rglob("*.md"))
+        for md_file in md_files:
+            try:
+                content = md_file.read_text(encoding="utf-8")
+                relative = md_file.relative_to(KNOWLEDGE_BASE_DIR.parent.parent)
+                results.append(f"--- Source: {relative} ---\n{content}")
+            except FileNotFoundError:
+                missing_files.append(str(md_file))
+            except Exception as e:
+                missing_files.append(f"{md_file} (error: {e})")
+
+    if not results:
+        result_text = "No relevant information found in the knowledge base."
+    else:
+        result_text = "\n\n".join(results)
+
+    if missing_files:
+        result_text += (
+            f"\n\nNote: The following files were not found: {', '.join(missing_files)}"
+        )
+
+    timestamp = datetime.now(timezone.utc).isoformat()
+    ctx.deps.state.knowledge_queries.append(
+        KnowledgeQuery(query=query, result=result_text[:500], timestamp=timestamp)
+    )
+    ctx.deps.state.last_knowledge_result = result_text
+
+    return result_text
 
 
 # ============================================================================

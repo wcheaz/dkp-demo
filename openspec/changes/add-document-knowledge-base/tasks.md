@@ -27,10 +27,10 @@
 
 ## 4. Document Reading Tool Implementation
 
-- [ ] 4.1 Implement file reading logic and `query_knowledge_base` tool in `agent/src/agent.py` using Python's standard library (`pathlib`, `open`)
+- [x] 4.1 Implement file reading logic and `query_knowledge_base` tool in `agent/src/agent.py` using Python's standard library (`pathlib`, `open`)
   **Done when:** Tool is decorated with `@agent.tool`, has signature `async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str`, reads `summary.md` to identify subdirectories, reads markdown files from those subdirectories, handles `FileNotFoundError` gracefully, and returns document contents with source file paths
 
-- [ ] 4.2 Update agent state on each `query_knowledge_base` call in `agent/src/agent.py`
+- [x] 4.2 Update agent state on each `query_knowledge_base` call in `agent/src/agent.py`
   **Done when:** Tool appends `KnowledgeQuery` entry to `ctx.deps.state.knowledge_queries` and sets `ctx.deps.state.last_knowledge_result` with the retrieval result
 
 ## 5. Knowledge Summary Tool Implementation
