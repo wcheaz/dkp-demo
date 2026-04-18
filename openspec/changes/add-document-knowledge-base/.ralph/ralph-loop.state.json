@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 14,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/add-document-knowledge-base/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/add-document-knowledge-base/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/add-document-knowledge-base/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-18T19:20:16.832Z",
+  "resumedAt": null,
+  "completedAt": "2026-04-18T19:50:13.772Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}
