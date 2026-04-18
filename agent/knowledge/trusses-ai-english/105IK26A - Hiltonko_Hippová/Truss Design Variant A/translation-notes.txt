@@ -1,0 +1,24 @@
+Directory: Truss Design Variant A
+===
+[not translated] 105IK26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 105IK26A.material.md → 105IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer: per glossary
+- Výpis řeziva dle skladových → Lumber list by stock items: per glossary
+- Kvalita → Grade, Tl. → Th., Š. → W., Celk. Dl. → Total L., Celk. Kub. → Total Vol.: per glossary abbreviations
+- Celkem → Total, Cena bez DPH → Price excl. VAT, pomurnica → wall plate, Kubatura → Volume
+- Údaje o střeše → Roof data, Celková půdorysná plocha pod střechou → Total floor plan area under roof
+- valba → hip roof: structural roof type designation
+- styčníkové desky → gusset plates, závěsy → hangers, zavětrování → bracing: per glossary
+- sedlový → gable, pultový → mono-pitch: per glossary roof type terms
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: per glossary
+- ZAŤAŽENIE → LOAD, STÁLE ZAŤAŽENIE → PERMANENT LOAD, ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD: per glossary
+- Úžitkové zaťaženie → Live load, PODPORY PRE VÄZNÍK → TRUSS SUPPORT: per glossary
+- ÚLOŽNÝ PRIESTOR → STORAGE SPACE: per glossary
+- KRESLIL → DRAWN BY, KONTR. → CHECKED, MĚŘÍTKO → SCALE, STRANA → SHEET: per glossary title block terms
+- OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION, ČÍSLO ZAKÁZKY → ORDER NUMBER, ČÍSLO VÝKRESU → DRAWING NUMBER: per glossary

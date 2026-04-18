@@ -1,0 +1,27 @@
+Directory: 001IK26A - Matlúch_House/Truss Design Variant A
+===
+Návrh väzníka A → Truss Design Variant A (directory)
+[not translated] 001IK26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 001IK26A.material.md → 001IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote; Zakázka → Order; Zákazník → Customer (glossary terms)
+- Výpis řeziva dle skladových → Lumber list by stock items (glossary)
+- Kvalita/Tl./Š./Celk. Dl./Celk. Kub. → Grade/Th./W./Total L./Total Vol. (glossary abbreviations)
+- pomurnica → wall plate; Hranol → Beam; Kubatura → Volume; zavětrování → bracing (glossary)
+- styčníkové desky → gusset plates; Údaje o střeše → Roof data (glossary)
+- All roof data labels translated per glossary (Délka okapu → Eave length, etc.)
+- Numeric values, units (m2, m3, CZK), and project code 001IK26A preserved verbatim
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD; STÁLE ZAŤAŽENIE → PERMANENT LOAD (glossary)
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORTS; ÚLOŽNÝ PRIESTOR → STORAGE SPACE (glossary)
+- KRESLIL → DRAWN; KONTR. → CHECKED; ČÍSLO ZAKÁZKY → ORDER NUMBER (title block terms)
+- OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION; STRANA → PAGE (title block terms)
+- Navrhl → Designed by; MĚŘÍTKO → SCALE (title block terms)
+- ALL-CAPS style preserved for construction annotations per design decision
+- Zateplenie → INSULATION; Pôdorys → floor plan; Krov → roof framing (glossary)
+- Stále zaťaženie (PODLAHA) → Permanent load (FLOOR); Úžitkové zaťaženie → Live load (glossary)
+- Dimension references (+5 300, +3 000, A-A, B-B, C-C) and numeric values preserved verbatim

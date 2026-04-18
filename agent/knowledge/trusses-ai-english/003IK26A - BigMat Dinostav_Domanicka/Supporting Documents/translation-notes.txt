@@ -1,0 +1,29 @@
+Directory: 003IK26A - BigMat Dinostav_Domanicka/Supporting Documents
+===
+Podklady → Supporting Documents (directory name)
+Domanicka_RD_Krov_790_297.pdf → Domanická_RD_Roof Framing_790_297.pdf (Krov → Roof Framing)
+Domanicka_RD_Pdorys strechy_670_297.pdf → Domanická_RD_Floor Plan Roof_670_297.pdf (Pdorys strechy → Floor Plan Roof)
+info k CP-návrh väzníka.txt → Info for Truss Design.txt (návrh väzníka → Truss Design; contents NOT translated)
+---
+Content translation: Domanická_RD_Floor Plan Roof_670_297.md → Domanická_RD_Floor Plan Roof_670_297_TRANSLATED.md
+Key decisions:
+- ODKVAPOVÝ SYSTÉM → EAVE SYSTEM; VÝLEZ POD STRECHU → ROOF ACCESS HATCH (preserved ALL-CAPS)
+- PROTIPOŽIARNA ÚPRAVA → FIRE-RESISTANT TREATMENT
+- STREŠNÉ VÝLEZOVÉ OKNO → ROOF ACCESS WINDOW; KOMÍNOVÝ SYSTÉM → CHIMNEY SYSTEM
+- PROJEKTANT NENESIE ŽIADNU ZODPOVEDNOSŤ → THE DESIGNER BEARS NO RESPONSIBILITY (legal disclaimer)
+- PROJEKT PRE STAVEBNÉ POVOLENIE → BUILDING PERMIT PROJECT; RODINNÝ DOM → FAMILY HOUSE
+- ARCHITEKTONICKO-STAVEBNÉ RIEŠENIE → ARCHITECTURAL-STRUCTURAL DESIGN
+- PÔDORYS STRECHY → ROOF FLOOR PLAN (glossary: Pôdorys → Floor plan, Strecha → Roof)
+- Proper nouns preserved: Domanická Monika, Bodiná, Veľká Čierna, ING. KRISTIÁN KARLÍK, SCHIEDEL
+---
+Content translation: Domanická_RD_Roof Framing_790_297.md → Domanická_RD_Roof Framing_790_297_TRANSLATED.md
+Key decisions:
+- Pôdorys krovu → Roof framing floor plan; Krov → Roof framing (glossary)
+- OBVODOVÉ NOSNÉ MURIVO Z PÓROBETÓNOVÝCH TVÁRNIC → PERIMETER LOAD-BEARING MASONRY OF AUTOCLAVED AERATED CONCRETE BLOCKS (construction terminology)
+- NENOSNÉ MURIVO → NON-LOAD-BEARING MASONRY; LEPIACA MALTA → THIN-BED MORTAR
+- TEPELNÁ IZOLÁCIA → THERMAL INSULATION; EXPANDOVANÝ POLYSTYRÉN → EXPANDED POLYSTYRENE
+- ŽELEZOBETÓN → REINFORCED CONCRETE; ŽALÚZIOVÝ KASTLÍK → LOUVER CASING
+- PRIEHRADOVÉ VÄZNÍKY → TRUSS GIRDERS; ZAVETRENIE A STUŽENIE → BRACING AND STIFFENING
+- PRIEHRADOVÉ VÄZNÍKY → TRUSS GIRDERS; ŠKODCOV A HNILOBE → PESTS AND ROT (wood treatment)
+- Rez A-A´ → Section A-A´; Legenda materálov → Material legend
+- All dimension values, coordinates, and proper nouns preserved verbatim

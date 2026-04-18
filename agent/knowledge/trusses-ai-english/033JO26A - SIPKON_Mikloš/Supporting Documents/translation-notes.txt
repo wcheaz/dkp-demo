@@ -1,0 +1,10 @@
+Directory: Supporting Documents
+===
+[not translated] 033JO26A.txt — project code identifier file (contents NOT translated)
+04 Pďdorys.pdf → 04 Floor Plan.pdf
+05 rez.pdf → 05 Section.pdf
+08 pohĖady.pdf → 08 Elevations.pdf
+---
+Content translation: 04 Floor Plan.md → 04 Floor Plan_TRANSLATED.md
+Key decisions:
+- File contains only a blank line (empty floor plan document). Translation is identical — no Slovak/Czech content to translate.

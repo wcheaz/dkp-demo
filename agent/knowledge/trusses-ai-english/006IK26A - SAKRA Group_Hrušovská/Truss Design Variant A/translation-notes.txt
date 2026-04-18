@@ -1,0 +1,20 @@
+Directory: 006IK26A - SAKRA Group_Hrušovská/Truss Design Variant A
+===
+[not translated] 006IK26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 006IK26A.material.md → 006IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote; Zakázka → Order; Zákazník → Customer (per glossary)
+- Pult → Mono-pitch (glossary); "sedlový" suffix for ridge → "(gable)", "pultový" → "(mono-pitch)"
+- Kubatura → Volume; pomurnica → wall plate; zavětrování → bracing; styčníkové desky → gusset plates
+- All numeric values, project codes, unit symbols, and proper nouns preserved verbatim
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- ALL-CAPS construction annotations translated to English while preserving casing style and dimension references
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD; STÁLE ZAŤAŽENIE → PERMANENT LOAD; PODPORY PRE VÄZNÍK → TRUSS SUPPORTS
+- PÔDORYS → FLOOR PLAN; PRIEVLAKY → BEAMS; PRIEČKY → PARTITIONS (non-glossary, contextual)
+- Title block fields: KRESLIL → DRAWN; KONTR. → CHECKED; ČÍSLO ZAKÁZKY → ORDER NUMBER; OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION; ČÍSLO VÝKRESU → DRAWING NUMBER
+- Navrhl → Designed by; medop strechy s.r.o. preserved as proper noun
+- All dimension values, project codes, and page separators preserved exactly

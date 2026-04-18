@@ -1,0 +1,100 @@
+Directory: 035IK26A - Kartik_Tapfer/Supporting Documents
+===
+pôdorys strechy.jpg → Floor Plan Roof.jpg
+pohlady 1.pdf → Elevations 1.pdf
+pohlady 2.pdf → Elevations 2.pdf
+pohlady 3.pdf → Elevations 3.pdf
+Strecha.jpg → Roof.jpg
+tapfer_PSP_03_PODORYS 1.NP.pdf → tapfer_PSP_03_Floor Plan 1st Floor.pdf
+tapfer_PSP_04_REZ CC-DD.pdf → tapfer_PSP_04_Section CC-DD.pdf
+tapfer_PSP_05_REZ AA- BB.pdf → tapfer_PSP_05_Section AA-BB.pdf
+tapfer_PSP_06_REZ EE.pdf → tapfer_PSP_06_Section EE.pdf
+tapfer_PSP_07_KROV.pdf → tapfer_PSP_07_Roof Framing.pdf
+tapfer_PSP_08_STRECHA.pdf → tapfer_PSP_08_Roof.pdf
+tapfer_PSP_09_POHLADY.pdf → tapfer_PSP_09_Elevations.pdf
+---
+Content translation: Elevations 1.md → Elevations 1_TRANSLATED.md
+Key decisions:
+- pohľad južný → south elevation, pohľad východný → east elevation (direction labels)
+- rodinný dom → family house, architektonická štúdia → architectural study
+- investori → investors, miesto stavby → building location (proper nouns preserved: Miroslav Tapfer, Zuzana Bajčiová, BA IV. Dúbravka, Jadranská ulica)
+- parc. č. → parcel no., vypracovala → drawn by, dátum → date
+---
+Content translation: Elevations 2.md → Elevations 2_TRANSLATED.md
+Key decisions:
+- pohľad severný → north elevation, pohľad západný → west elevation
+- Same terminology as Elevations 1 for consistency
+---
+Content translation: Elevations 3.md → Elevations 3_TRANSLATED.md
+Key decisions:
+- pohľad západný → west elevation
+- Same terminology as Elevations 1 for consistency
+---
+Content translation: tapfer_PSP_03_Floor Plan 1st Floor.md → tapfer_PSP_03_Floor Plan 1st Floor_TRANSLATED.md
+Key decisions:
+- LEGENDA MIESTNOSTÍ → ROOM LEGEND, POVRCHOVÁ ÚPRAVA → SURFACE FINISH
+- VSTUPNÉ ZÁDVERIE → ENTRANCE VESTIBULE, TECHNICKÁ MIESTNOSŤ → UTILITY ROOM
+- KÚPEĽŇA → BATHROOM, KUCHYŇA + JEDÁLEŇ → KITCHEN + DINING ROOM, SPOLOCENSKA MIESTNOSŤ → LIVING ROOM
+- SKLADBA OBVODOVÝCH STIEN → EXTERIOR WALL COMPOSITION, SKLADBA PODLÁH → FLOOR COMPOSITION
+- OBVODOVÁ NOSNÁ STENA → EXTERIOR LOAD-BEARING WALL, MURIVO → MASONRY, ŽELEZOBETÓNOVÁ TVÁRNICA → REINFORCED CONCRETE BLOCK
+- HYDROIZOLÁCIA → WATERPROOFING, CEMENTOVÝ POTER → CEMENT SCREED, PIESKOVÉ LÔŽKO → SAND BED
+- ŽB DOSKA → RC SLAB (Reinforced Concrete), ŠTRKOVÉ LÔŽKO → COMPACTED GRAVEL BED
+- EXTERIÉROVÁ/INTERIÉROVÁ OMIETKA → EXTERIOR/INTERIOR PLASTER
+- RASTLÝ TERÉN → NATURAL GRADE, NASYPANÁ ZEMINA → FILLED SOIL
+- PÔVODNÝ TERÉN → ORIGINAL GRADE, DREVENÁ PODLAHA → WOODEN FLOOR, DREVENÝ ROŠT → WOODEN JOISTS
+- PIVNICA → BASEMENT, LOFTOVA ČASŤ → LOFT AREA
+- Title block: RODINNÝ DOM - NOVOSTAVBA → FAMILY HOUSE - NEW CONSTRUCTION, NÁZOV STAVBY → BUILDING NAME, MIESTO STAVBY → BUILDING LOCATION
+- ZODP. PROJEKTANT → RESPONSIBLE DESIGNER, AUTOR PROJEKTU → PROJECT AUTHOR
+- PROJEKT PRE STAVEBNÉ POVOLENIE → BUILDING PERMIT PROJECT, PÔDORYS 1.NP → 1ST FLOOR PLAN
+---
+Content translation: tapfer_PSP_04_Section CC-DD.md → tapfer_PSP_04_Section CC-DD_TRANSLATED.md
+Key decisions:
+- SKLADBA OBVODOVÝCH STIEN → EXTERIOR WALL COMPOSITION, SKLADBA PODLÁH → FLOOR COMPOSITION
+- SKLADBA STEŠNÉHO PLÁŠŤA → ROOF COVERING COMPOSITION
+- STREŠNÝ PLÁŠŤ → ROOF COVERING, PLECHOVÁ STREŠNÁ KRYTINA → SHEET METAL ROOF COVERING
+- DREVENÉ DEBNENIE → WOODEN SHEATHING, LATOVANIE → BATTENS
+- POISTNÁ HYDROIZOLÁCIA → UNDERLAY WATERPROOFING
+- krov → roof framing, PAROZÁBRANA → VAPOUR BARRIER
+- SDK KONŠTRUKCIA → DRYWALL STRUCTURE, prekrytie väzníc → truss overlap
+- REZ → SECTION, ARCHITEKTÚRA → ARCHITECTURE, PROFESIA /ČASŤ → PROFESSION /PART
+- Same floor/wall composition terminology as Floor Plan 1st Floor for consistency
+---
+Content translation: tapfer_PSP_05_Section AA-BB.md → tapfer_PSP_05_Section AA-BB_TRANSLATED.md
+Key decisions:
+- Same wall/floor/roof composition terminology as Section CC-DD for consistency
+- REZ AAp, BBp → SECTION AAp, BBp (section references preserved as identifiers)
+---
+Content translation: tapfer_PSP_06_Section EE.md → tapfer_PSP_06_Section EE_TRANSLATED.md
+Key decisions:
+- Combined legend showing wall, roof covering, and floor compositions side by side
+- Same terminology as Sections CC-DD and AA-BB for consistency across all section drawings
+---
+Content translation: tapfer_PSP_07_Roof Framing.md → tapfer_PSP_07_Roof Framing_TRANSLATED.md
+Key decisions:
+- Source file contains heavily garbled OCR text (encoding corruption) — readable Slovak terms translated, garbled content preserved as-is
+- KROKVA → RAFTER, KROV → ROOF FRAMING
+- RODINNÝ DOM - NOVOSTAVBA → FAMILY HOUSE - NEW CONSTRUCTION
+- DREVO → WOOD
+- Material legend terms translated where readable: TEPELNÁ FAŠÁDNA IZOLÁCIA → THERMAL FAÇADE INSULATION, MURIVO → MASONRY, RASTLÝ TERÉN → NATURAL GRADE
+- Raw byte-level replacement used to preserve exact line structure (file contains embedded CR characters)
+---
+Content translation: tapfer_PSP_08_Roof.md → tapfer_PSP_08_Roof_TRANSLATED.md
+Key decisions:
+- Source file contains heavily garbled OCR text — same approach as Roof Framing file
+- STRECHA → ROOF, DREVO → WOOD
+- RODINNÝ DOM - NOVOSTAVBA → FAMILY HOUSE - NEW CONSTRUCTION
+- Material legend terms translated where readable, garbled content preserved as-is
+- Raw byte-level replacement used to preserve exact line structure
+---
+Content translation: tapfer_PSP_09_Elevations.md → tapfer_PSP_09_Elevations_TRANSLATED.md
+Key decisions:
+- Pohľad západný → West elevation, Pohľad severný → North elevation, Pohľad južný → South elevation, Pohľad východný → East elevation
+- Material legend: PLECHOVÁ STREŠNÁ KRYTINA FARBA ŠEDÁ RAL → SHEET METAL ROOF COVERING GREY COLOUR RAL
+- FASÁDNA OMIETKA BIELA → FAÇADE PLASTER WHITE
+- OKENNÝ A DVERNÝ SYTÉM → WINDOW AND DOOR SYSTEM
+- OPLECHOVANIE → SHEET METAL FLASHING, ODKVAPOVÝ SYSTÉM → DRAINAGE SYSTEM
+- SOKLOVÁ OMIETKA → BASE PLASTER, SKLO ČÍRE → CLEAR GLASS
+- m.n.m. → m.a.s.l. (meters above sea level)
+- POZNÁMKY → NOTES, same notes text as other drawings
+- POHĨADY → ELEVATIONS
+- PROJEKT PRE STAVEBNÉ POVOLENIE → BUILDING PERMIT PROJECT

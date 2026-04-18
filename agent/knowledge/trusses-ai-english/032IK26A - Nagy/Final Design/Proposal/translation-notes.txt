@@ -1,0 +1,21 @@
+Directory: Final Design/Proposal
+===
+[not translated] 032IK26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 032IK26A.material.md → 032IK26A.material_TRANSLATED.md
+Key decisions:
+- FINALNY NAVRH → FINAL DESIGN: Slovak project status designation
+- Stuženie → Bracing: structural stiffening elements, Spolu → Total: sum label
+- Výpis styčníkových desek → Gusset plate list: connector plate inventory section
+- Šířka → Width, Délka → Length, Počet Ks/Krabici → Qty Per Box: table header translations
+- ProjektObjednávka → ProjectOrder: combined column header kept as single word
+- Úhelník ABR-105 s prolisem → Angle bracket ABR-105 with embossment: hardware description
+- Celkem objednávka (přibližná cena v Kč) → Total order (approximate price in CZK): Czech order summary
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Same structural load, truss support, storage space annotations as Truss Design Variant A version
+- ks → pcs: Slovak/Czech abbreviation for pieces in annotations like "6 ks S1" → "6 pcs S1"
+- GL1/GL2, GE1, B1, S1, S2: element designations kept verbatim as structural labels
+- All dimension values (15960, 16000, 17600, 958, 957, etc.) passed through unchanged

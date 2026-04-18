@@ -1,6 +1,6 @@
 ## 1. Directory Structure and File Movement
 
-- [ ] 1.1 Create `agent/knowledge/` directory and move `hidden/Trusses AI English` to `agent/knowledge/trusses-ai-english/`
+- [x] 1.1 Create `agent/knowledge/` directory and move `hidden/Trusses AI English` to `agent/knowledge/trusses-ai-english/`
   **Done when:** Directory `agent/knowledge/trusses-ai-english/` exists and contains all 33 subdirectories from the original location
 
 - [ ] 1.2 Add `agent/knowledge/` to `.gitignore`

@@ -1,0 +1,35 @@
+Directory: . (root of Trusses AI)
+===
+001IK26A - Matlúch_dom → 001IK26A - Matlúch_House
+002IK26A - Matlúch_garáž → 002IK26A - Matlúch_Garage
+003IK26A - BigMat Dinostav_Domanicka → 003IK26A - BigMat Dinostav_Domanicka [not translated — proper noun/identifier]
+006IK26A - SAKRA Group_Hrušovská → 006IK26A - SAKRA Group_Hrušovská [not translated — proper noun/identifier]
+015IK26A - Slážik_RD Belince → 015IK26A - Slážik_Family House Belince (RD → Family House)
+022IK26B - Plecho_Filová → 022IK26B - Plecho_Filová [not translated — proper noun/identifier]
+027IK26B - BigMat Sumega_Chalupiansky → 027IK26B - BigMat Sumega_Chalupiansky [not translated — proper noun/identifier]
+028IK26A - BigMat Skalica_REDIP → 028IK26A - BigMat Skalica_REDIP [not translated — proper noun/identifier]
+029IK26A - Bigmat Skalica_Zeleňáková → 029IK26A - Bigmat Skalica_Zeleňáková [not translated — proper noun/identifier]
+032IK26A - Nagy → 032IK26A - Nagy [not translated — surname]
+033JO26A - SIPKON_Mikloš → 033JO26A - SIPKON_Mikloš [not translated — proper noun/identifier]
+034IK26B - Boča_Vyhnálik → 034IK26B - Boča_Vyhnálik [not translated — proper noun/identifier]
+035IK26A - Kartik_Tapfer → 035IK26A - Kartik_Tapfer [not translated — proper noun/identifier]
+039JO26A - SIPKON_Lutostav → 039JO26A - SIPKON_Lutostav [not translated — proper noun/identifier]
+040IK26A - Kišš → 040IK26A - Kišš [not translated — surname]
+041JO26A - EKO-MONT_Polyfunkcia Janíkovce → 041JO26A - EKO-MONT_Mixed-use Building Janíkovce (Polyfunkcia → Mixed-use Building)
+043IK26A - BigMat Skalica_Vŕba → 043IK26A - BigMat Skalica_Vŕba [not translated — proper noun/identifier]
+044AC26A - Stavmat_CALCUS → 044AC26A - Stavmat_CALCUS [not translated — proper noun/identifier]
+046JO26A - Plešivka_Kochan → 046JO26A - Plešivka_Kochan [not translated — proper noun/identifier]
+047IK26A - Hiltonko_Valo → 047IK26A - Hiltonko_Valo [not translated — proper noun/identifier]
+053IK26B - Plecho_RD Výčapovce → 053IK26B - Plecho_Family House Výčapovce (RD → Family House)
+054IK26A - IP-strechy_Čechvala → 054IK26A - IP Roofs_Čechvala (strechy → Roofs)
+056JO26A - Maťko_Ježovský → 056JO26A - Maťko_Ježovský [not translated — proper noun/identifier]
+057IK26A - Sollár → 057IK26A - Sollár [not translated — surname]
+058JO26A - SIPKON_Petruš → 058JO26A - SIPKON_Petruš [not translated — proper noun/identifier]
+060JO26B - SIPKON_Belančík → 060JO26B - SIPKON_Belančík [not translated — proper noun/identifier]
+062IK26A - Máče → 062IK26A - Máče [not translated — proper noun/identifier]
+064IK26A - LŠ_Greguš → 064IK26A - LŠ_Greguš [not translated — proper noun/identifier]
+065IK26A - Bigmat Remot_iTask Int → 065IK26A - Bigmat Remot_iTask Int [not translated — proper noun/identifier]
+078JO26A - SIPKON_Buocik → 078JO26A - SIPKON_Buocik [not translated — proper noun/identifier]
+083JO26A - SIPKON_BD Golianovo → 083JO26A - SIPKON_Apartment Building Golianovo (BD → Apartment Building)
+105IK26A - Hiltonko_Hippová → 105IK26A - Hiltonko_Hippová [not translated — proper noun/identifier]
+108JO26A - Marcinko → 108JO26A - Marcinko [not translated — surname]

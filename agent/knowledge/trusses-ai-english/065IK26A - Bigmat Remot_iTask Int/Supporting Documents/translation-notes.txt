@@ -1,0 +1,10 @@
+Directory: Supporting Documents
+===
+05-Pôdorys 1.NP.pdf → 05-Floor Plan 1st Floor.pdf
+06-Pôdorys krovu.pdf → 06-Floor Plan Roof Framing.pdf
+07-Pôdorys strechy.pdf → 07-Floor Plan Roof.pdf
+08-Rez A-A.pdf → 08-Section A-A.pdf
+09-Rez B-B´.pdf → 09-Section B-B'.pdf
+10-Rez C-C´.pdf → 10-Section C-C'.pdf
+11-Rez D-D´.pdf → 11-Section D-D'.pdf
+12-Pohľady.pdf → 12-Elevations.pdf

@@ -1,0 +1,28 @@
+Directory: 083JO26A - SIPKON_Apartment Building Golianovo/Truss Design Variant A
+===
+[not translated] 083JO26A.material.pdf — project code identifier preserved
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 083JO26A.material.md → 083JO26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer: standard business terms
+- pult → mono-pitch: roof type per glossary
+- Výpis řeziva dle skladových → Lumber list by stock items: timber industry term
+- pomurnica → wall plate: structural timber on top of wall
+- Kubatura nezahrnuje → Volume does not include: material quantity note
+- zavětrování → bracing: structural stabilization
+- styčníkové desky → gusset plates: truss connector plates
+- Údaje o střeše → Roof data: section header
+- All roof measurement terms translated per glossary (okap→eave, pozednice→sole plate, etc.)
+- Celkový počet vazníků → Total truss count, styčníků → joints, dřevěných prvků → timber elements
+- závěsů → hangers: metal connector supports
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: drawing annotation section
+- ZAŤAŽENIE → LOAD, STÁLE → PERMANENT, SNEHOM → SNOW, VETROM → WIND: Eurocode load types
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT: structural support designation
+- PRIEVLAKY → beams, PRIEČKY → PARTITION WALLS: structural terminology
+- Title block fields: KRESLIL→DRAWN BY, KONTR.→CHECKED, MĚŘÍTKO→SCALE, STRANA→SHEET
+- OZNAČENÍ VAZNÍKU→TRUSS DESIGNATION, ČÍSLO ZAKÁZKY→ORDER NUMBER, ČÍSLO VÝKRESU→DRAWING NUMBER
+- Navrhl → Designed by: attribution, company name and licence number preserved

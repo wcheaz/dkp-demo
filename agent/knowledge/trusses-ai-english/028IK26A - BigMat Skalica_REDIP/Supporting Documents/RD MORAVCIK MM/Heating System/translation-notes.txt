@@ -1,0 +1,17 @@
+Directory: Supporting Documents/RD MORAVCIK MM/Heating System
+===
+1np-uk (3).pdf → 1st Floor Layout (3).pdf (1np → 1st Floor, uk → Layout)
+[not translated] 25074.docx — reference identifier
+Schema-uk (8).pdf → Schema Layout (8).pdf (uk → Layout)
+---
+Content translation: 1st Floor Layout (3).md → 1st Floor Layout (3)_TRANSLATED.md
+Key decisions:
+- LEGENDA MIESTNOSTÍ → ROOM LEGEND with all room names translated consistently
+- NÁZOV MIESTNOSTI → ROOM NAME, Plocha → Area
+- Room names: Zádverie → Entrance hall, Chodba → Hallway, Spálňa → Bedroom, Hygiena → Hygiene, Izba → Room
+- Kuchyňa s obývacou izbou → Kitchen with living room
+- All numeric area values and room numbers preserved verbatim
+---
+Content translation: Schema Layout (8).md → Schema Layout (8)_TRANSLATED.md
+Key decisions:
+- File contained only a single empty line - translation is identical (empty line preserved)

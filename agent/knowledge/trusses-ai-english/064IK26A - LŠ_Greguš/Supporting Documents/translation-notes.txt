@@ -1,0 +1,8 @@
+Directory: 064IK26A - LŠ_Greguš/Supporting Documents
+===
+PDF ARCH → PDF ARCH (kept as-is — already English abbreviation)
+PDF ELEKTRO → PDF Electrical
+PDF EPH → PDF Energy Performance
+PDF POŽIAR → PDF Fire Protection
+PDF STATIKA → PDF Structural Engineering
+PDF TZB → PDF Building Services

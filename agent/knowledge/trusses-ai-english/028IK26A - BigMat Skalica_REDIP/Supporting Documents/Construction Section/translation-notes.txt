@@ -1,0 +1,46 @@
+Directory: Supporting Documents/Construction Section
+===
+[not translated] RD MM_E1.pdf — reference identifier
+[not translated] RD MM_E2.pdf — reference identifier
+[not translated] RD MM_E3.pdf — reference identifier
+[not translated] RD MM_E4.pdf — reference identifier
+[not translated] RD MM_E5.pdf — reference identifier
+[not translated] RD MM_S1.pdf — reference identifier
+TS - RODINNÝ DOM   MM JAKUBOV.pdf → Technical Report - Family House MM Jakubov.pdf (TS → Technical Report, RODINNÝ DOM → Family House)
+---
+Content translation: RD MM_E1.md → RD MM_E1_TRANSLATED.md
+Key decisions:
+- Hlavný inž. projektu → Chief project engineer, Vypracoval → Drawn by
+- Stavebník → Developer, Miesto stavby → Building location
+- RODINNÝ DOM → FAMILY HOUSE, POZNÁMKY → NOTES
+- STAVEBNÝ ZÁMER → BUILDING INTENT, Stupeň → Stage
+- ZTI → Plumbing (abbreviation for zdravotechnika)
+- All construction notes translated: masonry instructions, concrete work, reinforcement specifications
+- Proper nouns (M-Arch. group s.r.o., Ing. Michal Gašpar, Jakubov, REDIP s.r.o.) preserved
+---
+Content translation: RD MM_E2.md → RD MM_E2_TRANSLATED.md
+Key decisions:
+- LEGENDA MIESTNOSTÍ → ROOM LEGEND with all room names translated: Zádverie → Entrance hall, Chodba → Hallway, Spálňa → Bedroom, Hygiena → Hygiene, Izba → Room
+- Nášlapná vrstva → Wear layer, Povrch stena → Wall surface, Povrch strop → Ceiling surface
+- Sadrová omietka → Gypsum plaster, SDK podhľad → Drywall ceiling, Maľba → Paint
+- Keramika gres → Ceramic gres, Keramický obklad → Ceramic tiling
+- CELKOM ÚŽITKOVÁ PLOCHA → TOTAL USABLE AREA, CELKOM OBYTNÁ PLOCHA → TOTAL LIVING AREA
+- NOSNÉ OBVODOVÉ STENY Z PÓROBETÓNOVÝCH TVÁRNIC → LOAD-BEARING EXTERIOR WALLS FROM AAC BLOCKS
+- TEPELNÁ IZOLÁCIA → THERMAL INSULATION with specific types preserved
+---
+Content translation: RD MM_E3.md → RD MM_E3_TRANSLATED.md
+Key decisions:
+- Cross-section drawing: all construction layer descriptions translated
+- PODLAHA NA TERÉNE - GRESOVÁ DLAŽBA → FLOOR ON GRADE - GRES TILE
+- TEPELNOIZOLAČNÁ VRSTVA → THERMAL INSULATION LAYER with material specs preserved
+- PAROTESNÁ FÓLIA → VAPOR BARRIER, SEPARAČNÁ VRSTVA → SEPARATION LAYER
+- SADROKARTÓNOVÉ DOSKY → DRYWALL BOARDS, OBVODOVÁ STENA → EXTERIOR WALL
+- Code fence content (construction details) translated with column alignment preserved
+- LEGENDA MATERIÁLOV → MATERIAL LEGEND
+---
+Content translation: RD MM_E4.md → RD MM_E4_TRANSLATED.md
+Key decisions:
+- Elevations drawing: mostly dimension values passed through unchanged
+- Title block and notes translated same as E1-E3 files for consistency
+- Pohľady → Elevations, Číslo výkr. → Drawing number, Názov výkresu → Drawing title
+- All elevation dimension values preserved verbatim
