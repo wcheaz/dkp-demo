@@ -82,11 +82,11 @@ class YourState(BaseModel):
 # 2. Add any additional dependencies (API clients, database connections, etc.)
 # 3. Ensure the class matches the deps_type parameter in your Agent constructor
 # ============================================================================
-# class StateDeps:
-#     """Dependencies for your agent"""
-#
-#     def __init__(self, state: YourState):
-#         self.state = state
+class StateDeps:
+    """Dependencies for your agent"""
+
+    def __init__(self, state: YourState):
+        self.state = state
 
 
 # ============================================================================
