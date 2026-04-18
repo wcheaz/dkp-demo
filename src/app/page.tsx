@@ -41,14 +41,6 @@ export default function CopilotKitPage() {
     },
   });
 
-  useFrontendTool({
-    name: "get_knowledge_summary",
-    parameters: [],
-    handler() {
-      return "Please provide an overview of the knowledge base.";
-    },
-  });
-
   return (
     <main
       style={

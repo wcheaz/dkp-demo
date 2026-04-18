@@ -12,6 +12,7 @@ dependencies = [
     "uvicorn",
     "fastapi",
     "pydantic-ai",
+    "starlette<1.0.0",
     "logfire>=4.19.0",
     "torch",
     "python-dotenv",
