@@ -48,7 +48,7 @@
 
 ## 7. Verification and Testing
 
-- [ ] 7.1 Run agent server and verify document reading works (e.g., query for "permanent roof load" returns file contents)
+- [x] 7.1 Run agent server and verify document reading works (e.g., query for "permanent roof load" returns file contents)
   **Done when:** Agent server starts without errors and query returns relevant file contents with source file paths
 
 - [ ] 7.2 Run frontend server and verify "what do you know?" question returns knowledge summary
