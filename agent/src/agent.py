@@ -105,9 +105,21 @@ class StateDeps:
 # 4. Configure retries, model_settings, or other Agent parameters as needed
 # 5. Uncomment and adapt the code below
 # ============================================================================
-# agent = Agent(
-#     model, deps_type=StateDeps, system_prompt="You are a helpful AI assistant."
-# )
+agent = Agent(
+    model,
+    deps_type=StateDeps,
+    system_prompt=(
+        "You are a truss and roof engineering assistant with access to a knowledge base "
+        "of 33 construction projects designed by medop strechy s.r.o. "
+        "You have two tools available:\n"
+        "- get_knowledge_summary: Use this when the user asks general questions about what "
+        'information is available (e.g., "What projects do you have?", "What do you know?").\n'
+        "- query_knowledge_base: Use this when the user asks specific questions about projects, "
+        "load calculations, materials, truss designs, or engineering specifications.\n\n"
+        "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
+        "for specific technical queries. When providing answers, always cite the source document path."
+    ),
+)
 
 
 # ============================================================================

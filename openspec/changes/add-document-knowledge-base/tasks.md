@@ -22,7 +22,7 @@
 - [x] 3.3 Uncomment and implement `StateDeps` class in `agent/src/agent.py` to wrap `YourState`
   **Done when:** `StateDeps` class is uncommented with `__init__(self, state: YourState)` method that stores the state
 
-- [ ] 3.4 Uncomment and implement the `Agent` instance in `agent/src/agent.py` with appropriate system prompt and `deps_type=StateDeps`
+- [x] 3.4 Uncomment and implement the `Agent` instance in `agent/src/agent.py` with appropriate system prompt and `deps_type=StateDeps`
   **Done when:** `agent` variable is uncommented and instantiated with `model`, `deps_type=StateDeps`, and system prompt that references the knowledge base
 
 ## 4. Document Reading Tool Implementation
