@@ -58,14 +58,11 @@ class KnowledgeQuery(BaseModel):
     timestamp: str
 
 
-# Your state class - customize this for your domain
-# Commented out for genericization - this is a reference implementation
-# class YourState(BaseModel):
-#     """State for your specific application"""
-#
-#     user_input: str = ""
-#     ai_response: str = ""
-#     # Add your domain-specific state fields here
+class YourState(BaseModel):
+    user_input: str = ""
+    ai_response: str = ""
+    knowledge_queries: List[KnowledgeQuery] = []
+    last_knowledge_result: Optional[str] = None
 
 
 # ============================================================================

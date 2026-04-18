@@ -16,7 +16,7 @@
 - [x] 3.1 Uncomment and implement `KnowledgeQuery` BaseModel in `agent/src/agent.py` for tracking knowledge base interactions
   **Done when:** `KnowledgeQuery` class is defined with fields: `query: str`, `result: str`, and `timestamp: str`
 
-- [ ] 3.2 Uncomment and implement `YourState` class in `agent/src/agent.py` with `knowledge_queries` and `last_knowledge_result` fields
+- [x] 3.2 Uncomment and implement `YourState` class in `agent/src/agent.py` with `knowledge_queries` and `last_knowledge_result` fields
   **Done when:** `YourState` class is uncommented with fields: `user_input: str = ""`, `ai_response: str = ""`, `knowledge_queries: List[KnowledgeQuery] = []`, and `last_knowledge_result: Optional[str] = None`
 
 - [ ] 3.3 Uncomment and implement `StateDeps` class in `agent/src/agent.py` to wrap `YourState`
