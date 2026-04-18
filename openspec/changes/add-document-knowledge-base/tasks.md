@@ -19,7 +19,7 @@
 - [x] 3.2 Uncomment and implement `YourState` class in `agent/src/agent.py` with `knowledge_queries` and `last_knowledge_result` fields
   **Done when:** `YourState` class is uncommented with fields: `user_input: str = ""`, `ai_response: str = ""`, `knowledge_queries: List[KnowledgeQuery] = []`, and `last_knowledge_result: Optional[str] = None`
 
-- [ ] 3.3 Uncomment and implement `StateDeps` class in `agent/src/agent.py` to wrap `YourState`
+- [x] 3.3 Uncomment and implement `StateDeps` class in `agent/src/agent.py` to wrap `YourState`
   **Done when:** `StateDeps` class is uncommented with `__init__(self, state: YourState)` method that stores the state
 
 - [ ] 3.4 Uncomment and implement the `Agent` instance in `agent/src/agent.py` with appropriate system prompt and `deps_type=StateDeps`
