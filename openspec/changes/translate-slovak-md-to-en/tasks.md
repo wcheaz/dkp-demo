@@ -6,7 +6,7 @@
 
 ## 2. Translation — Batch 1 (67 files, 3 large projects)
 
-- [ ] 2.1 Translate all `.md` files in the following projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
+- [x] 2.1 Translate all `.md` files in the following projects. For each source file, create the `_TRANSLATED.md` companion in the same directory and append a reasoning entry to that directory's `translation-notes.txt`.
 
 Projects:
 - `064IK26A - LŠ_Greguš` (35 files across 7 directories: `Truss Design Variant A/`, `Supporting Documents/PDF ARCH/`, `PDF Building Services/`, `PDF Electrical/`, `PDF Energy Performance/`, `PDF Fire Protection/`, `PDF Structural Engineering/`)
