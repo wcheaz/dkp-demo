@@ -29,21 +29,26 @@
   **Done when:** `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2 (import + render), `grep -c 'YourComponent' src/app/page.tsx` returns 0, `npx tsc --noEmit` exits zero.
   **Stop and hand off if:** `npx tsc --noEmit` fails and the error is in `page.tsx` but the `DesignComponent` import or prop types do not match expectations.
 
-## 5. Agent Tool — Add Design Entry
+## 5. Agent Tool — Comment Out and Fallback to Manual Testing
 
-- [x] 5.1 Add a temporary `add_design_entry` tool to the agent in `agent/src/agent.py` that appends a design entry to state after every agent execution. This requires three changes in `agent/src/agent.py`:
+- [x] 5.1 Comment out the agent-side TEMPORARY changes in `agent/src/agent.py`. The `add_design_entry` tool approach did not work for automatic state propagation, so the code must be disabled without deleting it (preserved for future reference). Specifically:
+  1. Comment out the `DesignEntry` model class (lines ~71-74).
+  2. Comment out the `designs` field on `YourState` (line ~83).
+  3. Comment out the `add_design_entry` tool function (lines ~284-299).
+  4. Remove the `add_design_entry` instruction from the `system_prompt` string (lines ~139-141) — restore the system prompt to end after the existing "cite the source document path" instruction.
+  **Done when:** `grep -c 'add_design_entry' agent/src/agent.py` returns 0 (no active references), the `DesignEntry` class and `designs` field are wrapped in `#` comment lines, the system prompt does NOT reference `add_design_entry`, and `cd agent && python -m ruff check . && python -m mypy .` both exit zero.
+  **Stop and hand off if:** Commenting out `DesignEntry` or `designs` causes import errors in other parts of the agent that reference these symbols.
 
-  1. **Add `DesignEntry` model and `designs` field to `YourState`:** Add a Pydantic `DesignEntry` model with `imageUrl: str` and `promptText: str`. Add `designs: List[DesignEntry] = []` to `YourState`. This field syncs with the frontend's `AgentState.designs` via CopilotKit's shared state (`useCoAgent`).
+- [ ] 5.2 Create a new reusable component `src/components/add-design-button.tsx` that renders a button which, when clicked, appends a test design entry to the designs array. The component SHALL be exported as `AddDesignButton` and accept `{ state: AgentState; setState: (state: AgentState) => void }` props. The button's `onClick` handler SHALL create a `DesignEntry` with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #N"` (where N is `state.designs.length + 1`), then call `setState` with the new entry appended to `state.designs`. The button SHALL use glassmorphism styling consistent with the rest of the UI (`bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-full`). The component is intentionally generic and reusable — it accepts `state`/`setState` props rather than hardcoding state access.
+  **Done when:** File `src/components/add-design-button.tsx` exists, contains `export function AddDesignButton`, contains `import.*AgentState` and `import.*DesignEntry` from `@/lib/types`, contains an `<button>` element, and `npx tsc --noEmit` exits zero.
+  **Stop and hand off if:** `npx tsc --noEmit` fails because `AgentState` or `DesignEntry` are not correctly exported from `@/lib/types`.
 
-  2. **Add `add_design_entry` tool:** Create a new `@agent.tool` function with signature `async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str`. The tool SHALL append `DesignEntry(imageUrl="tmp/next.svg", promptText=prompt_text)` to `ctx.deps.state.designs` and return a confirmation string. The tool's docstring SHALL instruct the agent to call it after every response. Wrap the `DesignEntry` model, the `designs` field, and the tool with `# TEMPORARY` comments marking them for removal when real image generation is integrated.
-
-  3. **Update system prompt:** Append an instruction to the agent's `system_prompt` telling the agent to always call `add_design_entry` with the user's original prompt text after completing every response.
-
-  **Done when:** File `agent/src/agent.py` contains a `DesignEntry` class extending `BaseModel` with fields `imageUrl` and `promptText`, `YourState` contains `designs: List[DesignEntry] = []`, file contains `async def add_design_entry`, file contains `TEMPORARY` comments around the added model/field/tool, the system prompt string contains `add_design_entry`, and `cd agent && python -m ruff check . && python -m mypy .` both exit zero.
-  **Stop and hand off if:** `ruff` or `mypy` fail due to the new `DesignEntry` model or `YourState` change and the error is not resolved after confirming correct Pydantic `BaseModel` syntax and import paths.
+- [ ] 5.3 Integrate `AddDesignButton` into `src/app/page.tsx`. Add import `import { AddDesignButton } from "@/components/add-design-button"`. Render `<AddDesignButton state={state} setState={setState} />` in `YourMainContent`, positioned above the `<DesignComponent>` render. The button and the design list should be stacked vertically within the same container.
+  **Done when:** `grep -c 'AddDesignButton' src/app/page.tsx` returns at least 2 (import + render), `npx tsc --noEmit` exits zero, and the page renders a clickable button above the design list.
+  **Stop and hand off if:** `npx tsc --noEmit` fails because the `AddDesignButton` import does not resolve or prop types mismatch.
 
 ## 6. Final Verification
 
-- [x] 6.1 Run `npx tsc --noEmit && npm run lint` on the frontend and `cd agent && python -m ruff check . && python -m mypy .` on the agent. Confirm all exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'YourComponent' src/app/page.tsx` returns 0, `grep -c 'add_design_entry' agent/src/agent.py` returns at least 2 (definition + system prompt), `grep -c 'TEMPORARY' agent/src/agent.py` returns at least 1.
+- [ ] 6.1 Run `npx tsc --noEmit && npm run lint` on the frontend and `cd agent && python -m ruff check . && python -m mypy .` on the agent. Confirm all exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export function AddDesignButton' src/components/add-design-button.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'AddDesignButton' src/app/page.tsx` returns at least 2, `grep -c 'add_design_entry' agent/src/agent.py` returns 0 (all commented out), `grep -c 'TEMPORARY' agent/src/agent.py` returns at least 1 (preserved comments).
   **Done when:** All four commands exit zero and all grep/test assertions succeed.
   **Stop and hand off if:** Typecheck or lint fails in a file that was not modified by this change (pre-existing issue).
