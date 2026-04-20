@@ -31,6 +31,6 @@
 
 ## 5. Final Verification
 
-- [ ] 5.1 Run `npx tsc --noEmit && npm run lint` across the full codebase and confirm both exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'YourComponent' src/app/page.tsx` returns 0.
+- [x] 5.1 Run `npx tsc --noEmit && npm run lint` across the full codebase and confirm both exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'YourComponent' src/app/page.tsx` returns 0.
   **Done when:** `npx tsc --noEmit` exits zero, `npm run lint` exits zero, all grep/test commands above succeed.
   **Stop and hand off if:** Typecheck or lint fails in a file that was not modified by this change (pre-existing issue).
