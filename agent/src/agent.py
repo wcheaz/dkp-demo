@@ -68,11 +68,19 @@ class KnowledgeQuery(BaseModel):
     timestamp: str
 
 
+# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
+class DesignEntry(BaseModel):
+    imageUrl: str
+    promptText: str
+
+
 class YourState(BaseModel):
     user_input: str = ""
     ai_response: str = ""
     knowledge_queries: List[KnowledgeQuery] = []
     last_knowledge_result: Optional[str] = None
+    # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
+    designs: List[DesignEntry] = []
 
 
 # ============================================================================
@@ -127,7 +135,9 @@ agent = Agent(
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
         "load calculations, materials, truss designs, or engineering specifications.\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
-        "for specific technical queries. When providing answers, always cite the source document path."
+        "for specific technical queries. When providing answers, always cite the source document path.\n\n"
+        "After every response, you MUST call the add_design_entry tool with the user's original "
+        "prompt text to record the design entry in the shared state."
     ),
 )
 
@@ -269,6 +279,24 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
         return summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         return "Knowledge base summary not found. Please contact the administrator."
+
+
+# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated
+@agent.tool
+async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
+    """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
+
+    Args:
+        ctx: Agent context with state
+        prompt_text: The user's original prompt text
+
+    Returns:
+        Confirmation string
+    """
+    ctx.deps.state.designs.append(
+        DesignEntry(imageUrl="tmp/next.svg", promptText=prompt_text)
+    )
+    return f"Design entry added for prompt: {prompt_text}"
 
 
 # ============================================================================
