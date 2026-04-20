@@ -40,7 +40,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                 <img
                   src={entry.imageUrl}
                   alt={entry.promptText}
-                  className="w-[80%] h-[40vh] object-contain cursor-pointer"
+                  className="w-[55%] h-[27vh] object-contain cursor-pointer"
                   onClick={() => setModalImageUrl(entry.imageUrl)}
                 />
               </div>
