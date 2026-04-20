@@ -17,6 +17,7 @@ const eslintConfig = [
       "*.min.css",
       "*.log",
       ".env*",
+      ".backup/**",
     ],
   },
 ];
