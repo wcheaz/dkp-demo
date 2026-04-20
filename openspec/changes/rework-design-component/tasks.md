@@ -4,12 +4,12 @@
   **Done when:** File `src/lib/types.ts` contains `export interface DesignEntry` with fields `imageUrl: string` and `promptText: string`, contains `export type AgentState` with field `designs: DesignEntry[]`, does NOT contain `YourDataType`, and `npx tsc --noEmit` exits zero.
   **Stop and hand off if:** TypeScript compilation fails and the error is not caused by this change (e.g., pre-existing errors in unrelated files).
 
-- [ ] 1.2 Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx` using `git mv`.
+- [x] 1.2 Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx` using `git mv`.
   **Done when:** `test -f src/components/design-component.tsx` succeeds, `test -f src/components/procurement-codes.tsx` fails, and `git status` shows the rename.
 
 ## 2. Component Rewrite — Core Structure and Scrollable List
 
-- [ ] 2.1 Rewrite `src/components/design-component.tsx`: remove all `xlsx` imports, remove `ProcurementCodesProps` interface, remove all download handlers (TXT, CSV, XLSX), remove the delete button per entry, remove the old `ProcurementCodes` export. Add new `DesignComponentProps` interface with `{ state: AgentState; setState: (state: AgentState) => void }`. Export a named `DesignComponent` function component. The component body can return a placeholder `<div>` for now — the render details are in task 2.2.
+- [x] 2.1 Rewrite `src/components/design-component.tsx`: remove all `xlsx` imports, remove `ProcurementCodesProps` interface, remove all download handlers (TXT, CSV, XLSX), remove the delete button per entry, remove the old `ProcurementCodes` export. Add new `DesignComponentProps` interface with `{ state: AgentState; setState: (state: AgentState) => void }`. Export a named `DesignComponent` function component. The component body can return a placeholder `<div>` for now — the render details are in task 2.2.
   **Done when:** File `src/components/design-component.tsx` does NOT contain `import.*xlsx`, does NOT contain `ProcurementCodesProps`, does NOT contain `handleDownload`, does NOT contain `handleDownloadCSV`, does NOT contain `handleDownloadExcel`, does NOT contain `handleDownloadText`, does NOT contain `ProcurementCodes` export. File DOES contain `export function DesignComponent` and `DesignComponentProps`. `npx tsc --noEmit` exits zero.
   **Stop and hand off if:** `npx tsc --noEmit` fails and the error is in this file but the cause is unclear from the error message.
 
