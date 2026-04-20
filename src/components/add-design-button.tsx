@@ -9,7 +9,7 @@ export function AddDesignButton({ state, setState }: AddDesignButtonProps) {
   const handleClick = () => {
     const nextCount = (state.designs?.length ?? 0) + 1;
     const newEntry: DesignEntry = {
-      imageUrl: "tmp/next.svg",
+      imageUrl: "/next.svg",
       promptText: `Test design #${nextCount}`,
     };
     setState({

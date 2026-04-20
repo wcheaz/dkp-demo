@@ -99,6 +99,24 @@ No external modal library is used.
 
 **Rationale**: The design list is append-only — entries are added as the AI agent completes prompts. Removing entries is not part of the current workflow. If deletion is needed later, it should be a separate change.
 
+### D8: Agent tool for appending design entries — temporary `add_design_entry`
+
+**Decision**: Add a Pydantic `DesignEntry` model (mirroring the frontend's `DesignEntry` interface with `imageUrl: str` and `promptText: str`) and a `designs: List[DesignEntry] = []` field to `YourState` in `agent/src/agent.py`. Add a temporary `@agent.tool` function `add_design_entry(ctx, prompt_text)` that appends `DesignEntry(imageUrl="tmp/next.svg", promptText=prompt_text)` to `ctx.deps.state.designs`. Update the agent's `system_prompt` to instruct the agent to call `add_design_entry` with the user's original prompt text after every response. All additions are wrapped in `# TEMPORARY` comments marking them for removal when real image generation is integrated.
+
+**Rationale**: The component renders from `state.designs`, which is shared between frontend and agent via CopilotKit's `useCoAgent` hook. The agent needs a way to populate this array. A `@agent.tool` is the idiomatic PydanticAI approach — the agent decides when to call it, guided by the system prompt. The tool is temporary because it hardcodes `imageUrl="tmp/next.svg"` instead of producing a real diagram. When image generation is integrated, this tool will be replaced with one that produces or receives an actual image URL.
+
+**Alternative considered**: Use a `@agent.result_validator` to automatically append an entry after every response. Rejected because result validators are for post-processing output, not for triggering side effects on state. A tool gives the agent explicit control and a clear docstring to follow. Alternative considered: Call `setState` directly from the frontend after each agent response. Rejected because the state is shared — the agent should own the append logic to keep the data flow unidirectional (agent → state → frontend render).
+
+**Update:** The agent tool approach did not work — the state changes from the agent-side `add_design_entry` tool did not propagate to the frontend as expected. The agent-side code is commented out and preserved for future reference.
+
+### D9: Fallback — frontend `AddDesignButton` component for manual testing
+
+**Decision**: Create a reusable `AddDesignButton` component in `src/components/add-design-button.tsx` that, when clicked, appends a test `DesignEntry` to the shared state. The component accepts `{ state, setState }` props and creates an entry with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #N"`. It is rendered above the design list in `page.tsx`. The component is intentionally generic (accepting state/setState props) so it can be reused for other testing scenarios.
+
+**Rationale**: The agent tool approach failed, so a manual frontend button provides a deterministic way to test the design display component without depending on agent state propagation. Making it a separate component rather than inline logic in `page.tsx` allows reuse — for example, placing it in different layouts or using it in other test pages.
+
+**Alternative considered**: Add the button directly inside `DesignComponent`. Rejected because `DesignComponent` is the display component and should not own mutation logic. Keeping the button separate maintains single-responsibility.
+
 ## Risks / Trade-offs
 
 - **[Array index as React key]** → If designs are ever reordered or filtered, array-index keys will cause incorrect reconciliation. Mitigation: the list is append-only for now. If reordering is added later, introduce an `id` field at that time.
@@ -113,8 +131,9 @@ No external modal library is used.
 2. Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx`.
 3. Rewrite the component file with the new `DesignComponent` export, scrollable list, standard image sizing, and modal.
 4. Replace `<YourComponent>` with `<DesignComponent>` in `src/app/page.tsx` (import + JSX render only; state shape already aligned).
-5. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
-6. Verify image click opens the modal and Escape/backdrop click dismisses it.
+5. Add `DesignEntry` model, `designs` field, `add_design_entry` tool, and system prompt update to `agent/src/agent.py` (all marked TEMPORARY).
+6. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
+7. Verify image click opens the modal and Escape/backdrop click dismisses it.
 
 No rollback strategy is needed — the old component is unused and the old types are not referenced at runtime.
 

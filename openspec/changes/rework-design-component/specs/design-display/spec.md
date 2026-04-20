@@ -107,6 +107,36 @@ The component SHALL render the `designs` array as a read-only display. The compo
 - **WHEN** `src/app/page.tsx` is rendered in the browser
 - **THEN** the page SHALL render `<DesignComponent>` with `state` and `setState` props, and SHALL NOT render `<YourComponent>`.
 
+### Requirement: Agent tool code is commented out and preserved
+The `DesignEntry` model, `designs` field on `YourState`, and `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The agent's `system_prompt` SHALL NOT reference `add_design_entry`. This code is preserved for future reference when real image generation is integrated.
+
+#### Scenario: Agent code is commented out
+- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
+- **THEN** the `DesignEntry` class, `designs` field, and `add_design_entry` function SHALL be present but commented out.
+- **AND** the `system_prompt` string SHALL NOT contain `add_design_entry`.
+
+#### Scenario: Agent passes lint and typecheck
+- **WHEN** `cd agent && python -m ruff check . && python -m mypy .` is run
+- **THEN** both commands SHALL exit zero with no errors.
+
+### Requirement: AddDesignButton component appends test entries
+A reusable `AddDesignButton` component SHALL be exported from `src/components/add-design-button.tsx`. It SHALL accept `{ state: AgentState; setState: (state: AgentState) => void }` props. When clicked, the button SHALL append a `DesignEntry` with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #N"` (where N is the new total count) to `state.designs` via `setState`. The component is intentionally generic for reuse in other contexts.
+
+#### Scenario: Button click appends entry
+- **WHEN** the user clicks the `AddDesignButton` and the current `state.designs` has 0 entries
+- **THEN** `setState` SHALL be called with a new state where `designs` contains one entry with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #1"`.
+
+#### Scenario: Multiple clicks append multiple entries
+- **WHEN** the user clicks `AddDesignButton` three times
+- **THEN** `state.designs` SHALL contain three entries with prompt texts "Test design #1", "Test design #2", and "Test design #3", in order.
+
+### Requirement: AddDesignButton is rendered in the frontend page
+`src/app/page.tsx` SHALL import and render `AddDesignButton` above the `DesignComponent` render within `YourMainContent`. The button SHALL receive `state` and `setState` as props.
+
+#### Scenario: Page imports and renders AddDesignButton
+- **WHEN** `src/app/page.tsx` is inspected
+- **THEN** the file SHALL contain `import { AddDesignButton } from "@/components/add-design-button"` and SHALL render `<AddDesignButton state={state} setState={setState} />` above `<DesignComponent>`.
+
 ### Requirement: Test images resolve to tmp/next.svg
 During testing, all `DesignEntry` instances SHALL have their `imageUrl` set to `"tmp/next.svg"`. This ensures deterministic rendering without depending on external image generation.
 

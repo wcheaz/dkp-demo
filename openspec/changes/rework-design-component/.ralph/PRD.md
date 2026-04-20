@@ -16,6 +16,7 @@ The current `src/components/procurement-codes.tsx` component is unused and imple
 - Add image display support: each `DesignEntry` renders an `<img>` element sourced from a URL/path. During testing, all image sources resolve to `tmp/next.svg`. The component must accept standard image formats (jpg, jpeg, png, gif, svg, webp, bmp).
 - Add prompt text display: each `DesignEntry` renders the user prompt text below its image as a description/caption.
 - Add append behavior: when the AI agent finishes processing a prompt, the calling code appends a new `DesignEntry` to the `designs` array, which causes a new card to appear in the component's list.
+- Add a temporary agent tool (`add_design_entry`) in `agent/src/agent.py` that appends a `DesignEntry` to the shared agent state after every agent execution. The tool is temporary (marked with comments) and will be replaced when real image generation is integrated. The agent state (`YourState`) needs a `designs` field to sync with the frontend's `AgentState.designs` via CopilotKit's shared state. **Update:** The agent tool approach did not work for automatic state propagation. The agent-side code is commented out and preserved for future reference. Instead, a reusable `AddDesignButton` component is added to the frontend for manual testing — clicking the button appends a test design entry with `imageUrl: "tmp/next.svg"` and generic prompt text.
 - Integrate `DesignComponent` into the frontend page (`src/app/page.tsx`), replacing the existing `<YourComponent>` render. The `useCoAgent` hook already initializes `designs: []` and `useCopilotReadable` already reads `state.designs`, so only the import and JSX render need to change.
 - Remove individual entry deletion buttons (the procurement-codes pattern of per-item remove). This is a growing list, not a managed list.
 - Add scrollable container: the list of design cards SHALL be wrapped in a scrollable container so that multiple designs are visible at once and the user can scroll to see earlier entries.
@@ -34,7 +35,7 @@ _(None — no existing specs are being modified.)_
 
 ## Impact
 
-- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types), `src/app/page.tsx` (replace `<YourComponent>` with `<DesignComponent>`).
+- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types), `src/app/page.tsx` (replace `<YourComponent>` with `<DesignComponent>`, add `<AddDesignButton>`), `src/components/add-design-button.tsx` (new reusable component), `agent/src/agent.py` (agent tool additions commented out, preserved for reference).
 - **Dependencies removed**: `xlsx` import in the component (the library may still be used elsewhere).
 - **Dependencies added**: None — the modal is implemented with plain React state and CSS (no external modal library).
 - **Breaking change**: Any code importing `ProcurementCodes` or `procurement_codes` state must be updated. Currently no code imports the component or references that state field, so migration impact is zero.
@@ -174,6 +175,36 @@ The component SHALL render the `designs` array as a read-only display. The compo
 - **WHEN** `src/app/page.tsx` is rendered in the browser
 - **THEN** the page SHALL render `<DesignComponent>` with `state` and `setState` props, and SHALL NOT render `<YourComponent>`.
 
+### Requirement: Agent tool code is commented out and preserved
+The `DesignEntry` model, `designs` field on `YourState`, and `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The agent's `system_prompt` SHALL NOT reference `add_design_entry`. This code is preserved for future reference when real image generation is integrated.
+
+#### Scenario: Agent code is commented out
+- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
+- **THEN** the `DesignEntry` class, `designs` field, and `add_design_entry` function SHALL be present but commented out.
+- **AND** the `system_prompt` string SHALL NOT contain `add_design_entry`.
+
+#### Scenario: Agent passes lint and typecheck
+- **WHEN** `cd agent && python -m ruff check . && python -m mypy .` is run
+- **THEN** both commands SHALL exit zero with no errors.
+
+### Requirement: AddDesignButton component appends test entries
+A reusable `AddDesignButton` component SHALL be exported from `src/components/add-design-button.tsx`. It SHALL accept `{ state: AgentState; setState: (state: AgentState) => void }` props. When clicked, the button SHALL append a `DesignEntry` with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #N"` (where N is the new total count) to `state.designs` via `setState`. The component is intentionally generic for reuse in other contexts.
+
+#### Scenario: Button click appends entry
+- **WHEN** the user clicks the `AddDesignButton` and the current `state.designs` has 0 entries
+- **THEN** `setState` SHALL be called with a new state where `designs` contains one entry with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #1"`.
+
+#### Scenario: Multiple clicks append multiple entries
+- **WHEN** the user clicks `AddDesignButton` three times
+- **THEN** `state.designs` SHALL contain three entries with prompt texts "Test design #1", "Test design #2", and "Test design #3", in order.
+
+### Requirement: AddDesignButton is rendered in the frontend page
+`src/app/page.tsx` SHALL import and render `AddDesignButton` above the `DesignComponent` render within `YourMainContent`. The button SHALL receive `state` and `setState` as props.
+
+#### Scenario: Page imports and renders AddDesignButton
+- **WHEN** `src/app/page.tsx` is inspected
+- **THEN** the file SHALL contain `import { AddDesignButton } from "@/components/add-design-button"` and SHALL render `<AddDesignButton state={state} setState={setState} />` above `<DesignComponent>`.
+
 ### Requirement: Test images resolve to tmp/next.svg
 During testing, all `DesignEntry` instances SHALL have their `imageUrl` set to `"tmp/next.svg"`. This ensures deterministic rendering without depending on external image generation.
 
@@ -286,6 +317,24 @@ No external modal library is used.
 
 **Rationale**: The design list is append-only — entries are added as the AI agent completes prompts. Removing entries is not part of the current workflow. If deletion is needed later, it should be a separate change.
 
+### D8: Agent tool for appending design entries — temporary `add_design_entry`
+
+**Decision**: Add a Pydantic `DesignEntry` model (mirroring the frontend's `DesignEntry` interface with `imageUrl: str` and `promptText: str`) and a `designs: List[DesignEntry] = []` field to `YourState` in `agent/src/agent.py`. Add a temporary `@agent.tool` function `add_design_entry(ctx, prompt_text)` that appends `DesignEntry(imageUrl="tmp/next.svg", promptText=prompt_text)` to `ctx.deps.state.designs`. Update the agent's `system_prompt` to instruct the agent to call `add_design_entry` with the user's original prompt text after every response. All additions are wrapped in `# TEMPORARY` comments marking them for removal when real image generation is integrated.
+
+**Rationale**: The component renders from `state.designs`, which is shared between frontend and agent via CopilotKit's `useCoAgent` hook. The agent needs a way to populate this array. A `@agent.tool` is the idiomatic PydanticAI approach — the agent decides when to call it, guided by the system prompt. The tool is temporary because it hardcodes `imageUrl="tmp/next.svg"` instead of producing a real diagram. When image generation is integrated, this tool will be replaced with one that produces or receives an actual image URL.
+
+**Alternative considered**: Use a `@agent.result_validator` to automatically append an entry after every response. Rejected because result validators are for post-processing output, not for triggering side effects on state. A tool gives the agent explicit control and a clear docstring to follow. Alternative considered: Call `setState` directly from the frontend after each agent response. Rejected because the state is shared — the agent should own the append logic to keep the data flow unidirectional (agent → state → frontend render).
+
+**Update:** The agent tool approach did not work — the state changes from the agent-side `add_design_entry` tool did not propagate to the frontend as expected. The agent-side code is commented out and preserved for future reference.
+
+### D9: Fallback — frontend `AddDesignButton` component for manual testing
+
+**Decision**: Create a reusable `AddDesignButton` component in `src/components/add-design-button.tsx` that, when clicked, appends a test `DesignEntry` to the shared state. The component accepts `{ state, setState }` props and creates an entry with `imageUrl: "tmp/next.svg"` and `promptText: "Test design #N"`. It is rendered above the design list in `page.tsx`. The component is intentionally generic (accepting state/setState props) so it can be reused for other testing scenarios.
+
+**Rationale**: The agent tool approach failed, so a manual frontend button provides a deterministic way to test the design display component without depending on agent state propagation. Making it a separate component rather than inline logic in `page.tsx` allows reuse — for example, placing it in different layouts or using it in other test pages.
+
+**Alternative considered**: Add the button directly inside `DesignComponent`. Rejected because `DesignComponent` is the display component and should not own mutation logic. Keeping the button separate maintains single-responsibility.
+
 ## Risks / Trade-offs
 
 - **[Array index as React key]** → If designs are ever reordered or filtered, array-index keys will cause incorrect reconciliation. Mitigation: the list is append-only for now. If reordering is added later, introduce an `id` field at that time.
@@ -300,8 +349,9 @@ No external modal library is used.
 2. Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx`.
 3. Rewrite the component file with the new `DesignComponent` export, scrollable list, standard image sizing, and modal.
 4. Replace `<YourComponent>` with `<DesignComponent>` in `src/app/page.tsx` (import + JSX render only; state shape already aligned).
-5. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
-6. Verify image click opens the modal and Escape/backdrop click dismisses it.
+5. Add `DesignEntry` model, `designs` field, `add_design_entry` tool, and system prompt update to `agent/src/agent.py` (all marked TEMPORARY).
+6. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
+7. Verify image click opens the modal and Escape/backdrop click dismisses it.
 
 No rollback strategy is needed — the old component is unused and the old types are not referenced at runtime.
 
@@ -312,7 +362,7 @@ _(None — all design decisions are resolved.)_
 ## Current Task Context
 
 ## Current Task
-- 5.1 Run `npx tsc --noEmit && npm run lint` across the full codebase and confirm both exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'YourComponent' src/app/page.tsx` returns 0.
+- 5.1 Comment out the agent-side TEMPORARY changes in `agent/src/agent.py`. The `add_design_entry` tool approach did not work for automatic state propagation, so the code must be disabled without deleting it (preserved for future reference). Specifically:
 ## Completed Tasks for Git Commit
 - [x] 1.1 Update `src/lib/types.ts`: remove `YourDataType` and the old `AgentState` definition. Add exported `DesignEntry` interface with `imageUrl: string` and `promptText: string`. Redefine `AgentState` as `{ designs: DesignEntry[] }`.
 - [x] 1.2 Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx` using `git mv`.

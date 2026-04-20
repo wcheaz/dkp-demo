@@ -10,6 +10,7 @@ The current `src/components/procurement-codes.tsx` component is unused and imple
 - Add image display support: each `DesignEntry` renders an `<img>` element sourced from a URL/path. During testing, all image sources resolve to `tmp/next.svg`. The component must accept standard image formats (jpg, jpeg, png, gif, svg, webp, bmp).
 - Add prompt text display: each `DesignEntry` renders the user prompt text below its image as a description/caption.
 - Add append behavior: when the AI agent finishes processing a prompt, the calling code appends a new `DesignEntry` to the `designs` array, which causes a new card to appear in the component's list.
+- Add a temporary agent tool (`add_design_entry`) in `agent/src/agent.py` that appends a `DesignEntry` to the shared agent state after every agent execution. The tool is temporary (marked with comments) and will be replaced when real image generation is integrated. The agent state (`YourState`) needs a `designs` field to sync with the frontend's `AgentState.designs` via CopilotKit's shared state. **Update:** The agent tool approach did not work for automatic state propagation. The agent-side code is commented out and preserved for future reference. Instead, a reusable `AddDesignButton` component is added to the frontend for manual testing — clicking the button appends a test design entry with `imageUrl: "tmp/next.svg"` and generic prompt text.
 - Integrate `DesignComponent` into the frontend page (`src/app/page.tsx`), replacing the existing `<YourComponent>` render. The `useCoAgent` hook already initializes `designs: []` and `useCopilotReadable` already reads `state.designs`, so only the import and JSX render need to change.
 - Remove individual entry deletion buttons (the procurement-codes pattern of per-item remove). This is a growing list, not a managed list.
 - Add scrollable container: the list of design cards SHALL be wrapped in a scrollable container so that multiple designs are visible at once and the user can scroll to see earlier entries.
@@ -28,7 +29,7 @@ _(None — no existing specs are being modified.)_
 
 ## Impact
 
-- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types), `src/app/page.tsx` (replace `<YourComponent>` with `<DesignComponent>`).
+- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types), `src/app/page.tsx` (replace `<YourComponent>` with `<DesignComponent>`, add `<AddDesignButton>`), `src/components/add-design-button.tsx` (new reusable component), `agent/src/agent.py` (agent tool additions commented out, preserved for reference).
 - **Dependencies removed**: `xlsx` import in the component (the library may still be used elsewhere).
 - **Dependencies added**: None — the modal is implemented with plain React state and CSS (no external modal library).
 - **Breaking change**: Any code importing `ProcurementCodes` or `procurement_codes` state must be updated. Currently no code imports the component or references that state field, so migration impact is zero.

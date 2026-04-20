@@ -11,6 +11,7 @@
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
 import { DesignComponent } from "@/components/design-component";
+import { AddDesignButton } from "@/components/add-design-button";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
@@ -316,6 +317,7 @@ function YourMainContent({
       style={{}}
       className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
     >
+      <AddDesignButton state={state} setState={setState} />
       <DesignComponent state={state} setState={setState} />
     </div>
   );
