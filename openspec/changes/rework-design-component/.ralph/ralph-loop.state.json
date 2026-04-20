@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 10,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/rework-design-component/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/rework-design-component/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/rework-design-component/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-20T17:39:51.255Z",
+  "resumedAt": "2026-04-20T17:39:51.255Z",
+  "completedAt": "2026-04-20T17:40:21.539Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}

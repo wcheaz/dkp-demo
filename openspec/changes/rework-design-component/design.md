@@ -112,8 +112,9 @@ No external modal library is used.
 1. Update `src/lib/types.ts` with the new `DesignEntry` and `AgentState` types.
 2. Rename `src/components/procurement-codes.tsx` to `src/components/design-component.tsx`.
 3. Rewrite the component file with the new `DesignComponent` export, scrollable list, standard image sizing, and modal.
-4. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
-5. Verify image click opens the modal and Escape/backdrop click dismisses it.
+4. Replace `<YourComponent>` with `<DesignComponent>` in `src/app/page.tsx` (import + JSX render only; state shape already aligned).
+5. Verify the component renders correctly with empty state and with populated entries using `tmp/next.svg`.
+6. Verify image click opens the modal and Escape/backdrop click dismisses it.
 
 No rollback strategy is needed — the old component is unused and the old types are not referenced at runtime.
 

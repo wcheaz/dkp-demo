@@ -96,6 +96,17 @@ The component SHALL render the `designs` array as a read-only display. The compo
 - **WHEN** external code calls `setState` with a new `AgentState` where `designs` is `[...existingDesigns, newEntry]`
 - **THEN** the component SHALL re-render showing all previous entries plus the new entry at the end of the list.
 
+### Requirement: DesignComponent is rendered in the frontend page
+`src/app/page.tsx` SHALL import and render `DesignComponent` instead of `YourComponent`. The `<YourComponent>` reference SHALL be replaced with `<DesignComponent state={state} setState={setState} />`. The old `YourComponent` import SHALL be removed.
+
+#### Scenario: Page imports DesignComponent
+- **WHEN** `src/app/page.tsx` is inspected
+- **THEN** the file SHALL contain `import { DesignComponent } from "@/components/design-component"` and SHALL NOT contain `import.*YourComponent`.
+
+#### Scenario: Page renders DesignComponent
+- **WHEN** `src/app/page.tsx` is rendered in the browser
+- **THEN** the page SHALL render `<DesignComponent>` with `state` and `setState` props, and SHALL NOT render `<YourComponent>`.
+
 ### Requirement: Test images resolve to tmp/next.svg
 During testing, all `DesignEntry` instances SHALL have their `imageUrl` set to `"tmp/next.svg"`. This ensures deterministic rendering without depending on external image generation.
 

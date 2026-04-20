@@ -10,6 +10,7 @@ The current `src/components/procurement-codes.tsx` component is unused and imple
 - Add image display support: each `DesignEntry` renders an `<img>` element sourced from a URL/path. During testing, all image sources resolve to `tmp/next.svg`. The component must accept standard image formats (jpg, jpeg, png, gif, svg, webp, bmp).
 - Add prompt text display: each `DesignEntry` renders the user prompt text below its image as a description/caption.
 - Add append behavior: when the AI agent finishes processing a prompt, the calling code appends a new `DesignEntry` to the `designs` array, which causes a new card to appear in the component's list.
+- Integrate `DesignComponent` into the frontend page (`src/app/page.tsx`), replacing the existing `<YourComponent>` render. The `useCoAgent` hook already initializes `designs: []` and `useCopilotReadable` already reads `state.designs`, so only the import and JSX render need to change.
 - Remove individual entry deletion buttons (the procurement-codes pattern of per-item remove). This is a growing list, not a managed list.
 - Add scrollable container: the list of design cards SHALL be wrapped in a scrollable container so that multiple designs are visible at once and the user can scroll to see earlier entries.
 - Add standard image sizing: each image in a card SHALL be sized to 80% (4/5ths) of the card's natural width, with a height of approximately 40% (2/5ths) of the viewport height. Images SHALL scale proportionally within these bounds.
@@ -27,7 +28,7 @@ _(None — no existing specs are being modified.)_
 
 ## Impact
 
-- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types).
+- **Files modified**: `src/components/procurement-codes.tsx` (renamed to `design-component.tsx`, heavily rewritten), `src/lib/types.ts` (new types, removed old types), `src/app/page.tsx` (replace `<YourComponent>` with `<DesignComponent>`).
 - **Dependencies removed**: `xlsx` import in the component (the library may still be used elsewhere).
 - **Dependencies added**: None — the modal is implemented with plain React state and CSS (no external modal library).
 - **Breaking change**: Any code importing `ProcurementCodes` or `procurement_codes` state must be updated. Currently no code imports the component or references that state field, so migration impact is zero.
