@@ -3,18 +3,33 @@ schema: spec-driven
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: Python 3.12+, Pydantic AI, Uvicorn, Logfire, python-dotenv, LlamaIndex
+  We follow PEP 8 standards with strict typing
+  All development and testing files must be placed in the test/ directory at project root
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Keep proposals concise and focused
+    - Always include a "Non-goals" section
+
+  design:
+    - Include clear decision rationale
+    - Document trade-offs and alternatives
+
+  tasks:
+    - Break tasks into chunks that can be completed in 2 hours or less
+    - "CRITICAL FILE PLACEMENT RULE: When creating test files (test*.py, debug*.py, check*.py, measure*.py, performance*.py, verify*.py, validate*.py), place them in the test/ directory at project root (/home/ncheaz/git/dkp-demo/test/)"
+    - "FORBIDDEN: DO NOT create test files in the change directory (openspec/changes/...), agent/ directory, or project root"
+    - Follow naming conventions: test_*.py, debug_*.py, check_*.py, measure_*.py, performance_*.py, verify_*.py, or validate_*.py
+    - Before marking a task complete, verify test files are in test/ directory
+    - "Examples: Task \"Write unit tests for component extraction\" - Create test/test_component_extraction_clear_inputs.py"
+    - "CRITICAL DOCUMENTATION PLACEMENT RULE: When creating .md documentation files (SUMMARY.md, ANNOUNCEMENT.md, DOCUMENTATION.md, etc.), place them in the ralph-docs/ directory at project root (/home/ncheaz/git/dkp-demo/ralph-docs/)"
+    - "FORBIDDEN: DO NOT create .md documentation files in the project root (except for core files: README.md, CHANGELOG.md, SETUP.md, TESTING.md, DEPENDENCIES.md, deploy_log.md)"
+    - "Examples: Task \"Create deployment summary\" - Create ralph-docs/DEPLOYMENT_SUMMARY.md"
+
+  specs:
+    - Use clear, testable requirements
+    - Include scenarios with GIVEN-WHEN-THEN format

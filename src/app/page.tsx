@@ -1,5 +1,15 @@
 "use client";
 
+// Commented out for genericization - this imports a procurement-specific component
+// import { ProcurementCodes } from "@/components/procurement-codes";
+
+// To integrate your custom components:
+// 1. Create your component in src/components/your-component.tsx
+// 2. Import it here
+// 3. Render it in YourMainContent with appropriate props
+// Example:
+// import { YourCustomComponent } from "@/components/your-custom-component";
+
 import { YourComponent } from "@/components/your-component";
 import { AgentState } from "@/lib/types";
 import {
@@ -49,6 +59,10 @@ export default function CopilotKitPage() {
           {
             title: "Get Started",
             message: "How can you help me?",
+          },
+          {
+            title: "What do you know?",
+            message: "What do you know?",
           },
         ]}
         Input={CustomInput}

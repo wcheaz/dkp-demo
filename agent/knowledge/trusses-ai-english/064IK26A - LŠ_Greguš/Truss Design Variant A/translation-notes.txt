@@ -1,0 +1,47 @@
+Directory: 064IK26A - LŠ_Greguš/Truss Design Variant A
+===
+[not translated] 064IK26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 064IK26A.material.md → 064IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote: Czech term for price quotation
+- Zakázka → Order: standard construction industry term
+- Zákazník → Customer: standard business term
+- Výpis řeziva dle skladových → Lumber list by stock items: timber inventory report
+- Kvalita → Grade, Tl. → Th., Š. → W., Celk. Dl. → Total L., Celk. Kub. → Total Vol.: dimensional abbreviations
+- Celkem → Total: standard summation
+- Cena bez DPH → Price excl. VAT: financial term
+- Údaje o střeše → Roof data: section header for roof specifications
+- Celková půdorysná plocha pod střechou → Total floor plan area under roof: measurement description
+- Celková střešní plocha → Total roof area: measurement description
+- Půdorysná plocha uvnitř/mimo budovu → Floor plan area inside/outside building: measurement descriptions
+- Délka okapu → Eave length, Délka pozednice → Sole plate length: structural measurements
+- Délka valbových linií → Hip line length: hip roof measurement
+- Délka úžlabních linií → Valley line length: valley measurement
+- Délka hřebenu (sedlový/pultový) → Ridge length (gable/mono-pitch): roof ridge types
+- Délka ztužení → Bracing length: structural bracing
+- Celkové rozpětí vazníků → Total truss span: truss engineering term
+- Celkový počet vazníků → Total truss count: quantity count
+- Styčníkové desky → Gusset plates: structural connector plates
+- Pomurnica → Wall plate: top wall plate timber
+- Kubatura → Volume: volume measurement
+- Zavětrování → Bracing: structural bracing
+- Závěs → Hanger: structural hanger
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: drawing annotations
+- Zaťaženie konštrukcie → Structural load: Slovak structural engineering header
+- Stále zaťaženie strechy → Permanent roof load: dead load on roof
+- Stále zaťaženie stropu → Permanent ceiling load: dead load on ceiling
+- Zaťaženie snehom → Snow load: environmental load
+- Zaťaženie vetrom → Wind load: environmental load
+- Podpory pre väzník → Truss support: support conditions
+- Priečky → Partitions: internal walls, translated as partitions
+- Úložný priestor → Storage space: attic storage designation
+- Úžitkové zaťaženie → Live load: standard structural engineering term
+- KRESLIL → DRAWN BY, KONTR. → CHECKED, MĚŘÍTKO → SCALE: title block fields
+- STRANA → SHEET, OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION: title block fields
+- ČÍSLO ZAKÁZKY → ORDER NUMBER, ČÍSLO VÝKRESU → DRAWING NUMBER: title block fields
+- Navrhl medop strechy s.r.o. → Designed by medop strechy s.r.o.: proper noun preserved

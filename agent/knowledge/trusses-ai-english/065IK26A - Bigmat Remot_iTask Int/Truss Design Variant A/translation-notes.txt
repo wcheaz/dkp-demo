@@ -1,0 +1,23 @@
+Directory: Truss Design Variant A
+===
+[not translated] 065IK26A.material.pdf — project code identifier, preserved as-is
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+
+---
+Content translation: 065IK26A.material.md → 065IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer
+- valba → hip roof: roof type designation
+- pomurnica → wall plate, zavětrování → bracing
+- All standard glossary terms applied for roof data section
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD
+- STÁLE ZAŤAŽENIE STRECHY/STROPU → PERMANENT ROOF/CEILING LOAD
+- ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT
+- ÚLOŽNÝ PRIESTOR → STORAGE SPACE
+- Stále zaťaženie → Permanent load, Úžitkové zaťaženie → Live load
+- Title block translations per glossary

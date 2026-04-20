@@ -1,0 +1,21 @@
+Directory: 040IK26A - Kišš/Truss Design Variant A
+===
+[not translated] 040IK26A.material.pdf — project code material PDF, preserved as-is
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 040IK26A.material.md → 040IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer (glossary terms)
+- sedlo → gable (glossary), pomurnica → wall plate (glossary)
+- Délka hřebenu (sedlový/pultový) → Ridge length (gable/mono-pitch) (glossary)
+- Kubatura nezahrnuje konstrukci podélného zavětrování → Volume does not include longitudinal bracing structure
+- styčníkové desky → gusset plates, závěsů → hanger list (glossary terms)
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD, STÁLE ZAŤAŽENIE → PERMANENT LOAD (glossary)
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT, ÚLOŽNÝ PRIESTOR → STORAGE SPACE (glossary)
+- KRESLIL/KONTR. → DRAWN/CHECKED, ČÍSLO ZAKÁZKY → ORDER NUMBER
+- OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION, ČÍSLO VÝKRESU → DRAWING NUMBER
+- Navrhl → Designed by (attribution line, company name preserved verbatim)
+- ALL-CAPS preserved for load values and structural annotations

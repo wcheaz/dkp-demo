@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 45,
+  "minIterations": 1,
+  "maxIterations": 60,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-slovak-md-to-en/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-slovak-md-to-en/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/translate-slovak-md-to-en/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-17T23:59:04.937Z",
+  "resumedAt": "2026-04-17T23:59:04.937Z",
+  "completedAt": "2026-04-18T00:06:01.584Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}

@@ -1,0 +1,45 @@
+Directory: Truss Design Variant A
+===
+057IK26A.material.pdf → 057IK26A.material.pdf [not translated — project code identifier]
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+
+---
+Content translation: 057IK26A.material.md → 057IK26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote: standard commercial term
+- Zakázka → Order: project order reference
+- Zákazník → Customer: client reference
+- Výpis řeziva dle skladových → Lumber list by stock items: material inventory heading
+- pult → mono-pitch: roof type designation
+- pomurnica → wall plate: structural timber component
+- zavětrování → bracing: structural stabilization
+- styčníkové desky → gusset plates: joint connector plates
+- Kubatura → Volume: lumber volume measurement
+- Údaje o střeše → Roof data: roof specification section header
+- Celková půdorysná plocha pod střechou → Total floor plan area under roof
+- Celková střešní plocha → Total roof area
+- Půdorysná plocha uvnitř/mimo budovu → Floor plan area inside/outside building
+- Délka okapu → Eave length, Délka pozednice → Sole plate length
+- Délka valbových linií → Hip line length, Délka úžlabních linií → Valley line length
+- Délka hřebenu (sedlový/pultový) → Ridge length (gable/mono-pitch)
+- Délka ztužení → Bracing length
+- Celkové rozpětí vazníků → Total truss span
+- Celkový počet vazníků → Total truss count
+- Styčník → Joint, dřevěných prvků → timber elements
+- Závěs → Hanger, Výpis závěsů → Hanger list
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: drawing annotation header
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD: engineering section header
+- STÁLE ZAŤAŽENIE STRECHY/STROPU → PERMANENT ROOF/CEILING LOAD: load categories
+- ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT: support specification header
+- VŠETKY STENY A PRIEVLAKY → ALL WALLS AND BEAMS: structural support description
+- PRIEČKY → PARTITION WALLS: internal wall designation
+- ÚLOŽNÝ PRIESTOR → STORAGE SPACE: attic storage designation
+- Stále zaťaženie → Permanent load, Úžitkové zaťaženie → Live load
+- PODLAHA → FLOOR: floor load specification
+- Title block: KRESLIL → DRAWN BY, KONTR. → CHECKED, MĚŘÍTKO → SCALE
+- STRANA → SHEET, OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION
+- ČÍSLO ZAKÁZKY → ORDER NUMBER, ČÍSLO VÝKRESU → DRAWING NUMBER, PRO → FOR

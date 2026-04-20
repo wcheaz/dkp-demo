@@ -1,0 +1,84 @@
+Directory: Supporting Documents
+===
+C1 KOORDINAČNÁ SITUÁCIA.pdf → C1 Coordination Site Plan.pdf
+E2 PÔDORYS ZÁKLADOV.pdf → E2 Floor Plan Foundations.pdf
+E3 1. NADZEMNÉ PODLAŽIE.pdf → E3 1st Floor.pdf
+E4 PÔDOYRS  STRECHY.pdf → E4 Floor Plan Roof.pdf
+E5 REZ A-A´.pdf → E5 Section A-A'.pdf
+E6 POHĽADY.pdf → E6 Elevations.pdf
+---
+Content translation: C1 Coordination Site Plan.md → C1 Coordination Site Plan_TRANSLATED.md
+Key decisions:
+- LEGENDA STAVEBNÝCH OBJEKTOV → LEGEND OF BUILDING OBJECTS: standard legend header
+- RODINNÝ DOM → FAMILY HOUSE, SPEVNENÉ PLOCHY → PAVED AREAS: standard building terms
+- INŽINIERSKE SIETE → UTILITY NETWORKS: civil engineering terminology
+- PARCELNÉ ČÍSLO → PARCEL NUMBER, HRANICA PARCIEL → PARCEL BOUNDARY: cadastral terms
+- STAVEBNÍK → CLIENT (Slovak context for building permit docs)
+- ZODP. PROJEKTANT → RESPONSIBLE DESIGNER, PROJEKTANT → DESIGNER, VYPRACOVAL → DRAWN BY
+- MIESTO STAVBY → CONSTRUCTION SITE, NÁZOV AKCIE → PROJECT TITLE
+- NOVOSTAVBA RODINNÉHO DOMU → NEW BUILDING OF FAMILY HOUSE
+- PD pre SP → PD for BP (Project Documentation for Building Permit)
+- Zastavaná plocha → Built-up area, Zelená plocha → Green area: land use terms
+- Všetky dimension values, parcel numbers, and address data preserved as-is
+---
+Content translation: E2 Floor Plan Foundations.md → E2 Floor Plan Foundations_TRANSLATED.md
+Key decisions:
+- H.H. (Horná hrana) → T.E. (Top Edge), D.H. (Dolná hrana) → B.E. (Bottom Edge): foundation level abbreviations
+- OBVODOVÉ MURIVO → PERIMETER MASONRY, VNÚTORNÉ NOSNÉ MURIVO → INTERNAL LOAD-BEARING MASONRY
+- DELIACE PRIEČKY → PARTITION WALLS: glossary term
+- ŽELEZOBETÓN → REINFORCED CONCRETE, DEBNIACE TVÁRNICE → FORMWORK BLOCKS
+- TEPELNÁ IZOLÁCIA → THERMAL INSULATION, PAROZÁBRANA → VAPOR BARRIER
+- ŠTRKOVÉ LÔŽKO → GRAVEL BED, RASTLÁ ZEMINA → TOPSOIL, NASYPANÁ ZEMINA → FILL SOIL
+- PÔDORYS ZÁKLADOV → FOUNDATION FLOOR PLAN: drawing title
+- All construction notes translated preserving technical meaning; numeric values preserved
+---
+Content translation: E3 1st Floor.md → E3 1st Floor_TRANSLATED.md
+Key decisions:
+- LEGENDA MIESTNOSTÍ → LEGEND OF ROOMS, NÁZOV MIESTNOSTI → ROOM NAME, PLOCHA → AREA
+- ZÁVETRIE → VESTIBULE, ZÁDVERIE → ENTRANCE HALL, CHODBA → HALLWAY: room type translations
+- OBÝVACIA IZBA S KUCHYŇOU → LIVING ROOM WITH KITCHEN, SPÁLŇA → BEDROOM
+- KÚPEĽŇA → BATHROOM, KOMORA → PANTRY, ŠATNÍK → WARDROBE
+- TECHNICKÁ MIESTNOSŤ → UTILITY ROOM, DIELŇA → WORKSHOP
+- MRAZUVZDORNÁ DLAŽBA → FROST-RESISTANT TILES, LAMINÁTOVÁ PODLAHA → LAMINATE FLOORING
+- KERAMICKÝ OBKLAD → CERAMIC WALL TILES, KERAMICKÝ SOKEL → CERAMIC BASEBOARD
+- KOMÍNOVE TELESO SCHIEDEL → CHIMNEY BODY SCHIEDEL: preserved product name
+- VY (Výlez) → AT (Attic access), Ž → WT (exterior blinds/louver abbreviation)
+- ZASTAVANÁ PLOCHA → BUILT-UP AREA, OBYTNÁ PLOCHA → LIVING AREA
+- PODLAHOVÁ PLOCHA → FLOOR AREA: real estate measurement terms
+- STAVEBNÍK → CLIENT per project context
+---
+Content translation: E4 Floor Plan Roof.md → E4 Floor Plan Roof_TRANSLATED.md
+Key decisions:
+- PÔDORYS STRECHY → ROOF FLOOR PLAN: drawing title
+- SKLADBA STRECHY → ROOF ASSEMBLY: technical assembly description
+- BETÓNOVÁ STREŠNÁ KRYTINA → CONCRETE ROOF TILES: roofing material
+- LATOVANIE → BATTENS, KONTRALATOVANIE → COUNTER BATTENS: roofing terminology
+- DIFÚZNA FÓLIA → DIFFUSION MEMBRANE: building science term
+- DREVENÝ VÄZNÍK - HORNÁ PÁSNICA → WOODEN TRUSS - TOP CHORD: truss component terminology
+- DAŽĎOVÉ ŽĽABY → RAIN GUTTERS, ODKVAPOVÝ SYSTÉM → EAVE SYSTEM: drainage terms
+- DREVENÉ PRVKY KROVU NATRIEŤ NÁTEROM PROTI HNILOBE A ŠKODCOM → WOODEN ELEMENTS OF THE ROOF FRAMING SHALL BE TREATED WITH ANTI-ROT AND PEST COATING
+- PÔDORYSNÁ PLOCHA STRECHY → FLOOR PLAN AREA OF ROOF: measurement term
+---
+Content translation: E5 Section A-A'.md → E5 Section A-A'_TRANSLATED.md
+Key decisions:
+- REZ A-A´ → SECTION A-A': drawing title
+- SKLADBA PODLAHY NA TERÉNE → FLOOR ON GRADE ASSEMBLY: construction detail
+- SKLADBA STROPU → CEILING ASSEMBLY, SKLADBA PODBITIA STROPU → SOFFIT ASSEMBLY
+- SKLADBA SPEVNENÝCH PLÔCH → PAVED AREAS ASSEMBLY: exterior construction detail
+- HORNÁ PÁSNICA → TOP CHORD, SPODNÁ PÁSNICA → BOTTOM CHORD: truss terminology
+- DREVENÝ ROŠT → WOODEN JOIST, ZÁKLOP Z OSB DOSIEK → DECKING FROM OSB BOARDS
+- SÁDROKARTÓNOVÉ PODHĽADY → PLASTERBOARD CEILINGS: finishing term
+- SVETLÁ VÝŠKA → CLEAR HEIGHT: architectural measurement
+- All assembly descriptions (P1, S1, S2, S3, SP1) translated layer-by-layer preserving material specs
+---
+Content translation: E6 Elevations.md → E6 Elevations_TRANSLATED.md
+Key decisions:
+- POHĽADY → ELEVATIONS: architectural drawing type
+- POHĽAD SEVEROZÁPADNÝ → NORTHWEST ELEVATION, ČELNÝ → FRONT: elevation orientation
+- POHĽAD JUHOZÁPADNÝ → SOUTHWEST ELEVATION, BOČNÝ → SIDE
+- POHĽAD SEVEROVÝCHODNÝ → NORTHEAST ELEVATION, POHĽAD JUHOVÝCHODNÝ → SOUTHEAST ELEVATION
+- ZADNÝ → REAR: building face designation
+- FASÁDNA OMIETKA → FAÇADE PLASTER, OBKLAD → CLADDING: exterior finish terms
+- VÝPLŇOVÉ KONŠTRUKCIE → FILLING ELEMENTS (windows/doors), PLASTOVÉ → PLASTIC
+- DREVOHLINÍKOVÉ TROJSKLO → WOOD-ALUMINIUM TRIPLE GLAZING: window specification
+- EXTERIÉROVÉ ŽALÚZIE → EXTERIOR BLINDS, ODKVAPOVÝ SYSTÉM → EAVE SYSTEM

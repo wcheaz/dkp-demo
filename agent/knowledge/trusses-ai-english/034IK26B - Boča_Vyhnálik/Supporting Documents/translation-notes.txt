@@ -1,0 +1,5 @@
+Directory: 034IK26B - Boča_Vyhnálik/Supporting Documents
+===
+pôdorys.jpg → Floor Plan.jpg
+rez.jpg → Section.jpg
+strecha.jpg → Roof.jpg

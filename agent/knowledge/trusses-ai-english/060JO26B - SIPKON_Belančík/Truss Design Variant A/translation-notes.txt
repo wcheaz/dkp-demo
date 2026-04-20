@@ -1,0 +1,21 @@
+Directory: Truss Design Variant A
+===
+060JO26A.material.pdf → 060JO26A.material.pdf [not translated — project code identifier]
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+
+---
+Content translation: 060JO26A.material.md → 060JO26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer
+- Pult → mono-pitch: roof type designation
+- púomurnica → wall plate (variant spelling of pomurnica)
+- All standard glossary terms applied for roof data section
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD
+- STÁLE ZAŤAŽENIE STRECHY/STROPU → PERMANENT ROOF/CEILING LOAD
+- ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT
+- Title block translations per glossary

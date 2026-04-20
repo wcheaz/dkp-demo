@@ -1,0 +1,41 @@
+Directory: Truss Design Variant B
+===
+053IK26B.material.pdf → 053IK26B.material.pdf [not translated — project code identifier]
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+
+---
+Content translation: 053IK26B.material.md → 053IK26B.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka ze dne → Price quote dated: standard Czech business document header
+- Zakázka → Order, Zákazník → Customer: per glossary
+- Výpis řeziva dle skladových → Lumber list by stock items: per glossary
+- sedlo → gable: derived from glossary sedlový → gable; "sedlo" is Slovak for gable/ridge roof type
+- Kvalita → Grade, Tl. → Th., Š. → W., Celk. Dl. → Total L., Celk. Kub. → Total Vol.: per glossary abbreviations
+- pomurnica → wall plate: per glossary
+- Kubatura nezahrnuje konstrukci podélného zavětrování → Volume does not include longitudinal bracing structure: Kubatura → Volume, zavětrování → Bracing per glossary
+- styčníkové desky → gusset plates, závěsů → hanger list: per glossary
+- Údaje o střeše → Roof data: per glossary
+- All roof measurement labels translated per glossary (Celková půdorysná plocha pod střechou, Délka okapu, etc.)
+- sedlový → gable, pultový → mono-pitch: per glossary roof type translations
+- vazníků → truss, styčníků → joint, dřevěných prvků → timber element: per glossary
+- ks → pcs: standard abbreviation for pieces in engineering context
+- Preserved all numeric values, dimensions, project codes (053IK26B), proper nouns (Výčapy-Opatovce, Iveta Krajčova), and unit symbols (m3, m2, CZK)
+
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Poznámky na okraj → Marginal notes: per glossary
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURE LOAD, ZAŤAŽENIE → LOAD: per glossary Zaťaženie → Load
+- STÁLE ZAŤAŽENIE STRECHY → PERMANENT ROOF LOAD, STÁLE ZAŤAŽENIE STROPU → PERMANENT CEILING LOAD: Stále zaťaženie → Permanent load per glossary; STRECHY=roof, STROPU=ceiling
+- ZAŤAŽENIE SNEHOM → SNOW LOAD, ZAŤAŽENIE VETROM → WIND LOAD: per glossary
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORT: per glossary Podpora pre väzník → Truss support
+- PRIEVLAKY → BEAMS: per glossary Prievaly → Beams (Slovak construction term for beams/lintels)
+- PRIEČKY → PARTITIONS: per glossary Priečka → Partition wall
+- ÚLOŽNÝ PRIESTOR → STORAGE SPACE: per glossary
+- KROVU → ROOF FRAMING: per glossary Krov → Roof framing
+- vyšrafovaná časť → hatched area: standard technical drawing terminology
+- Úžitkové zaťaženie → Live load: per glossary
+- Title block: KRESLIL → DRAWN BY, KONTR. → CHECKED, MĚŘÍTKO → SCALE, STRANA → SHEET, OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION, ČÍSLO ZAKÁZKY → ORDER NUMBER, ČÍSLO VÝKRESU → DRAWING NUMBER, PRO → FOR: all per glossary
+- Navrhl → Designed by: standard drawing attribution translation
+- medop strechy s.r.o. preserved as proper noun (company name)
+- S1, 5743, 2301, A-A, dimension values: passed through as drawing annotations

@@ -1,8 +1,8 @@
-# DKP Demo
+# AG-UI App Template
 
 A PydanticAI + CopilotKit application template.
 
-This is a minimal fork of my-ag-ui-app that provides only the core infrastructure:
+This is a generic, customizable application template providing only the core infrastructure:
 - CopilotKit frontend UI
 - PydanticAI agent framework
 - Deployment pipeline (Docker + Kubernetes)
@@ -60,7 +60,7 @@ This will start both the Next.js UI (http://localhost:3000) and the PydanticAI a
 ## Project Structure
 
 ```
-dkp-demo/
+{{PROJECT_NAME}}/
 ├── src/                    # Next.js frontend
 │   ├── app/               # Next.js app directory
 │   │   ├── page.tsx      # Main CopilotKit page
@@ -146,7 +146,15 @@ The development servers run on:
 - UI: http://localhost:3000
 - Agent: http://localhost:3000 (integrated)
 
-### Kubernetes Deployment
+### Kubernetes Configuration
+
+Before deploying to Kubernetes, you must replace the placeholder values in the manifest files:
+
+- `{{PROJECT_NAME}}` — Your project identifier (e.g., `my-app`)
+- `{{APP_HOSTNAME}}` — Your application hostname (e.g., `app.example.com`)
+- `{{REGISTRY_HOST}}` — Your container registry (e.g., `localhost:32000` or `registry.example.com`)
+
+These placeholders appear in: `k8s/deployment.yaml`, `k8s/service.yaml`, `k8s/ingress.yaml`, `k8s/agent-deployment.yaml`, `k8s/secrets.yaml`, and deployment scripts.
 
 The project includes automated deployment scripts using Multipass and Microk8s:
 
@@ -162,7 +170,7 @@ The project includes automated deployment scripts using Multipass and Microk8s:
 ./deploy_scripts/deploy-to-k8s.sh
 ```
 
-See the original my-ag-ui-app README for detailed deployment instructions and troubleshooting.
+See the deployment scripts in `deploy_scripts/` and `scripts/` for detailed deployment instructions and troubleshooting.
 
 ## Architecture
 
@@ -220,8 +228,8 @@ If file uploads aren't working:
 
 ## License
 
-This project is based on my-ag-ui-app and is licensed under the MIT License.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
-This project was forked from my-ag-ui-app and retains only the core infrastructure while removing domain-specific procurement logic for maximum customization flexibility.
+This project was originally forked from [my-ag-ui-app](https://github.com/nichochar/my-ag-ui-app) and has been genericized into a reusable template. Domain-specific logic has been commented out as reference examples, with placeholders replacing hardcoded project values for easy customization.

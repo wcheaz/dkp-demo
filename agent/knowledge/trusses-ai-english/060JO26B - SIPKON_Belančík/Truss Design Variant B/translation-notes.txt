@@ -1,0 +1,17 @@
+Directory: Truss Design Variant B
+===
+060JO26B.material.pdf → 060JO26B.material.pdf [not translated — project code identifier]
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+
+---
+Content translation: 060JO26B.material.md → 060JO26B.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote, Zakázka → Order, Zákazník → Customer
+- pult → mono-pitch: roof type designation
+- pomurnica → wall plate, all standard glossary terms applied
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- Same Slovak structural notes translations as Variant A
+- Title block fields translated per glossary
+- Dimensional values and section labels preserved as-is

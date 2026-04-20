@@ -1,0 +1,36 @@
+Directory: Truss Design Variant A
+===
+[not translated] 041JO26A.material.pdf — project code identifier
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 041JO26A.material.md → 041JO26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote (glossary)
+- Zakázka → Order (glossary)
+- Zákazník → Customer (glossary)
+- Výpis řeziva dle skladových → Lumber list by stock items (glossary)
+- Kvalita/Tl./Š./Celk. Dl./Celk. Kub. → Grade/Th./W./Total L./Total Vol. (glossary abbreviations)
+- pomurnica → wall plate (glossary)
+- Kubatura → Volume (glossary)
+- zavětrování → bracing (glossary)
+- styčníkové desky → gusset plates (glossary)
+- All roof data labels translated per glossary (okapu→Eave, pozednice→Sole plate, hřebenu→Ridge, valbových→Hip, úžlabních→Valley, ztužení→Bracing)
+- Délka hřebenu (sedlový)/(pultový) → Ridge length (gable)/(mono-pitch) per glossary
+- Celkové rozpětí vazníků → Total truss span, Celkový počet vazníků → Total truss count (glossary)
+- závěsů → Hanger (glossary)
+- Polyfunkcia → Mixed-use Building (consistent with project name translation)
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD (glossary: zaťaženie → Load)
+- STÁLE ZAŤAŽENIE STRECHY → PERMANENT ROOF LOAD (glossary)
+- STÁLE ZAŤAŽENIE STROPU → PERMANENT CEILING LOAD (glossary: strop → Ceiling)
+- ZAŤAŽENIE SNEHOM → SNOW LOAD (glossary)
+- ZAŤAŽENIE VETROM → WIND LOAD (glossary)
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORTS (glossary)
+- PRIEVLAKY → BEAMS; PRIEČKY → PARTITIONS (glossary: priečka → Partition wall)
+- ALL-CAPS preserved for structural annotations to maintain emphasis
+- KRESLIL/KONTR./ČÍSLO ZAKÁZKY → DRAWN/CHECKED/ORDER NUMBER
+- MĚŘÍTKO → SCALE; STRANA → SHEET; OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION
+- medop strechy s.r.o. kept as proper noun (company name)
+- Dimension references (A-A, 2°, S4, numeric values) passed through verbatim

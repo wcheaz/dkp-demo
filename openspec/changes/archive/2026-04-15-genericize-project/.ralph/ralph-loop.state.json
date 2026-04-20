@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 47,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/genericize-project/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/genericize-project/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/genericize-project/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-15T20:13:18.989Z",
+  "resumedAt": "2026-04-15T20:13:18.989Z",
+  "completedAt": "2026-04-15T20:52:18.920Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}

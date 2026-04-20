@@ -1,0 +1,21 @@
+Directory: 046JO26A - Plešivka_Kochan/Truss Design Variant A
+===
+[not translated] 046JO26A.material.pdf — project code material PDF (identifier)
+Pôdorys+3D.pdf → Floor Plan + 3D.pdf
+---
+Content translation: 046JO26A.material.md → 046JO26A.material_TRANSLATED.md
+Key decisions:
+- Cenová nabídka → Price quote; Zakázka → Order; Zákazník → Customer (glossary D7)
+- Výpis řeziva dle skladových → Lumber list by stock items; column headers translated per glossary D7
+- valba → hip roof; pomurnica → wall plate; styčníkové desky → gusset plates (glossary D7)
+- zavětrování → bracing; závěsy → hangers; dřevěné prvky → timber elements (glossary D7)
+- BSH 140/360 kept as product identifier; CZK kept as unit
+---
+Content translation: Floor Plan + 3D.md → Floor Plan + 3D_TRANSLATED.md
+Key decisions:
+- ZAŤAŽENIE KONŠTRUKCIE → STRUCTURAL LOAD; STÁLE ZAŤAŽENIE → PERMANENT LOAD (glossary D7)
+- PODPORY PRE VÄZNÍK → TRUSS SUPPORTS; ÚLOŽNÝ PRIESTOR → STORAGE SPACE (glossary D7)
+- KROV → ROOF FRAMING; Úžitkové zaťaženie → Live load (glossary D7)
+- Title block: KRESLIL → DRAWN BY; KONTR. → CHECKED; MĚŘÍTKO → SCALE; STRANA → SHEET
+- medop strechy s.r.o. kept as proper noun; OZNAČENÍ VAZNÍKU → TRUSS DESIGNATION
+- Code fence block preserved with translated labels inside

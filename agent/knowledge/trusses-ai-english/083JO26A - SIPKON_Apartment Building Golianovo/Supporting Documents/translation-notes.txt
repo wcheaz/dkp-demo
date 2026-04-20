@@ -1,0 +1,76 @@
+Directory: 083JO26A - SIPKON_Apartment Building Golianovo/Supporting Documents
+===
+07 podorys strechy nad 3.NP 350x630 far. .pdf → 07 Floor Plan Roof above 3rd Floor 350x630 color.pdf
+08 pohlad nas trechu 350x630 far. .pdf → 08 View Toward Roof 350x630 color.pdf
+09 rezy 297x840 far. .pdf → 09 Sections 297x840 color.pdf
+10 pohlady 297x700 far. .pdf → 10 Elevations 297x700 color.pdf
+---
+Content translation: 07 Floor Plan Roof above 3rd Floor 350x630 color.md → 07 Floor Plan Roof above 3rd Floor 350x630 color_TRANSLATED.md
+Key decisions:
+- Pôdorys strechy nad 3.NP → Floor plan - Roof above 3rd floor: drawing title
+- miekra → Scale: typo in original preserved as corrected term
+- Tabuľka drevených prvkov krovu → Table of timber roof framing elements: section header
+- pomúrnica → wall plate: structural beam term per glossary
+- železobetónový veniec → reinforced concrete ring beam: per glossary
+- drevený väzník → timber truss: per glossary
+- štrkový zásyp → gravel fill, geotextília → geotextile: material terms per glossary
+- hydroizolačná fólia → waterproofing membrane, parozábrana → vapor barrier: per glossary
+- polystyrén EPS → EPS polystyrene, sadrokartón → drywall: material terms
+- tepelná izolácia → thermal insulation, oplechovanie → sheet metal flashing: per glossary
+- Zhotoviteľ → Contractor, projektant → Designer: professional roles per glossary
+- Investor → Client/Investor, Profesia → Discipline, Druh stavby → Type of building per glossary
+- Bytový dom → Apartment building, Novostavba → New construction per glossary
+- Stupeň PD → Design Stage, Katastrálne územie → Cadastral area per glossary
+- m.n.m. → m a.s.l.: meters above sea level abbreviation
+- hr. → Th. (thickness): dimension abbreviation consistency
+- Podhľad sadrokartónová → Soffit drywall: ceiling finish description
+---
+Content translation: 08 View Toward Roof 350x630 color.md → 08 View Toward Roof 350x630 color_TRANSLATED.md
+Key decisions:
+- Pohľad na strechu → View toward roof: drawing title
+- oplechovanie atiky → parapet sheet metal flashing: atika→parapet per glossary
+- drevená atika → wooden parapet: parapet/attic wall term per glossary
+- kapotáž vo farbe → cladding in color: finishing specification
+- drevená výdreva → wooden cladding: per glossary (výdreva→cladding/lining)
+- laty 30x50 mm → battens 30x50 mm: per glossary (laty→battens)
+- Tabuľka prvkov odkvapový systém → Table of elements - gutter system: drainage table header
+- atikový vpust → parapet drain, zvodová rúra → downpipe: drainage components
+- strešný chŕlič → roof drain: roof drainage element
+- Skladba strechy S1 → Roof composition S1: layer buildup section
+- All material layer terms per glossary: štrkový zásyp→gravel fill, geotextília→geotextile, etc.
+- LEGENDA → LEGEND, POZNÁMKA → NOTE: section headers
+- Contractor/Designer obligation notes translated consistently with document 07
+---
+Content translation: 09 Sections 297x840 color.md → 09 Sections 297x840 color_TRANSLATED.md
+Key decisions:
+- Rez → Section: architectural drawing type per glossary
+- Skladby stien → Wall compositions: section header
+- Legenda materiálov → Material legend: reference section
+- Skladby strechy → Roof compositions: section header
+- obvodové murivo → external masonry: wall description
+- murivo Porotherm → Porotherm masonry: brand name preserved
+- maltu pre tenké škáry → thin-bed mortar: masonry joint type
+- omietka → plaster: surface finish per glossary
+- zábradlie → railing, schodisko → staircase: building elements per glossary
+- základ → foundation, výstuž → reinforcement: structural terms per glossary
+- podlahové vykurovanie → underfloor heating: per glossary
+- poter → screed: floor finish layer per glossary
+- Skladba podlahy → Floor composition: layer buildup section headers (P1-P9)
+- železobetónové schodisko → reinforced concrete staircase: composite material + element
+- nopová fólia → dimpled membrane: waterproofing product type
+- hydroizolačná vrstva → waterproofing layer: generic term
+- ALL dimension values, coordinates (+levels), material brand names preserved exactly
+---
+Content translation: 10 Elevations 297x700 color.md → 10 Elevations 297x700 color_TRANSLATED.md
+Key decisions:
+- Pohľad zadný → Rear elevation, Pohľad bočný → Side elevation, Pohľad predný → Front elevation: per glossary (Pohľad→View/Elevation)
+- LEGENDA → LEGEND: standard drawing legend header
+- fasádna omietka → facade plaster, balkónová konštrukcia → balcony structure: building elements
+- zábradlie → railing: per glossary
+- tehlový obklad → brick cladding: facade material
+- kvetináč → planter: landscape element
+- Novostavba RD → New construction RD: building type per glossary
+- Stupeň PD → Design Stage, parcela č. → parcel no.: per glossary
+- Názov stavby → Building name, Výkres → Drawing: title block fields
+- All coordinate levels and legend letter codes (a-g) preserved exactly
+- Contractor/Designer obligation notes translated consistently with documents 07-09

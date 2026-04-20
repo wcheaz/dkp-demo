@@ -65,6 +65,9 @@ __pycache__
 # hidden folder
 hidden/
 
+# agent knowledge base
+agent/knowledge/
+
 # setup fix file
 SETUP-FIX.md
 
@@ -89,3 +92,7 @@ test/kubernetes/
 ralph-docs
 deploy_log.md
 deploy_log_explanation.md
+proposal_start.txt
+
+# temp working directory for scripts and agents
+tmp/

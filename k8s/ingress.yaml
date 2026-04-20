@@ -1,24 +1,30 @@
-# dkp-demo Ingress Configuration
+# {{PROJECT_NAME}} Ingress Configuration
 # ===================================
 #
-# CONFIGURABLE VALUES ANALYSIS (Task 9.3):
-# =========================================
-# The following values are appropriately hardcoded for this ingress:
-# - host: dkp-demo.local (local development hostname)
-# - path: / (root path for application access)
+# CONFIGURATION REQUIRED:
+# =========================
+# Before deploying, replace the following placeholders:
+#
+# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
+# {{APP_HOSTNAME}}: Your application hostname (e.g., "app.example.com" or "app.local")
+#
+# Example: if your project is called "my-app" and runs at myapp.local:
+# - Replace {{PROJECT_NAME}} with "my-app"
+# - Replace {{APP_HOSTNAME}} with "myapp.local"
+#
+# Notes:
 # - ingressClassName: nginx (using NGINX ingress controller)
 # - rewrite-target: / (standard path rewriting)
-#
-# Note: Ingress configuration is typically environment-specific and would be
-# configured differently for production vs. development environments.
-#
+# - SSE streaming support configured for agent communication
+# - SSL redirect disabled for development (enable for production)
+# ============================================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: dkp-demo-ingress
+  name: "{{PROJECT_NAME}}-ingress"  # Replace {{PROJECT_NAME}} with your project name
   namespace: default
   labels:
-    app: dkp-demo
+    app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -33,13 +39,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: dkp-demo.local
+  - host: "{{APP_HOSTNAME}}"  # Replace {{APP_HOSTNAME}} with your domain
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: dkp-demo-service
+            name: "{{PROJECT_NAME}}-service"  # Replace {{PROJECT_NAME}} with your project name
             port:
               name: http
