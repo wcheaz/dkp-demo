@@ -302,13 +302,13 @@ function YourMainContent({
   const { state, setState } = useCoAgent<AgentState>({
     name: "my_agent",
     initialState: {
-      your_data: [], // Customize this for your application
+      designs: [],
     },
   });
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify(state.your_data ?? []),
+    value: JSON.stringify(state.designs ?? []),
   });
 
   return (

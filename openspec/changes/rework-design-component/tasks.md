@@ -1,6 +1,6 @@
 ## 1. Types and File Rename
 
-- [ ] 1.1 Update `src/lib/types.ts`: remove `YourDataType` and the old `AgentState` definition. Add exported `DesignEntry` interface with `imageUrl: string` and `promptText: string`. Redefine `AgentState` as `{ designs: DesignEntry[] }`.
+- [x] 1.1 Update `src/lib/types.ts`: remove `YourDataType` and the old `AgentState` definition. Add exported `DesignEntry` interface with `imageUrl: string` and `promptText: string`. Redefine `AgentState` as `{ designs: DesignEntry[] }`.
   **Done when:** File `src/lib/types.ts` contains `export interface DesignEntry` with fields `imageUrl: string` and `promptText: string`, contains `export type AgentState` with field `designs: DesignEntry[]`, does NOT contain `YourDataType`, and `npx tsc --noEmit` exits zero.
   **Stop and hand off if:** TypeScript compilation fails and the error is not caused by this change (e.g., pre-existing errors in unrelated files).
 
