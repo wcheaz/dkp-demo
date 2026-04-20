@@ -23,8 +23,14 @@
   **Done when:** File `src/components/design-component.tsx` contains `useState`, contains `modalImageUrl` or equivalent state variable, contains `e.stopPropagation()`, contains `keydown` or `Escape` listener in a `useEffect`, contains an overlay element with `fixed` and `z-50` classes, and `npx tsc --noEmit` exits zero.
   **Stop and hand off if:** `npx tsc --noEmit` fails due to a React hooks rule violation that is not resolved by a single fix attempt.
 
-## 4. Final Verification
+## 4. Frontend Integration
 
-- [x] 4.1 Run `npx tsc --noEmit && npm run lint` across the full codebase and confirm both exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds.
+- [x] 4.1 Replace `<YourComponent>` with `<DesignComponent>` in `src/app/page.tsx`. Add import `import { DesignComponent } from "@/components/design-component"` at the top of the file. Replace the `<YourComponent state={state} setState={setState} />` render at line 319 with `<DesignComponent state={state} setState={setState} />`. Remove or comment out the old `import { YourComponent }` import line. The `useCoAgent<AgentState>` hook already initializes `initialState: { designs: [] }` and `useCopilotReadable` already reads `state.designs`, so no changes to state initialization are needed.
+  **Done when:** `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2 (import + render), `grep -c 'YourComponent' src/app/page.tsx` returns 0, `npx tsc --noEmit` exits zero.
+  **Stop and hand off if:** `npx tsc --noEmit` fails and the error is in `page.tsx` but the `DesignComponent` import or prop types do not match expectations.
+
+## 5. Final Verification
+
+- [ ] 5.1 Run `npx tsc --noEmit && npm run lint` across the full codebase and confirm both exit zero. Verify structural requirements: `grep -c 'export function DesignComponent' src/components/design-component.tsx` returns 1, `grep -c 'export interface DesignEntry' src/lib/types.ts` returns 1, `grep -c 'designs.*DesignEntry' src/lib/types.ts` returns at least 1, `test ! -f src/components/procurement-codes.tsx` succeeds, `grep -c 'DesignComponent' src/app/page.tsx` returns at least 2, `grep -c 'YourComponent' src/app/page.tsx` returns 0.
   **Done when:** `npx tsc --noEmit` exits zero, `npm run lint` exits zero, all grep/test commands above succeed.
   **Stop and hand off if:** Typecheck or lint fails in a file that was not modified by this change (pre-existing issue).

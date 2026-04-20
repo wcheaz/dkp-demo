@@ -10,7 +10,7 @@
 // Example:
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
-import { YourComponent } from "@/components/your-component";
+import { DesignComponent } from "@/components/design-component";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
@@ -316,7 +316,7 @@ function YourMainContent({
       style={{}}
       className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
     >
-      <YourComponent state={state} setState={setState} />
+      <DesignComponent state={state} setState={setState} />
     </div>
   );
 }
