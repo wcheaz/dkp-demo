@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { AgentState } from "@/lib/types";
 
 export interface DesignComponentProps {
@@ -7,6 +8,17 @@ export interface DesignComponentProps {
 
 export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setModalImageUrl(null);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="p-6">
@@ -18,9 +30,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
           design.
         </p>
       ) : (
-        <div
-          className="overflow-y-auto max-h-[80vh] space-y-4"
-        >
+        <div className="overflow-y-auto max-h-[80vh] space-y-4">
           {designs.map((entry, index) => (
             <div
               key={index}
@@ -31,7 +41,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                   src={entry.imageUrl}
                   alt={entry.promptText}
                   className="w-[80%] h-[40vh] object-contain cursor-pointer"
-                  onClick={() => {}}
+                  onClick={() => setModalImageUrl(entry.imageUrl)}
                 />
               </div>
               <p className="mt-3 text-center text-sm text-gray-200">
@@ -39,6 +49,20 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {modalImageUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+          onClick={() => setModalImageUrl(null)}
+        >
+          <img
+            src={modalImageUrl}
+            alt="Enlarged design"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>
