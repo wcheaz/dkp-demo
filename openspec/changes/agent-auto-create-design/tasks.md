@@ -10,7 +10,7 @@
 
 ## 2. Activate and Modify add_design_entry Tool
 
-- [ ] 2.1 Uncomment the `add_design_entry` tool in `agent/src/agent.py` (currently commented out at lines ~284-300). Modify the tool so that `DesignEntry` is constructed with `imageUrl="/next.svg"` and `promptText=prompt_text` (using the tool's `prompt_text` parameter, not a generic test string). Add a `# TEMPORARY` comment above the tool: `# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated`. The tool docstring SHALL state: `Add a design entry to the shared state. Call this after every response with the user's original prompt text.`
+- [x] 2.1 Uncomment the `add_design_entry` tool in `agent/src/agent.py` (currently commented out at lines ~284-300). Modify the tool so that `DesignEntry` is constructed with `imageUrl="/next.svg"` and `promptText=prompt_text` (using the tool's `prompt_text` parameter, not a generic test string). Add a `# TEMPORARY` comment above the tool: `# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated`. The tool docstring SHALL state: `Add a design entry to the shared state. Call this after every response with the user's original prompt text.`
   **Done when:** `grep -c 'async def add_design_entry' agent/src/agent.py` returns 1 (uncommented), the tool body uses `prompt_text` (not a hardcoded test string), and `grep -c 'TEMPORARY' agent/src/agent.py` shows at least 3 occurrences (model + field + tool).
   **Stop and hand off if:** Uncommenting causes decorator or type errors with the `@agent.tool` decorator.
 
