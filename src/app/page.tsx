@@ -307,6 +307,23 @@ function YourMainContent({
     },
   });
 
+  // TEMPORARY: add_design_entry frontend tool for auto-creating design entries on every agent response. Will be replaced when real image generation is integrated.
+  useFrontendTool({
+    name: "add_design_entry",
+    parameters: [
+      {
+        name: "prompt_text",
+        description: "The user's original prompt text",
+        required: true,
+      },
+    ],
+    handler({ prompt_text }) {
+      const newEntry = { imageUrl: "/next.svg", promptText: prompt_text };
+      setState({ ...state, designs: [...(state.designs ?? []), newEntry] });
+    },
+  });
+  // END TEMPORARY
+
   useCopilotReadable({
     description: "The application state data - customize this for your application",
     value: JSON.stringify(state.designs ?? []),
