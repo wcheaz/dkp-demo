@@ -4,7 +4,7 @@
   **Done when:** `grep -c 'class DesignEntry' agent/src/agent.py` returns 1 (uncommented), and the line above it contains `TEMPORARY`.
   **Stop and hand off if:** Uncommenting causes import errors or type conflicts with existing code.
 
-- [ ] 1.2 Uncomment the `designs: List[DesignEntry] = []` field on `YourState` in `agent/src/agent.py` (currently commented out at line ~85). Add a `# TEMPORARY` comment above it: `# TEMPORARY - designs field for design component; will be replaced when real image generation is integrated`.
+- [x] 1.2 Uncomment the `designs: List[DesignEntry] = []` field on `YourState` in `agent/src/agent.py` (currently commented out at line ~85). Add a `# TEMPORARY` comment above it: `# TEMPORARY - designs field for design component; will be replaced when real image generation is integrated`.
   **Done when:** `grep 'designs' agent/src/agent.py` shows an uncommented `designs: List[DesignEntry] = []` field on `YourState`, and the line above it contains `TEMPORARY`.
   **Stop and hand off if:** Uncommenting causes `List` or `DesignEntry` import resolution errors.
 

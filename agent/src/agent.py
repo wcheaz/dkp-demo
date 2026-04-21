@@ -80,8 +80,7 @@ class YourState(BaseModel):
     knowledge_queries: List[KnowledgeQuery] = []
     last_knowledge_result: Optional[str] = None
     # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
-    # Commented out because the agent tool approach did not work for automatic state propagation.
-    # designs: List[DesignEntry] = []
+    designs: List[DesignEntry] = []
 
 
 # ============================================================================
