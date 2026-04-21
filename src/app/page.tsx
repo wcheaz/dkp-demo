@@ -20,7 +20,7 @@ import {
 } from "@copilotkit/react-core";
 import { CopilotKitCSSProperties, CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useMemo } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
@@ -307,6 +307,23 @@ function YourMainContent({
     },
   });
 
+  const designs = useMemo(() => {
+    const d = state.designs ?? [];
+    if (d.length === 0) return d;
+    const needsBackfill = d.some((entry) => entry.id == null);
+    if (!needsBackfill) return d;
+    let nextId = Math.max(...d.map((entry) => entry.id ?? 0), 0);
+    return d.map((entry) => {
+      if (entry.id != null) return entry;
+      nextId += 1;
+      return { ...entry, id: nextId };
+    });
+  }, [state.designs]);
+
+  if ((state.designs ?? []).some((entry) => entry.id == null)) {
+    setState({ ...state, designs });
+  }
+
   // TEMPORARY: add_design_entry frontend tool for auto-creating design entries on every agent response. Will be replaced when real image generation is integrated.
   useFrontendTool({
     name: "add_design_entry",
@@ -318,10 +335,10 @@ function YourMainContent({
       },
     ],
     handler({ prompt_text }) {
-      const designs = state.designs ?? [];
-      const nextId = Math.max(...designs.map((d) => d.id ?? 0), 0) + 1;
+      const currentDesigns = designs;
+      const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
       const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text };
-      setState({ ...state, designs: [...designs, newEntry] });
+      setState({ ...state, designs: [...currentDesigns, newEntry] });
     },
   });
   useFrontendTool({
@@ -354,19 +371,20 @@ function YourMainContent({
         return "Error: at least one of image_name or prompt_text must be provided.";
       }
 
+      const currentDesigns = designs;
+
       if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
         return `Error: invalid image_name "${image_name}". Valid images: ${ALLOWED_IMAGES.join(", ")}.`;
       }
 
-      const designs = state.designs ?? [];
-      const index = designs.findIndex((d) => d.id === design_id);
+      const index = currentDesigns.findIndex((d) => d.id === design_id);
 
       if (index === -1) {
-        const validIds = designs.map((d) => d.id);
+        const validIds = currentDesigns.map((d) => d.id);
         return `Error: design_id ${design_id} not found. Valid IDs: [${validIds.join(", ")}].`;
       }
 
-      const updated = [...designs];
+      const updated = [...currentDesigns];
       updated[index] = {
         ...updated[index],
         ...(image_name ? { imageUrl: `/${image_name}` } : {}),
@@ -381,7 +399,7 @@ function YourMainContent({
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify(state.designs ?? []),
+    value: JSON.stringify(designs),
   });
 
   return (
