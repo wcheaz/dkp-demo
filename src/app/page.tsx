@@ -318,8 +318,10 @@ function YourMainContent({
       },
     ],
     handler({ prompt_text }) {
-      const newEntry = { imageUrl: "/next.svg", promptText: prompt_text };
-      setState({ ...state, designs: [...(state.designs ?? []), newEntry] });
+      const designs = state.designs ?? [];
+      const nextId = Math.max(...designs.map((d) => d.id ?? 0), 0) + 1;
+      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text };
+      setState({ ...state, designs: [...designs, newEntry] });
     },
   });
   // END TEMPORARY

@@ -7,10 +7,12 @@ export interface AddDesignButtonProps {
 
 export function AddDesignButton({ state, setState }: AddDesignButtonProps) {
   const handleClick = () => {
-    const nextCount = (state.designs?.length ?? 0) + 1;
+    const designs = state.designs ?? [];
+    const nextId = Math.max(...designs.map((d) => d.id ?? 0), 0) + 1;
     const newEntry: DesignEntry = {
+      id: nextId,
       imageUrl: "/next.svg",
-      promptText: `Test design #${nextCount}`,
+      promptText: `Test design #${nextId}`,
     };
     setState({
       ...state,

@@ -70,6 +70,7 @@ class KnowledgeQuery(BaseModel):
 
 # TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
 class DesignEntry(BaseModel):
+    id: int
     imageUrl: str
     promptText: str
 
