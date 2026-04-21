@@ -34,8 +34,11 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
           {designs.map((entry, index) => (
             <div
               key={index}
-              className="bg-white/20 backdrop-blur-md rounded-2xl shadow-xl p-4"
+              className="relative bg-white/20 backdrop-blur-md rounded-2xl shadow-xl p-4"
             >
+              <span className="absolute top-2 left-3 text-xs font-semibold text-gray-300">
+                #{entry.id}
+              </span>
               <div className="flex justify-center">
                 <img
                   src={entry.imageUrl}
