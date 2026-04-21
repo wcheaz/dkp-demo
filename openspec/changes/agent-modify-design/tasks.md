@@ -20,4 +20,4 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run full build to verify no type errors or compilation failures across all changed files. **Done when:** `npm run build` completes with exit code 0. **Stop and hand off if:** build errors persist after two fix attempts.
+- [x] 4.1 Run full build to verify no type errors or compilation failures across all changed files. **Done when:** `npm run build` completes with exit code 0. **Stop and hand off if:** build errors persist after two fix attempts.
