@@ -137,6 +137,13 @@ agent = Agent(
         "load calculations, materials, truss designs, or engineering specifications.\n"
         # TEMPORARY - add_design_entry tool instruction in system prompt; will be removed when real image generation is integrated
         "- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n\n"
+        "- modify_design_entry: Modify an existing design entry's image and/or prompt text.\n"
+        "  Parameters:\n"
+        "    - design_id (required, number): The 1-based ID of the design entry to modify.\n"
+        '    - image_name (optional, string): The filename of the image to set. Must be one of: "design-alpha.svg", "design-beta.svg".\n'
+        "    - prompt_text (optional, string): The new prompt text.\n"
+        "  At least one of image_name or prompt_text must be provided.\n"
+        '  Available images: "design-alpha.svg", "design-beta.svg".\n\n'
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),

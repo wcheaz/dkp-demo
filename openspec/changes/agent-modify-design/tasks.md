@@ -16,7 +16,7 @@
 
 - [x] 3.1 Update `DesignComponent` (`src/components/design-component.tsx`) to display each design entry's `id` as a visible label (e.g., `#1`) in the card. **Done when:** each rendered card shows the entry's ID. **Verify by:** `npm run build` succeeds and the component renders IDs visibly.
 
-- [ ] 3.2 Update the agent system prompt in `agent/src/agent.py` to document the `modify_design_entry` tool, its parameters, and the list of available images (`design-alpha.svg`, `design-beta.svg`). **Done when:** the system prompt string contains `"modify_design_entry"`, `"design-alpha.svg"`, and `"design-beta.svg"`. **Verify by:** reading `agent/src/agent.py` and confirming the system prompt includes the tool documentation.
+- [x] 3.2 Update the agent system prompt in `agent/src/agent.py` to document the `modify_design_entry` tool, its parameters, and the list of available images (`design-alpha.svg`, `design-beta.svg`). **Done when:** the system prompt string contains `"modify_design_entry"`, `"design-alpha.svg"`, and `"design-beta.svg"`. **Verify by:** reading `agent/src/agent.py` and confirming the system prompt includes the tool documentation.
 
 ## 4. Verification
 
