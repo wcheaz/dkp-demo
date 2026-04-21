@@ -40,3 +40,4 @@
 - [ ] 4.2 End-to-end smoke test: start the application (`npm run dev`), send a message to the agent (e.g., "hello"), and verify that a new design card appears in the UI with `promptText: "hello"` and the placeholder image. Send a second message (e.g., "second test") and verify a second card appears.
   **Done when:** Two design cards are visible in the UI with the correct prompt texts.
   **Stop and hand off if:** The frontend tool is not called by the agent (check browser console and agent logs for tool call events), or the state update does not render (check React DevTools for state changes).
+  **HANDOFF:** Dev server compiles cleanly (verified). Requires manual browser testing — start with `npm run dev`, open http://localhost:3000, send messages to agent, verify design cards appear.

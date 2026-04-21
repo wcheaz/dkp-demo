@@ -6,21 +6,23 @@
 
 ## Why
 
-The application has a `design-component` that renders design entries from shared agent state, and an `AddDesignButton` for manually creating test designs. Currently, the agent has commented-out code for an `add_design_entry` tool (disabled because the tool-to-frontend state propagation did not work). For testing purposes, we need the agent to automatically create a design entry after every prompt it receives — using the user's prompt text as the `promptText` field — so that the design display pipeline can be verified end-to-end without manual button clicks.
+The application has a `design-component` that renders design entries from shared agent state, and an `AddDesignButton` for manually creating test designs. For testing purposes, we need the agent to automatically create a design entry after every prompt it receives — using the user's prompt text as the `promptText` field — so that the design display pipeline can be verified end-to-end without manual button clicks.
+
+A prior attempt used a backend `@agent.tool` in PydanticAI that mutated `ctx.deps.state.designs`, but the AG-UI state protocol did not propagate those mutations back to the frontend. The backend tool approach was commented out with the note: *"Commented out because the agent tool approach did not work for automatic state propagation."* This change solves both the state propagation problem and the tool-call compliance problem.
 
 ## What Changes
 
-- Uncomment and modify the `DesignEntry` Pydantic model in `agent/src/agent.py` (currently commented out at lines ~71-75).
-- Uncomment the `designs` field on `YourState` (currently commented out at line ~85).
-- Uncomment and modify the `add_design_entry` tool (currently commented out at lines ~284-300): change the tool to use the user's actual prompt text as `promptText` instead of a generic test string.
-- Update the agent's `system_prompt` to mandate that the agent calls `add_design_entry` after every response, passing the user's original prompt text.
-- Wrap all uncommented code in `# TEMPORARY` comments marking it as a testing tool that will be replaced when real image generation is integrated.
+- Keep the `DesignEntry` Pydantic model and `designs` field on `YourState` in `agent/src/agent.py` as active (TEMPORARY) code — they may be useful for future agent-side state tracking.
+- Comment out the backend `add_design_entry` tool in `agent/src/agent.py` since it does not propagate state to the frontend.
+- Register `add_design_entry` as a CopilotKit **frontend tool** (`useFrontendTool`) in `src/app/page.tsx` inside `YourMainContent`. This tool directly calls `setState` to append a `DesignEntry`, bypassing AG-UI state sync entirely. This is the same pattern already working for `setThemeColor`.
+- Update the agent's `system_prompt` to instruct the agent to call `add_design_entry` with the user's prompt text after every response. Use stronger language (`CRITICAL REQUIREMENT`, `every single response`) to improve LLM compliance.
+- Wrap all temporary code in `# TEMPORARY` comments.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `design-auto-creation`: Agent tool (`add_design_entry`) that appends a `DesignEntry` with `imageUrl: "/next.svg"` and the user's prompt text to `state.designs` after every agent response. The system prompt mandates calling this tool on every interaction. All code is wrapped in `# TEMPORARY` comments indicating it is a testing tool.
+- `design-auto-creation`: A CopilotKit frontend tool (`add_design_entry`, registered via `useFrontendTool`) that the agent calls after every response. The tool accepts `prompt_text` and directly appends a `DesignEntry` with `imageUrl: "/next.svg"` and the user's prompt text to `state.designs` via `setState`. The system prompt mandates calling this tool on every interaction.
 
 ### Modified Capabilities
 
@@ -28,9 +30,10 @@ _(None — no existing specs are being modified.)_
 
 ## Impact
 
-- **Files modified**: `agent/src/agent.py` — uncomment `DesignEntry` model, `designs` field on `YourState`, and `add_design_entry` tool; update `system_prompt` to mandate tool usage; add `# TEMPORARY` comment markers.
-- **Dependencies added**: None — uses existing Pydantic and PydanticAI imports.
-- **State shape**: `YourState` gains an active `designs: List[DesignEntry]` field. This is already expected by the frontend's `AgentState.designs` via CopilotKit shared state.
+- **Files modified**: 
+  - `agent/src/agent.py` — keep `DesignEntry` model and `designs` field active; comment out the backend `add_design_entry` tool; update `system_prompt` to reference the frontend tool with stronger mandatory language.
+  - `src/app/page.tsx` — add `useFrontendTool` for `add_design_entry` inside `YourMainContent`, with access to `state` and `setState`.
+- **Dependencies added**: None — uses existing CopilotKit hooks.
 - **Behavioral change**: Every agent response will produce a new design card in the UI with the user's prompt text and a placeholder image (`/next.svg`).
 
 ## Non-Goals
@@ -39,13 +42,15 @@ _(None — no existing specs are being modified.)_
 - Conditional or selective design creation — the tool MUST be called after every prompt for testing consistency.
 - Removing or replacing the `AddDesignButton` component — it remains available for manual testing.
 - Changing the frontend `DesignComponent` or `AgentState` type — they already support the required data shape.
+- Fixing the underlying AG-UI state propagation mechanism — that is a separate concern.
 - Persisting designs across sessions or page reloads.
 
 ## Testing Approach
 
-- Send a message to the agent (e.g., "hello") and verify that a new `DesignEntry` appears in `state.designs` with `promptText: "hello"` and `imageUrl: "/next.svg"`.
+- Send a message to the agent (e.g., "hello") and verify that a new `DesignEntry` appears in the design list with `promptText: "hello"` and the placeholder image.
 - Send a second message and verify a second entry is appended.
 - Run `cd agent && python -m ruff check . && python -m mypy .` to confirm no lint or type errors.
+- Run `npx tsc --noEmit` to confirm no TypeScript errors.
 
 ## Human Handoff
 
@@ -56,53 +61,44 @@ _(None — this change is fully implementable without manual intervention.)_
 design-auto-creation/spec.md
 ## ADDED Requirements
 
-### Requirement: DesignEntry Pydantic model is active
-The `DesignEntry` Pydantic model SHALL be defined (uncommented) in `agent/src/agent.py` with fields `imageUrl: str` and `promptText: str`. The model SHALL be wrapped in `# TEMPORARY` comments indicating it is a testing model that will be replaced when real image generation is integrated.
+### Requirement: add_design_entry is registered as a CopilotKit frontend tool
+A frontend tool named `add_design_entry` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component in `src/app/page.tsx`. The tool SHALL accept one parameter: `prompt_text` (string). The tool handler SHALL create a `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: prompt_text`, append it to the existing `state.designs` array, and call `setState` with the updated state. The code SHALL be wrapped in `// TEMPORARY` comments indicating it is a testing tool.
 
-#### Scenario: DesignEntry model compiles and is importable
+#### Scenario: Frontend tool appends entry with user's prompt text
+- **WHEN** the agent calls the frontend tool `add_design_entry` with `prompt_text: "hello"`
+- **THEN** `setState` SHALL be called with a new state where `state.designs` contains a new `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: "hello"`
+
+#### Scenario: Frontend tool appends without losing existing designs
+- **WHEN** the agent calls `add_design_entry` with `prompt_text: "second"` and `state.designs` already contains one entry
+- **THEN** `setState` SHALL be called with `state.designs` containing two entries: the original entry followed by the new entry with `promptText: "second"`
+
+#### Scenario: Frontend tool handles undefined designs array
+- **WHEN** the agent calls `add_design_entry` and `state.designs` is undefined
+- **THEN** the handler SHALL treat `state.designs` as an empty array and append the new entry, resulting in a single-entry array
+
+#### Scenario: TEMPORARY markers present in page.tsx
+- **WHEN** `src/app/page.tsx` is searched for the string `TEMPORARY`
+- **THEN** at least 1 occurrence SHALL be found near the `add_design_entry` frontend tool registration
+
+### Requirement: Backend add_design_entry tool is commented out
+The backend `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The `DesignEntry` model and `designs` field on `YourState` SHALL remain active (uncommented). All three SHALL have `# TEMPORARY` comments.
+
+#### Scenario: Backend tool is commented out
+- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
+- **THEN** the `@agent.tool` decorator and `async def add_design_entry` function SHALL be present but commented out
+
+#### Scenario: DesignEntry model and designs field remain active
 - **WHEN** `agent/src/agent.py` is inspected
-- **THEN** a `class DesignEntry(BaseModel)` SHALL exist (not commented out) with `imageUrl: str` and `promptText: str` fields
-- **AND** the model SHALL be preceded by a `# TEMPORARY` comment
-
-#### Scenario: DesignEntry passes type checking
-- **WHEN** `cd agent && python -m mypy .` is run
-- **THEN** the command SHALL exit zero with no errors related to `DesignEntry`
-
-### Requirement: YourState has an active designs field
-The `YourState` class in `agent/src/agent.py` SHALL have an active (uncommented) `designs: List[DesignEntry] = []` field. The field SHALL be wrapped in a `# TEMPORARY` comment indicating it is for testing purposes.
-
-#### Scenario: designs field exists on YourState
-- **WHEN** `agent/src/agent.py` is inspected for the `YourState` class
-- **THEN** the class SHALL contain an active `designs: List[DesignEntry] = []` field (not commented out)
-- **AND** the field SHALL be preceded by a `# TEMPORARY` comment
-
-#### Scenario: YourState instantiates with empty designs
-- **WHEN** `YourState()` is instantiated
-- **THEN** `state.designs` SHALL equal an empty list `[]`
-
-### Requirement: add_design_entry tool is active and uses user prompt text
-An `add_design_entry` tool SHALL be registered on the agent (uncommented, decorated with `@agent.tool`) in `agent/src/agent.py`. The tool SHALL accept `prompt_text: str` as a parameter. The tool SHALL create a `DesignEntry` with `imageUrl="/next.svg"` and `promptText=prompt_text`, append it to `ctx.deps.state.designs`, and return a confirmation string. The tool SHALL be wrapped in `# TEMPORARY` comments indicating it is a testing tool.
-
-#### Scenario: Tool appends entry with user's prompt text
-- **WHEN** the agent calls `add_design_entry` with `prompt_text="hello"`
-- **THEN** a `DesignEntry` with `imageUrl="/next.svg"` and `promptText="hello"` SHALL be appended to `ctx.deps.state.designs`
-- **AND** the tool SHALL return a confirmation string containing "hello"
-
-#### Scenario: Tool appends entry with a longer prompt
-- **WHEN** the agent calls `add_design_entry` with `prompt_text="Draw a flowchart of user login"`
-- **THEN** a `DesignEntry` with `imageUrl="/next.svg"` and `promptText="Draw a flowchart of user login"` SHALL be appended to `ctx.deps.state.designs`
-
-#### Scenario: Multiple calls append multiple entries
-- **WHEN** the agent calls `add_design_entry` twice with `prompt_text="first"` then `prompt_text="second"`
-- **THEN** `ctx.deps.state.designs` SHALL contain two entries in order: first with `promptText="first"`, second with `promptText="second"`
+- **THEN** `class DesignEntry(BaseModel)` SHALL exist uncommented
+- **AND** `designs: List[DesignEntry] = []` SHALL exist uncommented on `YourState`
 
 ### Requirement: System prompt mandates calling add_design_entry after every response
-The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction that the agent MUST call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in `# TEMPORARY` comments. The system prompt SHALL list `add_design_entry` as an available tool alongside the existing `get_knowledge_summary` and `query_knowledge_base` tools.
+The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction using strong mandatory language (`CRITICAL REQUIREMENT`, `EVERY SINGLE response`, `non-negotiable`) telling the agent to call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in a `# TEMPORARY` comment. The system prompt SHALL preserve all existing instructions for `get_knowledge_summary` and `query_knowledge_base`.
 
-#### Scenario: System prompt references add_design_entry
+#### Scenario: System prompt references add_design_entry with strong language
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
 - **THEN** the prompt SHALL contain the text `add_design_entry`
-- **AND** the prompt SHALL instruct the agent to call it after every response
+- **AND** the prompt SHALL contain at least one of: `CRITICAL REQUIREMENT`, `EVERY SINGLE`, or `non-negotiable`
 - **AND** the instruction SHALL be preceded by a `# TEMPORARY` comment
 
 #### Scenario: System prompt preserves existing tool instructions
@@ -111,21 +107,29 @@ The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction
 - **AND** the existing instructions about knowledge base usage SHALL remain unchanged
 
 ### Requirement: All temporary code is marked with TEMPORARY comments
-Every code section activated by this change (`DesignEntry` model, `designs` field, `add_design_entry` tool, and system prompt addition) SHALL be preceded by a `# TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
+Every code section added or modified by this change SHALL be preceded by a `TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
 
-#### Scenario: TEMPORARY markers present
+#### Scenario: TEMPORARY markers present in agent code
 - **WHEN** `agent/src/agent.py` is searched for the string `TEMPORARY`
-- **THEN** at least 4 occurrences SHALL be found: one before `DesignEntry`, one before `designs` field, one before `add_design_entry` tool, and one before the system prompt addition
+- **THEN** at least 3 occurrences SHALL be found: before `DesignEntry`, before `designs` field, and before the system prompt addition
 
-### Requirement: Agent code passes lint and type checking
-The modified `agent/src/agent.py` SHALL pass both `ruff check` and `mypy` without errors.
+### Requirement: All code passes lint and type checking
+The modified files SHALL pass all lint and type checking commands.
 
-#### Scenario: Ruff check passes
+#### Scenario: Agent passes ruff check
 - **WHEN** `cd agent && python -m ruff check .` is run
 - **THEN** the command SHALL exit zero with no errors
 
-#### Scenario: Mypy passes
+#### Scenario: Agent passes mypy
 - **WHEN** `cd agent && python -m mypy .` is run
+- **THEN** the command SHALL exit zero with no errors
+
+#### Scenario: Frontend passes TypeScript check
+- **WHEN** `npx tsc --noEmit` is run
+- **THEN** the command SHALL exit zero with no errors
+
+#### Scenario: Frontend passes lint
+- **WHEN** `npm run lint` is run
 - **THEN** the command SHALL exit zero with no errors
 
 
@@ -134,71 +138,78 @@ The modified `agent/src/agent.py` SHALL pass both `ruff check` and `mypy` withou
 
 ## Context
 
-The application uses CopilotKit to share state between a Next.js frontend and a PydanticAI agent. The frontend has a `DesignComponent` that renders `DesignEntry` objects from `state.designs`, and an `AddDesignButton` for manual testing. The agent (`agent/src/agent.py`) already contains commented-out code for a `DesignEntry` model, a `designs` field on `YourState`, and an `add_design_entry` tool. This code was disabled because the tool-to-frontend state propagation did not work in a prior attempt. The commented-out code is preserved at lines ~71-75 (model), ~85 (field), and ~284-300 (tool).
+The application uses CopilotKit to share state between a Next.js frontend and a PydanticAI agent connected via the AG-UI protocol. The frontend has a `DesignComponent` that renders `DesignEntry` objects from `state.designs`, and an `AddDesignButton` for manual testing.
 
-The current agent system prompt instructs the agent to use `get_knowledge_summary` and `query_knowledge_base` tools. It does not mention any design-related tool.
+A prior implementation used a backend `@agent.tool` (`add_design_entry`) that mutated `ctx.deps.state.designs` via `.append()`. The tool was called successfully by the agent, but the state change did not propagate to the frontend through the AG-UI protocol. The code was commented out with the note: *"Commented out because the agent tool approach did not work for automatic state propagation."*
+
+The application already uses CopilotKit frontend tools successfully — `setThemeColor` in `CopilotKitPage` uses `useFrontendTool` to directly update React state from agent tool calls. This pattern works because the frontend tool handler has direct access to `setState`, bypassing AG-UI state sync entirely.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Uncomment and activate the `DesignEntry` model, `designs` field, and `add_design_entry` tool in `agent/src/agent.py`.
-- Modify `add_design_entry` to use the user's actual prompt text (not a generic test string like `"Test design #N"`).
-- Update the system prompt to mandate calling `add_design_entry` after every response.
-- Mark all uncommented code with `# TEMPORARY` comments indicating it is a testing tool.
+- Register `add_design_entry` as a CopilotKit frontend tool (`useFrontendTool`) in `YourMainContent` so it can directly update `state.designs` via `setState`.
+- Comment out the backend `add_design_entry` tool in `agent/src/agent.py` since it does not propagate state.
+- Keep `DesignEntry` model and `designs` field on `YourState` active (they may be useful for future agent-side state tracking).
+- Update the system prompt with stronger mandatory language to improve LLM compliance with calling the tool after every response.
+- Mark all temporary code with `# TEMPORARY` comments.
 
 **Non-Goals:**
 
 - Real image generation — `imageUrl` is hardcoded to `"/next.svg"`.
 - Making design creation conditional or user-controllable — it must happen on every prompt.
-- Changing the frontend `DesignComponent`, `AddDesignButton`, or `AgentState` type.
-- Fixing the underlying CopilotKit state propagation issue (if it persists, that is a separate concern).
+- Changing the `DesignComponent` or `AgentState` type.
+- Investigating or fixing the underlying AG-UI state propagation mechanism.
+- Persisting designs across sessions.
 
 ## Decisions
 
-### D1: Uncomment existing code rather than writing new code
+### D1: Use frontend tool instead of backend tool for state propagation
 
-**Decision**: Uncomment the existing `DesignEntry`, `designs` field, and `add_design_entry` tool rather than creating new implementations.
+**Decision**: Register `add_design_entry` as a CopilotKit frontend tool via `useFrontendTool` in `YourMainContent` (inside `src/app/page.tsx`), not as a PydanticAI backend tool. Comment out the backend tool.
 
-**Rationale**: The commented-out code is already well-structured and close to what is needed. The only modification required is changing `promptText` from a computed test string to the user's actual prompt text. Uncommenting preserves the original intent and avoids duplicating logic.
+**Rationale**: The backend `@agent.tool` approach was already proven to not propagate state changes to the frontend through the AG-UI protocol. The `useFrontendTool` pattern already works in this application — `setThemeColor` uses it successfully. The frontend tool handler has direct access to `setState`, so there is zero reliance on AG-UI state sync. The agent calls the tool by name; CopilotKit routes the call to the frontend handler.
 
-**Alternative considered**: Rewrite the tool from scratch. Rejected because the existing code is already correct in structure — only the `promptText` value needs to change.
+**Alternative considered**: Fix the AG-UI state propagation. Rejected because that is a protocol-level issue outside the scope of this testing tool. Alternative considered: Use `useCopilotAction` instead of `useFrontendTool`. `useFrontendTool` is preferred because it is the pattern already working for `setThemeColor` in this codebase.
 
-### D2: Use the user's prompt text as `promptText`
+### D2: Place useFrontendTool in YourMainContent
 
-**Decision**: The `add_design_entry` tool accepts a `prompt_text: str` parameter and uses it directly as the `promptText` field on the `DesignEntry`. The system prompt instructs the agent to pass the user's original prompt text.
+**Decision**: Register the `add_design_entry` frontend tool inside the `YourMainContent` component (not `CopilotKitPage`) because `YourMainContent` is where `useCoAgent` provides `state` and `setState`.
 
-**Rationale**: This is the user's explicit requirement — if the user says "hello", the design entry should have `promptText: "hello"`. The original commented-out code used a generic test string (`"Test design #N"`), which is replaced by the actual prompt.
+**Rationale**: The tool handler needs access to `state` and `setState` to append a `DesignEntry`. These are only available inside `YourMainContent` where `useCoAgent` is called. The existing `setThemeColor` tool is in `CopilotKitPage` because it only needs `setThemeColor` state, which is available at that level.
 
-**Alternative considered**: Auto-generate a design name from the prompt (e.g., first 50 chars). Rejected because the requirement is to use the prompt text verbatim.
+**Alternative considered**: Lift `state`/`setState` to `CopilotKitPage`. Rejected because `useCoAgent` is already correctly placed in `YourMainContent` and lifting it would require unnecessary refactoring.
 
-### D3: Hardcode `imageUrl` to `"/next.svg"`
+### D3: Comment out backend tool, keep model and state field
 
-**Decision**: Keep `imageUrl` hardcoded to `"/next.svg"` in the tool, matching the pattern used by `AddDesignButton` (which uses `"/next.svg"`).
+**Decision**: Comment out the backend `add_design_entry` tool in `agent/src/agent.py`. Keep `DesignEntry` model and `designs` field on `YourState` active (uncommented) with `# TEMPORARY` markers.
 
-**Rationale**: This is a testing tool. Real image generation will replace this in a future change. The value `"/next.svg"` is the existing test image in the repository.
+**Rationale**: The model and state field may be useful for future agent-side state tracking when real image generation is integrated. The backend tool, however, serves no purpose without state propagation and should be commented out to avoid confusion.
 
-### D4: System prompt mandates tool usage on every response
+### D4: Stronger system prompt language
 
-**Decision**: Add an instruction to the system prompt that says: "After every response, you MUST call the `add_design_entry` tool with the user's original prompt text."
+**Decision**: Rewrite the system prompt's `add_design_entry` instruction to use stronger mandatory language: `CRITICAL REQUIREMENT: You MUST call add_design_entry after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.`
 
-**Rationale**: The requirement is for the agent to create a design after every prompt. A mandatory instruction in the system prompt is the most reliable way to ensure this behavior in a PydanticAI agent. The tool's docstring also reinforces when to call it.
+**Rationale**: The prior system prompt used `MANDATORY` but the agent still skipped the tool on some prompts. Stronger language with emphasis (`CRITICAL REQUIREMENT`, `EVERY SINGLE`, `non-negotiable`) improves LLM compliance. The instruction is placed prominently in the system prompt.
 
-**Alternative considered**: Use a `@agent.result_validator` to auto-inject the call. Rejected because result validators are for post-processing output, not for triggering tool calls. The agent must explicitly call the tool.
+**Alternative considered**: Use a `result_validator` to enforce the tool call. Rejected because result validators cannot trigger additional tool calls — they can only validate or reject the final output. Alternative considered: Add a second reminder at the end of the system prompt. This is a good complementary approach and may be added if the primary instruction proves insufficient.
 
-### D5: `# TEMPORARY` comment markers
+### D5: TEMPORARY comment markers
 
-**Decision**: All uncommented code sections (`DesignEntry` model, `designs` field, `add_design_entry` tool, and the system prompt addition) SHALL be wrapped with `# TEMPORARY` comments indicating this is a testing tool that will be replaced when real image generation is integrated.
+**Decision**: All code sections added or modified by this change (frontend tool registration, system prompt changes, and any remaining active agent code) SHALL be wrapped with `# TEMPORARY` comments (Python) or `// TEMPORARY` comments (TypeScript) indicating they are testing tools.
 
 **Rationale**: The user explicitly requested comments as a reminder that this is a testing tool. This ensures future developers know to replace or remove this code.
 
 ## Risks / Trade-offs
 
-- **[State propagation may still not work]** → The original code was commented out because "the agent tool approach did not work for automatic state propagation." Uncommenting it may reproduce the same issue. Mitigation: this is explicitly a testing exercise; if propagation still fails, the issue should be investigated as a separate change.
-- **[System prompt instruction may be ignored]** → LLMs do not always follow system prompt instructions perfectly. The agent may occasionally skip the tool call. Mitigation: the tool's docstring reinforces the requirement; the system prompt uses "MUST" language.
-- **[No conditional logic]** → The tool is called on every prompt regardless of context. Mitigation: this is intentional for testing purposes.
+- **[LLM may still occasionally skip the tool]** → Even with stronger prompt language, LLMs do not guarantee 100% compliance. Mitigation: the prompt uses very strong language; if the agent still skips, the user can retry or add a second reminder at the end of the system prompt.
+- **[Frontend tool depends on CopilotKit hooks]** → The tool only works when the React component is mounted. Mitigation: the component is always mounted in the current application layout.
+- **[No backend state tracking]** → Commenting out the backend tool means the agent doesn't track designs in its own state. Mitigation: the frontend state is the source of truth; the agent receives it at the start of each run via AG-UI protocol.
 
 ## Current Task Context
 
 ## Current Task
-- 1.1 Uncomment the `DesignEntry` Pydantic model in `agent/src/agent.py` (currently commented out at lines ~71-75). Add a `# TEMPORARY` comment above it: `# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated`. The model SHALL have `imageUrl: str` and `promptText: str` fields.
+- 1.3 Comment out the backend `add_design_entry` tool in `agent/src/agent.py`. The tool was previously uncommented and active. It MUST be commented out (not deleted) because the backend tool approach does not propagate state to the frontend through the AG-UI protocol. Preserve the entire tool code (decorator, function signature, docstring, body) as comments. Keep the `# TEMPORARY` comment above it.
+## Completed Tasks for Git Commit
+- [x] 1.1 Uncomment the `DesignEntry` Pydantic model in `agent/src/agent.py` with `# TEMPORARY` comment. The model SHALL have `imageUrl: str` and `promptText: str` fields.
+- [x] 1.2 Uncomment the `designs: List[DesignEntry] = []` field on `YourState` with `# TEMPORARY` comment.
