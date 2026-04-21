@@ -324,6 +324,59 @@ function YourMainContent({
       setState({ ...state, designs: [...designs, newEntry] });
     },
   });
+  useFrontendTool({
+    name: "modify_design_entry",
+    parameters: [
+      {
+        name: "design_id",
+        type: "number",
+        description: "The 1-based ID of the design entry to modify",
+        required: true,
+      },
+      {
+        name: "image_name",
+        type: "string",
+        description:
+          'The filename of the image to set (e.g. "design-alpha.svg" or "design-beta.svg"). Optional.',
+        required: false,
+      },
+      {
+        name: "prompt_text",
+        type: "string",
+        description: "The new prompt text. Optional.",
+        required: false,
+      },
+    ],
+    handler({ design_id, image_name, prompt_text }) {
+      const ALLOWED_IMAGES = ["design-alpha.svg", "design-beta.svg"];
+
+      if (!image_name && !prompt_text) {
+        return "Error: at least one of image_name or prompt_text must be provided.";
+      }
+
+      if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
+        return `Error: invalid image_name "${image_name}". Valid images: ${ALLOWED_IMAGES.join(", ")}.`;
+      }
+
+      const designs = state.designs ?? [];
+      const index = designs.findIndex((d) => d.id === design_id);
+
+      if (index === -1) {
+        const validIds = designs.map((d) => d.id);
+        return `Error: design_id ${design_id} not found. Valid IDs: [${validIds.join(", ")}].`;
+      }
+
+      const updated = [...designs];
+      updated[index] = {
+        ...updated[index],
+        ...(image_name ? { imageUrl: `/${image_name}` } : {}),
+        ...(prompt_text ? { promptText: prompt_text } : {}),
+      };
+      setState({ ...state, designs: updated });
+      return `Design entry #${design_id} updated successfully.`;
+    },
+  });
+
   // END TEMPORARY
 
   useCopilotReadable({
