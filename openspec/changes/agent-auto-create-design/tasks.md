@@ -20,13 +20,13 @@
 
 ## 3. Strengthen System Prompt for Mandatory Tool Compliance
 
-- [ ] 3.1 Update the agent's `system_prompt` in `agent/src/agent.py` to use stronger mandatory language for the `add_design_entry` instruction. Replace the current `"- add_design_entry: Call this after EVERY response with the user's original prompt text. This is MANDATORY.\n"` with: `"- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n"`. Keep the `# TEMPORARY` comment. Preserve all existing `get_knowledge_summary` and `query_knowledge_base` instructions unchanged.
+- [x] 3.1 Update the agent's `system_prompt` in `agent/src/agent.py` to use stronger mandatory language for the `add_design_entry` instruction. Replace the current `"- add_design_entry: Call this after EVERY response with the user's original prompt text. This is MANDATORY.\n"` with: `"- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n"`. Keep the `# TEMPORARY` comment. Preserve all existing `get_knowledge_summary` and `query_knowledge_base` instructions unchanged.
   **Done when:** `grep 'add_design_entry' agent/src/agent.py` shows the system prompt contains `CRITICAL REQUIREMENT` or `EVERY SINGLE`, the existing knowledge base tool instructions are unchanged, and the instruction is preceded by a `# TEMPORARY` comment.
   **Stop and hand off if:** The system prompt string formatting breaks (e.g., unterminated string or concatenation error).
 
 ## 4. Final Verification
 
-- [ ] 4.1 Run `cd agent && python -m ruff check . && python -m mypy .` and `npx tsc --noEmit && npm run lint`. Confirm all exit zero. Verify structural requirements:
+- [x] 4.1 Run `cd agent && python -m ruff check . && python -m mypy .` and `npx tsc --noEmit && npm run lint`. Confirm all exit zero. Verify structural requirements:
   - `grep -c 'class DesignEntry' agent/src/agent.py` returns 1 (active model)
   - `grep -c 'async def add_design_entry' agent/src/agent.py` returns 0 (backend tool commented out)
   - `grep -c 'add_design_entry' agent/src/agent.py` returns at least 2 (commented-out tool + system prompt reference)
