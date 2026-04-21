@@ -282,21 +282,22 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
 
 
 # TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated
-@agent.tool
-async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
-    """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
-
-    Args:
-        ctx: Agent context with state
-        prompt_text: The user's original prompt text
-
-    Returns:
-        Confirmation string
-    """
-    ctx.deps.state.designs.append(
-        DesignEntry(imageUrl="/next.svg", promptText=prompt_text)
-    )
-    return f"Design entry added for prompt: {prompt_text}"
+# Commented out because the agent tool approach did not work for automatic state propagation.
+# @agent.tool
+# async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
+#     """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
+#
+#     Args:
+#         ctx: Agent context with state
+#         prompt_text: The user's original prompt text
+#
+#     Returns:
+#         Confirmation string
+#     """
+#     ctx.deps.state.designs.append(
+#         DesignEntry(imageUrl="/next.svg", promptText=prompt_text)
+#     )
+#     return f"Design entry added for prompt: {prompt_text}"
 
 
 # ============================================================================

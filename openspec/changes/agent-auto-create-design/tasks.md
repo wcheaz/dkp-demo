@@ -8,7 +8,7 @@
   **Done when:** `grep 'designs' agent/src/agent.py` shows an uncommented field on `YourState`, and the line above it contains `TEMPORARY`.
   **Stop and hand off if:** Uncommenting causes import resolution errors.
 
-- [ ] 1.3 Comment out the backend `add_design_entry` tool in `agent/src/agent.py`. The tool was previously uncommented and active. It MUST be commented out (not deleted) because the backend tool approach does not propagate state to the frontend through the AG-UI protocol. Preserve the entire tool code (decorator, function signature, docstring, body) as comments. Keep the `# TEMPORARY` comment above it.
+- [x] 1.3 Comment out the backend `add_design_entry` tool in `agent/src/agent.py`. The tool was previously uncommented and active. It MUST be commented out (not deleted) because the backend tool approach does not propagate state to the frontend through the AG-UI protocol. Preserve the entire tool code (decorator, function signature, docstring, body) as comments. Keep the `# TEMPORARY` comment above it.
   **Done when:** `grep -c 'async def add_design_entry' agent/src/agent.py` returns 0 (no uncommented definition), `grep -c 'add_design_entry' agent/src/agent.py` returns at least 1 (commented-out code present).
   **Stop and hand off if:** Commenting out the tool causes other agent code to fail (e.g., import references).
 
