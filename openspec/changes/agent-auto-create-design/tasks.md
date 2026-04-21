@@ -16,7 +16,7 @@
 
 ## 3. Update System Prompt
 
-- [ ] 3.1 Update the agent's `system_prompt` in `agent/src/agent.py` to include `add_design_entry` as an available tool and mandate its usage after every response. Add a `# TEMPORARY` comment inline before the addition. The prompt addition SHALL read: `"- add_design_entry: Call this after EVERY response with the user's original prompt text. This is MANDATORY.\n"`. Insert this into the existing tool list (after the `query_knowledge_base` description, before the "Always use" instruction).
+- [x] 3.1 Update the agent's `system_prompt` in `agent/src/agent.py` to include `add_design_entry` as an available tool and mandate its usage after every response. Add a `# TEMPORARY` comment inline before the addition. The prompt addition SHALL read: `"- add_design_entry: Call this after EVERY response with the user's original prompt text. This is MANDATORY.\n"`. Insert this into the existing tool list (after the `query_knowledge_base` description, before the "Always use" instruction).
   **Done when:** `grep -c 'add_design_entry' agent/src/agent.py` returns at least 3 (tool definition + docstring + system prompt reference), the system prompt contains `MANDATORY` or `MUST` language about calling the tool, and the existing `get_knowledge_summary` and `query_knowledge_base` instructions are unchanged.
   **Stop and hand off if:** The system prompt string formatting breaks (e.g., unterminated string or concatenation error).
 

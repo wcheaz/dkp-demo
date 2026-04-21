@@ -133,7 +133,9 @@ agent = Agent(
         "- get_knowledge_summary: Use this when the user asks general questions about what "
         'information is available (e.g., "What projects do you have?", "What do you know?").\n'
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
-        "load calculations, materials, truss designs, or engineering specifications.\n\n"
+        "load calculations, materials, truss designs, or engineering specifications.\n"
+        # TEMPORARY - add_design_entry tool instruction in system prompt; will be removed when real image generation is integrated
+        "- add_design_entry: Call this after EVERY response with the user's original prompt text. This is MANDATORY.\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),
