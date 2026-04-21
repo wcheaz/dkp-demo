@@ -22,6 +22,6 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run `cd agent && python -m ruff check . && python -m mypy .` and confirm both exit zero. Verify structural requirements: `grep -c 'class DesignEntry' agent/src/agent.py` returns 1, `grep -c 'async def add_design_entry' agent/src/agent.py` returns 1, `grep -c 'TEMPORARY' agent/src/agent.py` returns at least 4, and `grep 'add_design_entry' agent/src/agent.py` shows the tool in both the definition and the system prompt.
+- [x] 4.1 Run `cd agent && python -m ruff check . && python -m mypy .` and confirm both exit zero. Verify structural requirements: `grep -c 'class DesignEntry' agent/src/agent.py` returns 1, `grep -c 'async def add_design_entry' agent/src/agent.py` returns 1, `grep -c 'TEMPORARY' agent/src/agent.py` returns at least 4, and `grep 'add_design_entry' agent/src/agent.py` shows the tool in both the definition and the system prompt.
   **Done when:** All commands exit zero and all grep assertions succeed.
   **Stop and hand off if:** Typecheck or lint fails in a file that was not modified by this change (pre-existing issue).
