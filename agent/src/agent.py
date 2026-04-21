@@ -69,10 +69,9 @@ class KnowledgeQuery(BaseModel):
 
 
 # TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
-# Commented out because the agent tool approach did not work for automatic state propagation.
-# class DesignEntry(BaseModel):
-#     imageUrl: str
-#     promptText: str
+class DesignEntry(BaseModel):
+    imageUrl: str
+    promptText: str
 
 
 class YourState(BaseModel):

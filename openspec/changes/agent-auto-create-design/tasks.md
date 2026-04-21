@@ -1,6 +1,6 @@
 ## 1. Activate DesignEntry Model and designs Field
 
-- [ ] 1.1 Uncomment the `DesignEntry` Pydantic model in `agent/src/agent.py` (currently commented out at lines ~71-75). Add a `# TEMPORARY` comment above it: `# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated`. The model SHALL have `imageUrl: str` and `promptText: str` fields.
+- [x] 1.1 Uncomment the `DesignEntry` Pydantic model in `agent/src/agent.py` (currently commented out at lines ~71-75). Add a `# TEMPORARY` comment above it: `# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated`. The model SHALL have `imageUrl: str` and `promptText: str` fields.
   **Done when:** `grep -c 'class DesignEntry' agent/src/agent.py` returns 1 (uncommented), and the line above it contains `TEMPORARY`.
   **Stop and hand off if:** Uncommenting causes import errors or type conflicts with existing code.
 
