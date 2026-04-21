@@ -1,52 +1,43 @@
 ## ADDED Requirements
 
-### Requirement: DesignEntry Pydantic model is active
-The `DesignEntry` Pydantic model SHALL be defined (uncommented) in `agent/src/agent.py` with fields `imageUrl: str` and `promptText: str`. The model SHALL be wrapped in `# TEMPORARY` comments indicating it is a testing model that will be replaced when real image generation is integrated.
+### Requirement: add_design_entry is registered as a CopilotKit frontend tool
+A frontend tool named `add_design_entry` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component in `src/app/page.tsx`. The tool SHALL accept one parameter: `prompt_text` (string). The tool handler SHALL create a `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: prompt_text`, append it to the existing `state.designs` array, and call `setState` with the updated state. The code SHALL be wrapped in `// TEMPORARY` comments indicating it is a testing tool.
 
-#### Scenario: DesignEntry model compiles and is importable
+#### Scenario: Frontend tool appends entry with user's prompt text
+- **WHEN** the agent calls the frontend tool `add_design_entry` with `prompt_text: "hello"`
+- **THEN** `setState` SHALL be called with a new state where `state.designs` contains a new `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: "hello"`
+
+#### Scenario: Frontend tool appends without losing existing designs
+- **WHEN** the agent calls `add_design_entry` with `prompt_text: "second"` and `state.designs` already contains one entry
+- **THEN** `setState` SHALL be called with `state.designs` containing two entries: the original entry followed by the new entry with `promptText: "second"`
+
+#### Scenario: Frontend tool handles undefined designs array
+- **WHEN** the agent calls `add_design_entry` and `state.designs` is undefined
+- **THEN** the handler SHALL treat `state.designs` as an empty array and append the new entry, resulting in a single-entry array
+
+#### Scenario: TEMPORARY markers present in page.tsx
+- **WHEN** `src/app/page.tsx` is searched for the string `TEMPORARY`
+- **THEN** at least 1 occurrence SHALL be found near the `add_design_entry` frontend tool registration
+
+### Requirement: Backend add_design_entry tool is commented out
+The backend `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The `DesignEntry` model and `designs` field on `YourState` SHALL remain active (uncommented). All three SHALL have `# TEMPORARY` comments.
+
+#### Scenario: Backend tool is commented out
+- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
+- **THEN** the `@agent.tool` decorator and `async def add_design_entry` function SHALL be present but commented out
+
+#### Scenario: DesignEntry model and designs field remain active
 - **WHEN** `agent/src/agent.py` is inspected
-- **THEN** a `class DesignEntry(BaseModel)` SHALL exist (not commented out) with `imageUrl: str` and `promptText: str` fields
-- **AND** the model SHALL be preceded by a `# TEMPORARY` comment
-
-#### Scenario: DesignEntry passes type checking
-- **WHEN** `cd agent && python -m mypy .` is run
-- **THEN** the command SHALL exit zero with no errors related to `DesignEntry`
-
-### Requirement: YourState has an active designs field
-The `YourState` class in `agent/src/agent.py` SHALL have an active (uncommented) `designs: List[DesignEntry] = []` field. The field SHALL be wrapped in a `# TEMPORARY` comment indicating it is for testing purposes.
-
-#### Scenario: designs field exists on YourState
-- **WHEN** `agent/src/agent.py` is inspected for the `YourState` class
-- **THEN** the class SHALL contain an active `designs: List[DesignEntry] = []` field (not commented out)
-- **AND** the field SHALL be preceded by a `# TEMPORARY` comment
-
-#### Scenario: YourState instantiates with empty designs
-- **WHEN** `YourState()` is instantiated
-- **THEN** `state.designs` SHALL equal an empty list `[]`
-
-### Requirement: add_design_entry tool is active and uses user prompt text
-An `add_design_entry` tool SHALL be registered on the agent (uncommented, decorated with `@agent.tool`) in `agent/src/agent.py`. The tool SHALL accept `prompt_text: str` as a parameter. The tool SHALL create a `DesignEntry` with `imageUrl="/next.svg"` and `promptText=prompt_text`, append it to `ctx.deps.state.designs`, and return a confirmation string. The tool SHALL be wrapped in `# TEMPORARY` comments indicating it is a testing tool.
-
-#### Scenario: Tool appends entry with user's prompt text
-- **WHEN** the agent calls `add_design_entry` with `prompt_text="hello"`
-- **THEN** a `DesignEntry` with `imageUrl="/next.svg"` and `promptText="hello"` SHALL be appended to `ctx.deps.state.designs`
-- **AND** the tool SHALL return a confirmation string containing "hello"
-
-#### Scenario: Tool appends entry with a longer prompt
-- **WHEN** the agent calls `add_design_entry` with `prompt_text="Draw a flowchart of user login"`
-- **THEN** a `DesignEntry` with `imageUrl="/next.svg"` and `promptText="Draw a flowchart of user login"` SHALL be appended to `ctx.deps.state.designs`
-
-#### Scenario: Multiple calls append multiple entries
-- **WHEN** the agent calls `add_design_entry` twice with `prompt_text="first"` then `prompt_text="second"`
-- **THEN** `ctx.deps.state.designs` SHALL contain two entries in order: first with `promptText="first"`, second with `promptText="second"`
+- **THEN** `class DesignEntry(BaseModel)` SHALL exist uncommented
+- **AND** `designs: List[DesignEntry] = []` SHALL exist uncommented on `YourState`
 
 ### Requirement: System prompt mandates calling add_design_entry after every response
-The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction that the agent MUST call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in `# TEMPORARY` comments. The system prompt SHALL list `add_design_entry` as an available tool alongside the existing `get_knowledge_summary` and `query_knowledge_base` tools.
+The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction using strong mandatory language (`CRITICAL REQUIREMENT`, `EVERY SINGLE response`, `non-negotiable`) telling the agent to call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in a `# TEMPORARY` comment. The system prompt SHALL preserve all existing instructions for `get_knowledge_summary` and `query_knowledge_base`.
 
-#### Scenario: System prompt references add_design_entry
+#### Scenario: System prompt references add_design_entry with strong language
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
 - **THEN** the prompt SHALL contain the text `add_design_entry`
-- **AND** the prompt SHALL instruct the agent to call it after every response
+- **AND** the prompt SHALL contain at least one of: `CRITICAL REQUIREMENT`, `EVERY SINGLE`, or `non-negotiable`
 - **AND** the instruction SHALL be preceded by a `# TEMPORARY` comment
 
 #### Scenario: System prompt preserves existing tool instructions
@@ -55,19 +46,27 @@ The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction
 - **AND** the existing instructions about knowledge base usage SHALL remain unchanged
 
 ### Requirement: All temporary code is marked with TEMPORARY comments
-Every code section activated by this change (`DesignEntry` model, `designs` field, `add_design_entry` tool, and system prompt addition) SHALL be preceded by a `# TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
+Every code section added or modified by this change SHALL be preceded by a `TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
 
-#### Scenario: TEMPORARY markers present
+#### Scenario: TEMPORARY markers present in agent code
 - **WHEN** `agent/src/agent.py` is searched for the string `TEMPORARY`
-- **THEN** at least 4 occurrences SHALL be found: one before `DesignEntry`, one before `designs` field, one before `add_design_entry` tool, and one before the system prompt addition
+- **THEN** at least 3 occurrences SHALL be found: before `DesignEntry`, before `designs` field, and before the system prompt addition
 
-### Requirement: Agent code passes lint and type checking
-The modified `agent/src/agent.py` SHALL pass both `ruff check` and `mypy` without errors.
+### Requirement: All code passes lint and type checking
+The modified files SHALL pass all lint and type checking commands.
 
-#### Scenario: Ruff check passes
+#### Scenario: Agent passes ruff check
 - **WHEN** `cd agent && python -m ruff check .` is run
 - **THEN** the command SHALL exit zero with no errors
 
-#### Scenario: Mypy passes
+#### Scenario: Agent passes mypy
 - **WHEN** `cd agent && python -m mypy .` is run
+- **THEN** the command SHALL exit zero with no errors
+
+#### Scenario: Frontend passes TypeScript check
+- **WHEN** `npx tsc --noEmit` is run
+- **THEN** the command SHALL exit zero with no errors
+
+#### Scenario: Frontend passes lint
+- **WHEN** `npm run lint` is run
 - **THEN** the command SHALL exit zero with no errors
