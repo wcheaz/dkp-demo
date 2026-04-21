@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 5,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/agent-auto-create-design/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/agent-auto-create-design/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/agent-auto-create-design/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-21T18:25:37.718Z",
+  "resumedAt": null,
+  "completedAt": "2026-04-21T18:31:10.729Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}
