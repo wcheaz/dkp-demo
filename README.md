@@ -1,11 +1,14 @@
-# AG-UI App Template
+# dkp-demo
 
-A PydanticAI + CopilotKit application template.
+A truss and roof engineering AI assistant powered by PydanticAI and CopilotKit. The agent has access to a knowledge base of 33 construction projects designed by medop strechy s.r.o. and can answer technical questions about truss designs, load calculations, materials, and engineering specifications. The frontend includes a design gallery where the AI agent can create and modify design entries with images and prompt text.
 
-This is a generic, customizable application template providing only the core infrastructure:
-- CopilotKit frontend UI
-- PydanticAI agent framework
-- Deployment pipeline (Docker + Kubernetes)
+## Features
+
+- **Knowledge Base Queries** — Ask general or specific questions about truss/roof engineering projects and receive sourced answers from 33 project documents.
+- **Design Gallery** — The agent automatically creates design entries for each response. Users can click images to enlarge them in a modal overlay.
+- **Design Modification** — The agent can modify existing design entries (image and/or prompt text) via the `modify_design_entry` tool.
+- **File Upload** — Attach CSV, Excel, text, or XML files to messages as context for the agent.
+- **Kubernetes Deployment** — Full Docker + Kubernetes (MicroK8s) deployment pipeline included.
 
 ## Quick Start
 
@@ -13,156 +16,161 @@ This is a generic, customizable application template providing only the core inf
 
 - Node.js 20+
 - Python 3.12+
-- OpenAI API Key (or DeepSeek API Key)
-- `uv` (Python package manager) - optional but recommended
+- `uv` (Python package manager) — optional but recommended
+- OpenAI API key (or compatible endpoint like DeepSeek)
 
 ### Installation
 
-1. Install dependencies:
-```bash
-# Using pnpm (recommended)
-pnpm install
+1. Install Node.js dependencies:
 
-# Using npm
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-This will automatically install both Node.js and Python dependencies.
+   This automatically runs `npm run install:agent` via the `postinstall` hook, which sets up the Python agent environment.
 
 2. Configure environment:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env` and set at minimum:
+
+   ```bash
+   OPENAI_API_KEY=sk-your-key
+   OPENAI_BASE_URL=https://api.openai.com/v1
+   OPENAI_MODEL=gpt-4
+   ```
+
+3. Populate the knowledge base (required for document queries):
+   The agent reads documents from `agent/knowledge/trusses-ai-english/`. This directory must contain a `summary.md` and project subdirectories with markdown files. The `agent/knowledge/` directory is gitignored — populate it separately.
+
+### Development
+
 ```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env with your API keys
-# For OpenAI:
-OPENAI_API_KEY=sk-your-openai-key
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4
-
-# For DeepSeek (OpenAI-compatible):
-OPENAI_API_KEY=sk-your-deepseek-key
-OPENAI_BASE_URL=https://api.deepseek.com
-OPENAI_MODEL=deepseek-chat
-```
-
-3. Start development:
-```bash
-# Using pnpm
-pnpm dev
-
-# Using npm
 npm run dev
 ```
 
-This will start both the Next.js UI (http://localhost:3000) and the PydanticAI agent (http://localhost:3000) concurrently.
+Starts both the Next.js UI and PydanticAI agent concurrently:
 
-## Project Structure
+- **UI**: <http://localhost:3000>
+- **Agent**: <http://localhost:3000> (integrated via AG-UI protocol)
 
-```
-{{PROJECT_NAME}}/
-├── src/                    # Next.js frontend
-│   ├── app/               # Next.js app directory
-│   │   ├── page.tsx      # Main CopilotKit page
-│   │   └── layout.tsx    # App layout
-│   ├── components/       # React components
-│   │   └── your-component.tsx  # Your main component (customize this)
-│   └── lib/              # Utility functions and types
-│       └── types.ts      # TypeScript types
-├── agent/                # PydanticAI backend
-│   ├── src/
-│   │   ├── agent.py      # Main agent logic (customize this)
-│   │   └── main.py       # Agent server entry point
-│   ├── rag/              # RAG implementation (optional)
-│   └── pyproject.toml   # Python dependencies
-├── k8s/                  # Kubernetes deployment configs
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── ingress.yaml
-├── deploy_scripts/      # Deployment automation scripts
-│   └── deploy-all.sh    # Full deployment script
-└── package.json         # Node.js dependencies
-```
-
-## Customization
-
-### Frontend Customization
-
-**Main UI**: `src/app/page.tsx`
-- Update the sidebar title and initial message
-- Customize the suggestions
-- Modify the file upload functionality
-- Add/remove frontend tools
-
-**Main Component**: `src/components/your-component.tsx`
-- Replace this with your specific application UI
-- Implement your domain-specific display logic
-- Add export functionality as needed
-
-**State Management**: `src/lib/types.ts`
-- Define your application state structure
-- Ensure it aligns with your agent's state
-
-### Backend Customization
-
-**Agent Logic**: `agent/src/agent.py`
-- Update the system prompt
-- Define your tools and functions
-- Implement domain-specific logic
-- Add state management as needed
-
-**Model Configuration**: Edit environment variables in `.env`
-- Change the AI model
-- Adjust API settings
-- Configure other agent parameters
-
-### Deployment Customization
-
-**Docker**: `Dockerfile` and `docker-compose.yml`
-- Adjust container configurations
-- Add dependencies as needed
-
-**Kubernetes**: `k8s/*.yaml`
-- Update resource limits
-- Configure ingress settings
-- Add environment variables and secrets
-
-## Available Scripts
-
-- `dev` - Start both UI and agent servers in development mode
-- `dev:debug` - Start with debug logging enabled
-- `dev:ui` - Start only the Next.js UI server
-- `dev:agent` - Start only the PydanticAI agent server
-- `build` - Build the Next.js application for production
-- `start` - Start the production server
-- `lint` - Run ESLint for code linting
-- `install:agent` - Install Python dependencies for the agent
-
-## Deployment
-
-### Local Development
-
-The development servers run on:
-- UI: http://localhost:3000
-- Agent: http://localhost:3000 (integrated)
-
-### Kubernetes Configuration
-
-Before deploying to Kubernetes, you must replace the placeholder values in the manifest files:
-
-- `{{PROJECT_NAME}}` — Your project identifier (e.g., `my-app`)
-- `{{APP_HOSTNAME}}` — Your application hostname (e.g., `app.example.com`)
-- `{{REGISTRY_HOST}}` — Your container registry (e.g., `localhost:32000` or `registry.example.com`)
-
-These placeholders appear in: `k8s/deployment.yaml`, `k8s/service.yaml`, `k8s/ingress.yaml`, `k8s/agent-deployment.yaml`, `k8s/secrets.yaml`, and deployment scripts.
-
-The project includes automated deployment scripts using Multipass and Microk8s:
+Individual services:
 
 ```bash
-# Full deployment (recommended)
-./deploy_scripts/deploy-all.sh
+npm run dev:ui      # Next.js UI only
+npm run dev:agent   # PydanticAI agent only
+npm run dev:debug   # Both with debug logging
+```
 
-# Individual deployment steps
+### Production Build
+
+```bash
+npm run build
+npm run start
+```
+
+### Docker
+
+```bash
+docker-compose up --build
+```
+
+Services:
+
+- **Frontend**: <http://localhost:3001>
+- **Agent**: <http://localhost:8000>
+
+## Architecture
+
+### System Overview
+
+```text
+Browser
+  └── Next.js (CopilotKit)
+        ├── CopilotKit runtime → proxies to AG-UI agent
+        ├── Frontend tools (add_design_entry, modify_design_entry, setThemeColor)
+        └── Shared state (AgentState via useCoAgent)
+              │
+              ▼
+        PydanticAI Agent (FastAPI/Starlette)
+              ├── Backend tools: query_knowledge_base, get_knowledge_summary
+              ├── OpenAI-compatible LLM (configurable model/endpoint)
+              └── File-based knowledge base (agent/knowledge/trusses-ai-english/)
+```
+
+### Frontend Stack
+
+| Layer          | Technology                                                                   | Purpose                                            |
+| -------------- | ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, Turbopack)                                           | Server-side rendering, API routing                 |
+| AI Integration | CopilotKit (`@copilotkit/react-core`, `@copilotkit/react-ui`)                | Chat sidebar, frontend tools, shared state         |
+| UI             | React 19, Tailwind CSS 4                                                     | Component rendering, styling                       |
+| File Parsing   | PapaParse, SheetJS (xlsx)                                                    | CSV and Excel file upload handling                 |
+
+**Key frontend files:**
+
+- `src/app/layout.tsx` — Root layout wrapping the app in `<CopilotKit>` provider.
+- `src/app/page.tsx` — Main page with `CopilotSidebar`, `YourMainContent`, and `CustomInput`. Registers frontend tools (`add_design_entry`, `modify_design_entry`, `setThemeColor`) via `useFrontendTool`.
+- `src/components/design-component.tsx` — Renders the scrollable design gallery with image modal enlargement.
+- `src/components/add-design-button.tsx` — Dev-only button to append test design entries.
+- `src/lib/types.ts` — TypeScript types: `AgentState` (shared state), `DesignEntry` (id, imageUrl, promptText).
+
+### Backend Stack
+
+| Layer           | Technology            | Purpose                                                           |
+| --------------- | --------------------- | ----------------------------------------------------------------- |
+| Agent Framework | PydanticAI            | Tool registration, system prompts, result validation              |
+| Web Server      | Starlette/Uvicorn     | HTTP server, AG-UI protocol endpoint                              |
+| Observability   | Logfire               | Request tracing, instrumentation                                  |
+| LLM             | OpenAI-compatible API | Chat completions (OpenAI, DeepSeek, etc.)                         |
+
+**Key backend files:**
+
+- `agent/src/main.py` — Entry point. Creates the AG-UI app from the agent with `StateDeps(state=YourState())`, adds a `/api/health` endpoint, and runs Uvicorn.
+- `agent/src/agent.py` — Core agent logic:
+  - `YourState` (Pydantic model): shared state with `designs`, `knowledge_queries`, `last_knowledge_result`.
+  - `StateDeps`: dependency injection wrapper around `YourState`.
+  - Agent configured with OpenAI model, system prompt, and three tools.
+  - `query_knowledge_base` tool: keyword-matches subdirectories via `summary.md`, reads markdown files from up to 3 matched subdirectories, returns content with source paths.
+  - `get_knowledge_summary` tool: returns the full `summary.md` content.
+  - `add_design_entry`: commented-out backend version (frontend tool used instead).
+
+### Agent ↔ Frontend Communication
+
+1. **CopilotKit runtime** proxies chat messages to the PydanticAI agent via the AG-UI protocol.
+1. **Shared state** (`AgentState`) is synchronized bidirectionally through `useCoAgent`:
+   - Frontend reads `state.designs` to render the gallery.
+   - Frontend tools (`add_design_entry`, `modify_design_entry`) write to state via `setState`.
+   - Agent state (`knowledge_queries`, `last_knowledge_result`) tracks backend query history.
+1. **Frontend tools** are registered in the browser but callable by the agent — the agent decides when to call them, and the handler runs client-side to update React state.
+
+### Knowledge Base
+
+- **Location**: `agent/knowledge/trusses-ai-english/` (gitignored)
+- **Structure**: 33 project subdirectories (e.g., `001IK26A - Matlúch_House/`), each containing markdown files extracted from engineering PDFs.
+- **Summary**: `summary.md` at the root provides an overview table of all subdirectories, descriptions, and key topics.
+- **Query flow**: Agent reads `summary.md` to identify relevant subdirectories by keyword matching, then reads markdown files from matched directories.
+
+### Deployment
+
+#### Kubernetes (MicroK8s)
+
+Before deploying, replace placeholders in `k8s/*.yaml`:
+
+- `{{PROJECT_NAME}}` — project identifier
+- `{{APP_HOSTNAME}}` — application hostname
+- `{{REGISTRY_HOST}}` — container registry host
+
+```bash
+./deploy_scripts/deploy-all.sh
+```
+
+Individual steps:
+
+```bash
 ./deploy_scripts/build-docker-image.sh
 ./deploy_scripts/tag-docker-image.sh
 ./deploy_scripts/setup-microk8s-registry.sh
@@ -170,66 +178,21 @@ The project includes automated deployment scripts using Multipass and Microk8s:
 ./deploy_scripts/deploy-to-k8s.sh
 ```
 
-See the deployment scripts in `deploy_scripts/` and `scripts/` for detailed deployment instructions and troubleshooting.
+K8s manifests in `k8s/`:
 
-## Architecture
+- `deployment.yaml`, `service.yaml`, `ingress.yaml` — frontend
+- `agent-deployment.yaml`, `agent-service.yaml` — agent
+- `secrets.yaml`, `setup-secrets.sh` — secrets management
 
-### Frontend Stack
-- **Next.js 16** - React framework
-- **CopilotKit** - AI integration framework
-- **React 19** - UI library
-- **Tailwind CSS** - Styling
+### Available Scripts
 
-### Backend Stack
-- **PydanticAI** - AI agent framework
-- **FastAPI** (via Starlette) - Web framework
-- **OpenAI API** - AI model provider (or compatible)
-
-### Deployment Stack
-- **Docker** - Containerization
-- **Kubernetes (Microk8s)** - Orchestration
-- **Multipass** - VM management
-
-## Next Steps
-
-1. **Customize the agent** in `agent/src/agent.py`
-2. **Update the UI** in `src/app/page.tsx` and `src/components/your-component.tsx`
-3. **Configure state** in `src/lib/types.ts` and `agent/src/agent.py`
-4. **Test and iterate** with your specific domain logic
-5. **Deploy** using the provided scripts when ready
-
-## Troubleshooting
-
-### Agent Connection Issues
-If you see "I'm having trouble connecting to my tools":
-1. Ensure the PydanticAI agent is running on port 3000
-2. Check your API key is set correctly in `.env`
-3. Verify both servers started successfully
-
-### Python Dependencies
-If you encounter Python import errors:
-```bash
-cd agent
-uv sync
-uv run src/main.py
-```
-
-### File Upload Issues
-If file uploads aren't working:
-1. Check file size limits (max 2MB)
-2. Ensure file formats are supported (.txt, .csv, .xlsx, .xls, .xml)
-3. Verify browser console for errors
-
-## Documentation
-
-- [PydanticAI Documentation](https://ai.pydantic.dev)
-- [CopilotKit Documentation](https://docs.copilotkit.ai)
-- [Next.js Documentation](https://nextjs.org/docs)
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-This project was originally forked from [my-ag-ui-app](https://github.com/nichochar/my-ag-ui-app) and has been genericized into a reusable template. Domain-specific logic has been commented out as reference examples, with placeholders replacing hardcoded project values for easy customization.
+| Script                  | Description                           |
+| ----------------------- | ------------------------------------- |
+| `npm run dev`           | Start UI + agent concurrently         |
+| `npm run dev:debug`     | Start with debug logging              |
+| `npm run dev:ui`        | Next.js UI only                       |
+| `npm run dev:agent`     | PydanticAI agent only                 |
+| `npm run build`         | Build Next.js for production          |
+| `npm run start`         | Start production server               |
+| `npm run lint`          | ESLint                                |
+| `npm run install:agent` | Install Python agent dependencies     |
