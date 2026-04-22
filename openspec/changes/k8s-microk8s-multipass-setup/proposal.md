@@ -8,7 +8,7 @@ The project currently has no running Kubernetes cluster for testing. All k8s man
 - Install and configure MicroK8s inside the VM with required add-ons: DNS, NGINX ingress, built-in registry (`localhost:32000`), and hostpath storage.
 - Install Docker inside the VM for local image builds and registry push operations.
 - Replace all `{{PROJECT_NAME}}` and `{{REGISTRY_HOST}}` placeholders in existing k8s manifests with concrete values (`dkp-demo` and `localhost:32000`).
-- Replace all `{{PROJECT_NAME}}` and `{{REGISTRY_HOST}}` placeholders in deploy scripts (`scripts/deploy/common.sh`, `scripts/kubernetes-deployment-setup.sh`, `k8s/setup-secrets.sh`).
+- Replace all `{{PROJECT_NAME}}` and `{{REGISTRY_HOST}}` placeholders in deploy scripts (`scripts/deploy/common.sh`, `scripts/kubernetes-deployment-setup.sh`, `scripts/deploy/setup-secrets.sh`, `scripts/setup-vm-docker.sh`). Fix bug in `scripts/deploy/setup-k8s-secrets.sh` where it references non-existent `k8s/setup-secrets.sh` (should be `scripts/deploy/setup-secrets.sh`).
 - Update the frontend Dockerfile port from 3000 to 3001 to match `docker-compose.yml`, or vice versa — resolve the port mismatch.
 - Create a single end-to-end deploy script (`deploy-all.sh`) modeled on the reference project's orchestrator, chaining: cleanup → secrets → build → tag → registry setup → push → k8s apply → ingress → verify.
 - Add a VM teardown/destroy script for clean re-provisioning.
@@ -28,8 +28,8 @@ The project currently has no running Kubernetes cluster for testing. All k8s man
 
 ## Impact
 
-- **Files modified**: All `k8s/*.yaml` files (placeholder replacement), `scripts/deploy/common.sh`, `scripts/kubernetes-deployment-setup.sh`, `k8s/setup-secrets.sh`, frontend `Dockerfile` (port alignment).
-- **New files**: `scripts/deploy/setup-vm.sh` (VM provisioning), `scripts/deploy/destroy-vm.sh` (teardown), `deploy-all.sh` (orchestrator), `k8s/configmap.yaml` (extracted from secrets.yaml for clean separation if needed).
+- **Files modified**: All `k8s/*.yaml` files (placeholder replacement), `scripts/deploy/common.sh`, `scripts/kubernetes-deployment-setup.sh`, `scripts/deploy/setup-secrets.sh`, `scripts/setup-vm-docker.sh`, `scripts/deploy/setup-k8s-secrets.sh` (bug fix: correct path to setup-secrets.sh), `docker-compose.yml` (port alignment from 3001 to 3000).
+- **New files**: `scripts/deploy/setup-vm.sh` (VM provisioning), `scripts/deploy/destroy-vm.sh` (teardown), `deploy-all.sh` (orchestrator).
 - **Dependencies**: `multipass` CLI on the host machine, `docker` CLI on the host machine, internet access for snap installs and base image pulls.
 - **Runtime requirements**: Host must have ~25 GB free disk for VM image, Docker layers, and container images. Host OS must support Multipass (Linux recommended).
 - **Risk**: Port mismatch between Dockerfile (3000) and docker-compose.yml (3001) must be resolved before manifests will work. The agent image is large (~4 GB) due to PyTorch dependency, requiring adequate VM disk space and transfer time.
