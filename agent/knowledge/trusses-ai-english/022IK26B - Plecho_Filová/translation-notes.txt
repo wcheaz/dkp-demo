@@ -1,6 +1,0 @@
-Directory: (root)
-===
-Návrh väzníka A → Truss Design Variant A
-Návrh väzníka B → Truss Design Variant B
-zameranie.jpg → Survey.jpg
-[not translated] 022IK26B - Plecho_Filová — project code prefix preserved; Filová is a surname

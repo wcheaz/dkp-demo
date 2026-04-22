@@ -1,5 +1,0 @@
-Directory: (root of 054IK26A - IP Roofs_Čechvala)
-===
-054IK26A - IP-strechy_Čechvala → 054IK26A - IP Roofs_Čechvala [strechy → Roofs, prefix 054IK26A preserved]
-Návrh väzníka A → Truss Design Variant A [directory]
-Podklady → Supporting Documents [directory]

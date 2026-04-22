@@ -1,6 +1,0 @@
-Directory: (root)
-===
-Finálny návrh → Final Design
-Návrh väzníka A → Truss Design Variant A
-Podklady → Supporting Documents
-[not translated] 032IK26A - Nagy — project code prefix preserved, surname not translated

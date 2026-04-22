@@ -1,9 +1,0 @@
-Directory: 001IK26A - Matlúch_House/Supporting Documents
-===
-Podklady → Supporting Documents (directory)
-podorys dom.jpg → Floor Plan House.jpg
-podorys strechy domu.jpg → Floor Plan House Roof.jpg
-pohlady dom 1.jpg → Elevations House 1.jpg
-pohlady dom 2.jpg → Elevations House 2.jpg
-rez dom1.jpg → Section House 1.jpg
-rez dom 2.jpg → Section House 2.jpg

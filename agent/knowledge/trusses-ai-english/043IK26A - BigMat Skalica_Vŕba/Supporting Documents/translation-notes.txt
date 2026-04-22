@@ -1,4 +1,0 @@
-Directory: 043IK26A - BigMat Skalica_Vŕba/Supporting Documents
-===
-Podklady → Supporting Documents (directory name)
-RD_Vrba_PS_stavebná časť.pdf → RD_Vrba_PS_Construction Section.pdf (stavebná časť = Construction Section)

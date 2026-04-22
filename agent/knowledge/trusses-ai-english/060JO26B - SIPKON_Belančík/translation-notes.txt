@@ -1,6 +1,0 @@
-Directory: (root of 060JO26B - SIPKON_Belančík)
-===
-060JO26B - SIPKON_Belančík → 060JO26B - SIPKON_Belančík [not translated — surname, prefix 060JO26B preserved]
-Návrh väzníka A → Truss Design Variant A [directory]
-Návrh väzníka B → Truss Design Variant B [directory]
-Podklady → Supporting Documents [directory]

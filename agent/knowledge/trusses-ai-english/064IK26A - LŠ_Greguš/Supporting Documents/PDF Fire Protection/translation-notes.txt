@@ -1,8 +1,0 @@
-Directory: 064IK26A - LŠ_Greguš/Supporting Documents/PDF Fire Protection
-===
-[not translated] 227_11_25 RD Greguš-V01.pdf — already English/identifier
-[not translated] 227_11_25 RD Greguš-V02.pdf — already English/identifier
-[not translated] 227_11_25 RD Greguš-V03.pdf — already English/identifier
-[not translated] 227_11_25 RD Greguš-V04.pdf — already English/identifier
-[not translated] 227_11_25 RD Greguš-V05.pdf — already English/identifier
-227_11_25_Technicka sprava.pdf → 227_11_25_Technical Report.pdf

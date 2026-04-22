@@ -1,4 +1,0 @@
-Directory: Supporting Documents
-===
-ARCH → Architecture
-ST → Structural Assessment

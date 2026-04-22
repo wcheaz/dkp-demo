@@ -1,5 +1,0 @@
-Directory: 003IK26A - BigMat Dinostav_Domanicka
-===
-003IK26A - BigMat Dinostav_Domanicka → 003IK26A - BigMat Dinostav_Domanicka [not translated — project code prefix preserved, Domanicka is a placename]
-Návrh väzníka A → Truss Design Variant A (subdirectory)
-Podklady → Supporting Documents (subdirectory)
