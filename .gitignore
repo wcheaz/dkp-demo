@@ -95,3 +95,6 @@ deploy_log_explanation.md
 proposal_start.txt
 agent/knowledge/trusses-ai-english/summary.md
 tmp/*
+
+.backup/
+.kilocode/
