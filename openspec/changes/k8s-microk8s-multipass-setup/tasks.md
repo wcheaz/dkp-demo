@@ -28,7 +28,7 @@
   - Done when: `deploy-all.sh` exists, is executable, and contains all pipeline stages (preflight, secrets, build, transfer, apply, restart, rollback, cleanup).
   - Verify by: `test -x deploy-all.sh && grep 'setup_log_file' deploy-all.sh && grep 'rollout restart' deploy-all.sh && grep 'rollout status' deploy-all.sh && grep '\-\-skip-verify' deploy-all.sh`
 
-- [ ] 5.2 Add verification to `deploy-all.sh`: pod readiness check (poll `microk8s kubectl get pods` for up to 5 minutes, verify all pods `Running` with `1/1` ready), agent health check (`kubectl exec` into agent pod, curl `/api/health` on port 8000, expect HTTP 200), ingress reachability check (get VM IP via `multipass info`, curl `http://dkp-demo.local`, expect HTTP 200), and pass/fail summary output. Exit 0 if all checks pass, exit 1 if any fail. This step runs after manifest apply and rollout restart unless `--skip-verify` is set.
+- [x] 5.2 Add verification to `deploy-all.sh`: pod readiness check (poll `microk8s kubectl get pods` for up to 5 minutes, verify all pods `Running` with `1/1` ready), agent health check (`kubectl exec` into agent pod, curl `/api/health` on port 8000, expect HTTP 200), ingress reachability check (get VM IP via `multipass info`, curl `http://dkp-demo.local`, expect HTTP 200), and pass/fail summary output. Exit 0 if all checks pass, exit 1 if any fail. This step runs after manifest apply and rollout restart unless `--skip-verify` is set.
   - Done when: `deploy-all.sh` contains all three verification checks and the summary output.
   - Verify by: `grep '1/1' deploy-all.sh && grep 'api/health' deploy-all.sh && grep 'dkp-demo.local' deploy-all.sh && grep 'PASSED\|FAILED' deploy-all.sh`
 
