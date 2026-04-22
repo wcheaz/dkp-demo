@@ -1,6 +1,6 @@
 ## 1. Port Alignment
 
-- [ ] 1.1 Fix frontend port mismatch: update `docker-compose.yml` to use port `3000:3000` instead of `3001:3001` so it matches the frontend Dockerfile's `EXPOSE 3000`, `HEALTHCHECK` on port 3000, and k8s manifests' `containerPort: 3000`.
+- [x] 1.1 Fix frontend port mismatch: update `docker-compose.yml` to use port `3000:3000` instead of `3001:3001` so it matches the frontend Dockerfile's `EXPOSE 3000`, `HEALTHCHECK` on port 3000, and k8s manifests' `containerPort: 3000`.
   - Done when: `docker-compose.yml` maps port 3000 and no reference to `3001` remains.
   - Verify by: `grep '3000:3000' docker-compose.yml` succeeds and `grep '3001' docker-compose.yml` fails.
 
