@@ -7,8 +7,8 @@
 set -euo pipefail
 
 # Source common error handling functions
-if [ -f "deploy_scripts/common.sh" ]; then
-    source "deploy_scripts/common.sh"
+if [ -f "scripts/deploy/common.sh" ]; then
+    source "scripts/deploy/common.sh"
 else
     # Fallback error handling if common.sh is not available
     VM_NAME="${VM_NAME:-dkp-demo-k8s}"

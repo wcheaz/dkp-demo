@@ -3,7 +3,7 @@
 # DEBUG LEVEL: MINIMAL (successful phase)
 
 # Source common error handling functions
-source "deploy_scripts/common.sh"
+source "scripts/deploy/common.sh"
 
 # Log build process start
 log_info "Starting Docker build process"

@@ -5,12 +5,12 @@ set -e
 
 # Change to project root directory to ensure consistent paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 cd "$PROJECT_ROOT"
 
 # Source common error handling functions
-if [ -f "deploy_scripts/common.sh" ]; then
-    source "deploy_scripts/common.sh"
+if [ -f "scripts/deploy/common.sh" ]; then
+    source "scripts/deploy/common.sh"
     
     # Override log function for compatibility with existing log format
     log() {

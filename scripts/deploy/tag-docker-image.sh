@@ -11,8 +11,8 @@ DEBUG="${DEBUG:-false}"
 VM_NAME="${VM_NAME:-dkp-demo-k8s}"
 
 # Source common error handling functions
-if [ -f "deploy_scripts/common.sh" ]; then
-    source "deploy_scripts/common.sh"
+if [ -f "scripts/deploy/common.sh" ]; then
+    source "scripts/deploy/common.sh"
 else
     # Fallback error handling if common.sh is not available
     LOG_FILE="${LOG_FILE:-/tmp/deploy-$(date +%Y%m%d-%H%M%S).log}"

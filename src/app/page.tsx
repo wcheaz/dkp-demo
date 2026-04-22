@@ -4,7 +4,7 @@
 // import { ProcurementCodes } from "@/components/procurement-codes";
 
 // To integrate your custom components:
-// 1. Create your component in src/components/your-component.tsx
+// 1. Create your component in src/components/
 // 2. Import it here
 // 3. Render it in YourMainContent with appropriate props
 // Example:

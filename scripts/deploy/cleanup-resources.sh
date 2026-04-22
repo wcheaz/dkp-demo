@@ -2,18 +2,18 @@
 
 # Cleanup Resources Script
 # Removes non-running Kubernetes pods and unused Docker images
-# Usage: ./deploy_scripts/cleanup-resources.sh
+# Usage: ./scripts/deploy/cleanup-resources.sh
 
 # Change to project root directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 cd "$PROJECT_ROOT"
 
 # Source common error handling functions
-if [ -f "deploy_scripts/common.sh" ]; then
-    source "deploy_scripts/common.sh"
+if [ -f "scripts/deploy/common.sh" ]; then
+    source "scripts/deploy/common.sh"
 else
-    echo "ERROR: deploy_scripts/common.sh not found. Cannot continue with cleanup."
+    echo "ERROR: scripts/deploy/common.sh not found. Cannot continue with cleanup."
     exit 1
 fi
 

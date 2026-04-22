@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Source common error handling functions
-source "deploy_scripts/common.sh"
+source "scripts/deploy/common.sh"
 
 # Initialize log file
 setup_log_file

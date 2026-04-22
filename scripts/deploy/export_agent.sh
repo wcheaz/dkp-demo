@@ -7,7 +7,7 @@
 # running inside a Multipass VM (dkp-demo-k8s).
 #
 # USAGE:
-#   ./deploy_scripts/export_agent.sh [update|verify|restart]
+#   ./scripts/deploy/export_agent.sh [update|verify|restart]
 #
 #   update: Build and push new agent image to VM registry
 #   verify: Check current deployment status and health
@@ -357,9 +357,9 @@ main() {
             echo "  restart  - Restart agent deployment"
             echo ""
             echo "Examples:"
-            echo "  $0 deploy_scripts/export_agent.sh update"
-            echo "  $0 deploy_scripts/export_agent.sh verify"
-            echo "  $0 deploy_scripts/export_agent.sh restart"
+            echo "  $0 scripts/deploy/export_agent.sh update"
+            echo "  $0 scripts/deploy/export_agent.sh verify"
+            echo "  $0 scripts/deploy/export_agent.sh restart"
             print_separator
             exit 1
             ;;

@@ -4,10 +4,10 @@
 set -euo pipefail
 
 # Source common error handling functions
-if [ -f "deploy_scripts/common.sh" ]; then
-    source "deploy_scripts/common.sh"
+if [ -f "scripts/deploy/common.sh" ]; then
+    source "scripts/deploy/common.sh"
 else
-    echo "ERROR: deploy_scripts/common.sh not found. Please ensure common error handling functions are available."
+    echo "ERROR: scripts/deploy/common.sh not found. Please ensure common error handling functions are available."
     exit 1
 fi
 

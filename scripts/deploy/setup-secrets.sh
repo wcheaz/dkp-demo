@@ -231,7 +231,7 @@ then
 fi
 
 # Validate generated YAML file with Kubernetes API server
-# Skip validation if we're generating on host (validation happens in deploy_scripts/setup-k8s-secrets.sh)
+# Skip validation if we're generating on host (validation happens in scripts/deploy/setup-k8s-secrets.sh)
 if [ -z "${SKIP_VALIDATION:-}" ]; then
     log "Validating generated secrets file against Kubernetes API server..."
     if ! multipass exec "${VM_NAME:-{{PROJECT_NAME}}-k8s}" -- microk8s kubectl apply --dry-run=server -f - < "$OUTPUT_FILE" 2>/dev/null; then
