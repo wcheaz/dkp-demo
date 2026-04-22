@@ -93,6 +93,5 @@ ralph-docs
 deploy_log.md
 deploy_log_explanation.md
 proposal_start.txt
-
-# temp working directory for scripts and agents
-tmp/
+agent/knowledge/trusses-ai-english/summary.md
+tmp/*

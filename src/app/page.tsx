@@ -10,7 +10,8 @@
 // Example:
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
-import { YourComponent } from "@/components/your-component";
+import { DesignComponent } from "@/components/design-component";
+import { AddDesignButton } from "@/components/add-design-button";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
@@ -19,7 +20,7 @@ import {
 } from "@copilotkit/react-core";
 import { CopilotKitCSSProperties, CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useMemo } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
@@ -225,7 +226,7 @@ function CustomInput(props: InputProps) {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-[#007fd4]">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
-              <span className="text-sm text-[#d4d4d4] font-medium truncate max-w-[150px]">{file.name}</span>
+              <span className="text-sm text-[#d4d4d4] font-medium truncate max-w-37.5">{file.name}</span>
               <button
                 onClick={() => removeFile(index)}
                 className="ml-1 text-[#858585] hover:text-[#d4d4d4] focus:outline-none"
@@ -302,13 +303,103 @@ function YourMainContent({
   const { state, setState } = useCoAgent<AgentState>({
     name: "my_agent",
     initialState: {
-      your_data: [], // Customize this for your application
+      designs: [],
     },
   });
 
+  const designs = useMemo(() => {
+    const d = state.designs ?? [];
+    if (d.length === 0) return d;
+    const needsBackfill = d.some((entry) => entry.id == null);
+    if (!needsBackfill) return d;
+    let nextId = Math.max(...d.map((entry) => entry.id ?? 0), 0);
+    return d.map((entry) => {
+      if (entry.id != null) return entry;
+      nextId += 1;
+      return { ...entry, id: nextId };
+    });
+  }, [state.designs]);
+
+  if ((state.designs ?? []).some((entry) => entry.id == null)) {
+    setState({ ...state, designs });
+  }
+
+  // TEMPORARY: add_design_entry frontend tool for auto-creating design entries on every agent response. Will be replaced when real image generation is integrated.
+  useFrontendTool({
+    name: "add_design_entry",
+    parameters: [
+      {
+        name: "prompt_text",
+        description: "The user's original prompt text",
+        required: true,
+      },
+    ],
+    handler({ prompt_text }) {
+      const currentDesigns = designs;
+      const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
+      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text };
+      setState({ ...state, designs: [...currentDesigns, newEntry] });
+    },
+  });
+  useFrontendTool({
+    name: "modify_design_entry",
+    parameters: [
+      {
+        name: "design_id",
+        type: "number",
+        description: "The 1-based ID of the design entry to modify",
+        required: true,
+      },
+      {
+        name: "image_name",
+        type: "string",
+        description:
+          'The filename of the image to set (e.g. "design-alpha.svg" or "design-beta.svg"). Optional.',
+        required: false,
+      },
+      {
+        name: "prompt_text",
+        type: "string",
+        description: "The new prompt text. Optional.",
+        required: false,
+      },
+    ],
+    handler({ design_id, image_name, prompt_text }) {
+      const ALLOWED_IMAGES = ["design-alpha.svg", "design-beta.svg"];
+
+      if (!image_name && !prompt_text) {
+        return "Error: at least one of image_name or prompt_text must be provided.";
+      }
+
+      const currentDesigns = designs;
+
+      if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
+        return `Error: invalid image_name "${image_name}". Valid images: ${ALLOWED_IMAGES.join(", ")}.`;
+      }
+
+      const index = currentDesigns.findIndex((d) => d.id === design_id);
+
+      if (index === -1) {
+        const validIds = currentDesigns.map((d) => d.id);
+        return `Error: design_id ${design_id} not found. Valid IDs: [${validIds.join(", ")}].`;
+      }
+
+      const updated = [...currentDesigns];
+      updated[index] = {
+        ...updated[index],
+        ...(image_name ? { imageUrl: `/${image_name}` } : {}),
+        ...(prompt_text ? { promptText: prompt_text } : {}),
+      };
+      setState({ ...state, designs: updated });
+      return `Design entry #${design_id} updated successfully.`;
+    },
+  });
+
+  // END TEMPORARY
+
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify(state.your_data ?? []),
+    value: JSON.stringify(designs),
   });
 
   return (
@@ -316,7 +407,10 @@ function YourMainContent({
       style={{}}
       className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
     >
-      <YourComponent state={state} setState={setState} />
+      {process.env.NODE_ENV === "development" && (
+        <AddDesignButton state={state} setState={setState} />
+      )}
+      <DesignComponent state={state} setState={setState} />
     </div>
   );
 }

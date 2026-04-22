@@ -68,11 +68,20 @@ class KnowledgeQuery(BaseModel):
     timestamp: str
 
 
+# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
+class DesignEntry(BaseModel):
+    id: int
+    imageUrl: str
+    promptText: str
+
+
 class YourState(BaseModel):
     user_input: str = ""
     ai_response: str = ""
     knowledge_queries: List[KnowledgeQuery] = []
     last_knowledge_result: Optional[str] = None
+    # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
+    designs: List[DesignEntry] = []
 
 
 # ============================================================================
@@ -121,11 +130,20 @@ agent = Agent(
     system_prompt=(
         "You are a truss and roof engineering assistant with access to a knowledge base "
         "of 33 construction projects designed by medop strechy s.r.o. "
-        "You have two tools available:\n"
+        "You have three tools available:\n"
         "- get_knowledge_summary: Use this when the user asks general questions about what "
         'information is available (e.g., "What projects do you have?", "What do you know?").\n'
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
-        "load calculations, materials, truss designs, or engineering specifications.\n\n"
+        "load calculations, materials, truss designs, or engineering specifications.\n"
+        # TEMPORARY - add_design_entry tool instruction in system prompt; will be removed when real image generation is integrated
+        "- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n\n"
+        "- modify_design_entry: Modify an existing design entry's image and/or prompt text.\n"
+        "  Parameters:\n"
+        "    - design_id (required, number): The 1-based ID of the design entry to modify.\n"
+        '    - image_name (optional, string): The filename of the image to set. Must be one of: "design-alpha.svg", "design-beta.svg".\n'
+        "    - prompt_text (optional, string): The new prompt text.\n"
+        "  At least one of image_name or prompt_text must be provided.\n"
+        '  Available images: "design-alpha.svg", "design-beta.svg".\n\n'
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),
@@ -269,6 +287,25 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
         return summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         return "Knowledge base summary not found. Please contact the administrator."
+
+
+# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated
+# Commented out because the agent tool approach did not work for automatic state propagation.
+# @agent.tool
+# async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
+#     """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
+#
+#     Args:
+#         ctx: Agent context with state
+#         prompt_text: The user's original prompt text
+#
+#     Returns:
+#         Confirmation string
+#     """
+#     ctx.deps.state.designs.append(
+#         DesignEntry(imageUrl="/next.svg", promptText=prompt_text)
+#     )
+#     return f"Design entry added for prompt: {prompt_text}"
 
 
 # ============================================================================

@@ -10,6 +10,7 @@ const serviceAdapter = new ExperimentalEmptyAdapter();
 
 const runtime = new CopilotRuntime({
   agents: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     my_agent: new HttpAgent({ url: process.env.AGENT_URL || "http://localhost:8000/" }) as any,
   },
 });
