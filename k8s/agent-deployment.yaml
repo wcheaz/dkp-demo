@@ -5,8 +5,8 @@
 # =========================
 # Before deploying, replace the following placeholders:
 #
-# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
-# {{REGISTRY_HOST}}: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
+# dkp-demo: Your project identifier (e.g., "my-app")
+# localhost:32000: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
 #
 # Notes:
 # - This deployment uses the generic "agent" name and labels
@@ -32,14 +32,14 @@ spec:
     spec:
       containers:
       - name: agent
-        image: "{{REGISTRY_HOST}}/agent:latest"  # Replace {{REGISTRY_HOST}} with your registry host
+        image: "localhost:32000/agent:latest"  # Replace localhost:32000 with your registry host
         ports:
         - containerPort: 8000
         envFrom:
         - secretRef:
-            name: "{{PROJECT_NAME}}-secrets"  # Replace {{PROJECT_NAME}} with your project name
+            name: "dkp-demo-secrets"  # Replace dkp-demo with your project name
         - configMapRef:
-            name: "{{PROJECT_NAME}}-config"  # Replace {{PROJECT_NAME}} with your project name
+            name: "dkp-demo-config"  # Replace dkp-demo with your project name
         livenessProbe:
           httpGet:
             path: /api/health

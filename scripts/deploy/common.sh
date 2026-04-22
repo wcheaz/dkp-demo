@@ -31,7 +31,7 @@ ERROR_VALIDATION=205
 # If using a different Kubernetes distribution (minikube, k3d, cloud provider),
 # you will need to adapt the scripts to use the appropriate kubectl commands
 # and remove multipass-specific commands.
-VM_NAME="${VM_NAME:-{{PROJECT_NAME}}-k8s}"
+VM_NAME="${VM_NAME:-dkp-demo-k8s}"
 LOG_FILE="${LOG_FILE:-/tmp/deploy-$(date +%Y%m%d-%H%M%S).log}"
 HEALTH_CHECK_PATH="${HEALTH_CHECK_PATH:-/api/health}"
 

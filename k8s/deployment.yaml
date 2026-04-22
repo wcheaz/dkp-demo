@@ -1,16 +1,16 @@
-# {{PROJECT_NAME}} Deployment Configuration
+# dkp-demo Deployment Configuration
 # ===================================
 #
 # CONFIGURATION REQUIRED:
 # =========================
 # Before deploying, replace the following placeholders:
 #
-# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
-# {{REGISTRY_HOST}}: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
+# dkp-demo: Your project identifier (e.g., "my-app")
+# localhost:32000: Your container registry host (e.g., "registry.example.com" or "localhost:32000")
 #
 # Example: if your project is called "my-app" and registry is "registry.example.com":
-# - Replace {{PROJECT_NAME}} with "my-app"
-# - Replace {{REGISTRY_HOST}} with "registry.example.com"
+# - Replace dkp-demo with "my-app"
+# - Replace localhost:32000 with "registry.example.com"
 #
 # Notes:
 # - replicas: 3 (adjust based on your load requirements)
@@ -21,21 +21,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
+  name: "dkp-demo"  # Replace dkp-demo with your project name
   namespace: default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
+      app: "dkp-demo"  # Replace dkp-demo with your project name
   template:
     metadata:
       labels:
-        app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
+        app: "dkp-demo"  # Replace dkp-demo with your project name
     spec:
       containers:
-      - name: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
-        image: "{{REGISTRY_HOST}}/{{PROJECT_NAME}}:latest"  # Replace {{REGISTRY_HOST}} and {{PROJECT_NAME}}
+      - name: "dkp-demo"  # Replace dkp-demo with your project name
+        image: "localhost:32000/dkp-demo:latest"  # Replace localhost:32000 and dkp-demo
         ports:
         - containerPort: 3000
         env:
@@ -43,6 +43,6 @@ spec:
           value: "http://agent-service:8000/"
         envFrom:
         - secretRef:
-            name: "{{PROJECT_NAME}}-secrets"  # Replace {{PROJECT_NAME}} with your project name
+            name: "dkp-demo-secrets"  # Replace dkp-demo with your project name
         - configMapRef:
-            name: "{{PROJECT_NAME}}-config"  # Replace {{PROJECT_NAME}} with your project name
+            name: "dkp-demo-config"  # Replace dkp-demo with your project name

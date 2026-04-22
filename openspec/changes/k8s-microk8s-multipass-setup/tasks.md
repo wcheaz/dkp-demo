@@ -6,7 +6,7 @@
 
 ## 2. Placeholder Replacement
 
-- [ ] 2.1 Replace all `{{PROJECT_NAME}}` with `dkp-demo`, `{{REGISTRY_HOST}}` with `localhost:32000`, and `{{APP_HOSTNAME}}` with `dkp-demo.local` in every file under `k8s/` and `scripts/`. Also fix bug in `scripts/deploy/setup-k8s-secrets.sh` where it references non-existent `k8s/setup-secrets.sh` (lines 37 and 94 — should be `scripts/deploy/setup-secrets.sh`). Also replace `{{PROJECT_NAME}}` with `dkp-demo` in `scripts/setup-vm-docker.sh` (line 12).
+- [x] 2.1 Replace all `{{PROJECT_NAME}}` with `dkp-demo`, `{{REGISTRY_HOST}}` with `localhost:32000`, and `{{APP_HOSTNAME}}` with `dkp-demo.local` in every file under `k8s/` and `scripts/`. Also fix bug in `scripts/deploy/setup-k8s-secrets.sh` where it references non-existent `k8s/setup-secrets.sh` (lines 37 and 94 — should be `scripts/deploy/setup-secrets.sh`). Also replace `{{PROJECT_NAME}}` with `dkp-demo` in `scripts/setup-vm-docker.sh` (line 12).
   - Done when: `grep -r '{{' k8s/ scripts/` returns no matches and the path bug in `setup-k8s-secrets.sh` is corrected.
   - Verify by: `grep -r '{{' k8s/ scripts/` exits with status 1 (no matches); `grep 'k8s/setup-secrets' scripts/deploy/setup-k8s-secrets.sh` exits with status 1.
 

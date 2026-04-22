@@ -34,15 +34,15 @@ fi
 log_info "k8s directory found: $(pwd)/k8s/"
 
 # Check if setup-secrets.sh script exists
-if [ ! -f "k8s/setup-secrets.sh" ]; then
+if [ ! -f "scripts/deploy/setup-secrets.sh" ]; then
     log_error "setup-secrets.sh script not found"
     log_structured_error "KUBERNETES SECRETS SETUP SCRIPT MISSING" \
-        "The setup-secrets.sh script required for generating Kubernetes secrets was not found in the k8s directory" \
+        "The setup-secrets.sh script required for generating Kubernetes secrets was not found in the scripts/deploy directory" \
         "Script file was deleted or moved, incomplete project checkout, script running from wrong directory" \
-        "1. Verify setup-secrets.sh exists in k8s directory: ls -la k8s/\n2. If missing, restore the script from your project repository\n3. Ensure you're in the correct project directory: $(pwd)\n4. Check if you have the complete project source code"
+        "1. Verify setup-secrets.sh exists in scripts/deploy directory: ls -la scripts/deploy/\n2. If missing, restore the script from your project repository\n3. Ensure you're in the correct project directory: $(pwd)\n4. Check if you have the complete project source code"
     exit 1
 fi
-log_info "setup-secrets.sh script found: $(pwd)/k8s/setup-secrets.sh"
+log_info "setup-secrets.sh script found: $(pwd)/scripts/deploy/setup-secrets.sh"
 
 # Check if .env file exists
 if [ ! -f ".env" ]; then
@@ -91,12 +91,12 @@ log_info "All required environment variables are set"
 
 # Run the secrets setup script to generate the YAML file
 log_info "Running secrets setup script to generate YAML file..."
-if ! SKIP_VALIDATION=1 bash k8s/setup-secrets.sh 2>&1 | tee -a "$LOG_FILE"; then
+if ! SKIP_VALIDATION=1 bash scripts/deploy/setup-secrets.sh 2>&1 | tee -a "$LOG_FILE"; then
     log_error "Failed to generate Kubernetes secrets YAML file"
     log_structured_error "KUBERNETES SECRETS GENERATION FAILED" \
         "The setup-secrets.sh script failed to generate a valid Kubernetes secrets YAML file" \
         "Invalid environment variable values, base64 encoding errors, file permission issues, or script syntax errors" \
-        "1. Review the script output above for specific error messages\n2. Verify all environment variables are set correctly: echo \$OPENAI_API_KEY\n3. Check file permissions in k8s directory: ls -la k8s/\n4. Test environment variables manually: bash k8s/setup-secrets.sh\n5. Fix any reported issues and retry"
+        "1. Review the script output above for specific error messages\n2. Verify all environment variables are set correctly: echo \$OPENAI_API_KEY\n3. Check file permissions in scripts/deploy directory: ls -la scripts/deploy/\n4. Test environment variables manually: bash scripts/deploy/setup-secrets.sh\n5. Fix any reported issues and retry"
     exit 1
 fi
 log_info "Kubernetes secrets YAML file generated successfully: k8s/secrets.yaml"

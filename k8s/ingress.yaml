@@ -1,16 +1,16 @@
-# {{PROJECT_NAME}} Ingress Configuration
+# dkp-demo Ingress Configuration
 # ===================================
 #
 # CONFIGURATION REQUIRED:
 # =========================
 # Before deploying, replace the following placeholders:
 #
-# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
-# {{APP_HOSTNAME}}: Your application hostname (e.g., "app.example.com" or "app.local")
+# dkp-demo: Your project identifier (e.g., "my-app")
+# dkp-demo.local: Your application hostname (e.g., "app.example.com" or "app.local")
 #
 # Example: if your project is called "my-app" and runs at myapp.local:
-# - Replace {{PROJECT_NAME}} with "my-app"
-# - Replace {{APP_HOSTNAME}} with "myapp.local"
+# - Replace dkp-demo with "my-app"
+# - Replace dkp-demo.local with "myapp.local"
 #
 # Notes:
 # - ingressClassName: nginx (using NGINX ingress controller)
@@ -21,10 +21,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: "{{PROJECT_NAME}}-ingress"  # Replace {{PROJECT_NAME}} with your project name
+  name: "dkp-demo-ingress"  # Replace dkp-demo with your project name
   namespace: default
   labels:
-    app: "{{PROJECT_NAME}}"  # Replace {{PROJECT_NAME}} with your project name
+    app: "dkp-demo"  # Replace dkp-demo with your project name
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -39,13 +39,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: "{{APP_HOSTNAME}}"  # Replace {{APP_HOSTNAME}} with your domain
+  - host: "dkp-demo.local"  # Replace dkp-demo.local with your domain
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: "{{PROJECT_NAME}}-service"  # Replace {{PROJECT_NAME}} with your project name
+            name: "dkp-demo-service"  # Replace dkp-demo with your project name
             port:
               name: http

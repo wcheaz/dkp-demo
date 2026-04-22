@@ -1,14 +1,14 @@
-# {{PROJECT_NAME}} Service Configuration
+# dkp-demo Service Configuration
 # ===================================
 #
 # CONFIGURATION REQUIRED:
 # =========================
 # Before deploying, replace the following placeholders:
 #
-# {{PROJECT_NAME}}: Your project identifier (e.g., "my-app")
+# dkp-demo: Your project identifier (e.g., "my-app")
 #
 # Example: if your project is called "my-app":
-# - Replace {{PROJECT_NAME}} with "my-app"
+# - Replace dkp-demo with "my-app"
 #
 # Notes:
 # - port: 80 (standard HTTP port for ClusterIP service)
@@ -19,14 +19,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{PROJECT_NAME}}-service  # Replace {{PROJECT_NAME}} with your project name
+  name: dkp-demo-service  # Replace dkp-demo with your project name
   namespace: default
   labels:
-    app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+    app: dkp-demo  # Replace dkp-demo with your project name
 spec:
   type: ClusterIP
   selector:
-    app: {{PROJECT_NAME}}  # Replace {{PROJECT_NAME}} with your project name
+    app: dkp-demo  # Replace dkp-demo with your project name
   ports:
   - protocol: TCP
     port: 80
