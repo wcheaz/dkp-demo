@@ -8,7 +8,7 @@ source "${SCRIPT_DIR}/common.sh"
 VM_NAME="${VM_NAME:-dkp-demo-k8s}"
 VM_CPUS=4
 VM_MEMORY="7.7G"
-VM_DISK="19.3G"
+VM_DISK="20G"
 MAX_RETRIES=3
 RETRY_DELAY=10
 

@@ -194,17 +194,17 @@ transfer_and_push_image() {
     fi
     log "Image loaded in VM"
 
-    local vm_image_id
-    vm_image_id=$(echo "$load_output" | grep -o 'sha256:[a-f0-9]\+')
-    if [ -z "$vm_image_id" ]; then
-        log_error "Could not extract image ID from load output"
+    local loaded_name
+    loaded_name=$(echo "$load_output" | grep -oP '(?<=Loaded image: )\S+' || echo "$load_output" | grep -oP '(?<=Loaded image ID: )\S+')
+    if [ -z "$loaded_name" ]; then
+        log_error "Could not extract image name from load output: $load_output"
         rm -f "$tar_file"
         return 1
     fi
 
     local target_image="${REGISTRY}/${image_name}:latest"
-    log "Tagging as ${target_image}..."
-    if ! multipass exec "$VM_NAME" -- docker tag "$vm_image_id" "$target_image"; then
+    log "Tagging ${loaded_name} as ${target_image}..."
+    if ! multipass exec "$VM_NAME" -- docker tag "$loaded_name" "$target_image"; then
         log_error "Failed to tag ${image_name}"
         rm -f "$tar_file"
         return 1
