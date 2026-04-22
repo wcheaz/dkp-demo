@@ -131,9 +131,9 @@ Browser
 
 - `agent/src/main.py` — Entry point. Creates the AG-UI app from the agent with `StateDeps(state=YourState())`, adds a `/api/health` endpoint, and runs Uvicorn.
 - `agent/src/agent.py` — Core agent logic:
-  - `YourState` (Pydantic model): shared state with `designs`, `knowledge_queries`, `last_knowledge_result`.
+  - `YourState` (Pydantic model): shared state with `user_input`, `ai_response`, `designs`, `knowledge_queries`, `last_knowledge_result`.
   - `StateDeps`: dependency injection wrapper around `YourState`.
-  - Agent configured with OpenAI model, system prompt, and three tools.
+  - Agent configured with OpenAI model, system prompt, and two backend tools.
   - `query_knowledge_base` tool: keyword-matches subdirectories via `summary.md`, reads markdown files from up to 3 matched subdirectories, returns content with source paths.
   - `get_knowledge_summary` tool: returns the full `summary.md` content.
   - `add_design_entry`: commented-out backend version (frontend tool used instead).
@@ -165,17 +165,20 @@ Before deploying, replace placeholders in `k8s/*.yaml`:
 - `{{REGISTRY_HOST}}` — container registry host
 
 ```bash
-./deploy_scripts/deploy-all.sh
-```
-
-Individual steps:
-
-```bash
 ./deploy_scripts/build-docker-image.sh
 ./deploy_scripts/tag-docker-image.sh
 ./deploy_scripts/setup-microk8s-registry.sh
 ./deploy_scripts/push-docker-image.sh
 ./deploy_scripts/deploy-to-k8s.sh
+```
+
+Additional helper scripts:
+
+```bash
+./deploy_scripts/common.sh                # Shared variables and utilities sourced by other scripts
+./deploy_scripts/setup-k8s-secrets.sh     # Configure Kubernetes secrets
+./deploy_scripts/export_agent.sh          # Export agent artifacts for deployment
+./deploy_scripts/cleanup-resources.sh     # Remove deployed resources and clean up
 ```
 
 K8s manifests in `k8s/`:
