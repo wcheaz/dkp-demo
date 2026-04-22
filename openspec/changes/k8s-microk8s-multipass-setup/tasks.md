@@ -12,7 +12,7 @@
 
 ## 3. VM Provisioning Script
 
-- [ ] 3.1 Create `scripts/deploy/setup-vm.sh` that provisions a Multipass VM named `dkp-demo-k8s` (4 CPUs, 7.7G RAM, 19.3G disk), installs Docker with insecure registry config for `localhost:32000`, installs MicroK8s via snap with retry logic (3 attempts, 10-second delay), enables dns/ingress/registry/storage add-ons, adds the ubuntu user to the microk8s group, and validates the cluster is ready. Script must be executable with `set -euo pipefail`, source colored logging from `scripts/deploy/common.sh`, and be idempotent (skip VM creation if already running, skip add-ons if already enabled).
+- [x] 3.1 Create `scripts/deploy/setup-vm.sh` that provisions a Multipass VM named `dkp-demo-k8s` (4 CPUs, 7.7G RAM, 19.3G disk), installs Docker with insecure registry config for `localhost:32000`, installs MicroK8s via snap with retry logic (3 attempts, 10-second delay), enables dns/ingress/registry/storage add-ons, adds the ubuntu user to the microk8s group, and validates the cluster is ready. Script must be executable with `set -euo pipefail`, source colored logging from `scripts/deploy/common.sh`, and be idempotent (skip VM creation if already running, skip add-ons if already enabled).
   - Done when: `scripts/deploy/setup-vm.sh` exists, is executable, contains all provisioning steps, and handles idempotency.
   - Verify by: `test -x scripts/deploy/setup-vm.sh && grep 'set -euo pipefail' scripts/deploy/setup-vm.sh && grep 'multipass launch' scripts/deploy/setup-vm.sh && grep 'microk8s enable' scripts/deploy/setup-vm.sh`
 
