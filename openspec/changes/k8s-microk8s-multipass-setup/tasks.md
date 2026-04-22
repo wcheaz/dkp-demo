@@ -18,7 +18,7 @@
 
 ## 4. VM Teardown Script
 
-- [ ] 4.1 Create `scripts/deploy/destroy-vm.sh` that stops and deletes the `dkp-demo-k8s` VM when it exists, or logs "not found" and exits 0 when it doesn't. Script must be executable with `set -euo pipefail` and source logging from `scripts/deploy/common.sh`.
+- [x] 4.1 Create `scripts/deploy/destroy-vm.sh` that stops and deletes the `dkp-demo-k8s` VM when it exists, or logs "not found" and exits 0 when it doesn't. Script must be executable with `set -euo pipefail` and source logging from `scripts/deploy/common.sh`.
   - Done when: `scripts/deploy/destroy-vm.sh` exists, is executable, handles both the VM-exists and VM-not-found cases.
   - Verify by: `test -x scripts/deploy/destroy-vm.sh && grep 'multipass delete' scripts/deploy/destroy-vm.sh`
 
