@@ -183,47 +183,21 @@ transfer_and_push_image() {
     fi
     log "Image transferred to VM"
 
-    log "Loading ${image_name} in VM Docker..."
-    local load_output
-    load_output=$(multipass exec "$VM_NAME" -- docker load -i "/tmp/${image_name}.tar" 2>&1)
-    if [ $? -ne 0 ]; then
-        log_error "Failed to load ${image_name} in VM"
+    log "Importing ${image_name} into MicroK8s containerd..."
+    if ! multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images import "/tmp/${image_name}.tar"; then
+        log_error "Failed to import ${image_name} into containerd"
         rm -f "$tar_file"
         multipass exec "$VM_NAME" -- rm -f "/tmp/${image_name}.tar" 2>/dev/null || true
         return 1
     fi
-    log "Image loaded in VM"
-
-    local loaded_name
-    loaded_name=$(echo "$load_output" | grep -oP '(?<=Loaded image: )\S+' || echo "$load_output" | grep -oP '(?<=Loaded image ID: )\S+')
-    if [ -z "$loaded_name" ]; then
-        log_error "Could not extract image name from load output: $load_output"
-        rm -f "$tar_file"
-        return 1
-    fi
-
-    local target_image="${REGISTRY}/${image_name}:latest"
-    log "Tagging ${loaded_name} as ${target_image}..."
-    if ! multipass exec "$VM_NAME" -- docker tag "$loaded_name" "$target_image"; then
-        log_error "Failed to tag ${image_name}"
-        rm -f "$tar_file"
-        return 1
-    fi
-
-    log "Pushing ${target_image}..."
-    if ! multipass exec "$VM_NAME" -- docker push "$target_image"; then
-        log_error "Failed to push ${image_name} to registry"
-        rm -f "$tar_file"
-        return 1
-    fi
-    log "${image_name} pushed to ${target_image}"
+    log "${image_name} imported into MicroK8s containerd"
 
     rm -f "$tar_file"
     multipass exec "$VM_NAME" -- rm -f "/tmp/${image_name}.tar" 2>/dev/null || true
 }
 
 transfer_all_images() {
-    log "Transferring and pushing images to registry..."
+    log "Transferring images to VM and importing into containerd..."
 
     if ! transfer_and_push_image "$FRONTEND_IMAGE"; then
         log_error "Frontend image transfer failed"
@@ -235,7 +209,7 @@ transfer_all_images() {
         return 1
     fi
 
-    log "All images transferred and pushed"
+    log "All images transferred and imported"
 }
 
 apply_manifests() {

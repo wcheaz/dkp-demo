@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: agent
-        image: "localhost:32000/agent:latest"  # Replace localhost:32000 with your registry host
+        image: "agent:latest"
         ports:
         - containerPort: 8000
         envFrom:

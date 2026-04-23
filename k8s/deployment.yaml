@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: "dkp-demo"  # Replace dkp-demo with your project name
-        image: "localhost:32000/dkp-demo:latest"  # Replace localhost:32000 and dkp-demo
+        image: "dkp-demo:latest"
         ports:
         - containerPort: 3000
         env:
