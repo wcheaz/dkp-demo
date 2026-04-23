@@ -32,6 +32,13 @@
   - Done when: `deploy-all.sh` contains all three verification checks and the summary output.
   - Verify by: `grep '1/1' deploy-all.sh && grep 'api/health' deploy-all.sh && grep 'dkp-demo.local' deploy-all.sh && grep 'PASSED\|FAILED' deploy-all.sh`
 
+## 6. Fix Image Transfer for Large Images
+
+- [ ] 6.1 Switch image transfer in `deploy-all.sh` from registry push (`docker tag` + `docker push` to `localhost:32000`) to MicroK8s containerd import for both frontend and agent images. The agent image (5.5 GB, with layers up to 2.7 GB) fails with `blob upload invalid` when pushed to the MicroK8s built-in registry — the registry cannot handle large blob uploads reliably. The fix is to bypass the registry entirely using `microk8s ctr -n k8s.io images import`. Update the transfer function in `deploy-all.sh` to: `docker save` to tar → `multipass transfer` to VM → `microk8s ctr -n k8s.io images import` in VM. Remove the `docker load`, `docker tag`, and `docker push` steps. Update k8s manifests to reference short image names: change `localhost:32000/dkp-demo:latest` to `dkp-demo:latest` in `k8s/deployment.yaml` (line 38) and `localhost:32000/agent:latest` to `agent:latest` in `k8s/agent-deployment.yaml` (line 35). K8s resolves short names to `docker.io/library/<name>:latest`, which matches the containerd-imported tag. Keep the tar cleanup step unchanged.
+  - Done when: `deploy-all.sh` uses `ctr.*images import` for image loading, k8s manifests reference short image names without the `localhost:32000/` prefix, and no `docker push` or `docker tag` calls remain in the transfer function.
+  - Verify by: `grep 'ctr.*images import' deploy-all.sh` succeeds, `grep 'docker push' deploy-all.sh` fails, `grep 'image:' k8s/deployment.yaml` shows `dkp-demo:latest`, and `grep 'image:' k8s/agent-deployment.yaml` shows `agent:latest`.
+  - Stop and hand off if: `microk8s ctr` is not available inside the VM (indicates MicroK8s installation issue that should be caught by `setup-vm.sh`).
+
 ## Human Handoff
 
 The following validation steps require a running Multipass VM and cannot be executed autonomously. The operator should perform these after all tasks above are complete:
