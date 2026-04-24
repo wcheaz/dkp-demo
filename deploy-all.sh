@@ -138,6 +138,23 @@ build_images() {
     log "Docker images built successfully"
 }
 
+cleanup_old_images() {
+    log "Cleaning up Docker and containerd resources in VM..."
+
+    multipass exec "$VM_NAME" -- docker system prune -a -f --volumes 2>/dev/null || true
+
+    log "Cleaning up MicroK8s containerd images..."
+    local ctr_images
+    ctr_images=$(multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images ls -q 2>/dev/null | grep -E '(dkp-demo|agent|localhost:32000)' || true)
+    if [ -n "$ctr_images" ]; then
+        while IFS= read -r img; do
+            multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images rm "$img" 2>/dev/null || true
+        done <<< "$ctr_images"
+    fi
+
+    log "Docker and containerd resources cleaned up"
+}
+
 check_disk_space() {
     log "Checking disk space in VM..."
 
@@ -151,9 +168,17 @@ check_disk_space() {
     local available_gb=$((available_kb / 1024 / 1024))
     log "Available disk space in VM: ${available_gb} GB"
 
-    if [ "$available_gb" -lt 9 ]; then
-        log_error "Insufficient disk space: ${available_gb} GB available, need at least 9 GB"
-        log "Consider running with cleanup or destroying/recreating the VM"
+    if [ "$available_gb" -lt 7 ]; then
+        log "Insufficient disk space (${available_gb} GB), attempting cleanup..."
+        cleanup_old_images
+        available_kb=$(multipass exec "$VM_NAME" -- df --output=avail / | tail -n1)
+        available_gb=$((available_kb / 1024 / 1024))
+        log "Available disk space after cleanup: ${available_gb} GB"
+    fi
+
+    if [ "$available_gb" -lt 7 ]; then
+        log_error "Insufficient disk space: ${available_gb} GB available, need at least 7 GB"
+        log "Consider destroying/recreating the VM with more disk space"
         return 1
     fi
 
@@ -163,6 +188,7 @@ check_disk_space() {
 transfer_and_push_image() {
     local image_name="$1"
     local tar_file="${SCRIPT_DIR}/${image_name}.tar"
+    local registry_image="${REGISTRY}/${image_name}:latest"
 
     log "Processing image: ${image_name}"
 
@@ -183,21 +209,78 @@ transfer_and_push_image() {
     fi
     log "Image transferred to VM"
 
-    log "Importing ${image_name} into MicroK8s containerd..."
-    if ! multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images import "/tmp/${image_name}.tar"; then
-        log_error "Failed to import ${image_name} into containerd"
+    log "Pruning unused Docker and containerd resources in VM before load..."
+    multipass exec "$VM_NAME" -- docker system prune -a -f --volumes 2>/dev/null || true
+    local ctr_images
+    ctr_images=$(multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images ls -q 2>/dev/null | grep -E '(dkp-demo|agent|localhost:32000)' || true)
+    if [ -n "$ctr_images" ]; then
+        while IFS= read -r img; do
+            multipass exec "$VM_NAME" -- sudo microk8s ctr -n k8s.io images rm "$img" 2>/dev/null || true
+        done <<< "$ctr_images"
+    fi
+
+    log "Loading ${image_name} into Docker inside VM..."
+    if ! multipass exec "$VM_NAME" -- docker load -i "/tmp/${image_name}.tar"; then
+        log_error "Failed to load ${image_name} into VM Docker"
         rm -f "$tar_file"
         multipass exec "$VM_NAME" -- rm -f "/tmp/${image_name}.tar" 2>/dev/null || true
         return 1
     fi
-    log "${image_name} imported into MicroK8s containerd"
+    log "${image_name} loaded into VM Docker"
+
+    log "Removing tar from VM to free space before push..."
+    multipass exec "$VM_NAME" -- rm -f "/tmp/${image_name}.tar" 2>/dev/null || true
+
+    log "Tagging ${image_name} for registry (${registry_image})..."
+    if ! multipass exec "$VM_NAME" -- docker tag "${image_name}:latest" "$registry_image"; then
+        log_error "Failed to tag ${image_name} for registry"
+        rm -f "$tar_file"
+        return 1
+    fi
+    log "${image_name} tagged as ${registry_image}"
+
+    log "Pushing ${registry_image} to MicroK8s registry..."
+    if ! multipass exec "$VM_NAME" -- docker push "$registry_image"; then
+        log_error "Failed to push ${registry_image} to registry"
+        rm -f "$tar_file"
+        return 1
+    fi
+    log "${registry_image} pushed to registry"
+
+    log "Removing local Docker copies to free space..."
+    multipass exec "$VM_NAME" -- docker rmi "$registry_image" 2>/dev/null || true
+    multipass exec "$VM_NAME" -- docker rmi "${image_name}:latest" 2>/dev/null || true
+    multipass exec "$VM_NAME" -- docker image prune -f 2>/dev/null || true
 
     rm -f "$tar_file"
-    multipass exec "$VM_NAME" -- rm -f "/tmp/${image_name}.tar" 2>/dev/null || true
+}
+
+setup_registry() {
+    log "Ensuring MicroK8s registry is enabled..."
+
+    if ! multipass exec "$VM_NAME" -- microk8s status --format yaml 2>/dev/null | grep -q "registry: enabled"; then
+        log "Enabling MicroK8s registry addon..."
+        if ! multipass exec "$VM_NAME" -- microk8s enable registry; then
+            log_error "Failed to enable MicroK8s registry"
+            return 1
+        fi
+        log "Waiting for registry to become ready..."
+        sleep 5
+    fi
+
+    log "Verifying registry is accessible at ${REGISTRY}..."
+    local registry_check
+    registry_check=$(multipass exec "$VM_NAME" -- curl -sf --connect-timeout 5 "http://${REGISTRY}/v2/_catalog" 2>&1) || true
+    if [ -z "$registry_check" ]; then
+        log_error "Registry at ${REGISTRY} is not accessible"
+        log "Check registry pod: multipass exec $VM_NAME -- microk8s kubectl get pods -n container-registry"
+        return 1
+    fi
+    log "MicroK8s registry is ready at ${REGISTRY}"
 }
 
 transfer_all_images() {
-    log "Transferring images to VM and importing into containerd..."
+    log "Transferring images to VM and pushing to registry..."
 
     if ! transfer_and_push_image "$FRONTEND_IMAGE"; then
         log_error "Frontend image transfer failed"
@@ -465,6 +548,11 @@ main() {
 
     if ! check_disk_space; then
         rollback_on_failure "disk-space"
+        exit 1
+    fi
+
+    if ! setup_registry; then
+        rollback_on_failure "registry-setup"
         exit 1
     fi
 
