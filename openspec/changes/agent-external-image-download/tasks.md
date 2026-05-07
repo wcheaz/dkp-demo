@@ -2,7 +2,7 @@
 
 Create the test image asset and both Next.js API routes (`/api/test-image` and `/api/serve-image/[filename]`) that the rest of the pipeline depends on.
 
-- [ ] 1.1 Create test image asset, `.gitignore` entries, and both image-serving API routes.
+- [x] 1.1 Create test image asset, `.gitignore` entries, and both image-serving API routes.
   - Create directories `tmp/test-assets/` and `tmp/downloaded-images/`.
   - Generate a small valid PNG (100×100 px, < 50 KB) at `tmp/test-assets/test-image.png`. One approach: write a 1×1 white pixel PNG using a Node.js script (`Buffer.from([0x89,0x50,0x4e,0x47,...])`) or Python (`PIL`/`Pillow`), or create a minimal valid PNG manually. If no image library is available, copy an existing small PNG from the project and rename it.
   - Verify `tmp/*` is already in `.gitignore` (it is — do not add it again).

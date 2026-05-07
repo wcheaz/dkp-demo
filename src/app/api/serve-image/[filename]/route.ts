@@ -31,7 +31,7 @@ export async function GET(
   try {
     await stat(filePath);
   } catch {
-    return NextResponse.json({ error: "File not found" }, { status: 404 });
+    return NextResponse.json({ error: "Image not found" }, { status: 404 });
   }
 
   const ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
