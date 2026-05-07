@@ -29,7 +29,7 @@ Final verification across all changed files. This task runs after 1.1 and 2.1 ar
 - `rtk lint` has a known bug where it fails to parse ESLint JSON output and exits code 2 even when there are zero errors. This causes an infinite loop. Always use `npm run lint` directly.
 - ESLint warnings are acceptable — the command exits 0 on warnings. Only a non-zero exit code is a failure.
 
-- [ ] 3.1 Run full quality gate across both frontend and backend.
+- [x] 3.1 Run full quality gate across both frontend and backend.
   - Run `npx tsc --noEmit` — must exit zero.
   - Run `npm run lint` — must exit zero (warnings are expected and OK).
   - Run `cd agent && python -m ruff check .` — must exit zero.
