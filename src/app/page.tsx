@@ -358,17 +358,24 @@ function YourMainContent({
         required: false,
       },
       {
+        name: "image_url",
+        type: "string",
+        description:
+          "A full image URL to set directly (e.g. /api/serve-image/test-image-123.png). Use for dynamically downloaded images. Takes precedence over image_name. Optional.",
+        required: false,
+      },
+      {
         name: "prompt_text",
         type: "string",
         description: "The new prompt text. Optional.",
         required: false,
       },
     ],
-    handler({ design_id, image_name, prompt_text }) {
+    handler({ design_id, image_name, image_url, prompt_text }) {
       const ALLOWED_IMAGES = ["design-alpha.svg", "design-beta.svg"];
 
-      if (!image_name && !prompt_text) {
-        return "Error: at least one of image_name or prompt_text must be provided.";
+      if (!image_name && !image_url && !prompt_text) {
+        return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
       }
 
       const currentDesigns = designs;
@@ -384,10 +391,12 @@ function YourMainContent({
         return `Error: design_id ${design_id} not found. Valid IDs: [${validIds.join(", ")}].`;
       }
 
+      const imageUrl = image_url || (image_name ? `/${image_name}` : undefined);
+
       const updated = [...currentDesigns];
       updated[index] = {
         ...updated[index],
-        ...(image_name ? { imageUrl: `/${image_name}` } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
       };
       setState({ ...state, designs: updated });

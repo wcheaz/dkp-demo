@@ -16,6 +16,7 @@ dependencies = [
     "logfire>=4.19.0",
     "torch",
     "python-dotenv",
+    "httpx",
 ]
 
 [tool.uv]
