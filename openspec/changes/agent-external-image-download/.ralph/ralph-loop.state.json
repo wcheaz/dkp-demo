@@ -1,0 +1,19 @@
+{
+  "active": true,
+  "iteration": 2,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/agent-external-image-download/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-05-07T15:47:18.172Z",
+  "resumedAt": null,
+  "completedAt": null,
+  "stoppedAt": null,
+  "exitReason": null
+}
