@@ -27,25 +27,17 @@
   Verify by: `cd agent && python -m ruff check . && python -m mypy .` both exit zero.
   Stop and hand off if: The prompt becomes too long and causes model context issues — trim non-essential instructions and document what was removed.
 
-## 4. Parameter Display UI
+## 4. Per-Design Parameter Snapshot
 
-- [x] 4.1 Add a standalone parameter reference panel above the design cards
-  Add a generic parameter reference section in `src/components/design-component.tsx` rendered above the design cards scrollable container. This panel is NOT tied to any individual design — it is a standalone list showing the current global parameter state so the user can see what has been collected and what is still missing. Render a "Design Parameters" heading followed by 9 label-value rows. Use human-readable labels: Building Type, Floor Plan Dimensions, Roof Type, Roof Pitch, Attic Usage, Eaves Shape, Wall Construction, Location, Overhang. Show filled values as-is. Show `—` for empty optional fields. Show `⚠ Required` with distinct text color for empty required fields (buildingType, floorPlanDimensions, roofType, roofPitch). No collapsible sections, no modals.
-  Done when: DesignComponent renders a standalone parameter panel above design cards that reflects the current global `state.parameters`, shows `⚠ Required` for missing required fields, shows `—` for empty optional fields, handles `undefined` parameters.
-  Verify by: `npx tsc --noEmit && npm run lint` both exit zero.
-  Stop and hand off if: The DesignComponent becomes too complex — extract the parameter panel into a separate component in the same file and document the split.
-
-## 5. Per-Design Parameter Snapshot
-
-- [x] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
+- [x] 4.1 Add parameters snapshot to each DesignEntry and render it inside design cards
   Add an optional `parameters?: DesignParameters` field to `DesignEntry` in both `src/lib/types.ts` and `agent/src/agent.py`. When `add_design_entry` creates a new design entry, snapshot the current `state.parameters` and store it on the entry. In `DesignComponent`, render the snapshot parameters inside each design card (below the image and prompt text) as a compact label-value list showing only fields that have values. This lets the user see what parameters were active for each individual design.
   Done when: Each `DesignEntry` carries a `parameters` snapshot at creation time, each design card shows its captured parameters, cards without parameters show nothing extra.
   Verify by: `npx tsc --noEmit && npm run lint` both exit zero.
   Stop and hand off if: The design card layout becomes too crowded — move the per-design parameters into a collapsible detail section within the card.
 
-## 6. Verification
+## 5. Verification
 
-- [x] 6.1 Run all lint and type checks across backend and frontend
+- [x] 5.1 Run all lint and type checks across backend and frontend
   Run `cd agent && python -m ruff check . && python -m mypy .` then `npx tsc --noEmit && npm run lint`. All commands MUST exit zero.
   Done when: All four commands exit zero with no errors.
   Verify by: Run each command and confirm zero exit code.
