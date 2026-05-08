@@ -37,7 +37,7 @@
 
 ## 5. Per-Design Parameter Snapshot
 
-- [ ] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
+- [x] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
   Add an optional `parameters?: DesignParameters` field to `DesignEntry` in both `src/lib/types.ts` and `agent/src/agent.py`. When `add_design_entry` creates a new design entry, snapshot the current `state.parameters` and store it on the entry. In `DesignComponent`, render the snapshot parameters inside each design card (below the image and prompt text) as a compact label-value list showing only fields that have values. This lets the user see what parameters were active for each individual design.
   Done when: Each `DesignEntry` carries a `parameters` snapshot at creation time, each design card shows its captured parameters, cards without parameters show nothing extra.
   Verify by: `npx tsc --noEmit && npm run lint` both exit zero.
