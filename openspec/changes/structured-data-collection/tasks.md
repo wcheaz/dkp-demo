@@ -6,7 +6,7 @@
   Verify by: `npx tsc --noEmit` passes and `cd agent && python -c "from agent import YourState; s = YourState(); assert s.parameters.buildingType is None"`.
   Stop and hand off if: TypeScript or Python type errors cannot be resolved without changing the existing `DesignEntry` or `designs` field structure.
 
-- [ ] 1.2 Update useCopilotReadable to include parameters in serialized state
+- [x] 1.2 Update useCopilotReadable to include parameters in serialized state
   Update the `useCopilotReadable` call in `src/app/page.tsx` to serialize both `designs` and `state.parameters` in its `value` field so the agent sees current parameter state.
   Done when: `useCopilotReadable` value includes `state.parameters` in its JSON serialization.
   Verify by: inspect `src/app/page.tsx` for `useCopilotReadable` and confirm `state.parameters` appears in the `value` field.
