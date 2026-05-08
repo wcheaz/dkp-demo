@@ -338,7 +338,9 @@ function YourMainContent({
     handler({ prompt_text }) {
       const currentDesigns = designs;
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text };
+      const currentParams = state.parameters ?? {};
+      const hasParams = Object.values(currentParams).some((v) => v != null && v !== "");
+      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text, ...(hasParams ? { parameters: { ...currentParams } } : {}) };
       setState({ ...state, designs: [...currentDesigns, newEntry] });
     },
   });

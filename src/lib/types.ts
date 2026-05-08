@@ -2,6 +2,7 @@ export interface DesignEntry {
   id: number;
   imageUrl: string;
   promptText: string;
+  parameters?: DesignParameters;
 }
 
 export interface DesignParameters {

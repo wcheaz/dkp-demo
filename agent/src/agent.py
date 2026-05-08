@@ -70,13 +70,6 @@ class KnowledgeQuery(BaseModel):
     timestamp: str
 
 
-# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
-class DesignEntry(BaseModel):
-    id: int
-    imageUrl: str
-    promptText: str
-
-
 class DesignParameters(BaseModel):
     buildingType: Optional[str] = None
     floorPlanDimensions: Optional[str] = None
@@ -87,6 +80,14 @@ class DesignParameters(BaseModel):
     wallConstruction: Optional[str] = None
     location: Optional[str] = None
     overhang: Optional[str] = None
+
+
+# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
+class DesignEntry(BaseModel):
+    id: int
+    imageUrl: str
+    promptText: str
+    parameters: Optional[DesignParameters] = None
 
 
 class YourState(BaseModel):
