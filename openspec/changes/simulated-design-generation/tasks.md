@@ -4,7 +4,7 @@
 
 ## 2. Static Assets
 
-- [ ] 2.1 Create four roof-type schematic SVGs in `public/`: `design-gable.svg`, `design-hip.svg`, `design-mono.svg`, `design-flat.svg`. Each SVG MUST contain a visually distinct truss/roof schematic appropriate to its type. Verify by: confirming all four files exist in `public/` and are valid SVG (contain `<svg>` root element).
+- [x] 2.1 Create four roof-type schematic SVGs in `public/`: `design-gable.svg`, `design-hip.svg`, `design-mono.svg`, `design-flat.svg`. Each SVG MUST contain a visually distinct truss/roof schematic appropriate to its type. Verify by: confirming all four files exist in `public/` and are valid SVG (contain `<svg>` root element).
 
 ## 3. Frontend Tool Replacement
 
