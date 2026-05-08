@@ -21,7 +21,7 @@
 
 ## 3. Agent Collection Prompt
 
-- [ ] 3.1 Update agent system prompt with structured data collection instructions
+- [x] 3.1 Update agent system prompt with structured data collection instructions
   Update the `system_prompt` in `agent/src/agent.py` to include: (1) the four required parameter fields and their valid values, (2) instruction to extract parameter values from user messages and call `update_design_parameters`, (3) instruction to check the tool return value for missing required fields and ask for them, (4) instruction to confirm all parameters with the user before proceeding to design-related discussion. Preserve all existing tool references (`get_knowledge_summary`, `query_knowledge_base`, `add_design_entry`, `modify_design_entry`).
   Done when: `system_prompt` contains `update_design_parameters`, lists all four required fields, includes collection-loop instructions, and preserves existing tool references.
   Verify by: `cd agent && python -m ruff check . && python -m mypy .` both exit zero.
