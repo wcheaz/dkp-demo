@@ -20,4 +20,4 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Run full lint and typecheck across both frontend and backend. Verify by: `npx tsc --noEmit && npm run lint && cd agent && python -m ruff check . && python -m mypy .`. All commands MUST exit zero.
+- [x] 6.1 Run full lint and typecheck across both frontend and backend. Verify by: `npx tsc --noEmit && npm run lint && cd agent && python -m ruff check . && python -m mypy .`. All commands MUST exit zero.
