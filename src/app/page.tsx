@@ -304,6 +304,7 @@ function YourMainContent({
     name: "my_agent",
     initialState: {
       designs: [],
+      parameters: {},
     },
   });
 
@@ -404,11 +405,53 @@ function YourMainContent({
     },
   });
 
+  useFrontendTool({
+    name: "update_design_parameters",
+    parameters: [
+      { name: "building_type", type: "string", description: "Building type (e.g. House, Garage, Agricultural building)", required: false },
+      { name: "floor_plan_dimensions", type: "string", description: "Floor plan dimensions (e.g. 10x15m)", required: false },
+      { name: "roof_type", type: "string", description: "Roof type (Gable, Hip, Mono-pitch, Flat)", required: false },
+      { name: "roof_pitch", type: "string", description: "Roof pitch in degrees (2-45)", required: false },
+      { name: "attic_usage", type: "string", description: "Attic usage (None, Storage, Living space)", required: false },
+      { name: "eaves_shape", type: "string", description: "Eaves shape (Open, Boxed, Flush)", required: false },
+      { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
+      { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
+      { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
+    ],
+    handler({ building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
+      const current = state.parameters ?? {};
+      const updated = { ...current };
+      const updatedFields: string[] = [];
+
+      if (building_type !== undefined) { updated.buildingType = building_type; updatedFields.push("buildingType"); }
+      if (floor_plan_dimensions !== undefined) { updated.floorPlanDimensions = floor_plan_dimensions; updatedFields.push("floorPlanDimensions"); }
+      if (roof_type !== undefined) { updated.roofType = roof_type; updatedFields.push("roofType"); }
+      if (roof_pitch !== undefined) { updated.roofPitch = Number(roof_pitch); updatedFields.push("roofPitch"); }
+      if (attic_usage !== undefined) { updated.atticUsage = attic_usage; updatedFields.push("atticUsage"); }
+      if (eaves_shape !== undefined) { updated.eavesShape = eaves_shape; updatedFields.push("eavesShape"); }
+      if (wall_construction !== undefined) { updated.wallConstruction = wall_construction; updatedFields.push("wallConstruction"); }
+      if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
+      if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
+
+      setState({ ...state, parameters: updated });
+
+      const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
+      const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
+
+      let summary = `Updated fields: ${updatedFields.length > 0 ? updatedFields.join(", ") : "none"}. `;
+      summary += missingRequired.length > 0
+        ? `Missing required fields: ${missingRequired.join(", ")}. All required fields are NOT complete.`
+        : "All required fields are complete.";
+
+      return summary;
+    },
+  });
+
   // END TEMPORARY
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify(designs),
+    value: JSON.stringify({ designs, parameters: state.parameters }),
   });
 
   return (

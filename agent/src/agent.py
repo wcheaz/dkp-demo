@@ -77,6 +77,18 @@ class DesignEntry(BaseModel):
     promptText: str
 
 
+class DesignParameters(BaseModel):
+    buildingType: Optional[str] = None
+    floorPlanDimensions: Optional[str] = None
+    roofType: Optional[str] = None
+    roofPitch: Optional[int] = None
+    atticUsage: Optional[str] = None
+    eavesShape: Optional[str] = None
+    wallConstruction: Optional[str] = None
+    location: Optional[str] = None
+    overhang: Optional[str] = None
+
+
 class YourState(BaseModel):
     user_input: str = ""
     ai_response: str = ""
@@ -84,6 +96,7 @@ class YourState(BaseModel):
     last_knowledge_result: Optional[str] = None
     # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
     designs: List[DesignEntry] = []
+    parameters: DesignParameters = DesignParameters()
 
 
 # ============================================================================
@@ -149,6 +162,32 @@ agent = Agent(
         "- download_test_image: Downloads the preset test image from the Next.js test route and saves it to the server. "
         "Returns a serveable URL (e.g. /api/serve-image/test-image-1234567890.png) that can be used as image_url in modify_design_entry.\n"
         "  Workflow: call download_test_image first, then call modify_design_entry with the returned URL as image_url.\n\n"
+        "- update_design_parameters: MANDATORY — You MUST call this tool whenever the user provides any information "
+        "that could be a construction parameter. This tool accepts these fields:\n"
+        "  - building_type: Building type (e.g. House, Garage, Agricultural building)\n"
+        "  - floor_plan_dimensions: Floor plan dimensions (e.g. 10x15m)\n"
+        "  - roof_type: Roof type — must be one of: Gable, Hip, Mono-pitch, Flat\n"
+        "  - roof_pitch: Roof pitch in degrees (2-45)\n"
+        "  - attic_usage: Attic usage — None, Storage, or Living space\n"
+        "  - eaves_shape: Eaves shape — Open, Boxed, or Flush\n"
+        "  - wall_construction: Wall construction — Brick, SIP panels, Concrete block, or Mixed\n"
+        "  - location: Location (e.g. Bratislava)\n"
+        "  - overhang: Overhang (e.g. 450mm)\n\n"
+        "REQUIRED FIELDS (must be collected before proceeding to design discussion):\n"
+        "1. building_type (buildingType)\n"
+        "2. floor_plan_dimensions (floorPlanDimensions)\n"
+        "3. roof_type (roofType) — valid values: Gable, Hip, Mono-pitch, Flat\n"
+        "4. roof_pitch (roofPitch) — valid range: 2-45 degrees\n\n"
+        "COLLECTION LOOP INSTRUCTIONS:\n"
+        "1. On EVERY user message, extract any parameter values from the text.\n"
+        "2. Call update_design_parameters with whatever fields were extracted (even partial).\n"
+        "3. Read the tool's return value to see which required fields are still missing.\n"
+        "4. If required fields are missing → ask the user for them specifically, listing the missing "
+        "field names and valid options.\n"
+        "5. If all required fields are present → summarize ALL collected parameters (both required "
+        "and optional) and ask the user to confirm before proceeding to any design-related discussion.\n"
+        "6. Do NOT proceed to design generation, knowledge base queries about specific designs, or "
+        "design-related discussion until the user has confirmed all required parameters.\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),

@@ -4,6 +4,18 @@ export interface DesignEntry {
   promptText: string;
 }
 
+export interface DesignParameters {
+  buildingType?: string;
+  floorPlanDimensions?: string;
+  roofType?: string;
+  roofPitch?: number;
+  atticUsage?: string;
+  eavesShape?: string;
+  wallConstruction?: string;
+  location?: string;
+  overhang?: string;
+}
+
 // Domain-specific state fields - uncomment and adapt for your project
 // Example: procurement-specific state
 // export type ProcurementCode = {
@@ -23,4 +35,5 @@ export interface DesignEntry {
 // Uncomment the procurement_codes field below if restoring procurement functionality.
 export type AgentState = {
   designs: DesignEntry[];
+  parameters: DesignParameters;
 };
