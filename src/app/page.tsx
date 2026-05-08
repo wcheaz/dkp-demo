@@ -20,7 +20,7 @@ import {
 } from "@copilotkit/react-core";
 import { CopilotKitCSSProperties, CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent, useMemo } from "react";
+import { useState, useRef, ChangeEvent, useMemo, useEffect } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
@@ -292,6 +292,17 @@ function CustomInput(props: InputProps) {
   );
 }
 
+// DEMO-ONLY: roof-type-to-image mapping for simulated design generation
+const ROOF_TYPE_IMAGE_MAP: Record<string, string> = {
+  "Gable": "/design-gable.svg",
+  "Hip": "/design-hip.svg",
+  "Mono-pitch": "/design-mono.svg",
+  "Flat": "/design-flat.svg",
+};
+
+// DEMO-ONLY: artificial delay for demo presentation
+const DESIGN_GENERATION_DELAY_MS = 3000;
+
 function YourMainContent({
   themeColor,
 }: {
@@ -325,21 +336,56 @@ function YourMainContent({
     setState({ ...state, designs });
   }
 
-  // TEMPORARY: add_design_entry frontend tool for auto-creating design entries on every agent response. Will be replaced when real image generation is integrated.
+  // DEMO-ONLY: refs for simulated design generation timer
+  const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestStateRef = useRef(state);
+
+  useEffect(() => {
+    latestStateRef.current = state;
+  });
+
+  useEffect(() => {
+    return () => {
+      if (generationTimerRef.current) {
+        clearTimeout(generationTimerRef.current);
+      }
+    };
+  }, []);
+
+  // DEMO-ONLY: generate_design frontend tool for simulated design generation
   useFrontendTool({
-    name: "add_design_entry",
+    name: "generate_design",
     parameters: [
       {
         name: "prompt_text",
-        description: "The user's original prompt text",
+        description: "The user's original prompt text for the design",
         required: true,
       },
     ],
     handler({ prompt_text }) {
       const currentDesigns = designs;
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text, parameters: { ...(state.parameters ?? {}) } };
+      const roofType = state.parameters?.roofType ?? "";
+      const roofImage = ROOF_TYPE_IMAGE_MAP[roofType] ?? "/design-gable.svg";
+      const newEntry = {
+        id: nextId,
+        imageUrl: "/design-gable.svg",
+        promptText: prompt_text,
+        status: "processing" as const,
+        parameters: { ...(state.parameters ?? {}) },
+      };
       setState({ ...state, designs: [...currentDesigns, newEntry] });
+
+      // DEMO-ONLY: simulate generation delay then resolve to complete
+      generationTimerRef.current = setTimeout(() => {
+        const currentState = latestStateRef.current;
+        const updatedDesigns = (currentState.designs ?? []).map((d) =>
+          d.id === nextId
+            ? { ...d, status: "complete" as const, imageUrl: roofImage }
+            : d
+        );
+        setState({ ...currentState, designs: updatedDesigns });
+      }, DESIGN_GENERATION_DELAY_MS);
     },
   });
   useFrontendTool({
@@ -457,7 +503,7 @@ function YourMainContent({
     },
   });
 
-  // END TEMPORARY
+  // END DEMO-ONLY
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",

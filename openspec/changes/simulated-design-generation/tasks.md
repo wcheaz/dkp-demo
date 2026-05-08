@@ -8,7 +8,7 @@
 
 ## 3. Frontend Tool Replacement
 
-- [ ] 3.1 Replace `add_design_entry` frontend tool with `generate_design` in `src/app/page.tsx`. Add `ROOF_TYPE_IMAGE_MAP` constant and `DESIGN_GENERATION_DELAY_MS` constant (both marked `// DEMO-ONLY`). The `generate_design` handler: creates entry with `status: "processing"`, appends to `state.designs`, calls `setState`, waits `DESIGN_GENERATION_DELAY_MS`, then resolves entry to `status: "complete"` with roof-type-mapped `imageUrl`, calls `setState` again. Use a `useRef` to store timer ID for cleanup. Mark all new code with `// DEMO-ONLY` comments. Remove the old `add_design_entry` `useFrontendTool` registration entirely. Verify by: `npx tsc --noEmit && npm run lint`.
+- [x] 3.1 Replace `add_design_entry` frontend tool with `generate_design` in `src/app/page.tsx`. Add `ROOF_TYPE_IMAGE_MAP` constant and `DESIGN_GENERATION_DELAY_MS` constant (both marked `// DEMO-ONLY`). The `generate_design` handler: creates entry with `status: "processing"`, appends to `state.designs`, calls `setState`, waits `DESIGN_GENERATION_DELAY_MS`, then resolves entry to `status: "complete"` with roof-type-mapped `imageUrl`, calls `setState` again. Use a `useRef` to store timer ID for cleanup. Mark all new code with `// DEMO-ONLY` comments. Remove the old `add_design_entry` `useFrontendTool` registration entirely. Verify by: `npx tsc --noEmit && npm run lint`.
 
 ## 4. Processing Overlay UI
 
