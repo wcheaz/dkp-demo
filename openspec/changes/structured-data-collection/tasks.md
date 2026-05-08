@@ -1,6 +1,6 @@
 ## 1. Data Model
 
-- [ ] 1.1 Add DesignParameters model to backend and frontend, update state types and initial state
+- [x] 1.1 Add DesignParameters model to backend and frontend, update state types and initial state
   Add `DesignParameters` Pydantic model (9 Optional fields) to `agent/src/agent.py`, add `parameters` field to `YourState`. Add `DesignParameters` TypeScript interface to `src/lib/types.ts`, add `parameters: DesignParameters` to `AgentState`. Update `useCoAgent` initialState in `src/app/page.tsx` to include `parameters: {}`.
   Done when: `AgentState` has `parameters: DesignParameters`, `YourState` has `parameters: DesignParameters`, `useCoAgent` initializes `parameters: {}`.
   Verify by: `npx tsc --noEmit` passes and `cd agent && python -c "from agent import YourState; s = YourState(); assert s.parameters.buildingType is None"`.
