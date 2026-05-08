@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 import { AgentState, DesignParameters } from "@/lib/types";
 
-const REQUIRED_FIELDS: (keyof DesignParameters)[] = [
-  "buildingType",
-  "floorPlanDimensions",
-  "roofType",
-  "roofPitch",
-];
-
 const PARAM_LABELS: Record<keyof DesignParameters, string> = {
   buildingType: "Building Type",
   floorPlanDimensions: "Floor Plan Dimensions",
@@ -39,7 +32,6 @@ export interface DesignComponentProps {
 
 export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
-  const parameters = state.parameters ?? {};
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,28 +47,6 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Designs</h2>
-
-      <div className="mb-6 p-4 bg-white/10 backdrop-blur-md rounded-xl">
-        <h3 className="text-lg font-semibold mb-3 text-gray-200">Design Parameters</h3>
-        <div className="grid grid-cols-1 gap-1">
-          {ALL_PARAM_KEYS.map((key) => {
-            const value = parameters[key];
-            const isRequired = REQUIRED_FIELDS.includes(key);
-            return (
-              <div key={key} className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400 min-w-[180px]">{PARAM_LABELS[key]}:</span>
-                {value != null && value !== "" ? (
-                  <span className="text-gray-200">{String(value)}</span>
-                ) : isRequired ? (
-                  <span className="text-yellow-400">&#9888; Required</span>
-                ) : (
-                  <span className="text-gray-500">&mdash;</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {designs.length === 0 ? (
         <p className="text-gray-400 text-center py-12">
