@@ -37,15 +37,22 @@
 
 ## 5. Per-Design Parameter Snapshot
 
-- [x] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
-  Add an optional `parameters?: DesignParameters` field to `DesignEntry` in both `src/lib/types.ts` and `agent/src/agent.py`. When `add_design_entry` creates a new design entry, snapshot the current `state.parameters` and store it on the entry. In `DesignComponent`, render the snapshot parameters inside each design card (below the image and prompt text) as a compact label-value list showing only fields that have values. This lets the user see what parameters were active for each individual design.
-  Done when: Each `DesignEntry` carries a `parameters` snapshot at creation time, each design card shows its captured parameters, cards without parameters show nothing extra.
-  Verify by: `npx tsc --noEmit && npm run lint` both exit zero.
-  Stop and hand off if: The design card layout becomes too crowded — move the per-design parameters into a collapsible detail section within the card.
+- [ ] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
+  This task has TWO parts that must both be completed. Both are required because the first design entry is created BEFORE the user provides any parameters, so a simple creation-time snapshot is insufficient.
+
+  **Part A — Always snapshot parameters on entry creation**: Modify the `add_design_entry` frontend tool handler in `src/app/page.tsx` to ALWAYS include `parameters: { ...(state.parameters ?? {}) }` on every new `DesignEntry`, even when all parameter values are null/empty. Remove the `hasParams` conditional — the snapshot must always be present. This ensures every entry carries a parameters object from the start.
+
+  **Part B — Backfill existing entries when parameters update**: Modify the `update_design_parameters` frontend tool handler in `src/app/page.tsx` so that AFTER merging new parameter values into `state.parameters`, it also iterates through ALL existing `state.designs` entries. For any entry whose `parameters` field is missing, null, or has zero filled values (all fields null/empty), replace its `parameters` with a copy of the current `state.parameters`. Entries that already have their own filled parameter snapshot MUST NOT be overwritten — each design entry preserves the parameters that were active when it was created OR backfilled before any parameters existed.
+
+  **Part C — Render parameters inside each design card**: In `src/components/design-component.tsx`, inside each design card (below the image and prompt text), render the entry's `parameters` field as a compact label-value list showing only fields that have non-null, non-empty values. Use the `PARAM_LABELS` mapping and `ALL_PARAM_KEYS` array that already exist in the file. Cards whose parameters have no filled values should show nothing extra.
+
+  Done when: (1) Every new DesignEntry has a `parameters` object at creation time regardless of whether parameters are filled. (2) When `update_design_parameters` is called, it backfills entries that have no parameters snapshot yet. (3) Each design card renders its captured parameters below the image/prompt. (4) A design created before any parameters are set will show parameters once they are filled (via backfill).
+  Verify by: Open the browser. Type a message to create design #1 (no parameters set yet). Then provide parameters (e.g. "10x15m gable roof"). Design #1 MUST now show the parameters in its card. Create design #2 — it MUST also show parameters. Run `npx tsc --noEmit && npm run lint` both exit zero.
+  Stop and hand off if: The backfill logic causes React re-render loops — add a shallow-equality check before calling setState to prevent unnecessary updates.
 
 ## 6. Verification
 
-- [x] 6.1 Run all lint and type checks across backend and frontend
+- [ ] 6.1 Run all lint and type checks across backend and frontend
   Run `cd agent && python -m ruff check . && python -m mypy .` then `npx tsc --noEmit && npm run lint`. All commands MUST exit zero.
   Done when: All four commands exit zero with no errors.
   Verify by: Run each command and confirm zero exit code.
