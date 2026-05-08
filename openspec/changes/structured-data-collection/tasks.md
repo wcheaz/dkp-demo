@@ -13,7 +13,7 @@
 
 ## 2. Parameter Collection Tool
 
-- [ ] 2.1 Register update_design_parameters frontend tool with parameter merge and missing-field summary
+- [x] 2.1 Register update_design_parameters frontend tool with parameter merge and missing-field summary
   Register a `useFrontendTool` named `update_design_parameters` in `YourMainContent` (`src/app/page.tsx`). The tool accepts optional string parameters for all 9 fields (`building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`, `attic_usage`, `eaves_shape`, `wall_construction`, `location`, `overhang`). The handler merges provided fields into `state.parameters` via `setState`, converting `roof_pitch` from string to number. Returns a string listing updated fields, missing required fields, and whether all required fields are complete.
   Done when: Tool is registered, merges partial updates, preserves existing values, handles undefined `state.parameters`, returns missing-required-fields summary.
   Verify by: `npx tsc --noEmit` passes.
