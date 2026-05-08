@@ -71,7 +71,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                   onClick={() => setModalImageUrl(entry.imageUrl)}
                 />
               </div>
-              <p className="mt-3 text-center text-sm text-gray-200">
+              <p className="mt-3 text-center text-sm font-medium rounded-lg px-3 py-1.5 text-design-description-text bg-design-description-bg">
                 {entry.promptText}
               </p>
               {entry.parameters && (() => {
@@ -80,12 +80,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                 );
                 if (filledEntries.length === 0) return null;
                 return (
-                  <div className="mt-2 pt-2 border-t border-white/10">
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
+                  <div className="mt-2 pt-2 border-t border-design-param-border">
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                       {filledEntries.map((k) => (
-                        <div key={k} className="flex items-center gap-1">
-                          <span className="text-gray-400">{PARAM_LABELS[k]}:</span>
-                          <span className="text-gray-300">{String(entry.parameters![k])}</span>
+                        <div key={k} className="flex items-center gap-1.5 bg-design-param-bg rounded-md px-2 py-1">
+                          <span className="text-design-param-label font-medium">{PARAM_LABELS[k]}:</span>
+                          <span className="text-design-param-value font-semibold">{String(entry.parameters![k])}</span>
                         </div>
                       ))}
                     </div>
