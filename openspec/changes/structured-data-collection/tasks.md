@@ -52,7 +52,7 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Run all lint and type checks across backend and frontend
+- [x] 6.1 Run all lint and type checks across backend and frontend
   Run `cd agent && python -m ruff check . && python -m mypy .` then `npx tsc --noEmit && npm run lint`. All commands MUST exit zero.
   Done when: All four commands exit zero with no errors.
   Verify by: Run each command and confirm zero exit code.
