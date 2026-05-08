@@ -29,11 +29,11 @@
 
 ## 4. Parameter Display UI
 
-- [x] 4.1 Add parameter display section to DesignComponent with label-value rows and required indicators
-  Add a parameter display section above the design cards scrollable container in `src/components/design-component.tsx`. Render a "Design Parameters" heading followed by 9 label-value rows. Use human-readable labels: Building Type, Floor Plan Dimensions, Roof Type, Roof Pitch, Attic Usage, Eaves Shape, Wall Construction, Location, Overhang. Show filled values as-is. Show `—` for empty optional fields. Show `⚠ Required` with distinct text color for empty required fields (buildingType, floorPlanDimensions, roofType, roofPitch). No collapsible sections, no modals.
-  Done when: DesignComponent renders 9 parameter rows above design cards, shows `⚠ Required` for missing required fields, shows `—` for empty optional fields, handles `undefined` parameters.
+- [x] 4.1 Add a standalone parameter reference panel above the design cards
+  Add a generic parameter reference section in `src/components/design-component.tsx` rendered above the design cards scrollable container. This panel is NOT tied to any individual design — it is a standalone list showing the current global parameter state so the user can see what has been collected and what is still missing. Render a "Design Parameters" heading followed by 9 label-value rows. Use human-readable labels: Building Type, Floor Plan Dimensions, Roof Type, Roof Pitch, Attic Usage, Eaves Shape, Wall Construction, Location, Overhang. Show filled values as-is. Show `—` for empty optional fields. Show `⚠ Required` with distinct text color for empty required fields (buildingType, floorPlanDimensions, roofType, roofPitch). No collapsible sections, no modals.
+  Done when: DesignComponent renders a standalone parameter panel above design cards that reflects the current global `state.parameters`, shows `⚠ Required` for missing required fields, shows `—` for empty optional fields, handles `undefined` parameters.
   Verify by: `npx tsc --noEmit && npm run lint` both exit zero.
-  Stop and hand off if: The DesignComponent becomes too complex — extract the parameter display into a separate component in the same file and document the split.
+  Stop and hand off if: The DesignComponent becomes too complex — extract the parameter panel into a separate component in the same file and document the split.
 
 ## 5. Per-Design Parameter Snapshot
 
