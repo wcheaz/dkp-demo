@@ -2,6 +2,7 @@ export interface DesignEntry {
   id: number;
   imageUrl: string;
   promptText: string;
+  status?: "processing" | "complete";
   parameters?: DesignParameters;
 }
 

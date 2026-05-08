@@ -82,11 +82,12 @@ class DesignParameters(BaseModel):
     overhang: Optional[str] = None
 
 
-# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
+# DEMO-ONLY - DesignEntry model for design component; simulated for demo purposes
 class DesignEntry(BaseModel):
     id: int
     imageUrl: str
     promptText: str
+    status: str = "complete"
     parameters: Optional[DesignParameters] = None
 
 
@@ -95,7 +96,7 @@ class YourState(BaseModel):
     ai_response: str = ""
     knowledge_queries: List[KnowledgeQuery] = []
     last_knowledge_result: Optional[str] = None
-    # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
+    # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
     parameters: DesignParameters = DesignParameters()
 

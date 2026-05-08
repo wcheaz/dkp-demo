@@ -1,6 +1,6 @@
 ## 1. Data Model
 
-- [ ] 1.1 Add `status` field to `DesignEntry` in `src/lib/types.ts` and `agent/src/agent.py`. TypeScript: `status?: "processing" | "complete"` (optional, defaults via omitted). Python: `status: str = "complete"`. Remove or update `TEMPORARY` comments to `DEMO-ONLY` on `DesignEntry` and `designs` field in `agent/src/agent.py`. Verify by: `npx tsc --noEmit && cd agent && python -m ruff check . && python -m mypy .`.
+- [x] 1.1 Add `status` field to `DesignEntry` in `src/lib/types.ts` and `agent/src/agent.py`. TypeScript: `status?: "processing" | "complete"` (optional, defaults via omitted). Python: `status: str = "complete"`. Remove or update `TEMPORARY` comments to `DEMO-ONLY` on `DesignEntry` and `designs` field in `agent/src/agent.py`. Verify by: `npx tsc --noEmit && cd agent && python -m ruff check . && python -m mypy .`.
 
 ## 2. Static Assets
 
