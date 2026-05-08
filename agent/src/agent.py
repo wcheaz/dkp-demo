@@ -152,7 +152,9 @@ agent = Agent(
         'information is available (e.g., "What projects do you have?", "What do you know?").\n'
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
         "load calculations, materials, truss designs, or engineering specifications.\n"
-        "- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n\n"
+        "- generate_design: # DEMO-ONLY — Call this once after the user has confirmed all required parameters. "
+        "Pass the user's original prompt text. Do NOT call this after every response — only call it when "
+        "the user has confirmed parameters and is ready for a design to be generated.\n\n"
         "- modify_design_entry: Modify an existing design entry's image and/or prompt text.\n"
         "  Parameters:\n"
         "    - design_id (required, number): The 1-based ID of the design entry to modify.\n"
@@ -363,24 +365,6 @@ async def download_test_image(ctx: RunContext[StateDeps]) -> str:
     except Exception as e:
         return f"Error: {e}"
 
-
-# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated
-# Commented out because the agent tool approach did not work for automatic state propagation.
-# @agent.tool
-# async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
-#     """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
-#
-#     Args:
-#         ctx: Agent context with state
-#         prompt_text: The user's original prompt text
-#
-#     Returns:
-#         Confirmation string
-#     """
-#     ctx.deps.state.designs.append(
-#         DesignEntry(imageUrl="/next.svg", promptText=prompt_text)
-#     )
-#     return f"Design entry added for prompt: {prompt_text}"
 
 
 # ============================================================================

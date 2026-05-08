@@ -16,7 +16,7 @@
 
 ## 5. Agent System Prompt
 
-- [ ] 5.1 Update the agent system prompt in `agent/src/agent.py`: replace the `add_design_entry` instruction block with a `generate_design` instruction that tells the agent to call `generate_design` once after the user confirms all required parameters (not after every response). Remove `CRITICAL REQUIREMENT`, `EVERY SINGLE`, and `non-negotiable` language related to design entry creation. Mark the instruction with `# DEMO-ONLY`. Preserve all existing instructions for `get_knowledge_summary`, `query_knowledge_base`, `update_design_parameters`, `modify_design_entry`, and `download_test_image`. Remove the commented-out `add_design_entry` backend tool function. Verify by: `cd agent && python -m ruff check . && python -m mypy .`.
+- [x] 5.1 Update the agent system prompt in `agent/src/agent.py`: replace the `add_design_entry` instruction block with a `generate_design` instruction that tells the agent to call `generate_design` once after the user confirms all required parameters (not after every response). Remove `CRITICAL REQUIREMENT`, `EVERY SINGLE`, and `non-negotiable` language related to design entry creation. Mark the instruction with `# DEMO-ONLY`. Preserve all existing instructions for `get_knowledge_summary`, `query_knowledge_base`, `update_design_parameters`, `modify_design_entry`, and `download_test_image`. Remove the commented-out `add_design_entry` backend tool function. Verify by: `cd agent && python -m ruff check . && python -m mypy .`.
 
 ## 6. Verification
 
