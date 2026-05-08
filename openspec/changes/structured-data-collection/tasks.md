@@ -37,7 +37,7 @@
 
 ## 5. Per-Design Parameter Snapshot
 
-- [ ] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
+- [x] 5.1 Add parameters snapshot to each DesignEntry and render it inside design cards
   This task has TWO parts that must both be completed. Both are required because the first design entry is created BEFORE the user provides any parameters, so a simple creation-time snapshot is insufficient.
 
   **Part A — Always snapshot parameters on entry creation**: Modify the `add_design_entry` frontend tool handler in `src/app/page.tsx` to ALWAYS include `parameters: { ...(state.parameters ?? {}) }` on every new `DesignEntry`, even when all parameter values are null/empty. Remove the `hasParams` conditional — the snapshot must always be present. This ensures every entry carries a parameters object from the start.

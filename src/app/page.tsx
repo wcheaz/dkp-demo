@@ -338,9 +338,7 @@ function YourMainContent({
     handler({ prompt_text }) {
       const currentDesigns = designs;
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const currentParams = state.parameters ?? {};
-      const hasParams = Object.values(currentParams).some((v) => v != null && v !== "");
-      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text, ...(hasParams ? { parameters: { ...currentParams } } : {}) };
+      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text, parameters: { ...(state.parameters ?? {}) } };
       setState({ ...state, designs: [...currentDesigns, newEntry] });
     },
   });
@@ -435,7 +433,17 @@ function YourMainContent({
       if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
       if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
 
-      setState({ ...state, parameters: updated });
+      const currentDesigns = state.designs ?? [];
+      const backfilledDesigns = currentDesigns.map((entry) => {
+        const entryParams = entry.parameters;
+        const hasFilledParams = entryParams && Object.values(entryParams).some((v) => v != null && v !== "");
+        if (!hasFilledParams) {
+          return { ...entry, parameters: { ...updated } };
+        }
+        return entry;
+      });
+
+      setState({ ...state, parameters: updated, designs: backfilledDesigns });
 
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
