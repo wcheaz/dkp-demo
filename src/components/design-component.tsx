@@ -63,13 +63,20 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               <span className="absolute top-2 left-3 text-xs font-semibold text-gray-300">
                 #{entry.id}
               </span>
-              <div className="flex justify-center">
-                <img
-                  src={entry.imageUrl}
-                  alt={entry.promptText}
-                  className="w-[55%] h-[27vh] object-contain cursor-pointer"
-                  onClick={() => setModalImageUrl(entry.imageUrl)}
-                />
+              <div className="flex justify-center relative">
+                {entry.status === "processing" ? (
+                  <div className="w-[55%] h-[27vh] flex flex-col items-center justify-center bg-white/10 rounded-xl">
+                    <div className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    <p className="mt-3 text-sm text-gray-300">Generating truss structure...</p>
+                  </div>
+                ) : (
+                  <img
+                    src={entry.imageUrl}
+                    alt={entry.promptText}
+                    className="w-[55%] h-[27vh] object-contain cursor-pointer"
+                    onClick={() => setModalImageUrl(entry.imageUrl)}
+                  />
+                )}
               </div>
               <p className="mt-3 text-center text-sm font-medium rounded-lg px-3 py-1.5 text-design-description-text bg-design-description-bg">
                 {entry.promptText}

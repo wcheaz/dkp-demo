@@ -12,7 +12,7 @@
 
 ## 4. Processing Overlay UI
 
-- [ ] 4.1 Update `DesignComponent` in `src/components/design-component.tsx` to render a processing overlay for entries with `status: "processing"`. The overlay covers the image area only (not the full card) and contains a CSS-animated spinner and text "Generating truss structure...". Hide the `<img>` during processing. Card ID (`#N`) and prompt text remain visible. Processing entries MUST NOT open the modal on click. Entries with `status: "complete"` (or omitted) render unchanged. Verify by: `npx tsc --noEmit && npm run lint`.
+- [x] 4.1 Update `DesignComponent` in `src/components/design-component.tsx` to render a processing overlay for entries with `status: "processing"`. The overlay covers the image area only (not the full card) and contains a CSS-animated spinner and text "Generating truss structure...". Hide the `<img>` during processing. Card ID (`#N`) and prompt text remain visible. Processing entries MUST NOT open the modal on click. Entries with `status: "complete"` (or omitted) render unchanged. Verify by: `npx tsc --noEmit && npm run lint`.
 
 ## 5. Agent System Prompt
 
