@@ -336,18 +336,19 @@ function YourMainContent() {
       },
     ],
     handler({ prompt_text }) {
-      const currentDesigns = designs;
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const roofType = state.parameters?.roofType ?? "";
+      const roofType = currentState.parameters?.roofType ?? "";
       const roofImage = ROOF_TYPE_IMAGE_MAP[roofType] ?? "/design-gable.svg";
       const newEntry = {
         id: nextId,
         imageUrl: "/design-gable.svg",
         promptText: prompt_text,
         status: "processing" as const,
-        parameters: { ...(state.parameters ?? {}) },
+        parameters: { ...(currentState.parameters ?? {}) },
       };
-      setState({ ...state, designs: [...currentDesigns, newEntry] });
+      setState({ ...currentState, designs: [...currentDesigns, newEntry] });
 
       // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
@@ -398,7 +399,8 @@ function YourMainContent() {
         return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
       }
 
-      const currentDesigns = designs;
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
 
       if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
         return `Error: invalid image_name "${image_name}". Valid images: ${ALLOWED_IMAGES.join(", ")}.`;
@@ -419,7 +421,7 @@ function YourMainContent() {
         ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
       };
-      setState({ ...state, designs: updated });
+      setState({ ...currentState, designs: updated });
       return `Design entry #${design_id} updated successfully.`;
     },
   });
@@ -438,7 +440,8 @@ function YourMainContent() {
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
     handler({ building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
-      const current = state.parameters ?? {};
+      const currentState = latestStateRef.current;
+      const current = currentState.parameters ?? {};
       const updated = { ...current };
       const updatedFields: string[] = [];
 
@@ -452,7 +455,7 @@ function YourMainContent() {
       if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
       if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
 
-      const currentDesigns = state.designs ?? [];
+      const currentDesigns = currentState.designs ?? [];
       const backfilledDesigns = currentDesigns.map((entry) => {
         const entryParams = entry.parameters;
         const hasFilledParams = entryParams && Object.values(entryParams).some((v) => v != null && v !== "");
@@ -462,7 +465,7 @@ function YourMainContent() {
         return entry;
       });
 
-      setState({ ...state, parameters: updated, designs: backfilledDesigns });
+      setState({ ...currentState, parameters: updated, designs: backfilledDesigns });
 
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
