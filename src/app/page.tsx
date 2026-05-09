@@ -18,36 +18,15 @@ import {
   useCopilotReadable,
   useFrontendTool,
 } from "@copilotkit/react-core";
-import { CopilotKitCSSProperties, CopilotSidebar, InputProps } from "@copilotkit/react-ui";
+import { CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
 import { useState, useRef, ChangeEvent, useMemo, useEffect } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
 export default function CopilotKitPage() {
-  const [themeColor, setThemeColor] = useState("#363636ff");
-
-  // 🪁 Frontend Actions: https://docs.copilotkit.ai/pydantic-ai/frontend-actions
-  useFrontendTool({
-    name: "setThemeColor",
-    parameters: [
-      {
-        name: "themeColor",
-        description: "The theme color to set. Make sure to pick nice colors.",
-        required: true,
-      },
-    ],
-    handler({ themeColor }) {
-      setThemeColor(themeColor);
-    },
-  });
-
   return (
-    <main
-      style={
-        { "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties
-      }
-    >
+    <main>
       <CopilotSidebar
         defaultOpen={true}
         disableSystemMessage={true}
@@ -68,7 +47,7 @@ export default function CopilotKitPage() {
         ]}
         Input={CustomInput}
       >
-        <YourMainContent themeColor={themeColor} />
+        <YourMainContent />
       </CopilotSidebar>
     </main>
   );
@@ -303,13 +282,7 @@ const ROOF_TYPE_IMAGE_MAP: Record<string, string> = {
 // DEMO-ONLY: artificial delay for demo presentation
 const DESIGN_GENERATION_DELAY_MS = 3000;
 
-function YourMainContent({
-  themeColor,
-}: {
-  themeColor: string;
-}) {
-  // themeColor is reserved for future theming functionality
-  void themeColor;
+function YourMainContent() {
   // 🪁 Shared State: https://docs.copilotkit.ai/pydantic-ai/shared-state
   const { state, setState } = useCoAgent<AgentState>({
     name: "my_agent",
