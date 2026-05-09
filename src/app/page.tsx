@@ -189,7 +189,7 @@ function CustomInput(props: InputProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !props.inProgress) {
       e.preventDefault();
       handleSend();
     }
