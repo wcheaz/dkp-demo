@@ -348,17 +348,21 @@ function YourMainContent() {
         status: "processing" as const,
         parameters: { ...(currentState.parameters ?? {}) },
       };
-      setState({ ...currentState, designs: [...currentDesigns, newEntry] });
+      const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
+      setState(newState);
+      latestStateRef.current = newState;
 
       // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
-        const currentState = latestStateRef.current;
-        const updatedDesigns = (currentState.designs ?? []).map((d) =>
+        const timerState = latestStateRef.current;
+        const updatedDesigns = (timerState.designs ?? []).map((d) =>
           d.id === nextId
             ? { ...d, status: "complete" as const, imageUrl: roofImage }
             : d
         );
-        setState({ ...currentState, designs: updatedDesigns });
+        const resolvedState = { ...timerState, designs: updatedDesigns };
+        setState(resolvedState);
+        latestStateRef.current = resolvedState;
       }, DESIGN_GENERATION_DELAY_MS);
     },
   });
@@ -421,7 +425,9 @@ function YourMainContent() {
         ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
       };
-      setState({ ...currentState, designs: updated });
+      const newState = { ...currentState, designs: updated };
+      setState(newState);
+      latestStateRef.current = newState;
       return `Design entry #${design_id} updated successfully.`;
     },
   });
@@ -465,7 +471,9 @@ function YourMainContent() {
         return entry;
       });
 
-      setState({ ...currentState, parameters: updated, designs: backfilledDesigns });
+      const newState = { ...currentState, parameters: updated, designs: backfilledDesigns };
+      setState(newState);
+      latestStateRef.current = newState;
 
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
