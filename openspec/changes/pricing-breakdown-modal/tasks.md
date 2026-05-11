@@ -27,7 +27,7 @@
   - **Done when**: Hovering over each row label in the breakdown table displays the corresponding tooltip. `npm run typecheck` and `npm run lint` pass.
 
 - [x] 3.2 Add a dotted underline to each breakdown table row label in `src/components/pricing-breakdown-modal.tsx` as a visual indicator that hovering reveals a tooltip. Each row label SHALL use `border-bottom: 1px dotted` or `text-decoration: underline dotted` styling.
-  - **Done when**: All row labels in the breakdown table have a visible dotted underline. `npm run typecheck` and `npm run lint` pass.
+  - **Done when**: All row labels in the breakdown table have a visible dotted underline. Row labels show `cursor: pointer` on hover. `npm run typecheck` and `npm run lint` pass.
 
 ## 4. Verification
 
