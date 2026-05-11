@@ -26,6 +26,9 @@
   - **Total (EUR)**: "Total CZK ÷ 25 (CZK to EUR conversion rate)"
   - **Done when**: Hovering over each row label in the breakdown table displays the corresponding tooltip. `npm run typecheck` and `npm run lint` pass.
 
+- [x] 3.2 Add a dotted underline to each breakdown table row label in `src/components/pricing-breakdown-modal.tsx` as a visual indicator that hovering reveals a tooltip. Each row label SHALL use `border-bottom: 1px dotted` or `text-decoration: underline dotted` styling.
+  - **Done when**: All row labels in the breakdown table have a visible dotted underline. `npm run typecheck` and `npm run lint` pass.
+
 ## 4. Verification
 
 - [x] 4.1 Run full verification: `npm run typecheck` and `npm run lint` pass with zero errors. Open the application in the browser, generate or load a design entry that has a price, verify the info icon appears in the price cell, click it, verify the breakdown modal opens showing the pricing breakdown table with intermediate calculations, verify row label tooltips appear on hover, verify dismissing via backdrop click and Escape both work, verify the modal shows an unavailable message for entries with missing floor plan dimensions.

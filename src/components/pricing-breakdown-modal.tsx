@@ -129,78 +129,78 @@ export function PricingBreakdownModal({
           <table className="w-full text-sm text-left">
             <tbody>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Width × Height of the floor plan">Floor Area</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Width × Height of the floor plan">Floor Area</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.floorArea)} m&sup2;
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Floor Area × 1.32 (simulated joint count)">Joints</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Floor Area × 1.32 (simulated joint count)">Joints</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalJoints)}
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Total Joints × Cost per Joint (40 CZK)">Gusset Plate Cost</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Total Joints × Cost per Joint (40 CZK)">Gusset Plate Cost</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalJoints)} &times; 40 ={" "}
                   {fmt(breakdown.gussetPlateCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Floor Area × 0.254 m³/m² (timber volume coefficient)">Timber Volume</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Floor Area × 0.254 m³/m² (timber volume coefficient)">Timber Volume</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.timberVolume)} m&sup3;
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Timber Volume × Timber Cost per m³ (4,500 CZK)">Timber Cost</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Timber Volume × Timber Cost per m³ (4,500 CZK)">Timber Cost</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.timberVolume)} &times; 4,500 ={" "}
                   {fmt(breakdown.timberCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Floor Area × 0.147 (simulated truss count)">Trusses</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Floor Area × 0.147 (simulated truss count)">Trusses</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalTrusses)}
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Total Trusses ÷ 20 × Assembly Cost per Batch (15,000 CZK)">Assembly Cost</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Total Trusses ÷ 20 × Assembly Cost per Batch (15,000 CZK)">Assembly Cost</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalTrusses)}/20 &times; 15,000 ={" "}
                   {fmt(breakdown.assemblyCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Total Trusses × Hanger Cost per Truss (100 CZK)">Hanger Cost</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Total Trusses × Hanger Cost per Truss (100 CZK)">Hanger Cost</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalTrusses)} &times; 100 ={" "}
                   {fmt(breakdown.hangerCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/20 font-semibold">
-                <td className="py-1.5 text-gray-200" title="Sum of Gusset Plate Cost + Timber Cost + Assembly Cost + Hanger Cost">Subtotal</td>
+                <td className="py-1.5 text-gray-200 underline decoration-dotted" title="Sum of Gusset Plate Cost + Timber Cost + Assembly Cost + Hanger Cost">Subtotal</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.subtotalCZK)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/10">
-                <td className="py-1.5 text-gray-300" title="Complexity factor applied based on roof type (Gable: ×1.0, Hip: ×1.3, Mono-pitch: ×0.9, Flat: ×0.8)">Roof Type</td>
+                <td className="py-1.5 text-gray-300 underline decoration-dotted" title="Complexity factor applied based on roof type (Gable: ×1.0, Hip: ×1.3, Mono-pitch: ×0.9, Flat: ×0.8)">Roof Type</td>
                 <td className="py-1.5 text-white text-right">
                   {breakdown.roofType || "Unknown"} (&times;
                   {breakdown.roofTypeFactor})
                 </td>
               </tr>
               <tr className="border-b border-white/20 font-semibold">
-                <td className="py-1.5 text-gray-200" title="Subtotal × Roof Type Factor">Total (CZK)</td>
+                <td className="py-1.5 text-gray-200 underline decoration-dotted" title="Subtotal × Roof Type Factor">Total (CZK)</td>
                 <td className="py-1.5 text-white text-right">
                   {fmt(breakdown.totalCZK)} CZK
                 </td>
               </tr>
               <tr className="font-bold">
-                <td className="py-1.5 text-gray-100" title="Total CZK ÷ 25 (CZK to EUR conversion rate)">Total (EUR)</td>
+                <td className="py-1.5 text-gray-100 underline decoration-dotted" title="Total CZK ÷ 25 (CZK to EUR conversion rate)">Total (EUR)</td>
                 <td className="py-1.5 text-white text-right">
                   &euro;{fmt(breakdown.totalEUR)}
                 </td>
