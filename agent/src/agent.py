@@ -194,6 +194,11 @@ agent = Agent(
         "and optional) and ask the user to confirm before proceeding to any design-related discussion.\n"
         "6. Do NOT proceed to design generation, knowledge base queries about specific designs, or "
         "design-related discussion until the user has confirmed all required parameters.\n\n"
+        "- generate_quote: Call this when the user asks about pricing, cost, or estimated price for a design. "
+        "Pass the collected parameters: floor_plan_dimensions, roof_type, roof_pitch (default 30), "
+        "building_type (default 'Family house'). The tool returns a formatted price string. "
+        "Relay the result to the user and also pass the price to generate_design as the 'price' argument "
+        "when creating or updating a design entry (e.g. price='€1,752').\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),
@@ -236,6 +241,61 @@ agent = Agent(
 #         customer = await db.get_customer(customer_id)
 #         return f"Customer: {customer.name}, Email: {customer.email}"
 # ============================================================================
+import re
+
+
+@agent.tool
+async def generate_quote(
+    ctx: RunContext[StateDeps],
+    floor_plan_dimensions: str,
+    roof_type: str,
+    roof_pitch: int = 30,
+    building_type: str = "Family house",
+) -> str:
+    """Generate a deterministic cost estimate for a roof design based on floor plan dimensions and roof type.
+
+    Args:
+        ctx: Agent context with state
+        floor_plan_dimensions: Floor plan dimensions string (e.g. "10x15m")
+        roof_type: Roof type — Gable, Hip, Mono-pitch, or Flat
+        roof_pitch: Roof pitch in degrees (default 30)
+        building_type: Building type (default "Family house")
+
+    Returns:
+        Formatted price string, e.g. "Estimated price: €1,752 (excl. VAT)"
+    """
+    match = re.match(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?", floor_plan_dimensions.strip(), re.IGNORECASE)
+    if not match:
+        return "Error: Could not parse floor plan dimensions. Expected format like '10x15m'."
+
+    width = float(match.group(1))
+    height = float(match.group(2))
+    floor_area = width * height
+
+    total_joints = round(floor_area * 1.32)
+    timber_volume = floor_area * 0.254
+    total_trusses = round(floor_area * 0.147)
+
+    gusset_plate_cost = total_joints * 40
+    timber_cost = timber_volume * 4500
+    assembly_cost = (total_trusses / 20) * 15000
+    hanger_cost = total_trusses * 100
+
+    roof_type_factors = {
+        "gable": 1.0,
+        "hip": 1.3,
+        "mono-pitch": 0.9,
+        "flat": 0.8,
+    }
+    factor = roof_type_factors.get(roof_type.strip().lower(), 1.0)
+
+    total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
+    total_eur = round(total_czk / 25)
+
+    formatted_eur = f"{total_eur:,}"
+    return f"Estimated price: €{formatted_eur} (excl. VAT)"
+
+
 @agent.tool
 async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
     """Query truss and roof engineering knowledge base by reading relevant documents.

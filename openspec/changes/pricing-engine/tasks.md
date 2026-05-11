@@ -15,7 +15,7 @@
 
 ## 2. Backend Pricing Tool
 
-- [ ] 2.1 Implement `generate_quote` tool and update agent system prompt in `agent/src/agent.py`
+- [x] 2.1 Implement `generate_quote` tool and update agent system prompt in `agent/src/agent.py`
 
   Add a `generate_quote` async tool decorated with `@agent.tool` in `agent/src/agent.py`. The tool accepts: `floor_plan_dimensions` (str), `roof_type` (str), `roof_pitch` (int, default 30), `building_type` (str, default "Family house"). Implement the pricing formula from design decision D2: parse dimensions string (e.g. "10x15m") to extract width and height, compute floor area, derive simulated structural outputs (totalJoints = round(area × 1.32), timberVolume = area × 0.254, totalTrusses = round(area × 0.147)), apply cost coefficients (gussetPlateCost = joints × 40, timberCost = volume × 4500, assemblyCost = (trusses/20) × 15000, hangerCost = trusses × 100), apply roof type factor (Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8), convert CZK to EUR (/25, rounded), return `"Estimated price: €{totalEUR} (excl. VAT)"`. Update the agent system prompt to include `generate_quote` instructions: call when user asks about pricing/cost, pass collected parameters, relay result, and pass price to `generate_design` as the `price` argument (design decision D5).
 
