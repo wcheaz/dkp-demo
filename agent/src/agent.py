@@ -40,7 +40,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import time
 
-import httpx
+
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
@@ -167,9 +167,6 @@ agent = Agent(
         "    - prompt_text (optional, string): The new prompt text.\n"
         "  At least one of image_name, image_url, or prompt_text must be provided.\n"
         '  Available preset images: "design-alpha.svg", "design-beta.svg".\n\n'
-        "- download_test_image: Downloads the preset test image from the Next.js test route and saves it to the server. "
-        "Returns a serveable URL (e.g. /api/serve-image/test-image-1234567890.png) that can be used as image_url in modify_design_entry.\n"
-        "  Workflow: call download_test_image first, then call modify_design_entry with the returned URL as image_url.\n\n"
         "- update_design_parameters: MANDATORY — You MUST call this tool whenever the user provides any information "
         "that could be a construction parameter. This tool accepts these fields:\n"
         "  - building_type: Building type (e.g. House, Garage, Agricultural building)\n"
@@ -340,34 +337,6 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
     except FileNotFoundError:
         return "Knowledge base summary not found. Please contact the administrator."
 
-
-@agent.tool
-async def download_test_image(ctx: RunContext[StateDeps]) -> str:
-    """Download the preset test image from the Next.js test route and save it to the server.
-
-    Returns a serveable URL that can be used as image_url in modify_design_entry.
-
-    Args:
-        ctx: Agent context with state
-
-    Returns:
-        The serveable URL for the downloaded image, or an error message.
-    """
-    project_root = Path(__file__).resolve().parent.parent.parent
-    download_dir = project_root / "tmp" / "downloaded-images"
-    download_dir.mkdir(parents=True, exist_ok=True)
-
-    filename = f"test-image-{int(time.time() * 1000)}.png"
-    file_path = download_dir / filename
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get("http://localhost:3000/api/test-image")
-            response.raise_for_status()
-            file_path.write_bytes(response.content)
-            return f"/api/serve-image/{filename}"
-    except Exception as e:
-        return f"Error: {e}"
 
 
 

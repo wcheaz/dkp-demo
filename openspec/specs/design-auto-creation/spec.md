@@ -2,59 +2,39 @@
 
 Defines the capability for the agent to automatically create design entries by calling a frontend tool, enabling automatic population of the design gallery during agent responses.
 
-## ADDED Requirements
+## Requirements
 
-### Requirement: add_design_entry is registered as a CopilotKit frontend tool
-A frontend tool named `add_design_entry` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component in `src/app/page.tsx`. The tool SHALL accept one parameter: `prompt_text` (string). The tool handler SHALL create a `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: prompt_text`, append it to the existing `state.designs` array, and call `setState` with the updated state. The code SHALL be wrapped in `// TEMPORARY` comments indicating it is a testing tool.
+### Requirement: generate_design is registered as a CopilotKit frontend tool
+A frontend tool named `generate_design` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component in `src/app/page.tsx`. The tool SHALL accept one required parameter: `prompt_text` (string). The tool SHALL also accept the following optional string parameters: `building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`, `attic_usage`, `eaves_shape`, `wall_construction`, `location`, `overhang`. The tool handler SHALL create a `DesignEntry` with `imageUrl: "/design-gable.svg"`, `promptText: prompt_text`, `status: "processing"`, and `parameters` constructed from the provided parameter arguments. The handler SHALL append the entry to `state.designs` and call `setState` with the updated state. The handler SHALL NOT read `state.parameters` or any ref-based proxy. The code SHALL be wrapped in `// DEMO-ONLY` comments. The handler SHALL start a 3-second `setTimeout` that resolves the entry to `status: "complete"` with the roof-type-mapped image URL.
 
-#### Scenario: Frontend tool appends entry with user's prompt text
-- **WHEN** the agent calls the frontend tool `add_design_entry` with `prompt_text: "hello"`
-- **THEN** `setState` SHALL be called with a new state where `state.designs` contains a new `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: "hello"`
+#### Scenario: Frontend tool creates entry with design-specific parameters
+- **WHEN** the agent calls `generate_design` with `prompt_text: "Gable house"` and `roof_type: "Gable"`, `roof_pitch: "35"`, `building_type: "Family house"`
+- **THEN** `setState` SHALL be called with a new `DesignEntry` whose `parameters` contains `roofType: "Gable"`, `roofPitch: 35`, `buildingType: "Family house"`, and no other parameter fields
 
 #### Scenario: Frontend tool appends without losing existing designs
-- **WHEN** the agent calls `add_design_entry` with `prompt_text: "second"` and `state.designs` already contains one entry
-- **THEN** `setState` SHALL be called with `state.designs` containing two entries: the original entry followed by the new entry with `promptText: "second"`
+- **WHEN** the agent calls `generate_design` and `state.designs` already contains one entry
+- **THEN** `setState` SHALL be called with `state.designs` containing two entries: the original entry followed by the new entry
 
 #### Scenario: Frontend tool handles undefined designs array
-- **WHEN** the agent calls `add_design_entry` and `state.designs` is undefined
-- **THEN** the handler SHALL treat `state.designs` as an empty array and append the new entry, resulting in a single-entry array
+- **WHEN** the agent calls `generate_design` and `state.designs` is undefined
+- **THEN** the handler SHALL treat `state.designs` as an empty array and append the new entry
 
-#### Scenario: TEMPORARY markers present in page.tsx
-- **WHEN** `src/app/page.tsx` is searched for the string `TEMPORARY`
-- **THEN** at least 1 occurrence SHALL be found near the `add_design_entry` frontend tool registration
+#### Scenario: Processing spinner shown then resolved to complete
+- **WHEN** the agent calls `generate_design`
+- **THEN** the new entry SHALL have `status: "processing"` initially
+- **AND** after 3 seconds the entry SHALL be updated to `status: "complete"` with the roof-type-mapped `imageUrl`
 
-### Requirement: Backend add_design_entry tool is commented out
-The backend `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The `DesignEntry` model and `designs` field on `YourState` SHALL remain active (uncommented). All three SHALL have `# TEMPORARY` comments.
+### Requirement: System prompt mandates calling generate_design after parameter confirmation
+The agent's `system_prompt` in `agent/src/agent.py` SHALL include instructions telling the agent to call `generate_design` with the user's prompt text and all collected parameter fields after the user has confirmed all required parameters. The system prompt SHALL instruct the agent to pass every collected parameter field directly as an argument to `generate_design`.
 
-#### Scenario: Backend tool is commented out
-- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
-- **THEN** the `@agent.tool` decorator and `async def add_design_entry` function SHALL be present but commented out
-
-#### Scenario: DesignEntry model and designs field remain active
-- **WHEN** `agent/src/agent.py` is inspected
-- **THEN** `class DesignEntry(BaseModel)` SHALL exist uncommented
-- **AND** `designs: List[DesignEntry] = []` SHALL exist uncommented on `YourState`
-
-### Requirement: System prompt mandates calling add_design_entry after every response
-The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction using strong mandatory language (`CRITICAL REQUIREMENT`, `EVERY SINGLE response`, `non-negotiable`) telling the agent to call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in a `# TEMPORARY` comment. The system prompt SHALL preserve all existing instructions for `get_knowledge_summary` and `query_knowledge_base`.
-
-#### Scenario: System prompt references add_design_entry with strong language
+#### Scenario: System prompt references generate_design with parameter passing
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
-- **THEN** the prompt SHALL contain the text `add_design_entry`
-- **AND** the prompt SHALL contain at least one of: `CRITICAL REQUIREMENT`, `EVERY SINGLE`, or `non-negotiable`
-- **AND** the instruction SHALL be preceded by a `# TEMPORARY` comment
+- **THEN** the prompt SHALL contain the text `generate_design`
+- **AND** the prompt SHALL instruct the agent to pass parameter fields as arguments to `generate_design`
 
 #### Scenario: System prompt preserves existing tool instructions
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
-- **THEN** the prompt SHALL still contain references to `get_knowledge_summary` and `query_knowledge_base`
-- **AND** the existing instructions about knowledge base usage SHALL remain unchanged
-
-### Requirement: All temporary code is marked with TEMPORARY comments
-Every code section added or modified by this change SHALL be preceded by a `TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
-
-#### Scenario: TEMPORARY markers present in agent code
-- **WHEN** `agent/src/agent.py` is searched for the string `TEMPORARY`
-- **THEN** at least 3 occurrences SHALL be found: before `DesignEntry`, before `designs` field, and before the system prompt addition
+- **THEN** the prompt SHALL still contain references to `get_knowledge_summary`, `query_knowledge_base`, `modify_design_entry`, `download_test_image`, and `update_design_parameters`
 
 ### Requirement: All code passes lint and type checking
 The modified files SHALL pass all lint and type checking commands.
