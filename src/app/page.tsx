@@ -11,7 +11,6 @@
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
 import { DesignComponent } from "@/components/design-component";
-import { AddDesignButton } from "@/components/add-design-button";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
@@ -32,17 +31,21 @@ export default function CopilotKitPage() {
         disableSystemMessage={true}
         clickOutsideToClose={false}
         labels={{
-          title: "Your Assistant",
-          initial: "Hi! I can help you with your specific tasks. Customize this message for your application.",
+          title: "Design Assistant",
+          initial: "Hi! I can help you generate and customize building designs. Tell me what you're looking to build and I'll walk you through it.",
         }}
         suggestions={[
           {
-            title: "Get Started",
+            title: "How can you help me?",
             message: "How can you help me?",
           },
           {
-            title: "What do you know?",
-            message: "What do you know?",
+            title: "What info do I need for a design?",
+            message: "What information do I need to generate a design?",
+          },
+          {
+            title: "What's the price?",
+            message: "What's the price?",
           },
         ]}
         Input={CustomInput}
@@ -508,9 +511,6 @@ function YourMainContent() {
       style={{}}
       className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
     >
-      {process.env.NODE_ENV === "development" && (
-        <AddDesignButton state={state} setState={setState} />
-      )}
       <DesignComponent state={state} setState={setState} />
     </div>
   );
