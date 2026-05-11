@@ -65,6 +65,14 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               <span className="absolute top-2 left-3 text-xs font-semibold text-gray-300">
                 #{entry.id}
               </span>
+              <button
+                onClick={() => setState({ ...state, designs: designs.filter((_, i) => i !== index) })}
+                className="absolute top-2 right-3 z-10 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/20 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
               <div className="flex justify-center relative">
                 {entry.status === "processing" ? (
                   <div className="w-[55%] h-[27vh] flex flex-col items-center justify-center bg-white/10 rounded-xl">
