@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AgentState, DesignParameters } from "@/lib/types";
+import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
 
 const PARAM_LABELS: Record<keyof DesignParameters, string> = {
   buildingType: "Building Type",
@@ -33,6 +34,7 @@ export interface DesignComponentProps {
 export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const [pricingModalIndex, setPricingModalIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,6 +103,18 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                         <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
                           <span className="text-design-price-label font-medium">Price:</span>
                           <span className="text-design-price-value font-semibold">{entry.price}</span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            className="cursor-pointer text-gray-400 hover:text-white flex-shrink-0"
+                            onClick={() => setPricingModalIndex(index)}
+                          >
+                            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                            <text x="8" y="12" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">!</text>
+                          </svg>
                         </div>
                       )}
                     </div>
@@ -124,6 +138,15 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             onClick={(e) => e.stopPropagation()}
           />
         </div>
+      )}
+
+      {pricingModalIndex !== null && designs[pricingModalIndex] && (
+        <PricingBreakdownModal
+          open={true}
+          onClose={() => setPricingModalIndex(null)}
+          parameters={designs[pricingModalIndex].parameters ?? {}}
+          price={designs[pricingModalIndex].price ?? ""}
+        />
       )}
     </div>
   );
