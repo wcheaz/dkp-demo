@@ -320,17 +320,39 @@ function YourMainContent() {
         description: "The user's original prompt text for the design",
         required: true,
       },
+      { name: "building_type", type: "string", description: "Building type (e.g. House, Garage, Agricultural building)", required: false },
+      { name: "floor_plan_dimensions", type: "string", description: "Floor plan dimensions (e.g. 10x15m)", required: false },
+      { name: "roof_type", type: "string", description: "Roof type (Gable, Hip, Mono-pitch, Flat)", required: false },
+      { name: "roof_pitch", type: "string", description: "Roof pitch in degrees (2-45)", required: false },
+      { name: "attic_usage", type: "string", description: "Attic usage (None, Storage, Living space)", required: false },
+      { name: "eaves_shape", type: "string", description: "Eaves shape (Open, Boxed, Flush)", required: false },
+      { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
+      { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
+      { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
-    handler({ prompt_text }) {
+    handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
       const currentState = state;
       const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const roofImage = "/design-gable.svg";
+      const roofImage = (roof_type && ROOF_TYPE_IMAGE_MAP[roof_type]) || "/design-gable.svg";
+
+      const parameters: Record<string, unknown> = {};
+      if (building_type !== undefined) parameters.buildingType = building_type;
+      if (floor_plan_dimensions !== undefined) parameters.floorPlanDimensions = floor_plan_dimensions;
+      if (roof_type !== undefined) parameters.roofType = roof_type;
+      if (roof_pitch !== undefined) parameters.roofPitch = Number(roof_pitch);
+      if (attic_usage !== undefined) parameters.atticUsage = attic_usage;
+      if (eaves_shape !== undefined) parameters.eavesShape = eaves_shape;
+      if (wall_construction !== undefined) parameters.wallConstruction = wall_construction;
+      if (location !== undefined) parameters.location = location;
+      if (overhang !== undefined) parameters.overhang = overhang;
+
       const newEntry = {
         id: nextId,
         imageUrl: "/design-gable.svg",
         promptText: prompt_text,
         status: "processing" as const,
+        ...(Object.keys(parameters).length > 0 ? { parameters } : {}),
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);

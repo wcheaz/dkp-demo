@@ -10,7 +10,7 @@
 
 ## 3. Frontend: Rewrite generate_design to accept parameters directly
 
-- [ ] 3.1 Add the 9 optional parameter arguments (`building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`, `attic_usage`, `eaves_shape`, `wall_construction`, `location`, `overhang`) to the `generate_design` `useFrontendTool` parameters array in `src/app/page.tsx`. Update the handler to construct `DesignEntry.parameters` from these arguments instead of reading from any global state. Use the `roof_type` argument (not state) for the `ROOF_TYPE_IMAGE_MAP` lookup. The handler reads `state.designs` from the `useCoAgent` closure to compute the next ID.
+- [x] 3.1 Add the 9 optional parameter arguments (`building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`, `attic_usage`, `eaves_shape`, `wall_construction`, `location`, `overhang`) to the `generate_design` `useFrontendTool` parameters array in `src/app/page.tsx`. Update the handler to construct `DesignEntry.parameters` from these arguments instead of reading from any global state. Use the `roof_type` argument (not state) for the `ROOF_TYPE_IMAGE_MAP` lookup. The handler reads `state.designs` from the `useCoAgent` closure to compute the next ID.
   - Done when: `generate_design` handler body does not reference `state.parameters` or `latestStateRef`; the tool parameters array includes all 9 fields marked as `required: false`; `npm run lint` passes.
 
 ## 4. Frontend: Convert update_design_parameters to a pure diagnostic tool
