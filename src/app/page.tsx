@@ -20,7 +20,7 @@ import {
 } from "@copilotkit/react-core";
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent, useMemo } from "react";
+import { useState, useRef, ChangeEvent, useMemo, useEffect } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
@@ -311,6 +311,14 @@ function YourMainContent() {
   // DEMO-ONLY: refs for simulated design generation timer
   const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (generationTimerRef.current) {
+        clearTimeout(generationTimerRef.current);
+      }
+    };
+  }, []);
+
   // DEMO-ONLY: generate_design frontend tool for simulated design generation
   useFrontendTool({
     name: "generate_design",
@@ -359,14 +367,14 @@ function YourMainContent() {
 
       // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
-        const timerState = state;
-        const updatedDesigns = (timerState.designs ?? []).map((d) =>
-          d.id === nextId
-            ? { ...d, status: "complete" as const, imageUrl: roofImage }
-            : d
-        );
-        const resolvedState = { ...timerState, designs: updatedDesigns };
-        setState(resolvedState);
+        setState((prevState) => {
+          const updatedDesigns = (prevState.designs ?? []).map((d) =>
+            d.id === nextId
+              ? { ...d, status: "complete" as const, imageUrl: roofImage }
+              : d
+          );
+          return { ...prevState, designs: updatedDesigns };
+        });
       }, DESIGN_GENERATION_DELAY_MS);
     },
   });
