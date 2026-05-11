@@ -28,5 +28,5 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run full verification: `npm run typecheck` and `npm run lint` pass with zero errors. Open the application in the browser, generate or load a design entry that has a price, verify the info icon appears in the price cell, click it, verify the breakdown modal opens showing the pricing breakdown table with intermediate calculations, verify row label tooltips appear on hover, verify dismissing via backdrop click and Escape both work, verify the modal shows an unavailable message for entries with missing floor plan dimensions.
+- [x] 4.1 Run full verification: `npm run typecheck` and `npm run lint` pass with zero errors. Open the application in the browser, generate or load a design entry that has a price, verify the info icon appears in the price cell, click it, verify the breakdown modal opens showing the pricing breakdown table with intermediate calculations, verify row label tooltips appear on hover, verify dismissing via backdrop click and Escape both work, verify the modal shows an unavailable message for entries with missing floor plan dimensions.
   - **Done when**: All checks pass and the end-to-end flow works in the browser.
