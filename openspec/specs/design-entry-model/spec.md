@@ -5,11 +5,13 @@ Defines the `DesignEntry` data model and associated test assets for the design e
 ## Requirements
 
 ### Requirement: DesignEntry type has an id field
-The `DesignEntry` interface (TypeScript, `src/lib/types.ts`) and the `DesignEntry` Pydantic model (Python, `agent/src/agent.py`) SHALL include an `id: number` field.
+The `DesignEntry` interface (TypeScript, `src/lib/types.ts`) and the `DesignEntry` Pydantic model (Python, `agent/src/agent.py`) SHALL include an `id: number` field and a `status` field of type `"processing" | "complete"` with default value `"complete"`.
 
 The `id` SHALL be 1-based and assigned at creation time using the formula `max(existing entries' ids, 0) + 1`.
 
-All code paths that create `DesignEntry` objects — `add_design_entry` handler, `AddDesignButton`, and any other constructor — SHALL assign the next sequential ID.
+The `status` field SHALL default to `"complete"` so that all existing code and entries render normally without migration. Entries created by `generate_design` SHALL be created with `status: "processing"` and later resolved to `"complete"`.
+
+All code paths that create `DesignEntry` objects — `generate_design` handler, `AddDesignButton`, and any other constructor — SHALL assign the next sequential ID. Only `generate_design` SHALL create entries with `status: "processing"`; all other constructors SHALL use the default `"complete"`.
 
 #### Scenario: First design entry gets id 1
 - **WHEN** the first `DesignEntry` is created in an empty state
@@ -22,6 +24,22 @@ All code paths that create `DesignEntry` objects — `add_design_entry` handler,
 #### Scenario: Existing designs without ids are assigned ids on access
 - **WHEN** state contains design entries that lack an `id` field (e.g., from a pre-migration state)
 - **THEN** the application SHALL assign sequential IDs to those entries before rendering or processing them.
+
+#### Scenario: DesignEntry type includes status field with complete default
+- **WHEN** a `DesignEntry` object is created with `{ id: 1, imageUrl: "/next.svg", promptText: "test" }` (omitting `status`)
+- **THEN** the object SHALL satisfy the `DesignEntry` interface and `status` SHALL be `"complete"` (TypeScript) or not required (Python model default).
+
+#### Scenario: DesignEntry can be created with processing status
+- **WHEN** a `DesignEntry` object is created with `{ id: 1, imageUrl: "/design-gable.svg", promptText: "test", status: "processing" }`
+- **THEN** the object SHALL satisfy the `DesignEntry` interface with `status: "processing"`.
+
+#### Scenario: TypeScript compilation succeeds with status field
+- **WHEN** `npx tsc --noEmit` is run
+- **THEN** the command SHALL exit zero, confirming `status` is properly typed in both the interface and all usage sites.
+
+#### Scenario: Python model accepts status field
+- **WHEN** `cd agent && python -m mypy .` is run
+- **THEN** the command SHALL exit zero, confirming `status` is properly typed in the Pydantic model.
 
 ### Requirement: Test SVG files have descriptive names
 The test SVG files SHALL be renamed and copied as follows:
