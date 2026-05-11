@@ -46,3 +46,33 @@
   - `npm run build` passes
 
   **Stop and hand off if:** The price value appears inside the `parameters` object instead of as a top-level `DesignEntry` field, or the grid layout breaks (cells wrap incorrectly).
+
+## 4. Runtime Fix — Price Not Persisted on DesignEntry
+
+- [x] 4.1 Fix `generate_design` handler to actually store `price` on the `DesignEntry` object
+
+  The `generate_design` handler in `src/app/page.tsx:344` destructures `price` from the tool arguments, but the `newEntry` object constructed at lines 361-367 never includes it. The `price` value is accepted and then silently discarded. Fix by adding `...(price !== undefined ? { price } : {})` to the `newEntry` object, after the parameters spread and before the closing brace. The price must be stored as a top-level field on `DesignEntry`, not inside `parameters`. The `setTimeout` callback at lines 373-383 uses `{ ...d, ... }` spread so it will automatically preserve the price field once it exists on the entry.
+
+  **Done when:**
+  - `newEntry` in `generate_design` handler includes `price` when provided
+  - Inspecting the handler shows `price` included in the object literal (not just destructured)
+  - After calling `generate_design` with `price: "€1,752"`, the resulting design entry has `entry.price === "€1,752"`
+  - After the `setTimeout` completes (design transitions to "complete"), the entry still has its `price` field
+  - `npm run build` passes
+  - Verified at runtime: agent calls `generate_quote`, then `generate_design` with price, and the green "Price" cell appears in the parameter grid
+
+  **Stop and hand off if:** Adding the price spread causes a TypeScript type error that is not resolved by the existing `price?: string` field on `DesignEntry`.
+
+- [ ] 4.2 Add `price` parameter to `modify_design_entry` frontend tool
+
+  The system prompt (agent.py lines 200-201) tells the agent it can use `modify_design_entry` to update the price on an existing design entry, but the `modify_design_entry` handler in `src/app/page.tsx:386-449` does not accept a `price` parameter. Add a `price` parameter (type string, required false, description "The estimated price to set (e.g. €1,752)") to the `modify_design_entry` `useFrontendTool` registration. In the handler, when `price` is provided, include it in the updated entry object alongside existing fields (imageUrl, promptText). This enables the demo flow where the user asks for a price after a design already exists.
+
+  **Done when:**
+  - `modify_design_entry` parameter list includes `price` (type string, required false)
+  - Handler destructures `price` and includes it in the updated entry when provided
+  - Calling `modify_design_entry` with `design_id: 1, price: "€2,000"` updates entry 1's `price` field to `"€2,000"`
+  - Calling `modify_design_entry` without `price` leaves the existing price unchanged
+  - The updated design entry's price cell appears/updates in `DesignComponent`
+  - `npm run build` passes
+
+  **Stop and hand off if:** The handler's existing validation logic (`if (!image_name && !image_url && !prompt_text)`) rejects calls that only provide `price` — this check must be updated to also accept `price` as a valid standalone argument.

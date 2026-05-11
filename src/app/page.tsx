@@ -364,6 +364,7 @@ function YourMainContent() {
         promptText: prompt_text,
         status: "processing" as const,
         ...(Object.keys(parameters).length > 0 ? { parameters } : {}),
+        ...(price !== undefined ? { price } : {}),
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);
