@@ -5,6 +5,9 @@
   --color-design-param-value: #ffffff;
   --color-design-param-bg: rgba(6, 182, 212, 0.15);
   --color-design-param-border: rgba(34, 211, 238, 0.4);
+  --color-design-price-bg: rgba(34, 197, 94, 0.15);
+  --color-design-price-label: #86efac;
+  --color-design-price-value: #ffffff;
   --color-design-description-text: #f1f5f9;
   --color-design-description-bg: rgba(255, 255, 255, 0.08);
 }

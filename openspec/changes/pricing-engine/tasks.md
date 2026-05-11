@@ -1,6 +1,6 @@
 ## 1. Types and CSS Foundation
 
-- [ ] 1.1 Add `price` field to `DesignEntry` in `src/lib/types.ts` and `DesignEntry` Pydantic model in `agent/src/agent.py`, and add price CSS custom properties to `src/app/globals.css`
+- [x] 1.1 Add `price` field to `DesignEntry` in `src/lib/types.ts` and `DesignEntry` Pydantic model in `agent/src/agent.py`, and add price CSS custom properties to `src/app/globals.css`
 
   Add `price?: string` to the `DesignEntry` TypeScript interface in `src/lib/types.ts`. Add `price: Optional[str] = None` to the `DesignEntry` Pydantic model in `agent/src/agent.py`. Add three new variables to the `@theme` block in `src/app/globals.css`: `--color-design-price-bg: rgba(34, 197, 94, 0.15)`, `--color-design-price-label: #86efac`, `--color-design-price-value: #ffffff`. Do not modify `DesignParameters` — price is a top-level field on `DesignEntry` only (design decision D1). Do not use inline Tailwind color utilities — follow the existing `--color-design-param-*` pattern (design decision D4).
 

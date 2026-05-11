@@ -89,6 +89,7 @@ class DesignEntry(BaseModel):
     promptText: str
     status: str = "complete"
     parameters: Optional[DesignParameters] = None
+    price: Optional[str] = None
 
 
 class YourState(BaseModel):

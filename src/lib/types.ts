@@ -4,6 +4,7 @@ export interface DesignEntry {
   promptText: string;
   status?: "processing" | "complete";
   parameters?: DesignParameters;
+  price?: string;
 }
 
 export interface DesignParameters {
