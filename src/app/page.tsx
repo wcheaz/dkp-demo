@@ -310,6 +310,8 @@ function YourMainContent() {
 
   // DEMO-ONLY: refs for simulated design generation timer
   const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestStateRef = useRef(state);
+  useEffect(() => { latestStateRef.current = state; });
 
   useEffect(() => {
     return () => {
@@ -339,7 +341,7 @@ function YourMainContent() {
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
     handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
-      const currentState = state;
+      const currentState = latestStateRef.current;
       const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
       const roofImage = (roof_type && ROOF_TYPE_IMAGE_MAP[roof_type]) || "/design-gable.svg";
@@ -364,17 +366,19 @@ function YourMainContent() {
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);
+      latestStateRef.current = newState;
 
       // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
-        setState((prevState) => {
-          const updatedDesigns = (prevState.designs ?? []).map((d) =>
-            d.id === nextId
-              ? { ...d, status: "complete" as const, imageUrl: roofImage }
-              : d
-          );
-          return { ...prevState, designs: updatedDesigns };
-        });
+        const timerState = latestStateRef.current;
+        const updatedDesigns = (timerState.designs ?? []).map((d) =>
+          d.id === nextId
+            ? { ...d, status: "complete" as const, imageUrl: roofImage }
+            : d
+        );
+        const timerNewState = { ...timerState, designs: updatedDesigns };
+        setState(timerNewState);
+        latestStateRef.current = timerNewState;
       }, DESIGN_GENERATION_DELAY_MS);
     },
   });
@@ -415,7 +419,7 @@ function YourMainContent() {
         return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
       }
 
-      const currentState = state;
+      const currentState = latestStateRef.current;
       const currentDesigns = currentState.designs ?? [];
 
       if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
@@ -439,6 +443,7 @@ function YourMainContent() {
       };
       const newState = { ...currentState, designs: updated };
       setState(newState);
+      latestStateRef.current = newState;
       return `Design entry #${design_id} updated successfully.`;
     },
   });
