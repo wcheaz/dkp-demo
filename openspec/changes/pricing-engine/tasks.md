@@ -32,7 +32,7 @@
 
 ## 3. Frontend Integration
 
-- [ ] 3.1 Add `price` parameter to `generate_design` frontend tool and render price cell in `DesignComponent`
+- [x] 3.1 Add `price` parameter to `generate_design` frontend tool and render price cell in `DesignComponent`
 
   In `src/app/page.tsx`, add a `price` parameter (type string, required false, description "Estimated price (e.g. €1,752)") to the `generate_design` `useFrontendTool` registration. In the handler, when `price` is provided, set it as a top-level `price` field on the new `DesignEntry` object (not inside `parameters`). In `src/components/design-component.tsx`, after the existing parameter grid loop that renders filled `ALL_PARAM_KEYS` entries, add a conditional block: when `entry.price` is truthy, render an additional div in the same `grid-cols-2` grid with label "Price" and value `entry.price`, using `bg-design-price-bg` for background, `text-design-price-label` for the label, and `text-design-price-value` for the value. The price cell must not use inline Tailwind color classes (design decision D4). The price cell is appended after all parameter cells so it fills the 10th position in the grid (design decision D6).
 

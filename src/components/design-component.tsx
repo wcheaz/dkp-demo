@@ -81,11 +81,13 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               <p className="mt-3 text-center text-sm font-medium rounded-lg px-3 py-1.5 text-design-description-text bg-design-description-bg">
                 {entry.promptText}
               </p>
-              {entry.parameters && (() => {
-                const filledEntries = ALL_PARAM_KEYS.filter(
-                  (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== ""
-                );
-                if (filledEntries.length === 0) return null;
+              {(() => {
+                const filledEntries = entry.parameters
+                  ? ALL_PARAM_KEYS.filter(
+                      (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== ""
+                    )
+                  : [];
+                if (filledEntries.length === 0 && !entry.price) return null;
                 return (
                   <div className="mt-2 pt-2 border-t border-design-param-border">
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
@@ -95,6 +97,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                           <span className="text-design-param-value font-semibold">{String(entry.parameters![k])}</span>
                         </div>
                       ))}
+                      {entry.price && (
+                        <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
+                          <span className="text-design-price-label font-medium">Price:</span>
+                          <span className="text-design-price-value font-semibold">{entry.price}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
