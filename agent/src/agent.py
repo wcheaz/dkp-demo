@@ -98,7 +98,6 @@ class YourState(BaseModel):
     last_knowledge_result: Optional[str] = None
     # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
-    parameters: DesignParameters = DesignParameters()
 
 
 # ============================================================================
@@ -153,7 +152,12 @@ agent = Agent(
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
         "load calculations, materials, truss designs, or engineering specifications.\n"
         "- generate_design: # DEMO-ONLY — Call this once after the user has confirmed all required parameters. "
-        "Pass the user's original prompt text. Do NOT call this after every response — only call it when "
+        "Pass the user's original prompt text AND ALL collected parameter fields directly as arguments. "
+        "The tool accepts these optional parameter arguments in addition to prompt_text:\n"
+        "  - building_type, floor_plan_dimensions, roof_type, roof_pitch, "
+        "attic_usage, eaves_shape, wall_construction, location, overhang\n"
+        "You MUST pass every parameter you have collected as a separate argument — do NOT rely on "
+        "update_design_parameters to persist them. Do NOT call this after every response — only call it when "
         "the user has confirmed parameters and is ready for a design to be generated.\n\n"
         "- modify_design_entry: Modify an existing design entry's image and/or prompt text.\n"
         "  Parameters:\n"

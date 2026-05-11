@@ -15,20 +15,20 @@
 
 ## 4. Frontend: Convert update_design_parameters to a pure diagnostic tool
 
-- [ ] 4.1 Rewrite the `update_design_parameters` handler in `src/app/page.tsx` to be a pure function: compute the summary of provided fields and missing required fields from the tool's own arguments only. Remove the `setState` call, the backfill logic that overwrites existing `DesignEntry.parameters`, and all reads of `state.designs` or `state.parameters`. The handler returns the summary string and performs no state mutations.
+- [x] 4.1 Rewrite the `update_design_parameters` handler in `src/app/page.tsx` to be a pure function: compute the summary of provided fields and missing required fields from the tool's own arguments only. Remove the `setState` call, the backfill logic that overwrites existing `DesignEntry.parameters`, and all reads of `state.designs` or `state.parameters`. The handler returns the summary string and performs no state mutations.
   - Done when: `update_design_parameters` handler body contains zero `setState` calls and zero references to `state.designs` or `state.parameters`; the return value still lists updated fields and missing required fields; `npm run lint` passes.
 
 ## 5. Backend: Remove global parameters from YourState
 
-- [ ] 5.1 Remove the `parameters: DesignParameters = DesignParameters()` field from the `YourState` class in `agent/src/agent.py`. Keep the `DesignParameters` class itself (still used by `DesignEntry.parameters`). Remove any code that references `state.parameters` or mutates the global parameters field.
+- [x] 5.1 Remove the `parameters: DesignParameters = DesignParameters()` field from the `YourState` class in `agent/src/agent.py`. Keep the `DesignParameters` class itself (still used by `DesignEntry.parameters`). Remove any code that references `state.parameters` or mutates the global parameters field.
   - Done when: `YourState` class has no `parameters` field; `DesignParameters` class still exists; `agent` passes linting.
 
 ## 6. Backend: Update agent system prompt
 
-- [ ] 6.1 Update the `system_prompt` in `agent/src/agent.py` to instruct the agent to: (1) call `update_design_parameters` with extracted values to check completeness, (2) pass ALL collected parameter fields directly to `generate_design` as arguments when generating a design. Update the `generate_design` tool description to list the 9 parameter arguments. Preserve all existing tool references (`get_knowledge_summary`, `query_knowledge_base`, `modify_design_entry`, `download_test_image`, `update_design_parameters`).
+- [x] 6.1 Update the `system_prompt` in `agent/src/agent.py` to instruct the agent to: (1) call `update_design_parameters` with extracted values to check completeness, (2) pass ALL collected parameter fields directly to `generate_design` as arguments when generating a design. Update the `generate_design` tool description to list the 9 parameter arguments. Preserve all existing tool references (`get_knowledge_summary`, `query_knowledge_base`, `modify_design_entry`, `download_test_image`, `update_design_parameters`).
   - Done when: system prompt contains `generate_design` with instructions to pass params directly; system prompt still references all 5 other tools; agent starts without errors.
 
 ## 7. Verification
 
-- [ ] 7.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `latestStateRef` or `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`).
+- [x] 7.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `latestStateRef` or `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`).
   - Done when: `npm run lint` exits zero; `grep -c "latestStateRef" src/app/page.tsx` returns 0; `grep -c "state.parameters" src/app/page.tsx` returns 0.
