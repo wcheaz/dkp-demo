@@ -9,7 +9,24 @@
 - [x] 2.1 Modify `src/components/design-component.tsx` to add an inline SVG info icon ("!" circle, 16×16px, `cursor: pointer`) after the price value in the price cell, add `useState` for modal open/close state, import and render `PricingBreakdownModal` passing the current entry's `parameters` and `price` as props. The info icon click SHALL set modal open to true. The modal `onClose` SHALL set modal open to false. Each design entry with a price SHALL have its own modal instance scoped to that entry's parameters.
   - **Done when**: Clicking the info icon on a price cell opens the `PricingBreakdownModal` with the correct entry parameters. Dismissing the modal (backdrop click or Escape) closes it. Entries without a price show no info icon. `npm run typecheck` passes, `npm run lint` passes. Browser verification confirms the icon is visible, clickable, and the modal displays the breakdown table.
 
-## 3. Verification
+## 3. Row Tooltips
 
-- [x] 3.1 Run full verification: `npm run typecheck` and `npm run lint` pass with zero errors. Open the application in the browser, generate or load a design entry that has a price, verify the info icon appears in the price cell, click it, verify the breakdown modal opens showing the pricing breakdown table with intermediate calculations, verify dismissing via backdrop click and Escape both work, verify the modal shows an unavailable message for entries with missing floor plan dimensions.
+- [x] 3.1 Add native HTML `title` attribute tooltips to each breakdown table row label in `src/components/pricing-breakdown-modal.tsx`. Each row label SHALL have a tooltip describing the pricing logic for that line item. The tooltips SHALL be:
+  - **Floor Area**: "Width × Height of the floor plan"
+  - **Joints**: "Floor Area × 1.32 (simulated joint count)"
+  - **Gusset Plate Cost**: "Total Joints × Cost per Joint (40 CZK)"
+  - **Timber Volume**: "Floor Area × 0.254 m³/m² (timber volume coefficient)"
+  - **Timber Cost**: "Timber Volume × Timber Cost per m³ (4,500 CZK)"
+  - **Trusses**: "Floor Area × 0.147 (simulated truss count)"
+  - **Assembly Cost**: "Total Trusses ÷ 20 × Assembly Cost per Batch (15,000 CZK)"
+  - **Hanger Cost**: "Total Trusses × Hanger Cost per Truss (100 CZK)"
+  - **Subtotal**: "Sum of Gusset Plate Cost + Timber Cost + Assembly Cost + Hanger Cost"
+  - **Roof Type**: "Complexity factor applied based on roof type (Gable: ×1.0, Hip: ×1.3, Mono-pitch: ×0.9, Flat: ×0.8)"
+  - **Total (CZK)**: "Subtotal × Roof Type Factor"
+  - **Total (EUR)**: "Total CZK ÷ 25 (CZK to EUR conversion rate)"
+  - **Done when**: Hovering over each row label in the breakdown table displays the corresponding tooltip. `npm run typecheck` and `npm run lint` pass.
+
+## 4. Verification
+
+- [ ] 4.1 Run full verification: `npm run typecheck` and `npm run lint` pass with zero errors. Open the application in the browser, generate or load a design entry that has a price, verify the info icon appears in the price cell, click it, verify the breakdown modal opens showing the pricing breakdown table with intermediate calculations, verify row label tooltips appear on hover, verify dismissing via backdrop click and Escape both work, verify the modal shows an unavailable message for entries with missing floor plan dimensions.
   - **Done when**: All checks pass and the end-to-end flow works in the browser.
