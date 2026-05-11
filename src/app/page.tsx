@@ -413,12 +413,18 @@ function YourMainContent() {
         description: "The new prompt text. Optional.",
         required: false,
       },
+      {
+        name: "price",
+        type: "string",
+        description: "The estimated price to set (e.g. €1,752). Optional.",
+        required: false,
+      },
     ],
-    handler({ design_id, image_name, image_url, prompt_text }) {
+    handler({ design_id, image_name, image_url, prompt_text, price }) {
       const ALLOWED_IMAGES = ["design-alpha.svg", "design-beta.svg"];
 
-      if (!image_name && !image_url && !prompt_text) {
-        return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
+      if (!image_name && !image_url && !prompt_text && !price) {
+        return "Error: at least one of image_name, image_url, prompt_text, or price must be provided.";
       }
 
       const currentState = latestStateRef.current;
@@ -442,6 +448,7 @@ function YourMainContent() {
         ...updated[index],
         ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
+        ...(price !== undefined ? { price } : {}),
       };
       const newState = { ...currentState, designs: updated };
       setState(newState);

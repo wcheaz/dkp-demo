@@ -63,7 +63,7 @@
 
   **Stop and hand off if:** Adding the price spread causes a TypeScript type error that is not resolved by the existing `price?: string` field on `DesignEntry`.
 
-- [ ] 4.2 Add `price` parameter to `modify_design_entry` frontend tool
+- [x] 4.2 Add `price` parameter to `modify_design_entry` frontend tool
 
   The system prompt (agent.py lines 200-201) tells the agent it can use `modify_design_entry` to update the price on an existing design entry, but the `modify_design_entry` handler in `src/app/page.tsx:386-449` does not accept a `price` parameter. Add a `price` parameter (type string, required false, description "The estimated price to set (e.g. €1,752)") to the `modify_design_entry` `useFrontendTool` registration. In the handler, when `price` is provided, include it in the updated entry object alongside existing fields (imageUrl, promptText). This enables the demo flow where the user asks for a price after a design already exists.
 
