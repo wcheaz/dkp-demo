@@ -1,6 +1,6 @@
 {
-  "active": true,
-  "iteration": 1,
+  "active": false,
+  "iteration": 5,
   "minIterations": 1,
   "maxIterations": 50,
   "completionPromise": "COMPLETE",
@@ -13,9 +13,16 @@
   "noCommit": false,
   "model": "",
   "startedAt": "2026-05-10T01:13:03.120Z",
-  "resumedAt": null,
-  "completedAt": null,
+  "resumedAt": "2026-05-11T15:24:54.350Z",
+  "completedAt": "2026-05-11T15:35:37.510Z",
   "stoppedAt": null,
-  "exitReason": null,
-  "pendingDirtyPaths": null
+  "exitReason": "completion_promise",
+  "pendingDirtyPaths": null,
+  "autoResolveHandoffs": {
+    "enabled": true,
+    "maxPerRun": 6,
+    "totalAttempts": 0,
+    "attempts": {},
+    "lastDecision": null
+  }
 }
