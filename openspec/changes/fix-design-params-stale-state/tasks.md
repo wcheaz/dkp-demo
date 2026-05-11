@@ -28,7 +28,14 @@
 - [x] 6.1 Update the `system_prompt` in `agent/src/agent.py` to instruct the agent to: (1) call `update_design_parameters` with extracted values to check completeness, (2) pass ALL collected parameter fields directly to `generate_design` as arguments when generating a design. Update the `generate_design` tool description to list the 9 parameter arguments. Preserve all existing tool references (`get_knowledge_summary`, `query_knowledge_base`, `modify_design_entry`, `download_test_image`, `update_design_parameters`).
   - Done when: system prompt contains `generate_design` with instructions to pass params directly; system prompt still references all 5 other tools; agent starts without errors.
 
-## 7. Verification
+## 7. Fix stale-closure bug in generate_design setTimeout callback
 
-- [x] 7.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `latestStateRef` or `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`).
-  - Done when: `npm run lint` exits zero; `grep -c "latestStateRef" src/app/page.tsx` returns 0; `grep -c "state.parameters" src/app/page.tsx` returns 0.
+The `generate_design` handler's `setTimeout` callback (3-second simulated delay) reads `state` from the closure captured at handler registration time. When the timer fires, this `state` is stale — it does not include the newly-added design entry. The callback then calls `setState` with this stale state, overwriting the current state and causing all designs to vanish from the UI. This is the same category of stale-closure bug that affected parameter reads, but it impacts the designs array in the timer path.
+
+- [ ] 7.1 Fix the `setTimeout` callback in the `generate_design` handler in `src/app/page.tsx` to read the latest state at callback execution time instead of using the stale closure-captured `state`. Use a ref (`latestStateRef`) that is kept in sync via `useEffect`, or restructure the callback to merge only the specific design entry update (find by `nextId` and set `status`/`imageUrl`) into whatever the current state is at callback time. Ensure the cleanup `useEffect` for `generationTimerRef` is present. Ensure `generationTimerRef` is declared before the `useFrontendTool` calls.
+  - Done when: after generating a design, the card shows the processing spinner for 3 seconds, then transitions to the completed image with parameters — the design does NOT disappear; the "No designs available yet" empty state is NOT shown; `npm run lint` passes.
+
+## 8. Verification
+
+- [ ] 8.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`). Verify designs persist through the processing→complete lifecycle without vanishing.
+  - Done when: `npm run lint` exits zero; `grep -c "state.parameters" src/app/page.tsx` returns 0; designs remain visible after the 3-second generation delay resolves.
