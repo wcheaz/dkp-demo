@@ -1,6 +1,7 @@
 ## 1. Frontend: Remove stale-state workarounds
 
 - [x] 1.1 Remove `latestStateRef` declaration, the `useEffect(() => { latestStateRef.current = state })` sync, the cleanup `useEffect` for `generationTimerRef`, and all `latestStateRef.current` reads from the three `useFrontendTool` handlers in `src/app/page.tsx`. The handlers shall read `state` directly from the `useCoAgent` closure. The `generationTimerRef` for the `setTimeout` cleanup SHALL remain.
+  - Note: Removing the ref was premature — `useFrontendTool` captures a stale closure. Task 7 restores the ref with synchronous updates.
   - Done when: grep for `latestStateRef` in `src/app/page.tsx` returns zero matches; `npm run lint` passes.
 
 ## 2. Frontend: Remove global parameters from AgentState
@@ -28,14 +29,24 @@
 - [x] 6.1 Update the `system_prompt` in `agent/src/agent.py` to instruct the agent to: (1) call `update_design_parameters` with extracted values to check completeness, (2) pass ALL collected parameter fields directly to `generate_design` as arguments when generating a design. Update the `generate_design` tool description to list the 9 parameter arguments. Preserve all existing tool references (`get_knowledge_summary`, `query_knowledge_base`, `modify_design_entry`, `download_test_image`, `update_design_parameters`).
   - Done when: system prompt contains `generate_design` with instructions to pass params directly; system prompt still references all 5 other tools; agent starts without errors.
 
-## 7. Fix stale-closure bug in generate_design setTimeout callback
+## 7. Fix stale-closure bugs in all useFrontendTool handlers and setTimeout callback
 
-The `generate_design` handler's `setTimeout` callback (3-second simulated delay) reads `state` from the closure captured at handler registration time. When the timer fires, this `state` is stale — it does not include the newly-added design entry. The callback then calls `setState` with this stale state, overwriting the current state and causing all designs to vanish from the UI. This is the same category of stale-closure bug that affected parameter reads, but it impacts the designs array in the timer path.
+The previous fix for task 7 introduced a functional `setState((prevState) => ...)` updater on line 370, but `useCoAgent`'s `setState` does NOT support functional updaters — it expects a full `AgentState` object, not a function. This silently fails, causing designs to vanish.
 
-- [x] 7.1 Fix the `setTimeout` callback in the `generate_design` handler in `src/app/page.tsx` to read the latest state at callback execution time instead of using the stale closure-captured `state`. Use a ref (`latestStateRef`) that is kept in sync via `useEffect`, or restructure the callback to merge only the specific design entry update (find by `nextId` and set `status`/`imageUrl`) into whatever the current state is at callback time. Ensure the cleanup `useEffect` for `generationTimerRef` is present. Ensure `generationTimerRef` is declared before the `useFrontendTool` calls.
-  - Done when: after generating a design, the card shows the processing spinner for 3 seconds, then transitions to the completed image with parameters — the design does NOT disappear; the "No designs available yet" empty state is NOT shown; `npm run lint` passes.
+Additionally, removing `latestStateRef` in task 1.1 was premature. `useFrontendTool` registers handlers once and the closure captures the initial `state`. Without a ref, every handler that reads `state` or `state.designs` gets stale data. The parameter-specific state problem is solved (params come from tool arguments), but the **designs array** still needs fresh state access for:
+- `generate_design`: computing the next ID from the current designs list
+- `modify_design_entry`: finding the target design by ID
+- The `setTimeout` callback: resolving processing→complete without clobbering other designs
+
+The correct fix is to restore `latestStateRef` with synchronous updates after each `setState` call, AND use it in the `setTimeout` callback. This works because:
+- The ref is updated synchronously after `setState`, so sequential handler calls see the latest designs.
+- The `useEffect(() => { latestStateRef.current = state })` that syncs from `useCoAgent` only fires after render, so it does NOT clobber the ref between synchronous handler calls.
+- The `setTimeout` callback fires 3 seconds later, by which time the `useEffect` has synced the ref to the true current state.
+
+- [ ] 7.1 Restore `latestStateRef` in `src/app/page.tsx`: add `const latestStateRef = useRef(state)` and `useEffect(() => { latestStateRef.current = state })`. Update ALL three `useFrontendTool` handlers (`generate_design`, `modify_design_entry`) to read state via `latestStateRef.current` instead of the closure-captured `state`. After each `setState(newState)` call, immediately set `latestStateRef.current = newState` to keep the ref in sync for rapid sequential tool calls. Remove the broken functional `setState((prevState) => ...)` call in the `setTimeout` callback and replace with a ref-based read: `const timerState = latestStateRef.current`. Ensure the `generationTimerRef` cleanup `useEffect` remains. The `update_design_parameters` handler needs no changes (it is already a pure function with no state access).
+  - Done when: designs appear when generated; designs persist through the processing→complete lifecycle; `generate_design` and `modify_design_entry` handlers read state only from `latestStateRef.current`; `npm run lint` passes.
 
 ## 8. Verification
 
-- [x] 8.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`). Verify designs persist through the processing→complete lifecycle without vanishing.
+- [ ] 8.1 Run `npm run lint` and verify zero errors in `src/app/page.tsx` and `src/lib/types.ts`. Verify no references to `state.parameters` remain in `src/app/page.tsx`. Verify `AgentState` in `src/lib/types.ts` has exactly one field (`designs`). Verify designs persist through the processing→complete lifecycle without vanishing.
   - Done when: `npm run lint` exits zero; `grep -c "state.parameters" src/app/page.tsx` returns 0; designs remain visible after the 3-second generation delay resolves.
