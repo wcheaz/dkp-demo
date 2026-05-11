@@ -1,6 +1,6 @@
 ## 1. Frontend: Remove stale-state workarounds
 
-- [ ] 1.1 Remove `latestStateRef` declaration, the `useEffect(() => { latestStateRef.current = state })` sync, the cleanup `useEffect` for `generationTimerRef`, and all `latestStateRef.current` reads from the three `useFrontendTool` handlers in `src/app/page.tsx`. The handlers shall read `state` directly from the `useCoAgent` closure. The `generationTimerRef` for the `setTimeout` cleanup SHALL remain.
+- [x] 1.1 Remove `latestStateRef` declaration, the `useEffect(() => { latestStateRef.current = state })` sync, the cleanup `useEffect` for `generationTimerRef`, and all `latestStateRef.current` reads from the three `useFrontendTool` handlers in `src/app/page.tsx`. The handlers shall read `state` directly from the `useCoAgent` closure. The `generationTimerRef` for the `setTimeout` cleanup SHALL remain.
   - Done when: grep for `latestStateRef` in `src/app/page.tsx` returns zero matches; `npm run lint` passes.
 
 ## 2. Frontend: Remove global parameters from AgentState

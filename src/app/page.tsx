@@ -20,7 +20,7 @@ import {
 } from "@copilotkit/react-core";
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent, useMemo, useEffect } from "react";
+import { useState, useRef, ChangeEvent, useMemo } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
@@ -311,19 +311,6 @@ function YourMainContent() {
 
   // DEMO-ONLY: refs for simulated design generation timer
   const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const latestStateRef = useRef(state);
-
-  useEffect(() => {
-    latestStateRef.current = state;
-  });
-
-  useEffect(() => {
-    return () => {
-      if (generationTimerRef.current) {
-        clearTimeout(generationTimerRef.current);
-      }
-    };
-  }, []);
 
   // DEMO-ONLY: generate_design frontend tool for simulated design generation
   useFrontendTool({
@@ -336,7 +323,7 @@ function YourMainContent() {
       },
     ],
     handler({ prompt_text }) {
-      const currentState = latestStateRef.current;
+      const currentState = state;
       const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
       const roofType = currentState.parameters?.roofType ?? "";
@@ -350,11 +337,10 @@ function YourMainContent() {
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);
-      latestStateRef.current = newState;
 
       // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
-        const timerState = latestStateRef.current;
+        const timerState = state;
         const updatedDesigns = (timerState.designs ?? []).map((d) =>
           d.id === nextId
             ? { ...d, status: "complete" as const, imageUrl: roofImage }
@@ -362,7 +348,6 @@ function YourMainContent() {
         );
         const resolvedState = { ...timerState, designs: updatedDesigns };
         setState(resolvedState);
-        latestStateRef.current = resolvedState;
       }, DESIGN_GENERATION_DELAY_MS);
     },
   });
@@ -403,7 +388,7 @@ function YourMainContent() {
         return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
       }
 
-      const currentState = latestStateRef.current;
+      const currentState = state;
       const currentDesigns = currentState.designs ?? [];
 
       if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
@@ -427,7 +412,6 @@ function YourMainContent() {
       };
       const newState = { ...currentState, designs: updated };
       setState(newState);
-      latestStateRef.current = newState;
       return `Design entry #${design_id} updated successfully.`;
     },
   });
@@ -446,7 +430,7 @@ function YourMainContent() {
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
     handler({ building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
-      const currentState = latestStateRef.current;
+      const currentState = state;
       const current = currentState.parameters ?? {};
       const updated = { ...current };
       const updatedFields: string[] = [];
@@ -473,7 +457,6 @@ function YourMainContent() {
 
       const newState = { ...currentState, parameters: updated, designs: backfilledDesigns };
       setState(newState);
-      latestStateRef.current = newState;
 
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
