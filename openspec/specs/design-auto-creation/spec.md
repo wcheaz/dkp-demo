@@ -2,59 +2,57 @@
 
 Defines the capability for the agent to automatically create design entries by calling a frontend tool, enabling automatic population of the design gallery during agent responses.
 
-## ADDED Requirements
+## Requirements
 
-### Requirement: add_design_entry is registered as a CopilotKit frontend tool
-A frontend tool named `add_design_entry` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component in `src/app/page.tsx`. The tool SHALL accept one parameter: `prompt_text` (string). The tool handler SHALL create a `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: prompt_text`, append it to the existing `state.designs` array, and call `setState` with the updated state. The code SHALL be wrapped in `// TEMPORARY` comments indicating it is a testing tool.
+### Requirement: generate_design is registered as a CopilotKit frontend tool
+The `add_design_entry` frontend tool SHALL be removed entirely from `src/app/page.tsx`. A new frontend tool named `generate_design` SHALL be registered using `useFrontendTool` inside the `YourMainContent` component. The tool SHALL accept one parameter: `prompt_text` (string). The tool handler SHALL create a `DesignEntry` with `status: "processing"`, `imageUrl` selected from `ROOF_TYPE_IMAGE_MAP` based on `state.parameters.roofType` (fallback `"/design-gable.svg"`), and `promptText` set to `prompt_text`. The entry SHALL be appended to the existing `state.designs` array and `setState` called immediately. After a configurable delay (`DESIGN_GENERATION_DELAY_MS`, default 3000ms), the handler SHALL update the entry's `status` to `"complete"` and call `setState` again. All code for this tool SHALL be wrapped in `// DEMO-ONLY` comments.
 
-#### Scenario: Frontend tool appends entry with user's prompt text
-- **WHEN** the agent calls the frontend tool `add_design_entry` with `prompt_text: "hello"`
-- **THEN** `setState` SHALL be called with a new state where `state.designs` contains a new `DesignEntry` with `imageUrl: "/next.svg"` and `promptText: "hello"`
+#### Scenario: generate_design creates a processing entry
+- **WHEN** the agent calls the frontend tool `generate_design` with `prompt_text: "hello"`
+- **THEN** `setState` SHALL be called with a new state where `state.designs` contains a new `DesignEntry` with `status: "processing"` and `promptText: "hello"`
 
-#### Scenario: Frontend tool appends without losing existing designs
-- **WHEN** the agent calls `add_design_entry` with `prompt_text: "second"` and `state.designs` already contains one entry
-- **THEN** `setState` SHALL be called with `state.designs` containing two entries: the original entry followed by the new entry with `promptText: "second"`
+#### Scenario: generate_design resolves entry after delay
+- **WHEN** the agent calls `generate_design` and the delay elapses
+- **THEN** `setState` SHALL be called with the entry's `status` updated to `"complete"` and `imageUrl` updated to the roof-type-mapped SVG path
 
-#### Scenario: Frontend tool handles undefined designs array
-- **WHEN** the agent calls `add_design_entry` and `state.designs` is undefined
-- **THEN** the handler SHALL treat `state.designs` as an empty array and append the new entry, resulting in a single-entry array
+#### Scenario: add_design_entry tool no longer exists
+- **WHEN** `src/app/page.tsx` is searched for the string `add_design_entry`
+- **THEN** no `useFrontendTool` registration with `name: "add_design_entry"` SHALL be found
 
-#### Scenario: TEMPORARY markers present in page.tsx
-- **WHEN** `src/app/page.tsx` is searched for the string `TEMPORARY`
-- **THEN** at least 1 occurrence SHALL be found near the `add_design_entry` frontend tool registration
+#### Scenario: DEMO-ONLY markers present in page.tsx
+- **WHEN** `src/app/page.tsx` is searched for the string `DEMO-ONLY`
+- **THEN** at least 1 occurrence SHALL be found near the `generate_design` frontend tool registration
 
-### Requirement: Backend add_design_entry tool is commented out
-The backend `add_design_entry` tool in `agent/src/agent.py` SHALL be commented out (not deleted). The `DesignEntry` model and `designs` field on `YourState` SHALL remain active (uncommented). All three SHALL have `# TEMPORARY` comments.
+### Requirement: System prompt instructs calling generate_design after parameter confirmation
+The agent's `system_prompt` in `agent/src/agent.py` SHALL replace the `add_design_entry` instruction with an instruction to call `generate_design` after the user has confirmed all required parameters. The instruction SHALL specify that `generate_design` is called only once per generation, after parameter confirmation, not after every response. The instruction SHALL be wrapped in a `# DEMO-ONLY` comment indicating the simulated nature. The system prompt SHALL preserve all existing instructions for `get_knowledge_summary`, `query_knowledge_base`, `update_design_parameters`, `modify_design_entry`, and `download_test_image`.
 
-#### Scenario: Backend tool is commented out
-- **WHEN** `agent/src/agent.py` is inspected for `add_design_entry`
-- **THEN** the `@agent.tool` decorator and `async def add_design_entry` function SHALL be present but commented out
-
-#### Scenario: DesignEntry model and designs field remain active
-- **WHEN** `agent/src/agent.py` is inspected
-- **THEN** `class DesignEntry(BaseModel)` SHALL exist uncommented
-- **AND** `designs: List[DesignEntry] = []` SHALL exist uncommented on `YourState`
-
-### Requirement: System prompt mandates calling add_design_entry after every response
-The agent's `system_prompt` in `agent/src/agent.py` SHALL include an instruction using strong mandatory language (`CRITICAL REQUIREMENT`, `EVERY SINGLE response`, `non-negotiable`) telling the agent to call `add_design_entry` with the user's original prompt text after every response. The instruction SHALL be wrapped in a `# TEMPORARY` comment. The system prompt SHALL preserve all existing instructions for `get_knowledge_summary` and `query_knowledge_base`.
-
-#### Scenario: System prompt references add_design_entry with strong language
+#### Scenario: System prompt references generate_design
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
-- **THEN** the prompt SHALL contain the text `add_design_entry`
-- **AND** the prompt SHALL contain at least one of: `CRITICAL REQUIREMENT`, `EVERY SINGLE`, or `non-negotiable`
-- **AND** the instruction SHALL be preceded by a `# TEMPORARY` comment
+- **THEN** the prompt SHALL contain the text `generate_design`
+- **AND** the prompt SHALL NOT contain the text `add_design_entry`
+
+#### Scenario: System prompt no longer mandates after-every-response
+- **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
+- **THEN** the prompt SHALL NOT contain `CRITICAL REQUIREMENT` or `EVERY SINGLE` or `non-negotiable` in connection with design entry creation
 
 #### Scenario: System prompt preserves existing tool instructions
 - **WHEN** `agent/src/agent.py` is inspected for the `system_prompt` string
-- **THEN** the prompt SHALL still contain references to `get_knowledge_summary` and `query_knowledge_base`
-- **AND** the existing instructions about knowledge base usage SHALL remain unchanged
+- **THEN** the prompt SHALL still contain references to `get_knowledge_summary`, `query_knowledge_base`, `update_design_parameters`, `modify_design_entry`, and `download_test_image`
 
-### Requirement: All temporary code is marked with TEMPORARY comments
-Every code section added or modified by this change SHALL be preceded by a `TEMPORARY` comment explaining that it is a testing tool and will be replaced when real image generation is integrated.
+#### Scenario: DEMO-ONLY marker present in agent code
+- **WHEN** `agent/src/agent.py` is searched for the string `DEMO-ONLY`
+- **THEN** at least 1 occurrence SHALL be found near the `generate_design` instruction in the system prompt
 
-#### Scenario: TEMPORARY markers present in agent code
-- **WHEN** `agent/src/agent.py` is searched for the string `TEMPORARY`
-- **THEN** at least 3 occurrences SHALL be found: before `DesignEntry`, before `designs` field, and before the system prompt addition
+### Requirement: Backend DesignEntry model includes status field
+The `DesignEntry` Pydantic model in `agent/src/agent.py` SHALL include a `status` field of type `str` with default value `"complete"`. The `DesignEntry` class SHALL be marked with a `# DEMO-ONLY` comment.
+
+#### Scenario: Backend DesignEntry model has status field
+- **WHEN** `agent/src/agent.py` is inspected
+- **THEN** `class DesignEntry(BaseModel)` SHALL include `status: str = "complete"` as a field
+
+#### Scenario: Backend DEMO-ONLY marker present
+- **WHEN** `agent/src/agent.py` is searched for `DEMO-ONLY` near `DesignEntry`
+- **THEN** at least 1 occurrence SHALL be found near the `DesignEntry` class
 
 ### Requirement: All code passes lint and type checking
 The modified files SHALL pass all lint and type checking commands.

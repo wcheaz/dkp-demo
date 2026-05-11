@@ -1,0 +1,1 @@
+/home/ncheaz/git/dkp-demo/openspec/changes/fix-design-params-stale-state/tasks.md

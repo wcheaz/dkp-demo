@@ -5,19 +5,39 @@ The Design Display capability provides a scrollable list of design entries with 
 ## Requirements
 
 ### Requirement: DesignComponent renders a scrollable list of design entries
-The `DesignComponent` SHALL accept an `AgentState` containing a `designs` array of `DesignEntry` objects. Each `DesignEntry` SHALL have an `imageUrl` (string) and a `promptText` (string). The component SHALL render one card per entry inside a scrollable container. Multiple cards SHALL be visible simultaneously. The scrollable container SHALL use `overflow-y: auto` so the user can scroll through the design history. Each card SHALL contain an `<img>` element with `src` set to the entry's `imageUrl` and a text element displaying the entry's `promptText`.
+The `DesignComponent` SHALL accept an `AgentState` containing a `designs` array of `DesignEntry` objects and a `parameters` field of type `DesignParameters`. The component SHALL render a parameter display section above the scrollable design cards container (see `design-params-display` capability). Each `DesignEntry` SHALL have an `imageUrl` (string), a `promptText` (string), and a `status` field (`"processing" | "complete"`). The component SHALL render one card per entry inside a scrollable container. Multiple cards SHALL be visible simultaneously. The scrollable container SHALL use `overflow-y: auto` so the user can scroll through the design history. Each card SHALL contain an `<img>` element with `src` set to the entry's `imageUrl` and a text element displaying the entry's `promptText`.
+
+For entries with `status: "processing"`, the card SHALL render a processing overlay covering the image area instead of the normal image. The overlay SHALL contain a CSS-animated spinner and the text "Generating truss structure...". The image SHALL be hidden during processing. The card ID (`#N`) and prompt text SHALL remain visible above and below the overlay. Clicking the overlay or the processing entry SHALL NOT open the modal.
+
+For entries with `status: "complete"` (including the default), the card SHALL render normally as before — showing the image and allowing click-to-enlarge.
 
 #### Scenario: Empty state when no designs exist
 - **WHEN** the `designs` array on `AgentState` is empty or undefined
-- **THEN** the component SHALL display an empty-state message indicating no designs are available, and SHALL render zero design cards.
+- **THEN** the component SHALL display an empty-state message indicating no designs are available, and SHALL render zero design cards. The parameter display section SHALL still render above the empty state.
 
 #### Scenario: Single design entry displayed
-- **WHEN** the `designs` array contains one `DesignEntry` with `imageUrl` set to `"tmp/next.svg"` and `promptText` set to `"Draw a flowchart of user login"`
-- **THEN** the component SHALL render exactly one card containing an `<img>` element whose `src` attribute equals `"tmp/next.svg"` and a text element containing `"Draw a flowchart of user login"`.
+- **WHEN** the `designs` array contains one `DesignEntry` with `imageUrl` set to `"tmp/next.svg"` and `promptText` set to `"Draw a flowchart of user login"` and `status` omitted (defaults to `"complete"`)
+- **THEN** the component SHALL render exactly one card containing an `<img>` element whose `src` attribute equals `"tmp/next.svg"` and a text element containing `"Draw a flowchart of user login"`. No processing overlay SHALL be shown.
 
 #### Scenario: Multiple design entries displayed in order with scroll
-- **WHEN** the `designs` array contains five entries in order: A, B, C, D, E
+- **WHEN** the `designs` array contains five entries in order: A, B, C, D, E (all with `status: "complete"`)
 - **THEN** the component SHALL render five cards in the same order inside a scrollable container, each showing its own image and prompt text. At least two cards SHALL be visible without scrolling.
+
+#### Scenario: Processing entry shows overlay instead of image
+- **WHEN** the `designs` array contains one entry with `status: "processing"`, `imageUrl: "/design-gable.svg"`, and `promptText: "10x15m gable roof"`
+- **THEN** the card SHALL render a processing overlay in the image area containing a CSS-animated spinner and the text "Generating truss structure...". The `<img>` element SHALL NOT be visible. The card ID (`#N`) and prompt text "10x15m gable roof" SHALL still be visible.
+
+#### Scenario: Processing entry does not open modal on click
+- **WHEN** the user clicks on the processing overlay of a design entry with `status: "processing"`
+- **THEN** the modal SHALL NOT open. No modal overlay SHALL appear.
+
+#### Scenario: Entry transitions from processing to complete
+- **WHEN** a design entry transitions from `status: "processing"` to `status: "complete"` and `imageUrl` changes from `"/design-gable.svg"` to the resolved image
+- **THEN** the processing overlay SHALL disappear and the `<img>` element SHALL become visible with the updated `src`.
+
+#### Scenario: Complete entry allows click-to-enlarge
+- **WHEN** the user clicks on the `<img>` element of a design entry with `status: "complete"`
+- **THEN** the modal SHALL open as per existing behavior (see modal requirement in base spec).
 
 ### Requirement: DesignComponent accepts standard image formats
 The `<img>` element in each design card SHALL accept any standard image format path or URL assigned to `imageUrl`, including but not limited to: jpg, jpeg, png, gif, svg, webp, and bmp. The component SHALL NOT perform format validation or conversion — it SHALL pass `imageUrl` directly to the `<img src>` attribute.
@@ -68,15 +88,19 @@ The modal SHALL close and disappear when the user clicks on the backdrop area (o
 - **THEN** the modal SHALL remain open.
 
 ### Requirement: AgentState carries designs array
-`AgentState` in `src/lib/types.ts` SHALL define a `designs` field of type `DesignEntry[]`. `DesignEntry` SHALL be an exported interface with `imageUrl: string` and `promptText: string`. The old `procurement_codes`-related types and `your_data` field SHALL be removed from `AgentState`.
+`AgentState` in `src/lib/types.ts` SHALL define a `designs` field of type `DesignEntry[]` and a `parameters` field of type `DesignParameters`. `DesignEntry` SHALL be an exported interface with `imageUrl: string` and `promptText: string`. `DesignParameters` SHALL be an exported interface with optional string/number fields for construction parameters. The old `procurement_codes`-related types and `your_data` field SHALL be removed from `AgentState`.
 
-#### Scenario: AgentState type compiles with designs field
+#### Scenario: AgentState type compiles with designs and parameters fields
 - **WHEN** TypeScript compilation is run on `src/lib/types.ts`
-- **THEN** the file SHALL compile without errors and `AgentState` SHALL have exactly one field: `designs: DesignEntry[]`.
+- **THEN** the file SHALL compile without errors and `AgentState` SHALL have exactly two fields: `designs: DesignEntry[]` and `parameters: DesignParameters`.
 
 #### Scenario: DesignEntry has required fields
 - **WHEN** a `DesignEntry` object is created with `{ imageUrl: "tmp/next.svg", promptText: "test prompt" }`
 - **THEN** the object SHALL satisfy the `DesignEntry` interface without TypeScript errors.
+
+#### Scenario: AgentState accepts parameters field
+- **WHEN** an `AgentState` object is created with `{ designs: [], parameters: { buildingType: "Family house" } }`
+- **THEN** the object SHALL satisfy the `AgentState` type without TypeScript errors.
 
 ### Requirement: DesignComponent is exported from design-component.tsx
 The component SHALL be exported as a named export `DesignComponent` from `src/components/design-component.tsx`. The old file `src/components/procurement-codes.tsx` SHALL NOT exist after this change. The old named export `ProcurementCodes` SHALL NOT exist.

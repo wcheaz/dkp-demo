@@ -1,20 +1,30 @@
 @import "tailwindcss";
 
-:root {
-  --background: #1e1e1e;
-  --foreground: #d4d4d4;
+@theme {
+  --color-design-param-label: #67e8f9;
+  --color-design-param-value: #ffffff;
+  --color-design-param-bg: rgba(6, 182, 212, 0.15);
+  --color-design-param-border: rgba(34, 211, 238, 0.4);
+  --color-design-description-text: #f1f5f9;
+  --color-design-description-bg: rgba(255, 255, 255, 0.08);
+}
 
-  /* CopilotKit Dark Theme Variables (VS Code Style) */
-  --copilot-kit-primary-color: #007fd4 !important;
-  --copilot-kit-contrast-color: #ffffff !important;
-  --copilot-kit-background-color: #252526 !important;
-  --copilot-kit-secondary-color: #000000 !important;
-  --copilot-kit-secondary-contrast-color: #d4d4d4 !important;
-  --copilot-kit-separator-color: #454545 !important;
-  --copilot-kit-muted-color: #858585 !important;
-  --copilot-kit-scrollbar-color: #424242 !important;
-  --copilot-kit-response-button-color: #ffffff !important;
-  --copilot-kit-response-button-background-color: #007fd4 !important;
+@layer base {
+  :root {
+    --background: #1e1e1e;
+    --foreground: #d4d4d4;
+
+    --copilot-kit-primary-color: #007fd4 !important;
+    --copilot-kit-contrast-color: #ffffff !important;
+    --copilot-kit-background-color: #252526 !important;
+    --copilot-kit-secondary-color: #000000 !important;
+    --copilot-kit-secondary-contrast-color: #d4d4d4 !important;
+    --copilot-kit-separator-color: #454545 !important;
+    --copilot-kit-muted-color: #858585 !important;
+    --copilot-kit-scrollbar-color: #424242 !important;
+    --copilot-kit-response-button-color: #ffffff !important;
+    --copilot-kit-response-button-background-color: #007fd4 !important;
+  }
 }
 
 

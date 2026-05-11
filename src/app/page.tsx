@@ -18,36 +18,15 @@ import {
   useCopilotReadable,
   useFrontendTool,
 } from "@copilotkit/react-core";
-import { CopilotKitCSSProperties, CopilotSidebar, InputProps } from "@copilotkit/react-ui";
+import { CopilotSidebar, InputProps } from "@copilotkit/react-ui";
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useState, useRef, ChangeEvent, useMemo } from "react";
+import { useState, useRef, ChangeEvent, useMemo, useEffect } from "react";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
 export default function CopilotKitPage() {
-  const [themeColor, setThemeColor] = useState("#363636ff");
-
-  // 🪁 Frontend Actions: https://docs.copilotkit.ai/pydantic-ai/frontend-actions
-  useFrontendTool({
-    name: "setThemeColor",
-    parameters: [
-      {
-        name: "themeColor",
-        description: "The theme color to set. Make sure to pick nice colors.",
-        required: true,
-      },
-    ],
-    handler({ themeColor }) {
-      setThemeColor(themeColor);
-    },
-  });
-
   return (
-    <main
-      style={
-        { "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties
-      }
-    >
+    <main>
       <CopilotSidebar
         defaultOpen={true}
         disableSystemMessage={true}
@@ -68,7 +47,7 @@ export default function CopilotKitPage() {
         ]}
         Input={CustomInput}
       >
-        <YourMainContent themeColor={themeColor} />
+        <YourMainContent />
       </CopilotSidebar>
     </main>
   );
@@ -210,7 +189,7 @@ function CustomInput(props: InputProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !props.inProgress) {
       e.preventDefault();
       handleSend();
     }
@@ -292,13 +271,18 @@ function CustomInput(props: InputProps) {
   );
 }
 
-function YourMainContent({
-  themeColor,
-}: {
-  themeColor: string;
-}) {
-  // themeColor is reserved for future theming functionality
-  void themeColor;
+// DEMO-ONLY: roof-type-to-image mapping for simulated design generation
+const ROOF_TYPE_IMAGE_MAP: Record<string, string> = {
+  "Gable": "/design-gable.svg",
+  "Hip": "/design-hip.svg",
+  "Mono-pitch": "/design-mono.svg",
+  "Flat": "/design-flat.svg",
+};
+
+// DEMO-ONLY: artificial delay for demo presentation
+const DESIGN_GENERATION_DELAY_MS = 3000;
+
+function YourMainContent() {
   // 🪁 Shared State: https://docs.copilotkit.ai/pydantic-ai/shared-state
   const { state, setState } = useCoAgent<AgentState>({
     name: "my_agent",
@@ -324,21 +308,78 @@ function YourMainContent({
     setState({ ...state, designs });
   }
 
-  // TEMPORARY: add_design_entry frontend tool for auto-creating design entries on every agent response. Will be replaced when real image generation is integrated.
+  // DEMO-ONLY: refs for simulated design generation timer
+  const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestStateRef = useRef(state);
+  useEffect(() => { latestStateRef.current = state; });
+
+  useEffect(() => {
+    return () => {
+      if (generationTimerRef.current) {
+        clearTimeout(generationTimerRef.current);
+      }
+    };
+  }, []);
+
+  // DEMO-ONLY: generate_design frontend tool for simulated design generation
   useFrontendTool({
-    name: "add_design_entry",
+    name: "generate_design",
     parameters: [
       {
         name: "prompt_text",
-        description: "The user's original prompt text",
+        description: "The user's original prompt text for the design",
         required: true,
       },
+      { name: "building_type", type: "string", description: "Building type (e.g. House, Garage, Agricultural building)", required: false },
+      { name: "floor_plan_dimensions", type: "string", description: "Floor plan dimensions (e.g. 10x15m)", required: false },
+      { name: "roof_type", type: "string", description: "Roof type (Gable, Hip, Mono-pitch, Flat)", required: false },
+      { name: "roof_pitch", type: "string", description: "Roof pitch in degrees (2-45)", required: false },
+      { name: "attic_usage", type: "string", description: "Attic usage (None, Storage, Living space)", required: false },
+      { name: "eaves_shape", type: "string", description: "Eaves shape (Open, Boxed, Flush)", required: false },
+      { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
+      { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
+      { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
-    handler({ prompt_text }) {
-      const currentDesigns = designs;
+    handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const newEntry = { id: nextId, imageUrl: "/next.svg", promptText: prompt_text };
-      setState({ ...state, designs: [...currentDesigns, newEntry] });
+      const roofImage = (roof_type && ROOF_TYPE_IMAGE_MAP[roof_type]) || "/design-gable.svg";
+
+      const parameters: Record<string, unknown> = {};
+      if (building_type !== undefined) parameters.buildingType = building_type;
+      if (floor_plan_dimensions !== undefined) parameters.floorPlanDimensions = floor_plan_dimensions;
+      if (roof_type !== undefined) parameters.roofType = roof_type;
+      if (roof_pitch !== undefined) parameters.roofPitch = Number(roof_pitch);
+      if (attic_usage !== undefined) parameters.atticUsage = attic_usage;
+      if (eaves_shape !== undefined) parameters.eavesShape = eaves_shape;
+      if (wall_construction !== undefined) parameters.wallConstruction = wall_construction;
+      if (location !== undefined) parameters.location = location;
+      if (overhang !== undefined) parameters.overhang = overhang;
+
+      const newEntry = {
+        id: nextId,
+        imageUrl: "/design-gable.svg",
+        promptText: prompt_text,
+        status: "processing" as const,
+        ...(Object.keys(parameters).length > 0 ? { parameters } : {}),
+      };
+      const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
+      setState(newState);
+      latestStateRef.current = newState;
+
+      // DEMO-ONLY: simulate generation delay then resolve to complete
+      generationTimerRef.current = setTimeout(() => {
+        const timerState = latestStateRef.current;
+        const updatedDesigns = (timerState.designs ?? []).map((d) =>
+          d.id === nextId
+            ? { ...d, status: "complete" as const, imageUrl: roofImage }
+            : d
+        );
+        const timerNewState = { ...timerState, designs: updatedDesigns };
+        setState(timerNewState);
+        latestStateRef.current = timerNewState;
+      }, DESIGN_GENERATION_DELAY_MS);
     },
   });
   useFrontendTool({
@@ -358,20 +399,28 @@ function YourMainContent({
         required: false,
       },
       {
+        name: "image_url",
+        type: "string",
+        description:
+          "A full image URL to set directly (e.g. /api/serve-image/test-image-123.png). Use for dynamically downloaded images. Takes precedence over image_name. Optional.",
+        required: false,
+      },
+      {
         name: "prompt_text",
         type: "string",
         description: "The new prompt text. Optional.",
         required: false,
       },
     ],
-    handler({ design_id, image_name, prompt_text }) {
+    handler({ design_id, image_name, image_url, prompt_text }) {
       const ALLOWED_IMAGES = ["design-alpha.svg", "design-beta.svg"];
 
-      if (!image_name && !prompt_text) {
-        return "Error: at least one of image_name or prompt_text must be provided.";
+      if (!image_name && !image_url && !prompt_text) {
+        return "Error: at least one of image_name, image_url, or prompt_text must be provided.";
       }
 
-      const currentDesigns = designs;
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
 
       if (image_name && !ALLOWED_IMAGES.includes(image_name)) {
         return `Error: invalid image_name "${image_name}". Valid images: ${ALLOWED_IMAGES.join(", ")}.`;
@@ -384,22 +433,65 @@ function YourMainContent({
         return `Error: design_id ${design_id} not found. Valid IDs: [${validIds.join(", ")}].`;
       }
 
+      const imageUrl = image_url || (image_name ? `/${image_name}` : undefined);
+
       const updated = [...currentDesigns];
       updated[index] = {
         ...updated[index],
-        ...(image_name ? { imageUrl: `/${image_name}` } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
       };
-      setState({ ...state, designs: updated });
+      const newState = { ...currentState, designs: updated };
+      setState(newState);
+      latestStateRef.current = newState;
       return `Design entry #${design_id} updated successfully.`;
     },
   });
 
-  // END TEMPORARY
+  useFrontendTool({
+    name: "update_design_parameters",
+    parameters: [
+      { name: "building_type", type: "string", description: "Building type (e.g. House, Garage, Agricultural building)", required: false },
+      { name: "floor_plan_dimensions", type: "string", description: "Floor plan dimensions (e.g. 10x15m)", required: false },
+      { name: "roof_type", type: "string", description: "Roof type (Gable, Hip, Mono-pitch, Flat)", required: false },
+      { name: "roof_pitch", type: "string", description: "Roof pitch in degrees (2-45)", required: false },
+      { name: "attic_usage", type: "string", description: "Attic usage (None, Storage, Living space)", required: false },
+      { name: "eaves_shape", type: "string", description: "Eaves shape (Open, Boxed, Flush)", required: false },
+      { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
+      { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
+      { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
+    ],
+    handler({ building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
+      const updatedFields: string[] = [];
+      const updated: Record<string, unknown> = {};
+
+      if (building_type !== undefined) { updated.buildingType = building_type; updatedFields.push("buildingType"); }
+      if (floor_plan_dimensions !== undefined) { updated.floorPlanDimensions = floor_plan_dimensions; updatedFields.push("floorPlanDimensions"); }
+      if (roof_type !== undefined) { updated.roofType = roof_type; updatedFields.push("roofType"); }
+      if (roof_pitch !== undefined) { updated.roofPitch = Number(roof_pitch); updatedFields.push("roofPitch"); }
+      if (attic_usage !== undefined) { updated.atticUsage = attic_usage; updatedFields.push("atticUsage"); }
+      if (eaves_shape !== undefined) { updated.eavesShape = eaves_shape; updatedFields.push("eavesShape"); }
+      if (wall_construction !== undefined) { updated.wallConstruction = wall_construction; updatedFields.push("wallConstruction"); }
+      if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
+      if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
+
+      const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
+      const missingRequired = requiredFields.filter((f) => !updated[f]);
+
+      let summary = `Updated fields: ${updatedFields.length > 0 ? updatedFields.join(", ") : "none"}. `;
+      summary += missingRequired.length > 0
+        ? `Missing required fields: ${missingRequired.join(", ")}. All required fields are NOT complete.`
+        : "All required fields are complete.";
+
+      return summary;
+    },
+  });
+
+  // END DEMO-ONLY
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify(designs),
+    value: JSON.stringify({ designs }),
   });
 
   return (

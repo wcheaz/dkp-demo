@@ -7,6 +7,9 @@ context: |
   Tech stack: Python 3.12+, Pydantic AI, Uvicorn, Logfire, python-dotenv, LlamaIndex
   We follow PEP 8 standards with strict typing
   All development and testing files must be placed in the test/ directory at project root
+  This project follows the Ralph Wiggum method for task authoring.
+  Read openspec/OPENSPEC-RALPH-BP.md before generating OpenSpec artifacts.
+  Verify proposals against the Ralph checklist before approval.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
@@ -14,10 +17,14 @@ rules:
   proposal:
     - Keep proposals concise and focused
     - Always include a "Non-goals" section
+    - Include explicit scope, non-goals, and first-rollout boundaries
+    - Resolve all policy decisions before implementation tasks
 
   design:
     - Include clear decision rationale
     - Document trade-offs and alternatives
+    - Do not leave core policy choices unresolved
+    - Specify algorithms, config shapes, and failure semantics
 
   tasks:
     - Break tasks into chunks that can be completed in 2 hours or less
@@ -29,7 +36,14 @@ rules:
     - "CRITICAL DOCUMENTATION PLACEMENT RULE: When creating .md documentation files (SUMMARY.md, ANNOUNCEMENT.md, DOCUMENTATION.md, etc.), place them in the ralph-docs/ directory at project root (/home/ncheaz/git/dkp-demo/ralph-docs/)"
     - "FORBIDDEN: DO NOT create .md documentation files in the project root (except for core files: README.md, CHANGELOG.md, SETUP.md, TESTING.md, DEPENDENCIES.md, deploy_log.md)"
     - "Examples: Task \"Create deployment summary\" - Create ralph-docs/DEPLOYMENT_SUMMARY.md"
+    - Use the task template from OPENSPEC-RALPH-BP.md
+    - Each task has one dominant outcome and one verification cluster
+    - Include explicit stop-and-hand-off conditions
 
   specs:
     - Use clear, testable requirements
     - Include scenarios with GIVEN-WHEN-THEN format
+
+# --- Ralph Wiggum ---
+# This project uses the Ralph Wiggum method for iterative development.
+# See OPENSPEC-RALPH-BP.md for the detailed authoring guide shipped with spec-and-loop.

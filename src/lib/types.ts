@@ -2,6 +2,20 @@ export interface DesignEntry {
   id: number;
   imageUrl: string;
   promptText: string;
+  status?: "processing" | "complete";
+  parameters?: DesignParameters;
+}
+
+export interface DesignParameters {
+  buildingType?: string;
+  floorPlanDimensions?: string;
+  roofType?: string;
+  roofPitch?: number;
+  atticUsage?: string;
+  eavesShape?: string;
+  wallConstruction?: string;
+  location?: string;
+  overhang?: string;
 }
 
 // Domain-specific state fields - uncomment and adapt for your project

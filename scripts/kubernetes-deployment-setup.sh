@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# {{PROJECT_NAME}} Kubernetes Deployment Setup Script
+# dkp-demo Kubernetes Deployment Setup Script
 # ================================================
 #
 # CONFIGURATION REQUIRED:
@@ -50,7 +50,7 @@
 #   scripts/kubernetes-deployment-setup.sh --build agent --restart --delete-old
 #
 # Environment variables:
-#   VM_NAME: Name of the Multipass VM (default: {{PROJECT_NAME}}-k8s)
+#   VM_NAME: Name of the Multipass VM (default: dkp-demo-k8s)
 #
 # Disk space management:
 #   - Without --delete-old: Script checks available disk space and fails if insufficient
@@ -65,7 +65,7 @@
 #   - kubectl configured to access the microk8s cluster
 #
 # Configuration steps:
-#   1. Set VM_NAME to match your Multipass VM name (or use {{PROJECT_NAME}}-k8s default)
+#   1. Set VM_NAME to match your Multipass VM name (or use dkp-demo-k8s default)
 #   2. Set REGISTRY_HOST to match your container registry address
 #   3. Ensure the VM is running: multipass start <VM_NAME>
 #   4. Ensure microk8s is ready: multipass exec <VM_NAME> -- microk8s status
@@ -82,13 +82,13 @@
 set -e
 
 # Configuration
-# Replace {{PROJECT_NAME}} with your project identifier (e.g., "my-app")
-# Replace {{REGISTRY_HOST}} with your container registry (e.g., "localhost:32000" or "registry.example.com")
-VM_NAME="${VM_NAME:-{{PROJECT_NAME}}-k8s}"
-REGISTRY="{{REGISTRY_HOST}}"
-FRONTEND_IMAGE_NAME="{{PROJECT_NAME}}"
+# Replace dkp-demo with your project identifier (e.g., "my-app")
+# Replace localhost:32000 with your container registry (e.g., "localhost:32000" or "registry.example.com")
+VM_NAME="${VM_NAME:-dkp-demo-k8s}"
+REGISTRY="localhost:32000"
+FRONTEND_IMAGE_NAME="dkp-demo"
 AGENT_IMAGE_NAME="agent"
-FRONTEND_DEPLOYMENT="{{PROJECT_NAME}}"
+FRONTEND_DEPLOYMENT="dkp-demo"
 AGENT_DEPLOYMENT="agent"
 
 # Colors for output
@@ -123,7 +123,7 @@ usage() {
     echo "  -h, --help                 Show this help message"
     echo ""
     echo "Environment Variables:"
-    echo "  VM_NAME                    Name of the Multipass VM (default: {{PROJECT_NAME}}-k8s)"
+    echo "  VM_NAME                    Name of the Multipass VM (default: dkp-demo-k8s)"
     echo ""
     echo "Examples:"
     echo "  $0 --build all --manifest k8s/ingress.yaml --restart --verify"
@@ -417,23 +417,23 @@ if [ "$DAEMON_JSON_EXISTS" = "no" ]; then
     multipass exec "$VM_NAME" -- sudo mkdir -p /etc/docker
     multipass exec "$VM_NAME" -- sudo bash -c "cat > /etc/docker/daemon.json <<'DEOF'
 {
-  \"insecure-registries\": [\"{{REGISTRY_HOST}}\"]
+  \"insecure-registries\": [\"localhost:32000\"]
 }
 DEOF"
     NEEDS_DOCKER_RESTART=true
     log_info "Created /etc/docker/daemon.json"
 else
     # Check if insecure-registries already includes our registry
-    HAS_INSECURE=$(multipass exec "$VM_NAME" -- grep -c "{{REGISTRY_HOST}}" /etc/docker/daemon.json 2>/dev/null || echo "0")
+    HAS_INSECURE=$(multipass exec "$VM_NAME" -- grep -c "localhost:32000" /etc/docker/daemon.json 2>/dev/null || echo "0")
     if [ "$HAS_INSECURE" -eq 0 ]; then
-        log_info "Adding {{REGISTRY_HOST}} to insecure-registries in existing daemon.json..."
+        log_info "Adding localhost:32000 to insecure-registries in existing daemon.json..."
         multipass exec "$VM_NAME" -- sudo python3 -c "
 import json, sys
 with open('/etc/docker/daemon.json') as f:
     config = json.load(f)
 ir = config.get('insecure-registries', [])
-if '{{REGISTRY_HOST}}' not in ir:
-    ir.append('{{REGISTRY_HOST}}')
+if 'localhost:32000' not in ir:
+    ir.append('localhost:32000')
 config['insecure-registries'] = ir
 with open('/etc/docker/daemon.json', 'w') as f:
     json.dump(config, f, indent=2)

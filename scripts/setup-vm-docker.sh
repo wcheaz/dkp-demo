@@ -9,7 +9,7 @@ set -euo pipefail
 # PROJECT_NAME: Replace with your project name before running deployment scripts.
 # This VM name is used for multipass VM creation and access.
 # Override with: VM_NAME=my-vm ./scripts/setup-vm-docker.sh
-VM_NAME="${VM_NAME:-{{PROJECT_NAME}}-k8s}"
+VM_NAME="${VM_NAME:-dkp-demo-k8s}"
 
 # Colors for output
 RED='\033[0;31m'

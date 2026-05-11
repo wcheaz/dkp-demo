@@ -1,0 +1,21 @@
+{
+  "active": false,
+  "iteration": 6,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "blockedHandoffPromise": "BLOCKED_HANDOFF",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/simulated-design-generation/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-05-08T22:35:08.786Z",
+  "resumedAt": null,
+  "completedAt": "2026-05-08T22:44:00.021Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise",
+  "pendingDirtyPaths": null
+}

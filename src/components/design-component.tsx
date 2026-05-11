@@ -1,5 +1,29 @@
 import { useEffect, useState } from "react";
-import { AgentState } from "@/lib/types";
+import { AgentState, DesignParameters } from "@/lib/types";
+
+const PARAM_LABELS: Record<keyof DesignParameters, string> = {
+  buildingType: "Building Type",
+  floorPlanDimensions: "Floor Plan Dimensions",
+  roofType: "Roof Type",
+  roofPitch: "Roof Pitch",
+  atticUsage: "Attic Usage",
+  eavesShape: "Eaves Shape",
+  wallConstruction: "Wall Construction",
+  location: "Location",
+  overhang: "Overhang",
+};
+
+const ALL_PARAM_KEYS: (keyof DesignParameters)[] = [
+  "buildingType",
+  "floorPlanDimensions",
+  "roofType",
+  "roofPitch",
+  "atticUsage",
+  "eavesShape",
+  "wallConstruction",
+  "location",
+  "overhang",
+];
 
 export interface DesignComponentProps {
   state: AgentState;
@@ -39,17 +63,42 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               <span className="absolute top-2 left-3 text-xs font-semibold text-gray-300">
                 #{entry.id}
               </span>
-              <div className="flex justify-center">
-                <img
-                  src={entry.imageUrl}
-                  alt={entry.promptText}
-                  className="w-[55%] h-[27vh] object-contain cursor-pointer"
-                  onClick={() => setModalImageUrl(entry.imageUrl)}
-                />
+              <div className="flex justify-center relative">
+                {entry.status === "processing" ? (
+                  <div className="w-[55%] h-[27vh] flex flex-col items-center justify-center bg-white/10 rounded-xl">
+                    <div className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    <p className="mt-3 text-sm text-gray-300">Generating truss structure...</p>
+                  </div>
+                ) : (
+                  <img
+                    src={entry.imageUrl}
+                    alt={entry.promptText}
+                    className="w-[55%] h-[27vh] object-contain cursor-pointer"
+                    onClick={() => setModalImageUrl(entry.imageUrl)}
+                  />
+                )}
               </div>
-              <p className="mt-3 text-center text-sm text-gray-200">
+              <p className="mt-3 text-center text-sm font-medium rounded-lg px-3 py-1.5 text-design-description-text bg-design-description-bg">
                 {entry.promptText}
               </p>
+              {entry.parameters && (() => {
+                const filledEntries = ALL_PARAM_KEYS.filter(
+                  (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== ""
+                );
+                if (filledEntries.length === 0) return null;
+                return (
+                  <div className="mt-2 pt-2 border-t border-design-param-border">
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                      {filledEntries.map((k) => (
+                        <div key={k} className="flex items-center gap-1.5 bg-design-param-bg rounded-md px-2 py-1">
+                          <span className="text-design-param-label font-medium">{PARAM_LABELS[k]}:</span>
+                          <span className="text-design-param-value font-semibold">{String(entry.parameters![k])}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>

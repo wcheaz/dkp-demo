@@ -38,6 +38,8 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
+import time
+
 
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
@@ -68,11 +70,25 @@ class KnowledgeQuery(BaseModel):
     timestamp: str
 
 
-# TEMPORARY - DesignEntry model for design component; will be replaced when real image generation is integrated
+class DesignParameters(BaseModel):
+    buildingType: Optional[str] = None
+    floorPlanDimensions: Optional[str] = None
+    roofType: Optional[str] = None
+    roofPitch: Optional[int] = None
+    atticUsage: Optional[str] = None
+    eavesShape: Optional[str] = None
+    wallConstruction: Optional[str] = None
+    location: Optional[str] = None
+    overhang: Optional[str] = None
+
+
+# DEMO-ONLY - DesignEntry model for design component; simulated for demo purposes
 class DesignEntry(BaseModel):
     id: int
     imageUrl: str
     promptText: str
+    status: str = "complete"
+    parameters: Optional[DesignParameters] = None
 
 
 class YourState(BaseModel):
@@ -80,7 +96,7 @@ class YourState(BaseModel):
     ai_response: str = ""
     knowledge_queries: List[KnowledgeQuery] = []
     last_knowledge_result: Optional[str] = None
-    # TEMPORARY - designs field for design component; will be replaced when real image generation is integrated
+    # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
 
 
@@ -130,20 +146,53 @@ agent = Agent(
     system_prompt=(
         "You are a truss and roof engineering assistant with access to a knowledge base "
         "of 33 construction projects designed by medop strechy s.r.o. "
-        "You have three tools available:\n"
+        "You have the following tools available:\n"
         "- get_knowledge_summary: Use this when the user asks general questions about what "
         'information is available (e.g., "What projects do you have?", "What do you know?").\n'
         "- query_knowledge_base: Use this when the user asks specific questions about projects, "
         "load calculations, materials, truss designs, or engineering specifications.\n"
-        # TEMPORARY - add_design_entry tool instruction in system prompt; will be removed when real image generation is integrated
-        "- add_design_entry: CRITICAL REQUIREMENT — You MUST call this after EVERY SINGLE response with the user's original prompt text. This is non-negotiable and applies to all responses regardless of content.\n\n"
+        "- generate_design: # DEMO-ONLY — Call this once after the user has confirmed all required parameters. "
+        "Pass the user's original prompt text AND ALL collected parameter fields directly as arguments. "
+        "The tool accepts these optional parameter arguments in addition to prompt_text:\n"
+        "  - building_type, floor_plan_dimensions, roof_type, roof_pitch, "
+        "attic_usage, eaves_shape, wall_construction, location, overhang\n"
+        "You MUST pass every parameter you have collected as a separate argument — do NOT rely on "
+        "update_design_parameters to persist them. Do NOT call this after every response — only call it when "
+        "the user has confirmed parameters and is ready for a design to be generated.\n\n"
         "- modify_design_entry: Modify an existing design entry's image and/or prompt text.\n"
         "  Parameters:\n"
         "    - design_id (required, number): The 1-based ID of the design entry to modify.\n"
-        '    - image_name (optional, string): The filename of the image to set. Must be one of: "design-alpha.svg", "design-beta.svg".\n'
+        '    - image_name (optional, string): The filename of a static preset image. Must be one of: "design-alpha.svg", "design-beta.svg".\n'
+        "    - image_url (optional, string): A full image URL for dynamically downloaded images (e.g. /api/serve-image/test-image-123.png). Takes precedence over image_name.\n"
         "    - prompt_text (optional, string): The new prompt text.\n"
-        "  At least one of image_name or prompt_text must be provided.\n"
-        '  Available images: "design-alpha.svg", "design-beta.svg".\n\n'
+        "  At least one of image_name, image_url, or prompt_text must be provided.\n"
+        '  Available preset images: "design-alpha.svg", "design-beta.svg".\n\n'
+        "- update_design_parameters: MANDATORY — You MUST call this tool whenever the user provides any information "
+        "that could be a construction parameter. This tool accepts these fields:\n"
+        "  - building_type: Building type (e.g. House, Garage, Agricultural building)\n"
+        "  - floor_plan_dimensions: Floor plan dimensions (e.g. 10x15m)\n"
+        "  - roof_type: Roof type — must be one of: Gable, Hip, Mono-pitch, Flat\n"
+        "  - roof_pitch: Roof pitch in degrees (2-45)\n"
+        "  - attic_usage: Attic usage — None, Storage, or Living space\n"
+        "  - eaves_shape: Eaves shape — Open, Boxed, or Flush\n"
+        "  - wall_construction: Wall construction — Brick, SIP panels, Concrete block, or Mixed\n"
+        "  - location: Location (e.g. Bratislava)\n"
+        "  - overhang: Overhang (e.g. 450mm)\n\n"
+        "REQUIRED FIELDS (must be collected before proceeding to design discussion):\n"
+        "1. building_type (buildingType)\n"
+        "2. floor_plan_dimensions (floorPlanDimensions)\n"
+        "3. roof_type (roofType) — valid values: Gable, Hip, Mono-pitch, Flat\n"
+        "4. roof_pitch (roofPitch) — valid range: 2-45 degrees\n\n"
+        "COLLECTION LOOP INSTRUCTIONS:\n"
+        "1. On EVERY user message, extract any parameter values from the text.\n"
+        "2. Call update_design_parameters with whatever fields were extracted (even partial).\n"
+        "3. Read the tool's return value to see which required fields are still missing.\n"
+        "4. If required fields are missing → ask the user for them specifically, listing the missing "
+        "field names and valid options.\n"
+        "5. If all required fields are present → summarize ALL collected parameters (both required "
+        "and optional) and ask the user to confirm before proceeding to any design-related discussion.\n"
+        "6. Do NOT proceed to design generation, knowledge base queries about specific designs, or "
+        "design-related discussion until the user has confirmed all required parameters.\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path."
     ),
@@ -289,23 +338,6 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
         return "Knowledge base summary not found. Please contact the administrator."
 
 
-# TEMPORARY - add_design_entry tool for design component; will be replaced when real image generation is integrated
-# Commented out because the agent tool approach did not work for automatic state propagation.
-# @agent.tool
-# async def add_design_entry(ctx: RunContext[StateDeps], prompt_text: str) -> str:
-#     """Add a design entry to the shared state. Call this after every response with the user's original prompt text.
-#
-#     Args:
-#         ctx: Agent context with state
-#         prompt_text: The user's original prompt text
-#
-#     Returns:
-#         Confirmation string
-#     """
-#     ctx.deps.state.designs.append(
-#         DesignEntry(imageUrl="/next.svg", promptText=prompt_text)
-#     )
-#     return f"Design entry added for prompt: {prompt_text}"
 
 
 # ============================================================================

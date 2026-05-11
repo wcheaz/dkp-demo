@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "iteration": 7,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/k8s-microk8s-multipass-setup/tasks.md",
+  "promptFile": "/home/ncheaz/git/dkp-demo/openspec/changes/k8s-microk8s-multipass-setup/.ralph/PRD.md",
+  "promptTemplate": "/home/ncheaz/git/dkp-demo/openspec/changes/k8s-microk8s-multipass-setup/.ralph/prompt-template.md",
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-04-23T02:56:58.695Z",
+  "resumedAt": "2026-04-23T02:56:58.695Z",
+  "completedAt": "2026-04-23T02:59:32.173Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise"
+}

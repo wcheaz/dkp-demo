@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none" stroke="#1a1a2e" stroke-width="2">
+  <rect x="60" y="180" width="280" height="4" fill="#1a1a2e" stroke="none"/>
+  <line x1="60" y1="180" x2="200" y2="60"/>
+  <line x1="340" y1="180" x2="200" y2="60"/>
+  <line x1="60" y1="180" x2="340" y2="180"/>
+  <line x1="200" y1="60" x2="200" y2="180" stroke-dasharray="6,4" stroke="#555"/>
+  <line x1="60" y1="180" x2="200" y2="120"/>
+  <line x1="340" y1="180" x2="200" y2="120"/>
+  <line x1="130" y1="120" x2="200" y2="60"/>
+  <line x1="270" y1="120" x2="200" y2="60"/>
+  <line x1="130" y1="120" x2="270" y2="120"/>
+  <circle cx="60" cy="180" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="340" cy="180" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="200" cy="60" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="200" cy="120" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="130" cy="120" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="270" cy="120" r="4" fill="#1a1a2e" stroke="none"/>
+  <circle cx="200" cy="180" r="4" fill="#1a1a2e" stroke="none"/>
+  <text x="200" y="230" text-anchor="middle" font-family="monospace" font-size="14" fill="#555" stroke="none">Gable Truss</text>
+</svg>
