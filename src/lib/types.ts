@@ -37,5 +37,4 @@ export interface DesignParameters {
 // Uncomment the procurement_codes field below if restoring procurement functionality.
 export type AgentState = {
   designs: DesignEntry[];
-  parameters: DesignParameters;
 };

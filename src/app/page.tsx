@@ -288,7 +288,6 @@ function YourMainContent() {
     name: "my_agent",
     initialState: {
       designs: [],
-      parameters: {},
     },
   });
 
@@ -326,14 +325,12 @@ function YourMainContent() {
       const currentState = state;
       const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const roofType = currentState.parameters?.roofType ?? "";
-      const roofImage = ROOF_TYPE_IMAGE_MAP[roofType] ?? "/design-gable.svg";
+      const roofImage = "/design-gable.svg";
       const newEntry = {
         id: nextId,
         imageUrl: "/design-gable.svg",
         promptText: prompt_text,
         status: "processing" as const,
-        parameters: { ...(currentState.parameters ?? {}) },
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);
@@ -430,10 +427,8 @@ function YourMainContent() {
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
     ],
     handler({ building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang }) {
-      const currentState = state;
-      const current = currentState.parameters ?? {};
-      const updated = { ...current };
       const updatedFields: string[] = [];
+      const updated: Record<string, unknown> = {};
 
       if (building_type !== undefined) { updated.buildingType = building_type; updatedFields.push("buildingType"); }
       if (floor_plan_dimensions !== undefined) { updated.floorPlanDimensions = floor_plan_dimensions; updatedFields.push("floorPlanDimensions"); }
@@ -445,21 +440,8 @@ function YourMainContent() {
       if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
       if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
 
-      const currentDesigns = currentState.designs ?? [];
-      const backfilledDesigns = currentDesigns.map((entry) => {
-        const entryParams = entry.parameters;
-        const hasFilledParams = entryParams && Object.values(entryParams).some((v) => v != null && v !== "");
-        if (!hasFilledParams) {
-          return { ...entry, parameters: { ...updated } };
-        }
-        return entry;
-      });
-
-      const newState = { ...currentState, parameters: updated, designs: backfilledDesigns };
-      setState(newState);
-
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
-      const missingRequired = requiredFields.filter((f) => !updated[f as keyof typeof updated]);
+      const missingRequired = requiredFields.filter((f) => !updated[f]);
 
       let summary = `Updated fields: ${updatedFields.length > 0 ? updatedFields.join(", ") : "none"}. `;
       summary += missingRequired.length > 0
@@ -474,7 +456,7 @@ function YourMainContent() {
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify({ designs, parameters: state.parameters }),
+    value: JSON.stringify({ designs }),
   });
 
   return (

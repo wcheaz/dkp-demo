@@ -5,7 +5,7 @@
 
 ## 2. Frontend: Remove global parameters from AgentState
 
-- [ ] 2.1 Remove the `parameters: DesignParameters` field from the `AgentState` type in `src/lib/types.ts`. Remove `parameters: {}` from the `useCoAgent` `initialState` object in `src/app/page.tsx`. Update the `useCopilotReadable` call to serialize only `designs` (remove `parameters: state.parameters`). Remove any remaining references to `state.parameters` in `src/app/page.tsx`.
+- [x] 2.1 Remove the `parameters: DesignParameters` field from the `AgentState` type in `src/lib/types.ts`. Remove `parameters: {}` from the `useCoAgent` `initialState` object in `src/app/page.tsx`. Update the `useCopilotReadable` call to serialize only `designs` (remove `parameters: state.parameters`). Remove any remaining references to `state.parameters` in `src/app/page.tsx`.
   - Done when: `AgentState` has exactly one field (`designs: DesignEntry[]`); `useCoAgent` `initialState` has no `parameters` key; `useCopilotReadable` `value` does not reference `state.parameters`; `npm run lint` passes.
 
 ## 3. Frontend: Rewrite generate_design to accept parameters directly
