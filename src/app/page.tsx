@@ -47,6 +47,10 @@ export default function CopilotKitPage() {
             title: "What's the price?",
             message: "What's the price?",
           },
+          {
+            title: "Clear designs.",
+            message: "Clear the current designs.",
+          },
         ]}
         Input={CustomInput}
       >
