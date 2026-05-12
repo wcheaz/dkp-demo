@@ -36,7 +36,7 @@
 
 ## 3. reset_design Frontend Tool
 
-- [ ] 3.1 Implement `reset_design` frontend tool — partial reset and full scrap
+- [x] 3.1 Implement `reset_design` frontend tool — partial reset and full scrap
 
   Add a new `useFrontendTool` registration for `reset_design` in `src/app/page.tsx` (after the existing `update_design_parameters` tool). The tool accepts five optional parameters:
   - `design_ids` (number array) — IDs to reset; omit = all designs

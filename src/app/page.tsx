@@ -510,6 +510,122 @@ function YourMainContent() {
 
   // END DEMO-ONLY
 
+  useFrontendTool({
+    name: "reset_design",
+    parameters: [
+      { name: "design_ids", type: "number[]", description: "IDs to reset; omit to target all designs", required: false },
+      { name: "remove_designs", type: "boolean", description: "true = remove entries entirely (full scrap). Default false = partial reset.", required: false },
+      { name: "clear_parameters", type: "string[]", description: "Param keys to set to '---' on targeted entries", required: false },
+      { name: "clear_all_parameters", type: "boolean", description: "Set ALL entry params to '---'. Takes precedence over clear_parameters.", required: false },
+      { name: "clear_session_parameters", type: "string[]", description: "Param keys to clear from session-level AgentState.parameters", required: false },
+    ],
+    handler({ design_ids, remove_designs, clear_parameters, clear_all_parameters, clear_session_parameters }) {
+      const ALL_PARAM_KEYS = [
+        "buildingType", "floorPlanDimensions", "roofType", "roofPitch",
+        "atticUsage", "eavesShape", "wallConstruction", "location", "overhang",
+      ] as const;
+
+      const currentDesigns = latestStateRef.current.designs ?? [];
+      const validIds = currentDesigns.map((d) => d.id);
+
+      if (clear_parameters && clear_parameters.length > 0) {
+        const invalid = clear_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        if (invalid.length > 0) {
+          return `Error: invalid parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
+        }
+      }
+
+      if (clear_session_parameters && clear_session_parameters.length > 0) {
+        const invalid = clear_session_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        if (invalid.length > 0) {
+          return `Error: invalid session parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
+        }
+      }
+
+      let targetIds = design_ids;
+      if (targetIds && targetIds.length > 0) {
+        const notFound = targetIds.filter((id) => !validIds.includes(id));
+        if (notFound.length > 0) {
+          return `Error: design IDs not found: ${notFound.join(", ")}. Valid IDs: [${validIds.join(", ")}].`;
+        }
+      } else {
+        targetIds = validIds;
+      }
+
+      let updatedDesigns = currentDesigns;
+      let summary = "";
+
+      if (remove_designs) {
+        updatedDesigns = currentDesigns.filter((d) => !targetIds!.includes(d.id));
+        const removedIds = targetIds!;
+        summary = `Removed ${removedIds.length} design entry${removedIds.length !== 1 ? "s" : ""} entirely.`;
+      } else {
+        updatedDesigns = currentDesigns.map((d) => {
+          if (!targetIds!.includes(d.id)) return d;
+          if (!clear_all_parameters && (!clear_parameters || clear_parameters.length === 0)) return d;
+
+          const existing = d.parameters ?? {};
+          const keysToClear = clear_all_parameters
+            ? [...ALL_PARAM_KEYS]
+            : clear_parameters!;
+          const newParams = { ...existing };
+          for (const key of keysToClear) {
+            (newParams as Record<string, string>)[key] = "---";
+          }
+          return { ...d, parameters: newParams };
+        });
+
+        const clearedKeys = clear_all_parameters
+          ? "all parameters"
+          : clear_parameters!.join(", ");
+        const targetedEntries = targetIds!.map((id) => currentDesigns.find((d) => d.id === id)).filter(Boolean);
+        const preservedParts: string[] = [];
+        for (const entry of targetedEntries) {
+          if (!entry?.parameters) continue;
+          const preservedKeys = Object.entries(entry.parameters)
+            .filter(([k, v]) => v != null && v !== "" && v !== "---" && !((clear_all_parameters || clear_parameters!.includes(k))))
+            .map(([k, v]) => `${k}=${v}`);
+          if (preservedKeys.length > 0) {
+            preservedParts.push(preservedKeys.join(", "));
+          }
+        }
+        summary = `Reset ${targetIds!.length} design entry${targetIds!.length !== 1 ? "s" : ""} (ID${targetIds!.length !== 1 ? "s" : ""}: ${targetIds!.join(", ")}). Cleared parameters: ${clearedKeys}.`;
+        if (preservedParts.length > 0) {
+          summary += ` Preserved parameters: ${preservedParts.join("; ")}.`;
+        }
+      }
+
+      let sessionSummary = "";
+      if (clear_session_parameters && clear_session_parameters.length > 0) {
+        const currentState = latestStateRef.current;
+        const currentParams = currentState.parameters ?? {};
+        const newParams = { ...currentParams };
+        for (const key of clear_session_parameters) {
+          delete (newParams as Record<string, unknown>)[key];
+        }
+        const newState = { ...currentState, designs: updatedDesigns, parameters: newParams };
+        setState(newState);
+        latestStateRef.current = newState;
+
+        const remaining = Object.entries(newParams)
+          .filter(([, v]) => v != null && v !== "")
+          .map(([k, v]) => `${k}=${v}`);
+        sessionSummary = ` Cleared session parameters: ${clear_session_parameters.join(", ")}.`;
+        if (remaining.length > 0) {
+          sessionSummary += ` Remaining session parameters: ${remaining.join(", ")}.`;
+        } else {
+          sessionSummary += " No session parameters remaining.";
+        }
+      } else {
+        const newState = { ...latestStateRef.current, designs: updatedDesigns };
+        setState(newState);
+        latestStateRef.current = newState;
+      }
+
+      return (summary + sessionSummary).trim();
+    },
+  });
+
   useCopilotReadable({
     description: "The application state data - customize this for your application",
     value: JSON.stringify({ designs, parameters: state.parameters }),
