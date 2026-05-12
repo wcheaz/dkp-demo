@@ -26,6 +26,15 @@ const ALL_PARAM_KEYS: (keyof DesignParameters)[] = [
   "overhang",
 ];
 
+function isIncomplete(value: string | number | undefined): boolean {
+  return value === undefined || value === null || value === "" || value === "---";
+}
+
+function hasIncompleteParameters(params: DesignParameters | undefined): boolean {
+  if (!params) return true;
+  return ALL_PARAM_KEYS.some((k) => isIncomplete(params[k]));
+}
+
 export interface DesignComponentProps {
   state: AgentState;
   setState: (state: AgentState) => void;
@@ -79,6 +88,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     <div className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
                     <p className="mt-3 text-sm text-gray-300">Generating truss structure...</p>
                   </div>
+                ) : hasIncompleteParameters(entry.parameters) ? (
+                  <img
+                    src="/design-in-progress.svg"
+                    alt="Design In Progress"
+                    className="w-[55%] h-[27vh] object-contain"
+                  />
                 ) : (
                   <img
                     src={entry.imageUrl}

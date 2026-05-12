@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect x="40" y="40" width="320" height="220" rx="12" stroke="#555" stroke-width="2" stroke-dasharray="8,4"/>
+  <line x1="160" y1="120" x2="200" y2="80" stroke="#555" stroke-width="2"/>
+  <line x1="240" y1="120" x2="200" y2="80" stroke="#555" stroke-width="2"/>
+  <line x1="160" y1="120" x2="240" y2="120" stroke="#555" stroke-width="2"/>
+  <line x1="130" y1="180" x2="160" y2="120" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="270" y1="180" x2="240" y2="120" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="130" y1="180" x2="270" y2="180" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <circle cx="200" cy="80" r="3" fill="#555"/>
+  <circle cx="160" cy="120" r="3" fill="#555"/>
+  <circle cx="240" cy="120" r="3" fill="#555"/>
+  <circle cx="130" cy="180" r="2.5" fill="#777"/>
+  <circle cx="270" cy="180" r="2.5" fill="#777"/>
+  <text x="200" y="230" text-anchor="middle" font-family="monospace" font-size="16" fill="#777">Design In Progress</text>
+</svg>

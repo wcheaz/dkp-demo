@@ -16,7 +16,7 @@
 
 ## 2. Design In Progress Placeholder
 
-- [ ] 2.1 Create placeholder SVG and update DesignComponent to gate image on parameter completeness
+- [x] 2.1 Create placeholder SVG and update DesignComponent to gate image on parameter completeness
 
   Create `public/design-in-progress.svg` — a placeholder image displaying "Design In Progress" with muted styling consistent with the design card aesthetic.
 
