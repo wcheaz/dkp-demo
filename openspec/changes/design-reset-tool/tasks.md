@@ -82,7 +82,7 @@
 
 ## 4. Agent System Prompt
 
-- [ ] 4.1 Add `reset_design` documentation to agent system prompt
+- [x] 4.1 Add `reset_design` documentation to agent system prompt
 
   Add a `- reset_design:` section to the system prompt string in `agent/src/agent.py`, after the existing `- update_design_parameters:` section and in the same tool documentation block as `modify_design_entry`. Include parameter descriptions, the valid parameter field names, and usage rules distinguishing partial reset from full scrap. Note that the UI automatically shows a "Design In Progress" placeholder image when fields are cleared to `"---"`.
 
