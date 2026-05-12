@@ -491,7 +491,11 @@ function YourMainContent() {
       if (updatedFields.length > 0) {
         const currentState = latestStateRef.current;
         const newParameters = { ...currentState.parameters, ...updated };
-        const newState = { ...currentState, parameters: newParameters };
+        const updatedDesigns = (currentState.designs ?? []).map((d) => ({
+          ...d,
+          parameters: { ...(d.parameters ?? {}), ...updated },
+        }));
+        const newState = { ...currentState, parameters: newParameters, designs: updatedDesigns };
         setState(newState);
         latestStateRef.current = newState;
       }
@@ -559,10 +563,9 @@ function YourMainContent() {
         updatedDesigns = currentDesigns.filter((d) => !targetIds!.includes(d.id));
         const removedIds = targetIds!;
         summary = `Removed ${removedIds.length} design entry${removedIds.length !== 1 ? "s" : ""} entirely.`;
-      } else {
+      } else if (clear_all_parameters || (clear_parameters && clear_parameters.length > 0)) {
         updatedDesigns = currentDesigns.map((d) => {
           if (!targetIds!.includes(d.id)) return d;
-          if (!clear_all_parameters && (!clear_parameters || clear_parameters.length === 0)) return d;
 
           const existing = d.parameters ?? {};
           const keysToClear = clear_all_parameters
@@ -572,7 +575,7 @@ function YourMainContent() {
           for (const key of keysToClear) {
             (newParams as Record<string, string>)[key] = "---";
           }
-          return { ...d, parameters: newParams };
+          return { ...d, parameters: newParams, price: "---" };
         });
 
         const clearedKeys = clear_all_parameters

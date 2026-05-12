@@ -126,6 +126,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                         <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
                           <span className="text-design-price-label font-medium">Price:</span>
                           <span className="text-design-price-value font-semibold">{entry.price}</span>
+                          {entry.price !== "---" && (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="16"
@@ -138,6 +139,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                             <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="none" />
                             <text x="8" y="12" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">!</text>
                           </svg>
+                          )}
                         </div>
                       )}
                     </div>

@@ -97,8 +97,9 @@ The tool SHALL NOT modify `entry.imageUrl`. Image display is handled by the UI r
 When `remove_designs` is `false` (partial reset), the handler SHALL:
 1. Keep the targeted design entries in the list.
 2. Set specified parameter fields (via `clear_parameters` or `clear_all_parameters`) to `"---"`.
-3. Preserve all other parameter fields and `promptText`.
-4. The UI will automatically show the "Design In Progress" placeholder for entries with `"---"` fields.
+3. Set the `price` field on each targeted entry to `"---"`. Since cleared parameters invalidate the design, the price is also invalid and must be recalculated.
+4. Preserve all other parameter fields and `promptText`.
+5. The UI will automatically show the "Design In Progress" placeholder for entries with `"---"` fields.
 
 When `remove_designs` is `true` (full scrap), the handler SHALL:
 1. Remove the targeted design entries entirely from `AgentState.designs`.
@@ -106,13 +107,14 @@ When `remove_designs` is `true` (full scrap), the handler SHALL:
 
 #### Scenario: Partial reset — clear specific fields on a design entry
 
-- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", floorPlanDimensions: "10x15m", roofType: "Gable", location: "Bratislava" }`
+- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", floorPlanDimensions: "10x15m", roofType: "Gable", location: "Bratislava" }` and `price: "€1,752"`
 - **WHEN** the agent calls `reset_design` with `design_ids: [1]` and `clear_parameters: ["floorPlanDimensions", "roofType"]`
 - **THEN** design entry `#1` SHALL remain in the list
 - **AND** its `parameters.floorPlanDimensions` SHALL be `"---"`
 - **AND** its `parameters.roofType` SHALL be `"---"`
 - **AND** its `parameters.buildingType` SHALL remain `"House"`
 - **AND** its `parameters.location` SHALL remain `"Bratislava"`
+- **AND** its `price` SHALL be `"---"`
 - **AND** its `imageUrl` SHALL be unchanged (the UI will show the placeholder image because fields are `"---"`)
 - **AND** the handler SHALL return a summary listing cleared fields and preserved fields
 
@@ -138,10 +140,11 @@ When `remove_designs` is `true` (full scrap), the handler SHALL:
 
 #### Scenario: Clear all parameters on entries with clear_all_parameters
 
-- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", roofType: "Gable", location: "Bratislava" }`
+- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", roofType: "Gable", location: "Bratislava" }` and `price: "€1,752"`
 - **WHEN** the agent calls `reset_design` with `design_ids: [1]` and `clear_all_parameters: true`
 - **THEN** design entry `#1` SHALL remain in the list
 - **AND** ALL its parameter fields SHALL be set to `"---"`
+- **AND** its `price` SHALL be `"---"`
 
 #### Scenario: clear_all_parameters takes precedence over clear_parameters
 
@@ -158,9 +161,10 @@ When `remove_designs` is `true` (full scrap), the handler SHALL:
 
 #### Scenario: Compound reset — partial entry reset plus session clear
 
-- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", roofPitch: 35 }` and `AgentState.parameters` contains `{ buildingType: "House", roofPitch: 35 }`
+- **GIVEN** `AgentState` contains design entry `#1` with `parameters: { buildingType: "House", roofPitch: 35 }` and `price: "€2,100"` and `AgentState.parameters` contains `{ buildingType: "House", roofPitch: 35 }`
 - **WHEN** the agent calls `reset_design` with `design_ids: [1]`, `clear_parameters: ["roofPitch"]`, and `clear_session_parameters: ["roofPitch"]`
 - **THEN** design entry `#1` SHALL remain with `parameters.roofPitch` set to `"---"` and `parameters.buildingType` preserved as `"House"`
+- **AND** entry `#1` `price` SHALL be `"---"`
 - **AND** `AgentState.parameters.roofPitch` SHALL be removed
 - **AND** `AgentState.parameters.buildingType` SHALL remain `"House"`
 

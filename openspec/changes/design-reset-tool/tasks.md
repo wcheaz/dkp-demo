@@ -95,9 +95,34 @@
   Stop and hand off if:
   - The system prompt string has grown too long and the agent's tool selection accuracy degrades (flag for prompt engineering review)
 
-## 5. Verification
+## 5. Bugfix
 
-- [x] 5.1 Write tests for `reset_design` tool behavior
+- [x] 5.1 Fix `reset_design` crash when called with only `clear_session_parameters`
+
+  The handler crashed with `TypeError: Cannot read properties of undefined (reading 'join')` at the summary generation block when called with only `clear_session_parameters` and no `clear_parameters` or `clear_all_parameters`. The design entry modification code at line 565 correctly returned early for unmodified entries, but the summary generation at lines 578-580 ran unconditionally and called `clear_parameters!.join(", ")` on `undefined`.
+
+  Fix: changed the `else` branch to `else if (clear_all_parameters || (clear_parameters && clear_parameters.length > 0))` so the entire design modification + summary block is skipped when no entry parameters are being cleared. When neither condition is true, `updatedDesigns` remains as `currentDesigns` and `summary` stays empty — only the session parameter clearing block runs.
+
+  Done when:
+  - `reset_design` with only `clear_session_parameters` returns a session-only summary without crashing
+  - `reset_design` with only `clear_session_parameters` and no existing designs returns a session-only summary without crashing
+  - `reset_design` with `clear_parameters` still works as before
+  - `npm run build` passes
+
+- [x] 5.2 Reset price to `"---"` when design parameters are cleared
+
+  When `reset_design` clears parameter fields on a design entry (via `clear_parameters` or `clear_all_parameters`), the entry's `price` field SHALL also be set to `"---"`. This mirrors the "Design In Progress" placeholder image behavior: if parameters are incomplete, the price is also invalid and must be recalculated. The pricing info icon in the design card SHALL be hidden when `price === "---"` to prevent opening a stale breakdown modal.
+
+  Done when:
+  - `reset_design` with `clear_parameters` sets both the specified params and `price` to `"---"`
+  - `reset_design` with `clear_all_parameters` sets all params and `price` to `"---"`
+  - Design card shows `"---"` as the price value
+  - Design card hides the pricing info icon when `price === "---"`
+  - `npm run build` passes
+
+## 6. Verification
+
+- [x] 6.1 Write tests for `reset_design` tool behavior
 
   Create `test/test_reset_design.py` in the project `test/` directory. Test the core behavior scenarios from the spec.
 

@@ -65,6 +65,24 @@ A static SVG file at `public/design-in-progress.svg` SHALL exist as the placehol
 
 ## ADDED Requirements
 
+### Requirement: Price display hides info icon when placeholder
+
+When a design entry's `price` field is set to `"---"`, the `DesignComponent` SHALL display the price value as `"---"` but SHALL NOT render the pricing info icon (the circled `!` SVG). The info icon opens the pricing breakdown modal, which is not meaningful when the price is a placeholder.
+
+#### Scenario: Price placeholder shows value without info icon
+
+- **GIVEN** a design entry with `price: "---"`
+- **WHEN** the `DesignComponent` renders the price section
+- **THEN** the price value `"---"` SHALL be displayed
+- **AND** the pricing info icon SHALL NOT be rendered
+
+#### Scenario: Real price shows value with info icon
+
+- **GIVEN** a design entry with `price: "€1,752"`
+- **WHEN** the `DesignComponent` renders the price section
+- **THEN** the price value `"€1,752"` SHALL be displayed
+- **AND** the pricing info icon SHALL be rendered
+
 ### Requirement: design-in-progress.svg placeholder image file
 
 A static SVG file at `public/design-in-progress.svg` SHALL exist. The SVG SHALL display "Design In Progress" text centered within the image area, with styling consistent with the existing design card aesthetic (muted colors, similar dimensions to other design images).
