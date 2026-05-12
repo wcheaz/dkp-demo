@@ -97,7 +97,7 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Write tests for `reset_design` tool behavior
+- [x] 5.1 Write tests for `reset_design` tool behavior
 
   Create `test/test_reset_design.py` in the project `test/` directory. Test the core behavior scenarios from the spec.
 
