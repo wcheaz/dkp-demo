@@ -1,0 +1,1 @@
+/home/ncheaz/git/dkp-demo/openspec/changes/design-reset-tool/tasks.md

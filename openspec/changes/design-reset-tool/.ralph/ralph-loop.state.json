@@ -1,0 +1,28 @@
+{
+  "active": false,
+  "iteration": 2,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "blockedHandoffPromise": "BLOCKED_HANDOFF",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/design-reset-tool/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-05-12T16:43:54.343Z",
+  "resumedAt": "2026-05-12T16:44:13.360Z",
+  "completedAt": "2026-05-12T16:51:35.174Z",
+  "stoppedAt": null,
+  "exitReason": "completion_promise",
+  "pendingDirtyPaths": null,
+  "autoResolveHandoffs": {
+    "enabled": true,
+    "maxPerRun": 6,
+    "totalAttempts": 0,
+    "attempts": {},
+    "lastDecision": null
+  }
+}
