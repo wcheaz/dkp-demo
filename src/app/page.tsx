@@ -291,6 +291,7 @@ function YourMainContent() {
     name: "my_agent",
     initialState: {
       designs: [],
+      parameters: {},
     },
   });
 
@@ -487,6 +488,14 @@ function YourMainContent() {
       if (location !== undefined) { updated.location = location; updatedFields.push("location"); }
       if (overhang !== undefined) { updated.overhang = overhang; updatedFields.push("overhang"); }
 
+      if (updatedFields.length > 0) {
+        const currentState = latestStateRef.current;
+        const newParameters = { ...currentState.parameters, ...updated };
+        const newState = { ...currentState, parameters: newParameters };
+        setState(newState);
+        latestStateRef.current = newState;
+      }
+
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missingRequired = requiredFields.filter((f) => !updated[f]);
 
@@ -503,7 +512,7 @@ function YourMainContent() {
 
   useCopilotReadable({
     description: "The application state data - customize this for your application",
-    value: JSON.stringify({ designs }),
+    value: JSON.stringify({ designs, parameters: state.parameters }),
   });
 
   return (

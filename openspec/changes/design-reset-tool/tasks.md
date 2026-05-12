@@ -1,6 +1,6 @@
 ## 1. State Foundation
 
-- [ ] 1.1 Add `parameters` to `AgentState` and make `update_design_parameters` persist to state
+- [x] 1.1 Add `parameters` to `AgentState` and make `update_design_parameters` persist to state
 
   Add a `parameters?: DesignParameters` field to `AgentState` in `src/lib/types.ts`. Update the `update_design_parameters` handler in `src/app/page.tsx` to merge provided fields into `AgentState.parameters` via `setState`. Update the `useCopilotReadable` hook value from `{ designs }` to `{ designs, parameters }` so the agent can observe session-level parameters.
 
