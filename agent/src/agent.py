@@ -217,7 +217,16 @@ agent = Agent(
         "    - When the user says 'change X and Y but keep Z', call with clear_parameters: ['X', 'Y'] only — do not remove the design.\n"
         "    - After clearing fields, always confirm with the user what was cleared and what was preserved.\n\n"
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
-        "for specific technical queries. When providing answers, always cite the source document path."
+        "for specific technical queries. When providing answers, always cite the source document path.\n\n"
+        "OUTPUT STYLE — STRICT:\n"
+        "Do NOT expose internal reasoning, tool-selection logic, parameter-extraction steps, or "
+        "step-by-step thinking in your responses.\n"
+        "Do NOT narrate what you are doing (e.g. 'Let me check...', 'I will now call...', 'Based on the results...').\n"
+        "Instead, respond ONLY with the final design/design summary the user asked for.\n"
+        "When collecting missing parameters, ask concisely for the missing fields without explaining "
+        "why you need them or how you extracted previous ones.\n"
+        "When presenting a completed design, output a clean summary of all collected parameters and "
+        "the generated design — nothing else."
     ),
 )
 
