@@ -1,8 +1,8 @@
 export interface MaterialStats {
-  totalTrusses: number;
-  timberVolume: number;
-  totalJoints: number;
-  roofArea: number;
+  totalTrusses: number | "---";
+  timberVolume: number | "---";
+  totalJoints: number | "---";
+  roofArea: number | "---";
 }
 
 export interface DesignEntry {

@@ -289,11 +289,16 @@ const ROOF_TYPE_IMAGE_MAP: Record<string, string> = {
 // DEMO-ONLY: artificial delay for demo presentation
 const DESIGN_GENERATION_DELAY_MS = 3000;
 
+function isIncompleteParam(value: unknown): boolean {
+  return value === undefined || value === null || value === "" || value === "---";
+}
+
 function computeMaterialStats(parameters: Record<string, unknown>): MaterialStats | null {
   const dimStr = (parameters.floorPlanDimensions as string)?.trim();
-  if (!dimStr) return null;
+  if (!dimStr || isIncompleteParam(dimStr)) return null;
   const match = dimStr.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?/i);
   if (!match) return null;
+  if (isIncompleteParam(parameters.roofPitch)) return null;
   const width = parseFloat(match[1]);
   const height = parseFloat(match[2]);
   const floorArea = width * height;
@@ -337,24 +342,56 @@ function YourMainContent() {
   }
 
   // DEMO-ONLY: refs for simulated design generation timer
-  const generationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const processingIdsRef = useRef(new Set<number>());
   const latestStateRef = useRef(state);
   useEffect(() => { latestStateRef.current = state; });
 
   useEffect(() => {
-    return () => {
-      if (generationTimerRef.current) {
-        clearTimeout(generationTimerRef.current);
+    const currentDesigns = state.designs ?? [];
+    for (const entry of currentDesigns) {
+      if (entry.status === "processing" && !processingIdsRef.current.has(entry.id)) {
+        processingIdsRef.current.add(entry.id);
+        const roofImage = (entry.parameters?.roofType && ROOF_TYPE_IMAGE_MAP[entry.parameters.roofType]) || "/design-gable.svg";
+        const entryId = entry.id;
+        const params = entry.parameters ?? {};
+
+        setTimeout(() => {
+          const timerState = latestStateRef.current;
+          const stats = computeMaterialStats(params as Record<string, unknown>);
+          const updatedDesigns = (timerState.designs ?? []).map((d) =>
+            d.id === entryId
+              ? {
+                  ...d,
+                  status: "complete" as const,
+                  imageUrl: roofImage,
+                  materialStats: stats ?? {
+                    totalTrusses: "---",
+                    timberVolume: "---",
+                    totalJoints: "---",
+                    roofArea: "---",
+                  } as unknown as MaterialStats,
+                }
+              : d
+          );
+          const timerNewState = { ...timerState, designs: updatedDesigns };
+          setState(timerNewState);
+          latestStateRef.current = timerNewState;
+        }, DESIGN_GENERATION_DELAY_MS);
       }
-    };
-  }, []);
+    }
+  }, [state.designs]);
 
   // DEMO-ONLY: generate_design frontend tool for simulated design generation
   useFrontendTool({
     name: "generate_design",
+    description:
+      "Generate a new design entry. Call this IMMEDIATELY whenever the user wants, needs, or requests " +
+      "a design — even with partial parameters. Missing fields will show as placeholders. " +
+      "Do NOT wait for all parameters to be collected.",
     parameters: [
       {
         name: "prompt_text",
+        type: "string",
         description: "The user's original prompt text for the design",
         required: true,
       },
@@ -373,7 +410,6 @@ function YourMainContent() {
       const currentState = latestStateRef.current;
       const currentDesigns = currentState.designs ?? [];
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
-      const roofImage = (roof_type && ROOF_TYPE_IMAGE_MAP[roof_type]) || "/design-gable.svg";
 
       const parameters: Record<string, unknown> = {
         buildingType: building_type ?? "---",
@@ -393,26 +429,23 @@ function YourMainContent() {
         promptText: prompt_text,
         status: "processing" as const,
         parameters,
-        ...(price !== undefined ? { price } : {}),
+        price: price ?? "---",
+        materialStats: computeMaterialStats(parameters) ?? {
+          totalTrusses: "---",
+          timberVolume: "---",
+          totalJoints: "---",
+          roofArea: "---",
+        } as unknown as MaterialStats,
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };
       setState(newState);
       latestStateRef.current = newState;
 
-      generationTimerRef.current = setTimeout(() => {
-        const timerState = latestStateRef.current;
-        const stats = computeMaterialStats(parameters);
-        const updatedDesigns = (timerState.designs ?? []).map((d) =>
-          d.id === nextId
-            ? { ...d, status: "complete" as const, imageUrl: roofImage, materialStats: stats }
-            : d
-        );
-        const timerNewState = { ...timerState, designs: updatedDesigns };
-        setState(timerNewState);
-        latestStateRef.current = timerNewState;
-      }, DESIGN_GENERATION_DELAY_MS);
+      return `Design #${nextId} created. Missing fields show as placeholders.`;
     },
   });
+
+  // DEMO-ONLY: modify_design_entry frontend tool
   useFrontendTool({
     name: "modify_design_entry",
     parameters: [
@@ -518,7 +551,14 @@ function YourMainContent() {
         const newParameters = { ...currentState.parameters, ...updated };
         const updatedDesigns = (currentState.designs ?? []).map((d) => {
           const mergedParams = { ...(d.parameters ?? {}), ...updated };
-          const stats = d.status === "complete" ? computeMaterialStats(mergedParams) : d.materialStats;
+          const stats = d.status === "complete"
+            ? computeMaterialStats(mergedParams) ?? {
+                totalTrusses: "---",
+                timberVolume: "---",
+                totalJoints: "---",
+                roofArea: "---",
+              } as unknown as MaterialStats
+            : d.materialStats;
           return {
             ...d,
             parameters: mergedParams,

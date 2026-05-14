@@ -129,9 +129,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               </p>
               {(() => {
                 const filledEntries = entry.parameters
-                  ? ALL_PARAM_KEYS.filter(
-                      (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== "" && entry.parameters?.[k] !== "---"
-                    )
+                  ? ALL_PARAM_KEYS
                   : [];
                 if (filledEntries.length === 0 && !entry.price) return null;
                 return (
@@ -156,10 +154,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                             <div key={k} className="flex items-center gap-1.5 bg-design-material-bg rounded-md px-2 py-1">
                               <span className="text-design-material-label font-medium">{MATERIAL_STAT_LABELS[k]}:</span>
                               <span className="text-design-material-value font-semibold">
-                                {k === "timberVolume" || k === "roofArea"
-                                  ? entry.materialStats![k].toFixed(2)
-                                  : entry.materialStats![k]}
-                                {MATERIAL_STAT_UNITS[k]}
+                                {entry.materialStats![k] === "---"
+                                  ? "---"
+                                  : k === "timberVolume" || k === "roofArea"
+                                    ? (entry.materialStats![k] as number).toFixed(2)
+                                    : entry.materialStats![k]}
+                                {entry.materialStats![k] !== "---" && MATERIAL_STAT_UNITS[k]}
                               </span>
                             </div>
                           ))}
