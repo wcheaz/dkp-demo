@@ -375,23 +375,24 @@ function YourMainContent() {
       const nextId = Math.max(...currentDesigns.map((d) => d.id ?? 0), 0) + 1;
       const roofImage = (roof_type && ROOF_TYPE_IMAGE_MAP[roof_type]) || "/design-gable.svg";
 
-      const parameters: Record<string, unknown> = {};
-      if (building_type !== undefined) parameters.buildingType = building_type;
-      if (floor_plan_dimensions !== undefined) parameters.floorPlanDimensions = floor_plan_dimensions;
-      if (roof_type !== undefined) parameters.roofType = roof_type;
-      if (roof_pitch !== undefined) parameters.roofPitch = Number(roof_pitch);
-      if (attic_usage !== undefined) parameters.atticUsage = attic_usage;
-      if (eaves_shape !== undefined) parameters.eavesShape = eaves_shape;
-      if (wall_construction !== undefined) parameters.wallConstruction = wall_construction;
-      if (location !== undefined) parameters.location = location;
-      if (overhang !== undefined) parameters.overhang = overhang;
+      const parameters: Record<string, unknown> = {
+        buildingType: building_type ?? "---",
+        floorPlanDimensions: floor_plan_dimensions ?? "---",
+        roofType: roof_type ?? "---",
+        roofPitch: roof_pitch !== undefined ? Number(roof_pitch) : "---",
+        atticUsage: attic_usage ?? "---",
+        eavesShape: eaves_shape ?? "---",
+        wallConstruction: wall_construction ?? "---",
+        location: location ?? "---",
+        overhang: overhang ?? "---",
+      };
 
       const newEntry = {
         id: nextId,
         imageUrl: "/design-gable.svg",
         promptText: prompt_text,
         status: "processing" as const,
-        ...(Object.keys(parameters).length > 0 ? { parameters } : {}),
+        parameters,
         ...(price !== undefined ? { price } : {}),
       };
       const newState = { ...currentState, designs: [...currentDesigns, newEntry] };

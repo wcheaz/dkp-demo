@@ -130,7 +130,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
               {(() => {
                 const filledEntries = entry.parameters
                   ? ALL_PARAM_KEYS.filter(
-                      (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== ""
+                      (k) => entry.parameters?.[k] != null && entry.parameters?.[k] !== "" && entry.parameters?.[k] !== "---"
                     )
                   : [];
                 if (filledEntries.length === 0 && !entry.price) return null;
