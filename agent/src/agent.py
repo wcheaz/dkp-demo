@@ -36,18 +36,23 @@
 # - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, List, Optional
 import time
 
 
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, SystemPromptPart, ThinkingPart
+from pydantic_ai.models import ModelRequestParameters, StreamedResponse
 from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.providers.deepseek import DeepSeekProvider
+from pydantic_ai.settings import ModelSettings
 import os
 from dotenv import load_dotenv
-from typing import List, Optional
 
 KNOWLEDGE_BASE_DIR = (
     Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-english"
@@ -55,12 +60,49 @@ KNOWLEDGE_BASE_DIR = (
 
 load_dotenv(dotenv_path="../.env")
 
-model = OpenAIModel(
-    model_name=os.getenv("OPENAI_MODEL", "gpt-4"),
-    provider=OpenAIProvider(
-        base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-        api_key=os.getenv("OPENAI_API_KEY"),
-    ),
+
+class DeepSeekModel(OpenAIModel):
+    def _ensure_thinking_parts(self, messages: list[ModelMessage]) -> None:
+        for msg in messages:
+            if isinstance(msg, ModelResponse):
+                has_thinking = any(isinstance(p, ThinkingPart) for p in msg.parts)
+                if not has_thinking:
+                    msg.parts = [
+                        *msg.parts,
+                        ThinkingPart(
+                            content="reasoning content from this turn was not preserved",
+                            id="reasoning_content",
+                            provider_name="deepseek",
+                        ),
+                    ]
+
+    async def request(
+        self,
+        messages: list[ModelMessage],
+        model_settings: ModelSettings | None,
+        model_request_parameters: ModelRequestParameters,
+    ) -> ModelResponse:
+        self._ensure_thinking_parts(messages)
+        return await super().request(messages, model_settings, model_request_parameters)
+
+    @asynccontextmanager
+    async def request_stream(
+        self,
+        messages: list[ModelMessage],
+        model_settings: ModelSettings | None,
+        model_request_parameters: ModelRequestParameters,
+        run_context: Any | None = None,
+    ) -> AsyncIterator[StreamedResponse]:
+        self._ensure_thinking_parts(messages)
+        async with super().request_stream(
+            messages, model_settings, model_request_parameters, run_context
+        ) as stream:
+            yield stream
+
+
+model = DeepSeekModel(
+    os.getenv("OPENAI_MODEL", "deepseek-chat"),
+    provider=DeepSeekProvider(api_key=os.getenv("OPENAI_API_KEY")),
 )
 
 
