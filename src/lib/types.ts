@@ -1,3 +1,10 @@
+export interface MaterialStats {
+  totalTrusses: number;
+  timberVolume: number;
+  totalJoints: number;
+  roofArea: number;
+}
+
 export interface DesignEntry {
   id: number;
   imageUrl: string;
@@ -5,6 +12,7 @@ export interface DesignEntry {
   status?: "processing" | "complete";
   parameters?: DesignParameters;
   price?: string;
+  materialStats?: MaterialStats | null;
 }
 
 export interface DesignParameters {

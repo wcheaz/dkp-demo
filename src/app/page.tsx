@@ -11,7 +11,7 @@
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
 import { DesignComponent } from "@/components/design-component";
-import { AgentState } from "@/lib/types";
+import { AgentState, MaterialStats } from "@/lib/types";
 import {
   useCoAgent,
   useCopilotReadable,
@@ -32,7 +32,7 @@ export default function CopilotKitPage() {
         clickOutsideToClose={false}
         labels={{
           title: "Design Assistant",
-          initial: "Hi! I can help you generate and customize building designs. Tell me what you're looking to build and I'll walk you through it.",
+          initial: "Hi! I can help you generate and customize building designs. To get started, I'll need a few details: floor plan dimensions, building section, roof shape and layout, eaves shape, and attic usage.",
         }}
         suggestions={[
           {
@@ -289,6 +289,26 @@ const ROOF_TYPE_IMAGE_MAP: Record<string, string> = {
 // DEMO-ONLY: artificial delay for demo presentation
 const DESIGN_GENERATION_DELAY_MS = 3000;
 
+function computeMaterialStats(parameters: Record<string, unknown>): MaterialStats | null {
+  const dimStr = (parameters.floorPlanDimensions as string)?.trim();
+  if (!dimStr) return null;
+  const match = dimStr.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?/i);
+  if (!match) return null;
+  const width = parseFloat(match[1]);
+  const height = parseFloat(match[2]);
+  const floorArea = width * height;
+  const pitchDeg = Number(parameters.roofPitch) || 30;
+  const pitchRad = (pitchDeg * Math.PI) / 180;
+  const cosPitch = Math.cos(pitchRad);
+  const roofArea = cosPitch > 0.01 ? floorArea / cosPitch : floorArea;
+  return {
+    totalTrusses: Math.round(floorArea * 0.147),
+    timberVolume: Math.round(floorArea * 0.254 * 100) / 100,
+    totalJoints: Math.round(floorArea * 1.32),
+    roofArea: Math.round(roofArea * 100) / 100,
+  };
+}
+
 function YourMainContent() {
   // 🪁 Shared State: https://docs.copilotkit.ai/pydantic-ai/shared-state
   const { state, setState } = useCoAgent<AgentState>({
@@ -378,12 +398,12 @@ function YourMainContent() {
       setState(newState);
       latestStateRef.current = newState;
 
-      // DEMO-ONLY: simulate generation delay then resolve to complete
       generationTimerRef.current = setTimeout(() => {
         const timerState = latestStateRef.current;
+        const stats = computeMaterialStats(parameters);
         const updatedDesigns = (timerState.designs ?? []).map((d) =>
           d.id === nextId
-            ? { ...d, status: "complete" as const, imageUrl: roofImage }
+            ? { ...d, status: "complete" as const, imageUrl: roofImage, materialStats: stats }
             : d
         );
         const timerNewState = { ...timerState, designs: updatedDesigns };
@@ -495,10 +515,15 @@ function YourMainContent() {
       if (updatedFields.length > 0) {
         const currentState = latestStateRef.current;
         const newParameters = { ...currentState.parameters, ...updated };
-        const updatedDesigns = (currentState.designs ?? []).map((d) => ({
-          ...d,
-          parameters: { ...(d.parameters ?? {}), ...updated },
-        }));
+        const updatedDesigns = (currentState.designs ?? []).map((d) => {
+          const mergedParams = { ...(d.parameters ?? {}), ...updated };
+          const stats = d.status === "complete" ? computeMaterialStats(mergedParams) : d.materialStats;
+          return {
+            ...d,
+            parameters: mergedParams,
+            ...(stats !== undefined ? { materialStats: stats } : {}),
+          };
+        });
         const newState = { ...currentState, parameters: newParameters, designs: updatedDesigns };
         setState(newState);
         latestStateRef.current = newState;

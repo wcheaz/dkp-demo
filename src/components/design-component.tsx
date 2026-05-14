@@ -1,6 +1,27 @@
 import { useEffect, useState } from "react";
-import { AgentState, DesignParameters } from "@/lib/types";
+import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
+
+const MATERIAL_STAT_LABELS: Record<keyof MaterialStats, string> = {
+  totalTrusses: "Trusses",
+  timberVolume: "Timber Vol.",
+  totalJoints: "Joints",
+  roofArea: "Roof Area",
+};
+
+const MATERIAL_STAT_UNITS: Record<keyof MaterialStats, string> = {
+  totalTrusses: "",
+  timberVolume: " m\u00B3",
+  totalJoints: "",
+  roofArea: " m\u00B2",
+};
+
+const MATERIAL_STAT_KEYS: (keyof MaterialStats)[] = [
+  "totalTrusses",
+  "timberVolume",
+  "totalJoints",
+  "roofArea",
+];
 
 const PARAM_LABELS: Record<keyof DesignParameters, string> = {
   buildingType: "Building Type",
@@ -122,7 +143,31 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                           <span className="text-design-param-value font-semibold">{String(entry.parameters![k])}</span>
                         </div>
                       ))}
-                      {entry.price && (
+                    </div>
+                    {entry.materialStats && (
+                      <>
+                        <div className="flex items-center gap-2 my-2">
+                          <div className="flex-1 border-t border-design-material-border" />
+                          <span className="text-design-material-label text-xs font-medium tracking-wide uppercase">Material Estimate</span>
+                          <div className="flex-1 border-t border-design-material-border" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                          {MATERIAL_STAT_KEYS.map((k) => (
+                            <div key={k} className="flex items-center gap-1.5 bg-design-material-bg rounded-md px-2 py-1">
+                              <span className="text-design-material-label font-medium">{MATERIAL_STAT_LABELS[k]}:</span>
+                              <span className="text-design-material-value font-semibold">
+                                {k === "timberVolume" || k === "roofArea"
+                                  ? entry.materialStats![k].toFixed(2)
+                                  : entry.materialStats![k]}
+                                {MATERIAL_STAT_UNITS[k]}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {entry.price && (
+                      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                         <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
                           <span className="text-design-price-label font-medium">Price:</span>
                           <span className="text-design-price-value font-semibold">{entry.price}</span>
@@ -141,8 +186,8 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                           </svg>
                           )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}

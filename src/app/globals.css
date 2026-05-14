@@ -8,6 +8,10 @@
   --color-design-price-bg: rgba(34, 197, 94, 0.15);
   --color-design-price-label: #86efac;
   --color-design-price-value: #ffffff;
+  --color-design-material-bg: rgba(251, 191, 36, 0.25);
+  --color-design-material-label: #fbbf24;
+  --color-design-material-value: #ffffff;
+  --color-design-material-border: rgba(251, 191, 36, 0.5);
   --color-design-description-text: #f1f5f9;
   --color-design-description-bg: rgba(255, 255, 255, 0.08);
 }
