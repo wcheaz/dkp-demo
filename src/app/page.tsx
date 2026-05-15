@@ -11,6 +11,8 @@
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
 import { DesignComponent } from "@/components/design-component";
+import { LanguageToggle } from "@/components/language-toggle";
+import { LanguageProvider } from "@/i18n/language-provider";
 import { AgentState, MaterialStats } from "@/lib/types";
 import {
   useCoAgent,
@@ -25,42 +27,47 @@ import { read, utils } from "xlsx";
 
 export default function CopilotKitPage() {
   return (
-    <main>
-      <CopilotSidebar
-        defaultOpen={true}
-        disableSystemMessage={true}
-        clickOutsideToClose={false}
-        labels={{
-          title: "Design Assistant",
-          initial: "Hi! I can help you generate and customize building designs. To get started, I'll need a few details: floor plan dimensions, building section, roof shape and layout, eaves shape, and attic usage.",
-        }}
-        suggestions={[
-          {
-            title: "Generate a sample design",
-            message: "Generate a sample building design: a 10x12m house with a Gable roof at 30° pitch, Open eaves, Brick walls, located in Bratislava, with Storage attic and 450mm overhang.",
-          },
-          {
-            title: "How can you help me?",
-            message: "How can you help me?",
-          },
-          {
-            title: "What info do I need for a design?",
-            message: "What information do I need to generate a design?",
-          },
-          {
-            title: "What's the price?",
-            message: "What's the price?",
-          },
-          {
-            title: "Clear designs.",
-            message: "Clear the current designs.",
-          },
-        ]}
-        Input={CustomInput}
-      >
-        <YourMainContent />
-      </CopilotSidebar>
-    </main>
+    <LanguageProvider>
+      <main className="relative">
+        <div className="fixed top-0 right-0 z-50 p-2">
+          <LanguageToggle />
+        </div>
+        <CopilotSidebar
+          defaultOpen={true}
+          disableSystemMessage={true}
+          clickOutsideToClose={false}
+          labels={{
+            title: "Design Assistant",
+            initial: "Hi! I can help you generate and customize building designs. To get started, I'll need a few details: floor plan dimensions, building section, roof shape and layout, eaves shape, and attic usage.",
+          }}
+          suggestions={[
+            {
+              title: "Generate a sample design",
+              message: "Generate a sample building design: a 10x12m house with a Gable roof at 30° pitch, Open eaves, Brick walls, located in Bratislava, with Storage attic and 450mm overhang.",
+            },
+            {
+              title: "How can you help me?",
+              message: "How can you help me?",
+            },
+            {
+              title: "What info do I need for a design?",
+              message: "What information do I need to generate a design?",
+            },
+            {
+              title: "What's the price?",
+              message: "What's the price?",
+            },
+            {
+              title: "Clear designs.",
+              message: "Clear the current designs.",
+            },
+          ]}
+          Input={CustomInput}
+        >
+          <YourMainContent />
+        </CopilotSidebar>
+      </main>
+    </LanguageProvider>
   );
 }
 

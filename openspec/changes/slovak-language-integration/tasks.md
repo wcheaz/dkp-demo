@@ -20,7 +20,7 @@
 - [x] 2.1 Create `src/components/language-toggle.tsx` with `LanguageToggle` component. Renders EN/SK buttons in development, returns `null` in production. Uses `useLanguage()` hook. Active locale gets bold + underline. Verify by rendering in dev mode (shows buttons) and confirming production mode returns null.
   Done when: Component renders two buttons in dev, returns `null` in production, and clicking a button calls `setLocale`.
 
-- [ ] 2.2 Integrate `LanguageToggle` into the page header. Add to `src/app/page.tsx` or `src/app/layout.tsx` in the header area so it is visible at the top in development. Verify by running `npm run dev` and confirming the toggle appears in the header.
+- [x] 2.2 Integrate `LanguageToggle` into the page header. Add to `src/app/page.tsx` or `src/app/layout.tsx` in the header area so it is visible at the top in development. Verify by running `npm run dev` and confirming the toggle appears in the header.
   Done when: `npm run dev` shows EN/SK toggle in the page header area. `npm run build && npm start` does NOT show the toggle.
 
 ## 3. Layout and Metadata
