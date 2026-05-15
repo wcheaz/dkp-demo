@@ -1,0 +1,28 @@
+{
+  "active": false,
+  "iteration": 4,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "blockedHandoffPromise": "BLOCKED_HANDOFF",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo-with-specs/dkp-demo/openspec/changes/pydantic-ai-skill-integration/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-05-15T18:47:55.871Z",
+  "resumedAt": "2026-05-15T19:17:01.195Z",
+  "completedAt": null,
+  "stoppedAt": "2026-05-15T19:18:32.752Z",
+  "exitReason": "stalled",
+  "pendingDirtyPaths": null,
+  "autoResolveHandoffs": {
+    "enabled": true,
+    "maxPerRun": 6,
+    "totalAttempts": 0,
+    "attempts": {},
+    "lastDecision": null
+  }
+}

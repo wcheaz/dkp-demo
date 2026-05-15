@@ -1,0 +1,1 @@
+/home/ncheaz/git/dkp-demo-with-specs/dkp-demo/openspec/changes/pydantic-ai-skill-integration/tasks.md

@@ -9,6 +9,7 @@
     "dev:ui": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "start:all": "concurrently \"npm run start\" \"npm run dev:agent\" --names ui,agent --prefix-colors blue,green --kill-others",
     "lint": "eslint .",
     "install:agent": "./scripts/setup-agent.sh || scripts\\setup-agent.bat",
     "postinstall": "npm run install:agent"

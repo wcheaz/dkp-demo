@@ -17,6 +17,8 @@ dependencies = [
     "torch",
     "python-dotenv",
     "httpx",
+    "pydantic-ai-skills>=0.10.0",
+    "ag-ui-protocol",
 ]
 
 [tool.uv]

@@ -11,7 +11,7 @@ export interface DesignEntry {
   promptText: string;
   status?: "processing" | "complete";
   parameters?: DesignParameters;
-  price?: string;
+  price?: number | "---";
   materialStats?: MaterialStats | null;
 }
 
