@@ -71,6 +71,10 @@ Produce a checklist of the 4 **desirable fields** showing present vs missing:
 Only execute the tasks matching the classified intent. Skip others with a note:
 "Intent does not match — skipped."
 
+**Exception:** When design-generation produces a `"complete"` status (all 4
+desirable fields present), automatically execute the pricing calculation
+(step 4c) as well — even if `pricing-quote` was not in the classified intent.
+
 #### 4a — Knowledge summary (`knowledge-query/summary`)
 
 Read [the knowledge base summary](references/knowledge-summary-path.md) and
@@ -109,8 +113,8 @@ CZK costs:
 
 Roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
 
-total_eur = round(total_czk / 25)
-Output: "Estimated price: EUR {formatted_total} (excl. VAT)"
+total_gbp = round(total_czk / 30)
+Output: "Estimated price: £{formatted_total} (excl. VAT)"
 ```
 
 If `floor_plan_dimensions` was not extracted, output a message asking the user
@@ -124,7 +128,8 @@ Produce a design entry with:
 - All 9 parameter fields (extracted values or `---`)
 - Status: `"complete"` if all 4 desirable fields are present; otherwise
   `"Design In Progress"`
-- Price from step 4c if pricing was also requested
+- Price from step 4c — automatically compute if status is `"complete"` (all 4
+  desirable fields present); otherwise only if `pricing-quote` was also requested
 
 #### 4e — Design modification (`design-modification`)
 
@@ -145,8 +150,9 @@ Compose the final output following strict rules:
 2. **No narration** — forbidden: "Let me...", "I'll...", "Great!", "Based on...",
    "The design has been...", "Now generating...", etc. Output must read as a
    direct answer to the user, not a log of actions taken.
-3. **Chat-friendly formatting** — use standard markdown (headings, pipe tables,
-   bullet lists). Do NOT use reStructuredText-style underlines (`===`, `---`),
+3. **Chat-friendly formatting** — use standard markdown (headings, bullet lists).
+   Design summaries MUST use a bullet list (`- **Label:** value`) for all 9 fields.
+   Do NOT use pipe-delimited tables, reStructuredText-style underlines (`===`, `---`),
    horizontal rules made of dashes, boxed/bordered sections, or any formatting
    that resembles a standalone document/report. The response must look like a
    chat message, not a file.
@@ -154,7 +160,7 @@ Compose the final output following strict rules:
 
 | Form | When | Content |
 |---|---|---|
-| Design summary | Design was generated | Parameters table (9 fields), status, optional price |
+| Design summary | Design was generated | Bullet list of 9 fields (`- **Label:** value`), status, optional price |
 | Missing params question | Design triggered but desirable fields missing | Concise question listing only missing fields |
 | Direct answer | Knowledge query or general question | Answer with source citations (relative file paths) |
 

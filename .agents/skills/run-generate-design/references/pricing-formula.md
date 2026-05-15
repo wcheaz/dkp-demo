@@ -25,9 +25,9 @@ Input: floor_plan_dimensions (e.g. "10x15m"), roof_type, roof_pitch
 8. total_czk = (7920 + 171450 + 16500 + 2200) * factor
              = 198,070 * factor
 
-9. For Gable (factor=1.0): total_eur = round(198070 / 25) = 7,923
+9. For Gable (factor=1.0): total_gbp = round(198070 / 30) = 6,602
 
-10. Output: "Estimated price: EUR 7,923 (excl. VAT)"
+10. Output: "Estimated price: £6,602 (excl. VAT)"
 ```
 
 ## Example: 8x12m Hip roof
@@ -44,9 +44,9 @@ assembly = (14/20) * 15000 = 10,500
 hangers = 14 * 100 = 1,400
 
 total_czk = (5080 + 109728 + 10500 + 1400) * 1.3 = 164,710.4
-total_eur = round(164710.4 / 25) = 6,589
+total_gbp = round(164710.4 / 30) = 5,490
 
-Output: "Estimated price: EUR 6,589 (excl. VAT)"
+Output: "Estimated price: £5,490 (excl. VAT)"
 ```
 
 ## Missing dimensions

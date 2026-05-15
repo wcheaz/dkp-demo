@@ -283,7 +283,7 @@ async def generate_quote(
         building_type: Building type (default "Family house")
 
     Returns:
-        Formatted price string, e.g. "Estimated price: €1,752 (excl. VAT)"
+        Formatted price string, e.g. "Estimated price: £1,752 (excl. VAT)"
     """
     match = re.match(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?", floor_plan_dimensions.strip(), re.IGNORECASE)
     if not match:
@@ -311,10 +311,10 @@ async def generate_quote(
     factor = roof_type_factors.get(roof_type.strip().lower(), 1.0)
 
     total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
-    total_eur = round(total_czk / 25)
+    total_gbp = round(total_czk / 30)
 
-    formatted_eur = f"{total_eur:,}"
-    return f"Estimated price: €{formatted_eur} (excl. VAT)"
+    formatted_gbp = f"{total_gbp:,}"
+    return f"Estimated price: £{formatted_gbp} (excl. VAT)"
 
 
 @agent.tool

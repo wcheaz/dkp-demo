@@ -8,11 +8,25 @@ The system SHALL NOT include emoji or pictograph characters in any output.
 - **THEN** it SHALL NOT contain any emoji or pictograph characters
 
 ### Requirement: Output must use chat-friendly formatting
-The system SHALL format responses as standard markdown chat messages — using markdown headings (`##`), pipe-delimited tables, and bullet lists. The system SHALL NOT use reStructuredText-style underlines (`===`, `---`), horizontal rules made of dashes, boxed/bordered sections, or any formatting that resembles a standalone document or report file.
+The system SHALL format responses as standard markdown chat messages — using markdown headings (`##`) and bold-labeled key-value lines. The system SHALL NOT use reStructuredText-style underlines (`===`, `---`), horizontal rules made of dashes, boxed/bordered sections, pipe-delimited tables, or any formatting that resembles a standalone document or report file.
 
 #### Scenario: Design summary formatting
 - **WHEN** a design summary is produced
-- **THEN** it SHALL use a markdown heading, a pipe-delimited parameter table, and optional bullet-point notes — NOT underlines, dash borders, or document-style sections
+- **THEN** it SHALL use a markdown heading followed by a markdown bullet list. Each field SHALL be a separate bullet item formatted as `- **Label:** value`. All 9 fields SHALL be present (use `---` for missing values). Example:
+
+```
+## Design Summary
+
+- **Building type:** Family house
+- **Floor plan dimensions:** 10x15m
+- **Location:** Veľké Lovce
+- **Roof type:** Gable
+- **Roof pitch:** 35 deg
+- **Overhang:** 400mm
+- **Attic usage:** Living space
+- **Eaves shape:** Open
+- **Wall construction:** Brick
+```
 
 ### Requirement: Output must not narrate actions
 The system SHALL NOT include any text that describes what actions were taken, tools that were called, or information that was looked up.
@@ -22,11 +36,12 @@ The system SHALL NOT include any text that describes what actions were taken, to
 - **THEN** the output SHALL NOT contain any of: "Let me...", "I'll...", "I will...", "Great!", "Excellent!", "Based on...", "After checking...", "The design has been...", "Let me verify...", "I see there's...", "Now generating...", "Now creating..."
 
 ### Requirement: Output must be exactly one of three forms
-The system SHALL produce exactly one of: (1) a clean design summary with parameters table and optional price, (2) a concise question listing missing required parameters, or (3) a direct answer to the user's question.
+The system SHALL produce exactly one of: (1) a clean design summary with grouped labeled sections and optional price, (2) a concise question listing missing required parameters, or (3) a direct answer to the user's question.
 
 #### Scenario: Design summary output
 - **WHEN** a design was generated (with or without pricing)
-- **THEN** output SHALL be a parameters table showing all 9 fields (with values or `---`), plus the price if available
+- **THEN** output SHALL be a grouped labeled-section layout showing all 9 fields (with values or `---`), plus the price if available
+- **AND** the output MAY be followed by a single helpful closing sentence such as "Let me know if you'd like to adjust anything" or "Happy to refine the roof pitch if needed"
 
 #### Scenario: Missing parameter question output
 - **WHEN** a design was triggered but desirable fields are missing
