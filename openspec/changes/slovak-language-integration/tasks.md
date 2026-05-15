@@ -6,7 +6,7 @@
 - [x] 1.2 Create `src/i18n/messages/en.json` with English translations for all user-facing strings (sidebar, designs, pricing, alerts, metadata). Key structure: nested by component (`sidebar.*`, `designs.*`, `pricing.*`, `alerts.*`, `metadata.*`). Verify by confirming the file is valid JSON with no empty values.
   Done when: `node -e "const m = require('./src/i18n/messages/en.json'); console.log(Object.keys(m).join(','))"` prints section names and all leaf values are non-empty strings.
 
-- [ ] 1.3 Create `src/i18n/messages/sk.json` with Slovak translations using identical key structure to `en.json`. Slovak domain terms from the planning doc (väzník, pôdorys, rímsa, previs, etc.) MUST be used for domain vocabulary. Verify by confirming valid JSON and matching keys.
+- [x] 1.3 Create `src/i18n/messages/sk.json` with Slovak translations using identical key structure to `en.json`. Slovak domain terms from the planning doc (väzník, pôdorys, rímsa, previs, etc.) MUST be used for domain vocabulary. Verify by confirming valid JSON and matching keys.
   Done when: `node -e "const m = require('./src/i18n/messages/sk.json'); console.log(Object.keys(m).join(','))"` prints the same section names as `en.json`, and domain terms like "väzník" appear in values.
 
 - [ ] 1.4 Create `src/i18n/language-provider.tsx` with `LanguageProvider` component and `useLanguage` hook. Provider reads `localStorage('locale')` on mount, falls back to `data-default-locale` HTML attribute, exposes `locale`, `setLocale`, `isDevelopment`. `setLocale` persists to localStorage and sets `document.documentElement.lang`. Verify by rendering the provider in a test component and checking locale state changes.
