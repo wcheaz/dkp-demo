@@ -36,6 +36,10 @@ export default function CopilotKitPage() {
         }}
         suggestions={[
           {
+            title: "Generate a sample design",
+            message: "Generate a sample building design: a 10x12m house with a Gable roof at 30° pitch, Open eaves, Brick walls, located in Bratislava, with Storage attic and 450mm overhang.",
+          },
+          {
             title: "How can you help me?",
             message: "How can you help me?",
           },

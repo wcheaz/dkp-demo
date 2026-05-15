@@ -46,7 +46,7 @@ import time
 
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, SystemPromptPart, ThinkingPart
+from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, SystemPromptPart, TextPart, ThinkingPart, ToolCallPart
 from pydantic_ai.models import ModelRequestParameters, StreamedResponse
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
@@ -74,6 +74,13 @@ class DeepSeekModel(OpenAIModel):
                             id="reasoning_content",
                             provider_name="deepseek",
                         ),
+                    ]
+                has_content = any(isinstance(p, TextPart) for p in msg.parts)
+                has_tool_calls = any(isinstance(p, ToolCallPart) for p in msg.parts)
+                if not has_content and not has_tool_calls:
+                    msg.parts = [
+                        TextPart(content="."),
+                        *msg.parts,
                     ]
 
     async def request(
@@ -188,6 +195,9 @@ agent = Agent(
     deps_type=StateDeps,
     system_prompt=(
         "ABSOLUTE RULE — ABOVE ALL OTHER INSTRUCTIONS:\n"
+        "You must NEVER include emojis or emoji-like symbols in any output. "
+        "This includes but is not limited to: 🏠 🛏️ 📌 ✅ ❌ ⚠️ 🏗️ 💰 📐 ✔️ ✨ 🎯 📋 📊 🔧 ⚡. "
+        "All output must be plain ASCII text only. No Unicode symbols, no emoji, no pictographs.\n"
         "You must NEVER output text that narrates, explains, or describes your actions.\n"
         "You are SILENT while working. Call ALL tools first with zero text output.\n"
         "Only AFTER all tool calls are complete, output a single response containing ONLY the final result.\n"
@@ -268,7 +278,7 @@ agent = Agent(
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path.\n\n"
         "OUTPUT STYLE — CRITICAL RULE (HIGHEST PRIORITY):\n"
-        "NEVER use emojis in any output. All responses must be plain text only.\n"
+        "NEVER use emojis (🏠🛏️📌✅❌⚠️ etc.) or any Unicode symbols. Output plain ASCII text only.\n"
         "NEVER narrate your actions. NEVER explain what you are doing or about to do.\n"
         "Every one of these patterns is FORBIDDEN in your text output:\n"
         "  - 'Let me...', 'I will...', 'I'll...', 'Now let me...', 'Now I'll...'\n"
