@@ -12,7 +12,7 @@
 - [x] 1.4 Create `src/i18n/language-provider.tsx` with `LanguageProvider` component and `useLanguage` hook. Provider reads `localStorage('locale')` on mount, falls back to `data-default-locale` HTML attribute, exposes `locale`, `setLocale`, `isDevelopment`. `setLocale` persists to localStorage and sets `document.documentElement.lang`. Verify by rendering the provider in a test component and checking locale state changes.
   Done when: The file exports `LanguageProvider` and `useLanguage`, calling `setLocale('sk')` updates `localStorage.getItem('locale')` to `"sk"` and `document.documentElement.lang` to `"sk"`.
 
-- [ ] 1.5 Create `scripts/check-i18n-parity.mjs` that flattens and compares keys between `en.json` and `sk.json`. Missing keys in `sk.json` = exit 1. Add `"i18n:check": "node scripts/check-i18n-parity.mjs"` to `package.json` scripts. Verify by running `npm run i18n:check` — it should exit 0 with both complete dictionaries.
+- [x] 1.5 Create `scripts/check-i18n-parity.mjs` that flattens and compares keys between `en.json` and `sk.json`. Missing keys in `sk.json` = exit 1. Add `"i18n:check": "node scripts/check-i18n-parity.mjs"` to `package.json` scripts. Verify by running `npm run i18n:check` — it should exit 0 with both complete dictionaries.
   Done when: `npm run i18n:check` exits 0. Temporarily remove a key from `sk.json` and confirm it exits 1 with an error message, then restore the key.
 
 ## 2. Language Toggle Component
