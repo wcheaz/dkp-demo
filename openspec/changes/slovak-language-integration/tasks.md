@@ -52,7 +52,7 @@
 
 ## 6. Verification and Quality Gates
 
-- [ ] 6.1 Run `npm run i18n:check` and confirm both dictionaries have identical key structures. Run `npm run build` and confirm no TypeScript errors from translation key references. Run `npm run lint` and confirm no lint errors. Verify by running all three commands and confirming they exit 0.
+- [x] 6.1 Run `npm run i18n:check` and confirm both dictionaries have identical key structures. Run `npm run build` and confirm no TypeScript errors from translation key references. Run `npm run lint` and confirm no lint errors. Verify by running all three commands and confirming they exit 0.
   Done when: `npm run i18n:check`, `npm run build`, and `npm run lint` all exit 0.
 
 - [ ] 6.2 Visual parity check in development — run `npm run dev`, test in English (default), then toggle to Slovak. Verify: all labels/buttons/headings display in Slovak, no English bleed-through, no layout overflow from longer Slovak text, suggestion buttons wrap correctly, number formatting uses Slovak locale. Run `npm run build && npm start` and confirm the toggle is hidden and Slovak is the default.

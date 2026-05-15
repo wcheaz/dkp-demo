@@ -630,16 +630,17 @@ function YourMainContent() {
 
       const currentDesigns = latestStateRef.current.designs ?? [];
       const validIds = currentDesigns.map((d) => d.id);
+      const paramKeySet = new Set<string>(ALL_PARAM_KEYS);
 
       if (clear_parameters && clear_parameters.length > 0) {
-        const invalid = clear_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        const invalid = clear_parameters.filter((k) => !paramKeySet.has(k));
         if (invalid.length > 0) {
           return `Error: invalid parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
         }
       }
 
       if (clear_session_parameters && clear_session_parameters.length > 0) {
-        const invalid = clear_session_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        const invalid = clear_session_parameters.filter((k) => !paramKeySet.has(k));
         if (invalid.length > 0) {
           return `Error: invalid session parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
         }
