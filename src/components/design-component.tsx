@@ -131,7 +131,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                 const filledEntries = entry.parameters
                   ? ALL_PARAM_KEYS
                   : [];
-                if (filledEntries.length === 0 && !entry.price) return null;
+                if (filledEntries.length === 0 && entry.price == null) return null;
                 return (
                   <div className="mt-2 pt-2 border-t border-design-param-border">
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
@@ -170,7 +170,9 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                       <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                         <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
                           <span className="text-design-price-label font-medium">Price:</span>
-                          <span className="text-design-price-value font-semibold">{entry.price}</span>
+                          <span className="text-design-price-value font-semibold">
+                            {entry.price === "---" ? "---" : `\u00A3${entry.price.toLocaleString()}`}
+                          </span>
                           {entry.price !== "---" && (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +217,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
           open={true}
           onClose={() => setPricingModalIndex(null)}
           parameters={designs[pricingModalIndex].parameters ?? {}}
-          price={designs[pricingModalIndex].price ?? ""}
+          price={designs[pricingModalIndex].price ?? "---"}
         />
       )}
     </div>

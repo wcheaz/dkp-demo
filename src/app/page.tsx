@@ -408,7 +408,7 @@ function YourMainContent() {
       { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
       { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
-      { name: "price", type: "string", description: "Estimated price (e.g. €1,752)", required: false },
+      { name: "price", type: "number", description: "Estimated price in GBP (integer, excl. VAT)", required: false },
     ],
     handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang, price }) {
       const currentState = latestStateRef.current;
@@ -433,7 +433,7 @@ function YourMainContent() {
         promptText: prompt_text,
         status: "processing" as const,
         parameters,
-        price: price ?? "---",
+        price: (price as number | undefined) ?? ("---" as const),
         materialStats: computeMaterialStats(parameters) ?? {
           totalTrusses: "---",
           timberVolume: "---",
@@ -482,7 +482,7 @@ function YourMainContent() {
       {
         name: "price",
         type: "string",
-        description: "The estimated price to set (e.g. €1,752). Optional.",
+        description: "The estimated price to set (integer, GBP excl. VAT). Optional.",
         required: false,
       },
     ],
@@ -514,7 +514,7 @@ function YourMainContent() {
         ...updated[index],
         ...(imageUrl ? { imageUrl } : {}),
         ...(prompt_text ? { promptText: prompt_text } : {}),
-        ...(price !== undefined ? { price } : {}),
+        ...(price !== undefined ? { price: price as unknown as number } : {}),
       };
       const newState = { ...currentState, designs: updated };
       setState(newState);

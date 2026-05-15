@@ -14,7 +14,7 @@ export interface PricingBreakdown {
   roofType: string;
   roofTypeFactor: number;
   totalCZK: number;
-  totalEUR: number;
+  totalGBP: number;
 }
 
 const ROOF_TYPE_FACTORS: Record<string, number> = {
@@ -55,7 +55,7 @@ export function computePricingBreakdown(
   const subtotalCZK =
     gussetPlateCost + timberCost + assemblyCost + hangerCost;
   const totalCZK = subtotalCZK * roofTypeFactor;
-  const totalEUR = Math.round(totalCZK / 25);
+  const totalGBP = Math.round(totalCZK / 30);
 
   return {
     floorArea,
@@ -70,7 +70,7 @@ export function computePricingBreakdown(
     roofType: roofTypeStr,
     roofTypeFactor,
     totalCZK,
-    totalEUR,
+    totalGBP,
   };
 }
 
@@ -78,7 +78,7 @@ interface PricingBreakdownModalProps {
   open: boolean;
   onClose: () => void;
   parameters: DesignParameters;
-  price: string;
+  price: number | "---";
 }
 
 function fmt(n: number): string {
@@ -200,9 +200,9 @@ export function PricingBreakdownModal({
                 </td>
               </tr>
               <tr className="font-bold">
-                <td className="py-1.5 text-gray-100 underline decoration-dotted cursor-pointer" title="Total CZK ÷ 25 (CZK to EUR conversion rate)">Total (EUR)</td>
+                <td className="py-1.5 text-gray-100 underline decoration-dotted cursor-pointer" title="Total CZK &divide; 30 (CZK to GBP conversion rate)">Total (GBP)</td>
                 <td className="py-1.5 text-white text-right">
-                  &euro;{fmt(breakdown.totalEUR)}
+                  &pound;{fmt(breakdown.totalGBP)}
                 </td>
               </tr>
             </tbody>
@@ -214,9 +214,9 @@ export function PricingBreakdownModal({
           </p>
         )}
 
-        {price && (
+        {price != null && (
           <p className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-400">
-            Stored price: {price}
+            Stored price: {price === "---" ? "---" : `\u00A3${Number(price).toLocaleString()}`} (excl. VAT)
           </p>
         )}
       </div>

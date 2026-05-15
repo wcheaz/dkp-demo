@@ -27,7 +27,7 @@ When the intent is `pricing-quote`, the system SHALL compute the price using the
 - **THEN** compute: `floor_area = N * M`, `total_joints = round(floor_area * 1.32)`, `timber_volume = floor_area * 0.254`, `total_trusses = round(floor_area * 0.147)`
 - **THEN** compute CZK costs: `gusset_plates = joints * 40`, `timber = volume * 4500`, `assembly = (trusses/20) * 15000`, `hangers = trusses * 100`
 - **THEN** apply roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
-- **THEN** return `"Estimated price: £{formatted_total} (excl. VAT)"` where `total_gbp = round(total_czk / 30)`
+- **THEN** return the price as an integer (GBP, excl. VAT) where `total_gbp = round(total_czk / 30)`
 
 #### Scenario: Missing floor_plan_dimensions
 - **WHEN** `floor_plan_dimensions` was not extracted
