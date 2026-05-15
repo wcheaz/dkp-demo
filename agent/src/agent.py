@@ -268,6 +268,7 @@ agent = Agent(
         "Always use get_knowledge_summary first for overview questions, and query_knowledge_base "
         "for specific technical queries. When providing answers, always cite the source document path.\n\n"
         "OUTPUT STYLE — CRITICAL RULE (HIGHEST PRIORITY):\n"
+        "NEVER use emojis in any output. All responses must be plain text only.\n"
         "NEVER narrate your actions. NEVER explain what you are doing or about to do.\n"
         "Every one of these patterns is FORBIDDEN in your text output:\n"
         "  - 'Let me...', 'I will...', 'I'll...', 'Now let me...', 'Now I'll...'\n"
