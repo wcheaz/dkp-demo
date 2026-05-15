@@ -12,7 +12,7 @@
 
 import { DesignComponent } from "@/components/design-component";
 import { LanguageToggle } from "@/components/language-toggle";
-import { LanguageProvider } from "@/i18n/language-provider";
+import { LanguageProvider, useLanguage } from "@/i18n/language-provider";
 import { useTranslations } from "@/i18n/use-translations";
 import { AgentState, MaterialStats } from "@/lib/types";
 import {
@@ -344,6 +344,14 @@ function YourMainContent() {
       parameters: {},
     },
   });
+
+  const { locale } = useLanguage();
+
+  useEffect(() => {
+    setState((prev) =>
+      prev && prev.locale !== locale ? { ...prev, locale } : prev ?? { designs: [], parameters: {}, locale }
+    );
+  }, [locale, setState]);
 
   const designs = useMemo(() => {
     const d = state.designs ?? [];

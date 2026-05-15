@@ -47,4 +47,5 @@ export interface DesignParameters {
 export type AgentState = {
   designs: DesignEntry[];
   parameters?: DesignParameters;
+  locale?: string;
 };

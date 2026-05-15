@@ -47,7 +47,7 @@
 - [x] 5.1 Refactor `agent/src/agent.py` — extract the system prompt into a function `get_system_prompt(locale: str = "sk") -> str` that appends a language instruction based on locale (`"sk"` → "Respond in Slovak", `"en"` → "Respond in English", default → Slovak). Update the agent instantiation to call this function. The base prompt content remains unchanged. Verify by running `cd agent && python -m ruff check . && python -m mypy .` — both must exit 0.
   Done when: `get_system_prompt("sk")` returns a string containing "Slovak", `get_system_prompt("en")` returns a string containing "English". `ruff check` and `mypy` both pass.
 
-- [ ] 5.2 Forward frontend locale to the agent via CopilotKit context. The frontend's current locale (from `useLanguage()`) SHALL be passed to the backend agent so `get_system_prompt` receives the correct locale. Add the locale to the CopilotKit readable context or agent state. Verify by sending a message with locale "en" (agent responds in English) then toggling to "sk" (agent responds in Slovak).
+- [x] 5.2 Forward frontend locale to the agent via CopilotKit context. The frontend's current locale (from `useLanguage()`) SHALL be passed to the backend agent so `get_system_prompt` receives the correct locale. Add the locale to the CopilotKit readable context or agent state. Verify by sending a message with locale "en" (agent responds in English) then toggling to "sk" (agent responds in Slovak).
   Done when: The agent's response language matches the frontend's current locale setting. English prompts in English locale produce English responses. Slovak locale produces Slovak responses.
 
 ## 6. Verification and Quality Gates

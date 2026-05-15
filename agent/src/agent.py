@@ -151,6 +151,7 @@ class YourState(BaseModel):
     last_knowledge_result: Optional[str] = None
     # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
+    locale: str = "sk"
 
 
 # ============================================================================
@@ -234,8 +235,14 @@ agent = Agent(
             auto_reload=True,
         )
     ],
-    system_prompt=get_system_prompt(),
+    system_prompt=_BASE_PROMPT,
 )
+
+
+@agent.system_prompt
+def locale_instruction(ctx: RunContext[StateDeps]) -> str:
+    locale = ctx.deps.state.locale if ctx.deps.state.locale else "sk"
+    return _LANGUAGE_INSTRUCTIONS.get(locale, _LANGUAGE_INSTRUCTIONS["sk"])
 
 
 # ============================================================================
