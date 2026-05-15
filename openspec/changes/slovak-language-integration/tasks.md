@@ -39,7 +39,7 @@
 - [x] 4.3 Migrate `src/components/pricing-breakdown-modal.tsx` — replace all row labels, tooltips, modal title, fallback message, "Stored price:" label, "(excl. VAT)" suffix, and "Unknown" fallback with translation keys from `useTranslations('pricing')`. Switch `toLocaleString("en-US")` to `Intl.NumberFormat('sk-SK')`. Verify by opening the pricing modal in both locales.
   Done when: All hardcoded English strings in the modal are replaced. `toLocaleString("en-US")` no longer appears. Pricing modal displays correctly in both English and Slovak.
 
-- [ ] 4.4 Migrate `src/components/add-design-button.tsx` — replace `"Add Test Design"` button label and `"Test design #N"` text with translation keys. Verify by clicking the button in both locales.
+- [x] 4.4 Migrate `src/components/add-design-button.tsx` — replace `"Add Test Design"` button label and `"Test design #N"` text with translation keys. Verify by clicking the button in both locales.
   Done when: Button label changes when toggling locale. The `#N` counter still works correctly.
 
 ## 5. Agent Locale Awareness
