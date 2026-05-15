@@ -77,7 +77,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="w-4/5 p-6">
       <h2 className="text-2xl font-bold mb-4">Designs</h2>
 
       {designs.length === 0 ? (
