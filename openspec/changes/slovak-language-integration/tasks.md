@@ -17,7 +17,7 @@
 
 ## 2. Language Toggle Component
 
-- [ ] 2.1 Create `src/components/language-toggle.tsx` with `LanguageToggle` component. Renders EN/SK buttons in development, returns `null` in production. Uses `useLanguage()` hook. Active locale gets bold + underline. Verify by rendering in dev mode (shows buttons) and confirming production mode returns null.
+- [x] 2.1 Create `src/components/language-toggle.tsx` with `LanguageToggle` component. Renders EN/SK buttons in development, returns `null` in production. Uses `useLanguage()` hook. Active locale gets bold + underline. Verify by rendering in dev mode (shows buttons) and confirming production mode returns null.
   Done when: Component renders two buttons in dev, returns `null` in production, and clicking a button calls `setLocale`.
 
 - [ ] 2.2 Integrate `LanguageToggle` into the page header. Add to `src/app/page.tsx` or `src/app/layout.tsx` in the header area so it is visible at the top in development. Verify by running `npm run dev` and confirming the toggle appears in the header.
