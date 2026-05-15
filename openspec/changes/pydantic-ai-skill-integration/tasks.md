@@ -13,34 +13,46 @@
 - [x] 3.1 Run any existing test suite (`pytest` or equivalent) and confirm all tests pass. If no tests exist, start the agent and send a knowledge-base query (e.g., "What projects do you have?") confirming it responds correctly without loading the skill. Done when: agent responds with knowledge summary content.
 - [x] 3.2 Send a design-related message to the agent (e.g., "I need a truss for a 10m span roof") and confirm the agent calls `load_skill("run-generate-design")`, follows the decision-loop workflow, and produces a structured design response. Done when: the response contains the expected design output format and the agent loaded the skill during the conversation.
 
-## 4. Fix — ModuleNotFoundError for pydantic_ai_skills
+## 4. Fix — Verify in-worktree dependency install and import
 
-The agent process runs from `/home/ncheaz/git/dkp-demo/agent/` (main worktree) using its own `.venv`, but loads source code from `/home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/src/agent.py`. The `pydantic-ai-skills` package was installed only in the specs worktree venv, not in the main worktree venv where the process executes. Both `pyproject.toml` and `agent.py` must also be synced to the main worktree.
+The original `ModuleNotFoundError` occurred because the agent process loaded source from this worktree but used a venv from `/home/ncheaz/git/dkp-demo/`. Additionally, `pydantic-ai-skills` pulled in `pydantic-ai-slim==1.96.1` which does not include the `ag-ui-protocol` package needed by `agent.to_ag_ui()` in `main.py`. Both `pydantic-ai-skills` and `ag-ui-protocol` must be declared in `pyproject.toml`.
 
-- [ ] 4.1 Install `pydantic-ai-skills` in the main worktree venv and sync source code
+- [ ] 4.1 Verify `pydantic-ai-skills` and `ag-ui-protocol` are installed and importable in this worktree's venv
 
-  The main worktree at `/home/ncheaz/git/dkp-demo/` has its own `.venv` that does not contain `pydantic-ai-skills`. The source code at `/home/ncheaz/git/dkp-demo/agent/src/agent.py` also lacks the `SkillsCapability` import and constructor changes. Both must be fixed.
-
-  **Part A — Install dependency**: Run `cd /home/ncheaz/git/dkp-demo/agent && uv sync` to install `pydantic-ai-skills>=0.10.0` (already listed in `pyproject.toml` but not installed in this venv). If `pyproject.toml` in the main worktree does not contain `pydantic-ai-skills`, add it to the dependencies list first, then run `uv sync`.
-
-  **Part B — Sync source code**: Copy `agent/src/agent.py` from the specs worktree to the main worktree: `cp /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/src/agent.py /home/ncheaz/git/dkp-demo/agent/src/agent.py`. Also copy `agent/pyproject.toml` if the dependency is missing: `cp /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/pyproject.toml /home/ncheaz/git/dkp-demo/agent/pyproject.toml`. If other files were modified by this change (e.g., `agent/src/main.py`), sync those too.
+  Confirm that `agent/pyproject.toml` contains both `pydantic-ai-skills>=0.10.0` AND `ag-ui-protocol` in the `dependencies` list. Run `cd agent && uv sync` if either is missing from the venv. Verify all three critical imports work: `pydantic_ai_skills.SkillsCapability`, `ag_ui.core`, and `src.agent.agent`.
 
   **Done when:**
-  - `/home/ncheaz/git/dkp-demo/agent/.venv/bin/python -c "from pydantic_ai_skills import SkillsCapability"` exits with code 0
-  - `diff /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/src/agent.py /home/ncheaz/git/dkp-demo/agent/src/agent.py` shows no differences
-  - `diff /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/pyproject.toml /home/ncheaz/git/dkp-demo/agent/pyproject.toml` shows no differences
-  - `/home/ncheaz/git/dkp-demo/agent/.venv/bin/python -c "import ast; ast.parse(open('/home/ncheaz/git/dkp-demo/agent/src/agent.py').read())"` exits with code 0 (valid Python syntax)
+  - `agent/pyproject.toml` contains `pydantic-ai-skills>=0.10.0` in the `dependencies` list
+  - `agent/pyproject.toml` contains `ag-ui-protocol` in the `dependencies` list
+  - `agent/.venv/bin/python -c "from pydantic_ai_skills import SkillsCapability"` exits with code 0
+  - `agent/.venv/bin/python -c "from ag_ui.core import *"` exits with code 0
+  - `agent/.venv/bin/python -c "from src.agent import agent"` exits with code 0 (full agent module loads)
+  - `agent/.venv/bin/python -c "import ast; ast.parse(open('agent/src/agent.py').read())"` exits with code 0 (valid syntax)
 
-  **Stop and hand off if:** `uv sync` fails with a dependency conflict between `pydantic-ai-skills>=0.10.0` and the existing `pydantic-ai` version — document the exact error message and version numbers.
+  **Stop and hand off if:** `uv sync` fails with a dependency conflict between `pydantic-ai-skills>=0.10.0` and the existing `pydantic-ai-slim` version — document the exact error message and version numbers.
 
-- [ ] 4.2 Start the agent and verify it initializes without ModuleNotFoundError
+## Human Handoff — Cross-worktree sync
 
-  Start the agent process from `/home/ncheaz/git/dkp-demo/`. The agent MUST start without any `ModuleNotFoundError` or import errors. The uvicorn process MUST reach the "Application startup complete" log line. If the agent has a health endpoint or responds to WebSocket connections, confirm it accepts connections.
+> The following steps require access to `/home/ncheaz/git/dkp-demo/` (main worktree) which is outside the Ralph loop's workspace. These MUST be performed manually by the operator.
 
-  **Done when:**
-  - The agent process starts and logs no `ModuleNotFoundError` or `ImportError`
-  - The uvicorn log shows "Application startup complete" (or equivalent startup message)
-  - The agent is reachable (WebSocket connection accepted, or health endpoint returns 200)
-  - No traceback appears in the agent process output
+The agent process runs from the main worktree at `/home/ncheaz/git/dkp-demo/` using its own `.venv`. When the agent starts, it loads source from this specs worktree but resolves dependencies from the main worktree's venv. After the Ralph loop completes all checkbox tasks above, the operator MUST:
 
-  **Stop and hand off if:** The agent starts but throws a runtime error from `SkillsCapability` (e.g., the skill directory path does not resolve correctly from the main worktree, or `validate=True` fails because `.agents/skills/run-generate-design/SKILL.md` does not exist in the main worktree). Document the exact error and the resolved `SKILLS_DIR` path.
+1. **Sync source files** to the main worktree:
+   ```bash
+   cp /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/src/agent.py /home/ncheaz/git/dkp-demo/agent/src/agent.py
+   cp /home/ncheaz/git/dkp-demo-with-specs/dkp-demo/agent/pyproject.toml /home/ncheaz/git/dkp-demo/agent/pyproject.toml
+   ```
+
+2. **Install dependencies** in the main worktree's venv:
+   ```bash
+   cd /home/ncheaz/git/dkp-demo/agent && uv sync
+   ```
+
+3. **Verify** all imports work in the main worktree:
+   ```bash
+   /home/ncheaz/git/dkp-demo/agent/.venv/bin/python -c "from pydantic_ai_skills import SkillsCapability"
+   /home/ncheaz/git/dkp-demo/agent/.venv/bin/python -c "from ag_ui.core import *"
+   /home/ncheaz/git/dkp-demo/agent/.venv/bin/python -c "from src.agent import agent"
+   ```
+
+4. **Re-start the agent** and confirm no `ModuleNotFoundError` or `ImportError` appears.

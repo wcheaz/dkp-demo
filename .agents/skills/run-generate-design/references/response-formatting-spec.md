@@ -1,18 +1,25 @@
 ## ADDED Requirements
 
-### Requirement: Output must be plain ASCII only
-The system SHALL produce output containing only ASCII characters. No emojis, Unicode symbols, or pictographs are permitted.
+### Requirement: Output must not contain emojis
+The system SHALL NOT include emoji or pictograph characters in any output.
 
 #### Scenario: No emojis in output
 - **WHEN** the final response is composed
-- **THEN** it SHALL NOT contain any character outside the printable ASCII range (0x20-0x7E plus newlines)
+- **THEN** it SHALL NOT contain any emoji or pictograph characters
+
+### Requirement: Output must use chat-friendly formatting
+The system SHALL format responses as standard markdown chat messages — using markdown headings (`##`), pipe-delimited tables, and bullet lists. The system SHALL NOT use reStructuredText-style underlines (`===`, `---`), horizontal rules made of dashes, boxed/bordered sections, or any formatting that resembles a standalone document or report file.
+
+#### Scenario: Design summary formatting
+- **WHEN** a design summary is produced
+- **THEN** it SHALL use a markdown heading, a pipe-delimited parameter table, and optional bullet-point notes — NOT underlines, dash borders, or document-style sections
 
 ### Requirement: Output must not narrate actions
 The system SHALL NOT include any text that describes what actions were taken, tools that were called, or information that was looked up.
 
 #### Scenario: Forbidden narration patterns
 - **WHEN** composing the final response
-- **THEN** the output SHALL NOT contain any of: "Let me...", "I'll...", "I will...", "Great!", "Excellent!", "Based on...", "After checking...", "The design has been...", "Let me verify...", "I see there's..."
+- **THEN** the output SHALL NOT contain any of: "Let me...", "I'll...", "I will...", "Great!", "Excellent!", "Based on...", "After checking...", "The design has been...", "Let me verify...", "I see there's...", "Now generating...", "Now creating..."
 
 ### Requirement: Output must be exactly one of three forms
 The system SHALL produce exactly one of: (1) a clean design summary with parameters table and optional price, (2) a concise question listing missing required parameters, or (3) a direct answer to the user's question.

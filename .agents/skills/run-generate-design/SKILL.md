@@ -141,10 +141,16 @@ Produce a modified design entry with updated `image_name` (one of
 
 Compose the final output following strict rules:
 
-1. **Plain ASCII only** — no emojis, no Unicode symbols (0x20-0x7E + newlines)
+1. **No emojis** — do not use emoji or pictograph characters in any output
 2. **No narration** — forbidden: "Let me...", "I'll...", "Great!", "Based on...",
-   "The design has been...", etc.
-3. **Exactly one of three forms**:
+   "The design has been...", "Now generating...", etc. Output must read as a
+   direct answer to the user, not a log of actions taken.
+3. **Chat-friendly formatting** — use standard markdown (headings, pipe tables,
+   bullet lists). Do NOT use reStructuredText-style underlines (`===`, `---`),
+   horizontal rules made of dashes, boxed/bordered sections, or any formatting
+   that resembles a standalone document/report. The response must look like a
+   chat message, not a file.
+4. **Exactly one of three forms**:
 
 | Form | When | Content |
 |---|---|---|
