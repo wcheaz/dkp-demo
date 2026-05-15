@@ -1,6 +1,6 @@
 ## 1. i18n Infrastructure
 
-- [ ] 1.1 Install `next-intl` and create `src/i18n/config.ts` with `locales`, `Locale` type, and environment-based default locale (`en` in dev, `sk` in prod). Verify by running `npm ls next-intl` and checking the config file exports correctly.
+- [x] 1.1 Install `next-intl` and create `src/i18n/config.ts` with `locales`, `Locale` type, and environment-based default locale (`en` in dev, `sk` in prod). Verify by running `npm ls next-intl` and checking the config file exports correctly.
   Done when: `npm ls next-intl` shows the package, and `config.ts` exports `locales`, `Locale`, and a default derived from `NODE_ENV`.
 
 - [ ] 1.2 Create `src/i18n/messages/en.json` with English translations for all user-facing strings (sidebar, designs, pricing, alerts, metadata). Key structure: nested by component (`sidebar.*`, `designs.*`, `pricing.*`, `alerts.*`, `metadata.*`). Verify by confirming the file is valid JSON with no empty values.
