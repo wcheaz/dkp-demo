@@ -25,7 +25,7 @@
 
 ## 3. Layout and Metadata
 
-- [ ] 3.1 Update `src/app/layout.tsx`: set `<html lang>` dynamically based on locale (default `"sk"` for Slovak). Set `data-default-locale` attribute on `<html>` to `"sk"` or `"en"` based on `NODE_ENV`. Replace hardcoded metadata title/description with Slovak values from translation dictionary. Wrap app with `LanguageProvider`. Verify by checking `<html lang="sk">` in production and `<html lang="en">` in dev (default).
+- [x] 3.1 Update `src/app/layout.tsx`: set `<html lang>` dynamically based on locale (default `"sk"` for Slovak). Set `data-default-locale` attribute on `<html>` to `"sk"` or `"en"` based on `NODE_ENV`. Replace hardcoded metadata title/description with Slovak values from translation dictionary. Wrap app with `LanguageProvider`. Verify by checking `<html lang="sk">` in production and `<html lang="en">` in dev (default).
   Done when: `<html>` element has `data-default-locale` attribute, `lang` attribute updates when locale changes, and metadata uses translated values.
 
 ## 4. Migrate Frontend Components to useTranslations
