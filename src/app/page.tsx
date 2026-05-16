@@ -348,12 +348,6 @@ function YourMainContent() {
 
   const { locale } = useLanguage();
 
-  useEffect(() => {
-    setState((prev) =>
-      prev && prev.locale !== locale ? { ...prev, locale } : prev ?? { designs: [], parameters: {}, locale }
-    );
-  }, [locale, setState]);
-
   const designs = useMemo(() => {
     const d = state.designs ?? [];
     if (d.length === 0) return d;
@@ -731,8 +725,8 @@ function YourMainContent() {
   });
 
   useCopilotReadable({
-    description: "The application state data - customize this for your application",
-    value: JSON.stringify({ designs, parameters: state.parameters }),
+    description: "The application state data including the current UI locale. The agent MUST respond in the language specified by 'locale' (sk = Slovak, en = English).",
+    value: JSON.stringify({ designs, parameters: state.parameters, locale }),
   });
 
   return (
