@@ -32,6 +32,35 @@ export default function CopilotKitPage() {
 
 function CopilotKitPageInner() {
   const t = useTranslations();
+  const { locale } = useLanguage();
+
+  const labels = useMemo(() => ({
+    title: t("sidebar.title"),
+    initial: t("sidebar.greeting"),
+  }), [locale]);
+
+  const suggestions = useMemo(() => [
+    {
+      title: t("sidebar.suggestions.generateSample.title"),
+      message: t("sidebar.suggestions.generateSample.message"),
+    },
+    {
+      title: t("sidebar.suggestions.howHelp.title"),
+      message: t("sidebar.suggestions.howHelp.message"),
+    },
+    {
+      title: t("sidebar.suggestions.whatInfo.title"),
+      message: t("sidebar.suggestions.whatInfo.message"),
+    },
+    {
+      title: t("sidebar.suggestions.whatsPrice.title"),
+      message: t("sidebar.suggestions.whatsPrice.message"),
+    },
+    {
+      title: t("sidebar.suggestions.clearDesigns.title"),
+      message: t("sidebar.suggestions.clearDesigns.message"),
+    },
+  ], [locale]);
 
   return (
     <main className="relative">
@@ -42,32 +71,8 @@ function CopilotKitPageInner() {
         defaultOpen={true}
         disableSystemMessage={true}
         clickOutsideToClose={false}
-        labels={{
-          title: t("sidebar.title"),
-          initial: t("sidebar.greeting"),
-        }}
-        suggestions={[
-          {
-            title: t("sidebar.suggestions.generateSample.title"),
-            message: t("sidebar.suggestions.generateSample.message"),
-          },
-          {
-            title: t("sidebar.suggestions.howHelp.title"),
-            message: t("sidebar.suggestions.howHelp.message"),
-          },
-          {
-            title: t("sidebar.suggestions.whatInfo.title"),
-            message: t("sidebar.suggestions.whatInfo.message"),
-          },
-          {
-            title: t("sidebar.suggestions.whatsPrice.title"),
-            message: t("sidebar.suggestions.whatsPrice.message"),
-          },
-          {
-            title: t("sidebar.suggestions.clearDesigns.title"),
-            message: t("sidebar.suggestions.clearDesigns.message"),
-          },
-        ]}
+        labels={labels}
+        suggestions={suggestions}
         Input={CustomInput}
       >
         <YourMainContent />
