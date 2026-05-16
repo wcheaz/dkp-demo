@@ -50,10 +50,24 @@
 - [x] 5.2 Forward frontend locale to the agent via CopilotKit context. The frontend's current locale (from `useLanguage()`) SHALL be passed to the backend agent so `get_system_prompt` receives the correct locale. Add the locale to the CopilotKit readable context or agent state. Verify by sending a message with locale "en" (agent responds in English) then toggling to "sk" (agent responds in Slovak).
   Done when: The agent's response language matches the frontend's current locale setting. English prompts in English locale produce English responses. Slovak locale produces Slovak responses.
 
-## 6. Verification and Quality Gates
+## 6. Fix Language Toggle Crash (Regression)
 
-- [x] 6.1 Run `npm run i18n:check` and confirm both dictionaries have identical key structures. Run `npm run build` and confirm no TypeScript errors from translation key references. Run `npm run lint` and confirm no lint errors. Verify by running all three commands and confirming they exit 0.
+- [ ] 6.1 Remove duplicate `LanguageProvider` from `page.tsx`. The provider already exists in `layout.tsx` wrapping the entire app. The second provider in `page.tsx` (lines 29-35) creates a disconnected state — when the toggle updates one provider, the other doesn't know. Remove the `LanguageProvider` wrapper from `CopilotKitPage()` in `page.tsx` and remove the unused import. The page components should use the single provider from `layout.tsx`.
+  Done when: `LanguageProvider` appears only in `layout.tsx`, not in `page.tsx`. The toggle and all page components share the same context instance.
+
+- [ ] 6.2 Memoize `CopilotSidebar` props (`labels` and `suggestions`) to prevent CopilotKit re-initialization on locale change. The `labels` object and `suggestions` array are created inline on every render, producing new references each time. When locale changes, CopilotKit receives new `labels.initial` and `suggestions`, which causes it to reinitialize its internal chat state and crash. Wrap them with `useMemo` keyed on locale so they only update when the locale actually changes.
+  Done when: `labels` and `suggestions` are wrapped in `useMemo(() => {...}, [locale])`. Clicking the language toggle no longer crashes the app. The sidebar title and suggestions update to the new language without resetting chat state.
+
+- [ ] 6.3 Fix the `setState` call in the locale sync `useEffect` (page.tsx ~line 350-354). Calling `setState` from `useCoAgent` on every locale change triggers CopilotKit to re-sync agent state with the backend, which can destabilize the connection. Move the locale-to-agent-state sync into the `useCopilotReadable` value so the locale is passed as context without triggering a state mutation.
+  Done when: The `useEffect` that calls `setState` on locale change is removed or replaced with a non-mutating approach. The locale is still available to the agent via `useCopilotReadable` without triggering CopilotKit re-sync. Toggle still works without crash.
+
+- [ ] 6.4 Verify language toggle works without crashing. Start dev server, load page, click EN, click SK, click EN again. Confirm: no crash, sidebar updates language, suggestions update, chat history persists, design component re-renders with translated labels. Check browser console for errors.
+  Done when: Repeatedly toggling between EN and SK does not crash the app. Console shows no errors. Chat history is preserved across toggles.
+
+## 7. Verification and Quality Gates
+
+- [ ] 7.1 Run `npm run i18n:check` and confirm both dictionaries have identical key structures. Run `npm run build` and confirm no TypeScript errors from translation key references. Run `npm run lint` and confirm no lint errors. Verify by running all three commands and confirming they exit 0.
   Done when: `npm run i18n:check`, `npm run build`, and `npm run lint` all exit 0.
 
-- [x] 6.2 Visual parity check in development — run `npm run dev`, test in English (default), then toggle to Slovak. Verify: all labels/buttons/headings display in Slovak, no English bleed-through, no layout overflow from longer Slovak text, suggestion buttons wrap correctly, number formatting uses Slovak locale. Run `npm run build && npm start` and confirm the toggle is hidden and Slovak is the default.
+- [ ] 7.2 Visual parity check in development — run `npm run dev`, test in English (default), then toggle to Slovak. Verify: all labels/buttons/headings display in Slovak, no English bleed-through, no layout overflow from longer Slovak text, suggestion buttons wrap correctly, number formatting uses Slovak locale. Run `npm run build && npm start` and confirm the toggle is hidden and Slovak is the default.
   Done when: Both locales render cleanly. No missing translation keys (no raw key paths visible). Slovak text fits within all containers. Production build shows Slovak by default with no toggle.

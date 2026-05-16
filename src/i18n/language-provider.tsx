@@ -32,8 +32,15 @@ function getInitialLocale(): Locale {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const isDevelopment = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    const stored = getInitialLocale();
+    if (stored !== defaultLocale) {
+      setLocaleState(stored);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
