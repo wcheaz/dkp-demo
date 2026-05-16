@@ -19,7 +19,7 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-function getInitialLocale(): Locale {
+function getStoredLocale(): Locale {
   if (typeof window === "undefined") return defaultLocale;
 
   const stored = localStorage.getItem("locale");
@@ -36,8 +36,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const isDevelopment = process.env.NODE_ENV === "development";
 
   useEffect(() => {
-    const stored = getInitialLocale();
+    const stored = getStoredLocale();
     if (stored !== defaultLocale) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time sync from localStorage; avoids hydration mismatch vs lazy init
       setLocaleState(stored);
     }
   }, []);

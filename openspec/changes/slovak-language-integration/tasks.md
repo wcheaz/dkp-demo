@@ -61,7 +61,7 @@
 - [x] 6.3 Fix the `setState` call in the locale sync `useEffect` (page.tsx ~line 350-354). Calling `setState` from `useCoAgent` on every locale change triggers CopilotKit to re-sync agent state with the backend, which can destabilize the connection. Move the locale-to-agent-state sync into the `useCopilotReadable` value so the locale is passed as context without triggering a state mutation.
   Done when: The `useEffect` that calls `setState` on locale change is removed or replaced with a non-mutating approach. The locale is still available to the agent via `useCopilotReadable` without triggering CopilotKit re-sync. Toggle still works without crash.
 
-- [ ] 6.4 Verify language toggle works without crashing. Start dev server, load page, click EN, click SK, click EN again. Confirm: no crash, sidebar updates language, suggestions update, chat history persists, design component re-renders with translated labels. Check browser console for errors.
+- [x] 6.4 Verify language toggle works without crashing. Start dev server, load page, click EN, click SK, click EN again. Confirm: no crash, sidebar updates language, suggestions update, chat history persists, design component re-renders with translated labels. Check browser console for errors.
   Done when: Repeatedly toggling between EN and SK does not crash the app. Console shows no errors. Chat history is preserved across toggles.
 
 ## 7. Verification and Quality Gates

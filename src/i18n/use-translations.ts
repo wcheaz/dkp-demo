@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback } from "react";
+
 import { useLanguage } from "./language-provider";
 import en from "./messages/en.json";
 import sk from "./messages/sk.json";
@@ -18,9 +20,9 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string | un
 
 export function useTranslations(namespace?: string) {
   const { locale } = useLanguage();
-  const dict = dictionaries[locale] ?? dictionaries["en"];
 
-  return function t(key: string, params?: Record<string, string | number>): string {
+  return useCallback((key: string, params?: Record<string, string | number>): string => {
+    const dict = dictionaries[locale] ?? dictionaries["en"];
     const fullKey = namespace ? `${namespace}.${key}` : key;
     let value = getNestedValue(dict, fullKey) ?? getNestedValue(dictionaries["en"], fullKey) ?? fullKey;
     if (params) {
@@ -29,5 +31,5 @@ export function useTranslations(namespace?: string) {
       }
     }
     return value;
-  };
+  }, [locale, namespace]);
 }

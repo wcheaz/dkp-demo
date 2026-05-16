@@ -32,12 +32,11 @@ export default function CopilotKitPage() {
 
 function CopilotKitPageInner() {
   const t = useTranslations();
-  const { locale } = useLanguage();
 
   const labels = useMemo(() => ({
     title: t("sidebar.title"),
     initial: t("sidebar.greeting"),
-  }), [locale]);
+  }), [t]);
 
   const suggestions = useMemo(() => [
     {
@@ -60,7 +59,7 @@ function CopilotKitPageInner() {
       title: t("sidebar.suggestions.clearDesigns.title"),
       message: t("sidebar.suggestions.clearDesigns.message"),
     },
-  ], [locale]);
+  ], [t]);
 
   return (
     <main className="relative">

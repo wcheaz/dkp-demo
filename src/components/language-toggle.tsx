@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/i18n/language-provider";
-import { locales, type Locale } from "@/i18n/config";
+import { locales } from "@/i18n/config";
 
 export function LanguageToggle() {
   const { locale, setLocale, isDevelopment } = useLanguage();
