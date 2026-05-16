@@ -12,7 +12,7 @@
 
 import { DesignComponent } from "@/components/design-component";
 import { LanguageToggle } from "@/components/language-toggle";
-import { LanguageProvider, useLanguage } from "@/i18n/language-provider";
+import { useLanguage } from "@/i18n/language-provider";
 import { useTranslations } from "@/i18n/use-translations";
 import { AgentState, MaterialStats } from "@/lib/types";
 import {
@@ -27,11 +27,7 @@ import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
 export default function CopilotKitPage() {
-  return (
-    <LanguageProvider>
-      <CopilotKitPageInner />
-    </LanguageProvider>
-  );
+  return <CopilotKitPageInner />;
 }
 
 function CopilotKitPageInner() {

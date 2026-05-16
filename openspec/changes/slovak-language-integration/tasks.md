@@ -52,7 +52,7 @@
 
 ## 6. Fix Language Toggle Crash (Regression)
 
-- [ ] 6.1 Remove duplicate `LanguageProvider` from `page.tsx`. The provider already exists in `layout.tsx` wrapping the entire app. The second provider in `page.tsx` (lines 29-35) creates a disconnected state — when the toggle updates one provider, the other doesn't know. Remove the `LanguageProvider` wrapper from `CopilotKitPage()` in `page.tsx` and remove the unused import. The page components should use the single provider from `layout.tsx`.
+- [x] 6.1 Remove duplicate `LanguageProvider` from `page.tsx`. The provider already exists in `layout.tsx` wrapping the entire app. The second provider in `page.tsx` (lines 29-35) creates a disconnected state — when the toggle updates one provider, the other doesn't know. Remove the `LanguageProvider` wrapper from `CopilotKitPage()` in `page.tsx` and remove the unused import. The page components should use the single provider from `layout.tsx`.
   Done when: `LanguageProvider` appears only in `layout.tsx`, not in `page.tsx`. The toggle and all page components share the same context instance.
 
 - [ ] 6.2 Memoize `CopilotSidebar` props (`labels` and `suggestions`) to prevent CopilotKit re-initialization on locale change. The `labels` object and `suggestions` array are created inline on every render, producing new references each time. When locale changes, CopilotKit receives new `labels.initial` and `suggestions`, which causes it to reinitialize its internal chat state and crash. Wrap them with `useMemo` keyed on locale so they only update when the locale actually changes.
