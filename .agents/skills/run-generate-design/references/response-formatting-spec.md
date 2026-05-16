@@ -10,8 +10,8 @@ The system SHALL NOT include emoji or pictograph characters in any output.
 ### Requirement: Output must use chat-friendly formatting
 The system SHALL format responses as standard markdown chat messages — using markdown headings (`##`) and bold-labeled key-value lines. The system SHALL NOT use reStructuredText-style underlines (`===`, `---`), horizontal rules made of dashes, boxed/bordered sections, pipe-delimited tables, or any formatting that resembles a standalone document or report file.
 
-#### Scenario: Design summary formatting
-- **WHEN** a design summary is produced
+#### Scenario: Design summary formatting (English)
+- **WHEN** a design summary is produced AND locale is `en`
 - **THEN** it SHALL use a markdown heading followed by a markdown bullet list. Each field SHALL be a separate bullet item formatted as `- **Label:** value`. All 9 fields SHALL be present (use `---` for missing values). Example:
 
 ```
@@ -26,6 +26,24 @@ The system SHALL format responses as standard markdown chat messages — using m
 - **Attic usage:** Living space
 - **Eaves shape:** Open
 - **Wall construction:** Brick
+```
+
+#### Scenario: Design summary formatting (Slovak)
+- **WHEN** a design summary is produced AND locale is `sk`
+- **THEN** it SHALL use Slovak field labels and Slovak parameter values from the locale mapping table in SKILL.md. Example:
+
+```
+## Návrh strechy
+
+- **Typ budovy:** Rodinný dom
+- **Rozmery pôdorysu:** 10x15m
+- **Umiestnenie:** Veľké Lovce
+- **Typ strechy:** Štítová
+- **Sklon strechy:** 35°
+- **Previs:** 400mm
+- **Využitie podkrovia:** Obytný priestor
+- **Tvar rímsy:** Otvorené
+- **Konštrukcia stien:** Tehla
 ```
 
 ### Requirement: Output must not narrate actions
