@@ -67,6 +67,51 @@ missing fields as `---`.
 Produce a checklist of the 4 **desirable fields** showing present vs missing:
 `building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`.
 
+#### Locale mapping (English — locale `en`)
+
+When the agent locale is `en`, use these English labels and values for all
+user-facing output:
+
+**Field labels:**
+
+- Building type
+- Floor plan dimensions
+- Roof type
+- Roof pitch
+- Attic usage
+- Eaves shape
+- Wall construction
+- Location
+- Overhang
+
+**Parameter values:**
+
+- Building types: Family house, Apartment building, Garage, Agricultural building, Office building, Mixed-use building
+- Roof types: Gable, Hip, Mono-pitch, Flat
+- Attic usage: None, Storage, Living space
+- Eaves shape: Open, Boxed, Flush
+- Wall construction: Brick, SIP panels, Concrete block, Mixed
+
+**Status values:**
+
+- Design In Progress / Complete
+
+Example English design summary:
+
+```
+## Roof Design
+
+- **Building type:** Family house
+- **Floor plan dimensions:** 10x15m
+- **Location:** Bratislava
+- **Roof type:** Gable
+- **Roof pitch:** 30°
+- **Overhang:** 450mm
+- **Attic usage:** Storage
+- **Eaves shape:** Open
+- **Wall construction:** Brick
+```
+
 #### Locale mapping (Slovak — locale `sk`)
 
 When the agent locale is `sk`, use these Slovak translations for all
@@ -226,8 +271,12 @@ Compose the final output following strict rules:
 | Missing params question | Design triggered but desirable fields missing | Concise question listing only missing fields |
 | Direct answer | Knowledge query or general question | Answer with source citations (relative file paths) |
 
+**When locale is `en`**, use English labels and English parameter values from
+the English locale mapping section above. The heading MUST be "Roof Design".
+All labels, values, and status text must be in English.
+
 **When locale is `sk`**, use Slovak labels and Slovak parameter values from the
-locale mapping table above. Example Slovak design summary:
+Slovak locale mapping table below. Example Slovak design summary:
 
 ```
 ## Návrh strechy
@@ -243,8 +292,22 @@ locale mapping table above. Example Slovak design summary:
 - **Konštrukcia stien:** Tehla
 ```
 
-When locale is `en`, use the English labels shown in the response formatting
-reference.
+When locale is `en`, use the English labels and values from the English
+locale mapping section above. Example English design summary:
+
+```
+## Roof Design
+
+- **Building type:** Family house
+- **Floor plan dimensions:** 10x15m
+- **Location:** Bratislava
+- **Roof type:** Gable
+- **Roof pitch:** 30°
+- **Overhang:** 450mm
+- **Attic usage:** Storage
+- **Eaves shape:** Open
+- **Wall construction:** Brick
+```
 
 See [response formatting reference](references/response-formatting.md) for
 examples and the full list of forbidden narration patterns.

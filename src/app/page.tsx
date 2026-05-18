@@ -344,6 +344,14 @@ function YourMainContent() {
 
   const { locale } = useLanguage();
 
+  useEffect(() => {
+    if (latestStateRef.current.locale !== locale) {
+      const newState = { ...latestStateRef.current, locale };
+      setState(newState);
+      latestStateRef.current = newState;
+    }
+  }, [locale]);
+
   const designs = useMemo(() => {
     const d = state.designs ?? [];
     if (d.length === 0) return d;
