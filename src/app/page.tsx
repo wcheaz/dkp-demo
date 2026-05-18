@@ -63,9 +63,6 @@ function CopilotKitPageInner() {
 
   return (
     <main className="relative">
-      <div className="fixed top-0 right-0 z-50 p-2">
-        <LanguageToggle />
-      </div>
       <CopilotSidebar
         defaultOpen={true}
         disableSystemMessage={true}
@@ -730,6 +727,9 @@ function YourMainContent() {
 
   return (
     <div className="h-screen w-full flex items-center pt-[10vh] flex-col transition-colors duration-300">
+      <div className="w-full flex justify-start px-4 -mt-6 mb-2">
+        <LanguageToggle />
+      </div>
       <DesignComponent state={state} setState={setState} />
     </div>
   );
