@@ -729,10 +729,7 @@ function YourMainContent() {
   });
 
   return (
-    <div
-      style={{}}
-      className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
-    >
+    <div className="h-screen w-full flex items-center pt-[10vh] flex-col transition-colors duration-300">
       <DesignComponent state={state} setState={setState} />
     </div>
   );
