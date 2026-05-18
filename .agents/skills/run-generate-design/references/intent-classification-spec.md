@@ -35,6 +35,12 @@ The system SHALL analyze the user's message and classify it into exactly one of:
 - **WHEN** the user's message does not match any of the above patterns
 - **THEN** the intent SHALL be classified as `general-response`
 
+<!-- ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove if agent becomes too weak) ---- -->
+- **AND** the agent SHALL first search the knowledge base before responding.
+  If no relevant KB results exist, the agent SHALL inform the user that the
+  information is not available, rather than answering from general knowledge.
+<!-- ---- END KNOWLEDGE BOUNDARY CONSTRAINTS ---- -->
+
 ### Requirement: Multiple intents may co-occur
 The system SHALL detect when both `design-generation` and `pricing-quote` are present in the same message (e.g., "I need a design with a price").
 

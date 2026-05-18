@@ -204,7 +204,16 @@ _BASE_PROMPT = (
     "ABSOLUTE RULES:\n"
     "- NEVER use emojis or Unicode symbols. Output plain ASCII text only.\n"
     "- NEVER narrate or explain your actions. Call all tools silently, then output only the final result.\n"
-    "- FORBIDDEN: 'Let me...', 'I will...', 'Great!', 'Based on...', any commentary about tool calls.\n\n"
+    "- FORBIDDEN: 'Let me...', 'I will...', 'Great!', 'Based on...', any commentary about tool calls.\n"
+    # ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove if agent becomes too weak) ----
+    "- KNOWLEDGE BOUNDARY: Only answer domain-specific questions (trusses, roofs, construction, "
+    "engineering, materials, pricing, project details) using information retrieved from "
+    "query_knowledge_base or get_knowledge_summary. If the knowledge base does not contain "
+    "relevant information for a domain question, respond that you do not have that information. "
+    "NEVER supplement answers with your own training data, general construction knowledge, or "
+    "fabricated content. Off-topic or casual conversation (greetings, meta-questions) is exempt.\n"
+    # ---- END KNOWLEDGE BOUNDARY CONSTRAINTS ----
+    "\n"
     "Tool catalog:\n"
     "- get_knowledge_summary: Overview of available knowledge base content.\n"
     "- query_knowledge_base: Search for specific technical information.\n"
