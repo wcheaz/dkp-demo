@@ -28,18 +28,19 @@ Record the user's message verbatim. This is the input for the entire workflow.
 
 ### Step 2 — Classify Intent
 
-Analyze the message and classify into one or more intent categories:
+Analyze the message and classify into one or more intent categories. Match
+against both English and Slovak trigger phrases:
 
-| Intent | Trigger phrases |
-|---|---|
-| `design-generation` | "I need a design", "design for", "show me", "build me", "create", "generate", "plan for", "I want", or any construction project description |
-| `knowledge-query/summary` | "What projects do you have?", "What do you know?", "what information is available" |
-| `knowledge-query/specific` | Questions about load calculations, materials, truss designs, engineering specs |
-| `pricing-quote` | "price", "cost", "estimated price", "how much" |
-| `design-modification` | Requests to change an existing design's image or prompt text |
-| `design-reset/partial` | "change X and Y but keep Z", clear specific parameters |
-| `design-reset/full` | "scrap this design", "delete this design", "start over completely" |
-| `general-response` | Anything that doesn't match the above |
+| Intent | Trigger phrases (EN) | Trigger phrases (SK) |
+|---|---|---|
+| `design-generation` | "I need a design", "design for", "show me", "build me", "create", "generate", "plan for", "I want" | "potrebujem návrh", "navrhni", "chcem návrh", "potrebujem strechu", "návrh pre", "chcem" |
+| `knowledge-query/summary` | "What projects do you have?", "What do you know?", "what information is available" | "aké projekty máte", "čo viete", "aké informácie máte", "prehľad" |
+| `knowledge-query/specific` | Questions about load, materials, truss designs, engineering specs | Otázky o zaťažení, materiáloch, väzníkoch, technických parametroch |
+| `pricing-quote` | "price", "cost", "estimated price", "how much" | "cena", "koľko", "odhadovaná cena", "cena za", "stojí" |
+| `design-modification` | Requests to change an existing design's image or prompt text | Požiadavky na zmenu existujúceho návrhu |
+| `design-reset/partial` | "change X and Y but keep Z" | "zmeň X a Y ale nechaj Z" |
+| `design-reset/full` | "scrap this design", "delete this design", "start over completely" | "začnime odznova", "zmazať návrh", "vymazať", "odznova" |
+| `general-response` | Anything that doesn't match the above | Čokoľvek, čo nezodpovedá vyššie uvedenému |
 
 If design AND pricing are both present, flag both intents (pricing executes first).
 
@@ -65,6 +66,112 @@ missing fields as `---`.
 
 Produce a checklist of the 4 **desirable fields** showing present vs missing:
 `building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`.
+
+#### Locale mapping (English — locale `en`)
+
+When the agent locale is `en`, use these English labels and values for all
+user-facing output:
+
+**Field labels:**
+
+- Building type
+- Floor plan dimensions
+- Roof type
+- Roof pitch
+- Attic usage
+- Eaves shape
+- Wall construction
+- Location
+- Overhang
+
+**Parameter values:**
+
+- Building types: Family house, Apartment building, Garage, Agricultural building, Office building, Mixed-use building
+- Roof types: Gable, Hip, Mono-pitch, Flat
+- Attic usage: None, Storage, Living space
+- Eaves shape: Open, Boxed, Flush
+- Wall construction: Brick, SIP panels, Concrete block, Mixed
+
+**Status values:**
+
+- Design In Progress / Complete
+
+Example English design summary:
+
+```
+## Roof Design
+
+- **Building type:** Family house
+- **Floor plan dimensions:** 10x15m
+- **Location:** Bratislava
+- **Roof type:** Gable
+- **Roof pitch:** 30°
+- **Overhang:** 450mm
+- **Attic usage:** Storage
+- **Eaves shape:** Open
+- **Wall construction:** Brick
+```
+
+#### Locale mapping (Slovak — locale `sk`)
+
+When the agent locale is `sk`, use these Slovak translations for all
+user-facing output (field labels, parameter values, status text):
+
+**Field labels:**
+
+| English label | Slovak label |
+|---|---|
+| Building type | Typ budovy |
+| Floor plan dimensions | Rozmery pôdorysu |
+| Roof type | Typ strechy |
+| Roof pitch | Sklon strechy |
+| Attic usage | Využitie podkrovia |
+| Eaves shape | Tvar rímsy |
+| Wall construction | Konštrukcia stien |
+| Location | Umiestnenie |
+| Overhang | Previs |
+
+**Parameter values:**
+
+| English | Slovak |
+|---|---|
+| Family house | Rodinný dom |
+| Apartment building | Bytový dom |
+| Garage | Garáž |
+| Agricultural building | Poľnohospodárska budova |
+| Office building | Kancelárska budova |
+| Mixed-use building | Zmiešaná budova |
+| Gable | Štítová |
+| Hip | Valbová |
+| Mono-pitch | Jednosklovitá |
+| Flat | Plochá |
+| none | žiadne |
+| storage | skladovací priestor |
+| living space | obytný priestor |
+| open | otvorené |
+| boxed | uzatvorené |
+| flush | hladké |
+| brick | tehla |
+| SIP panels | SIP panely |
+| concrete block | betónové tvárnice |
+| mixed | zmiešaná |
+
+**Status values:**
+
+| English | Slovak |
+|---|---|
+| Design In Progress | Návrh v procese |
+| complete | dokončené |
+
+**Also recognise these Slovak trigger patterns for extraction:**
+
+| Field | Slovak trigger patterns |
+|---|---|
+| `building_type` | "dom", "rodinný dom", "bytová budova", "garáž", "poľnohospodárska budova", "kancelárska budova", "zmiešaná budova" |
+| `roof_type` | "štítová", "valbová", "jednosklovitá", "plochá" |
+| `attic_usage` | "podkrovie", "skladovací priestor", "obytný priestor", "bez využitia", "žiadne" |
+| `eaves_shape` | "otvorené okapy", "uzatvorené okapy", "hladké okapy" |
+| `wall_construction` | "tehlové steny", "SIP panely", "betónové tvárnice", "zmiešaná konštrukcia" |
 
 ### Step 4 — Execute Simulated Tool Actions
 
@@ -113,8 +220,8 @@ CZK costs:
 
 Roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
 
-total_gbp = round(total_czk / 30)
-Output: integer (GBP, excl. VAT)
+total_eur = round(total_czk / 25)
+Output: integer (EUR, excl. VAT)
 ```
 
 If `floor_plan_dimensions` was not extracted, output a message asking the user
@@ -163,6 +270,44 @@ Compose the final output following strict rules:
 | Design summary | Design was generated | Bullet list of 9 fields (`- **Label:** value`), status, optional price |
 | Missing params question | Design triggered but desirable fields missing | Concise question listing only missing fields |
 | Direct answer | Knowledge query or general question | Answer with source citations (relative file paths) |
+
+**When locale is `en`**, use English labels and English parameter values from
+the English locale mapping section above. The heading MUST be "Roof Design".
+All labels, values, and status text must be in English.
+
+**When locale is `sk`**, use Slovak labels and Slovak parameter values from the
+Slovak locale mapping table below. Example Slovak design summary:
+
+```
+## Návrh strechy
+
+- **Typ budovy:** Rodinný dom
+- **Rozmery pôdorysu:** 10x15m
+- **Umiestnenie:** Veľké Lovce
+- **Typ strechy:** Štítová
+- **Sklon strechy:** 35°
+- **Previs:** 400mm
+- **Využitie podkrovia:** Obytný priestor
+- **Tvar rímsy:** Otvorené
+- **Konštrukcia stien:** Tehla
+```
+
+When locale is `en`, use the English labels and values from the English
+locale mapping section above. Example English design summary:
+
+```
+## Roof Design
+
+- **Building type:** Family house
+- **Floor plan dimensions:** 10x15m
+- **Location:** Bratislava
+- **Roof type:** Gable
+- **Roof pitch:** 30°
+- **Overhang:** 450mm
+- **Attic usage:** Storage
+- **Eaves shape:** Open
+- **Wall construction:** Brick
+```
 
 See [response formatting reference](references/response-formatting.md) for
 examples and the full list of forbidden narration patterns.

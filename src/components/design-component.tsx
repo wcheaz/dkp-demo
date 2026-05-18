@@ -1,13 +1,10 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
-
-const MATERIAL_STAT_LABELS: Record<keyof MaterialStats, string> = {
-  totalTrusses: "Trusses",
-  timberVolume: "Timber Vol.",
-  totalJoints: "Joints",
-  roofArea: "Roof Area",
-};
+import { useTranslations } from "@/i18n/use-translations";
+import { useLanguage } from "@/i18n/language-provider";
 
 const MATERIAL_STAT_UNITS: Record<keyof MaterialStats, string> = {
   totalTrusses: "",
@@ -22,18 +19,6 @@ const MATERIAL_STAT_KEYS: (keyof MaterialStats)[] = [
   "totalJoints",
   "roofArea",
 ];
-
-const PARAM_LABELS: Record<keyof DesignParameters, string> = {
-  buildingType: "Building Type",
-  floorPlanDimensions: "Floor Plan Dimensions",
-  roofType: "Roof Type",
-  roofPitch: "Roof Pitch",
-  atticUsage: "Attic Usage",
-  eavesShape: "Eaves Shape",
-  wallConstruction: "Wall Construction",
-  location: "Location",
-  overhang: "Overhang",
-};
 
 const ALL_PARAM_KEYS: (keyof DesignParameters)[] = [
   "buildingType",
@@ -65,6 +50,9 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [pricingModalIndex, setPricingModalIndex] = useState<number | null>(null);
+  const t = useTranslations();
+  const { locale } = useLanguage();
+  const numberLocale = locale === "sk" ? "sk-SK" : "en-US";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,13 +65,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   }, []);
 
   return (
-    <div className="w-4/5 p-6">
-      <h2 className="text-2xl font-bold mb-4">Designs</h2>
+    <div className="w-full p-6">
+      <h2 className="text-2xl font-bold mb-4">{t("designs.heading")}</h2>
 
       {designs.length === 0 ? (
         <p className="text-gray-400 text-center py-12">
-          No designs available yet. Submit a prompt to generate your first
-          design.
+          {t("designs.empty")}
         </p>
       ) : (
         <div className="overflow-y-auto max-h-[80vh] space-y-4">
@@ -107,12 +94,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                 {entry.status === "processing" ? (
                   <div className="w-[55%] h-[27vh] flex flex-col items-center justify-center bg-white/10 rounded-xl">
                     <div className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                    <p className="mt-3 text-sm text-gray-300">Generating truss structure...</p>
+                    <p className="mt-3 text-sm text-gray-300">{t("designs.generating")}</p>
                   </div>
                 ) : hasIncompleteParameters(entry.parameters) ? (
                   <img
                     src="/design-in-progress.svg"
-                    alt="Design In Progress"
+                    alt={t("designs.designInProgress")}
                     className="w-[55%] h-[27vh] object-contain"
                   />
                 ) : (
@@ -137,7 +124,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                       {filledEntries.map((k) => (
                         <div key={k} className="flex items-center gap-1.5 bg-design-param-bg rounded-md px-2 py-1">
-                          <span className="text-design-param-label font-medium">{PARAM_LABELS[k]}:</span>
+                          <span className="text-design-param-label font-medium">{t(`designs.params.${k}`)}:</span>
                           <span className="text-design-param-value font-semibold">{String(entry.parameters![k])}</span>
                         </div>
                       ))}
@@ -146,13 +133,13 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                       <>
                         <div className="flex items-center gap-2 my-2">
                           <div className="flex-1 border-t border-design-material-border" />
-                          <span className="text-design-material-label text-xs font-medium tracking-wide uppercase">Material Estimate</span>
+                          <span className="text-design-material-label text-xs font-medium tracking-wide uppercase">{t("designs.materialEstimate")}</span>
                           <div className="flex-1 border-t border-design-material-border" />
                         </div>
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                           {MATERIAL_STAT_KEYS.map((k) => (
                             <div key={k} className="flex items-center gap-1.5 bg-design-material-bg rounded-md px-2 py-1">
-                              <span className="text-design-material-label font-medium">{MATERIAL_STAT_LABELS[k]}:</span>
+                              <span className="text-design-material-label font-medium">{t(`designs.labels.${k}`)}:</span>
                               <span className="text-design-material-value font-semibold">
                                 {entry.materialStats![k] === "---"
                                   ? "---"
@@ -169,9 +156,9 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     {entry.price && (
                       <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                         <div className="flex items-center gap-1.5 bg-design-price-bg rounded-md px-2 py-1">
-                          <span className="text-design-price-label font-medium">Price:</span>
+                          <span className="text-design-price-label font-medium">{t("designs.price")}</span>
                           <span className="text-design-price-value font-semibold">
-                            {entry.price === "---" ? "---" : `\u00A3${entry.price.toLocaleString()}`}
+                            {entry.price === "---" ? "---" : `${t("designs.currency")}${new Intl.NumberFormat(numberLocale).format(entry.price)}`}
                           </span>
                           {entry.price !== "---" && (
                           <svg

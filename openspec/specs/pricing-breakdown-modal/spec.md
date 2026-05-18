@@ -7,9 +7,30 @@ Defines the PricingBreakdownModal component that displays an itemized pricing br
 ### Requirement: PricingBreakdownModal component renders a pricing breakdown table
 `PricingBreakdownModal` SHALL be a React component exported from `src/components/pricing-breakdown-modal.tsx`. It SHALL accept props: `open: boolean`, `onClose: () => void`, `parameters: DesignParameters`, `price: string`. When `open` is `true`, it SHALL render a fixed-position modal overlay with a centered content panel containing a breakdown table. The table SHALL display line items computed from `parameters` using the same formula as the backend `generate_quote` tool in `agent/src/agent.py`.
 
+All user-facing text in the component SHALL be sourced from the translation dictionary via `useTranslations('pricing')` hook. The following strings SHALL be translation keys: modal title, all row labels (floor area, joints, gusset plate cost, timber volume, timber cost, trusses, assembly cost, hanger cost, subtotal, roof type, total CZK, total GBP), title tooltips, the "Unknown" fallback for empty roof type, the fallback error message, "Stored price:" label, and "(excl. VAT)" suffix.
+
+Number formatting SHALL use `Intl.NumberFormat('sk-SK')` instead of `toLocaleString("en-US")`.
+
 #### Scenario: Modal renders breakdown table when open
 - **WHEN** `PricingBreakdownModal` is rendered with `open: true`, `parameters: { floorPlanDimensions: "10x15m", roofType: "Gable" }`, and `price: "Estimated price: €7,923 (excl. VAT)"`
 - **THEN** the modal SHALL display a table with rows for floor area, joints, gusset plate cost, timber volume, timber cost, trusses, assembly cost, hanger cost, subtotal CZK, roof type with factor, total CZK, and total EUR
+
+#### Scenario: Modal renders with translated labels
+- **WHEN** `PricingBreakdownModal` is rendered with `open: true` and locale `"sk"`
+- **THEN** the modal title SHALL display the Slovak translation from key `pricing.title`
+- **AND** each table row label SHALL display the corresponding Slovak translation
+
+#### Scenario: Number formatting uses Slovak locale
+- **WHEN** the breakdown table displays numeric values
+- **THEN** numbers SHALL be formatted using `Intl.NumberFormat('sk-SK')` — using space as thousands separator and comma as decimal separator
+
+#### Scenario: Tooltips are translated
+- **WHEN** the breakdown table renders tooltips on row labels
+- **THEN** each tooltip SHALL display the translated description from the corresponding translation key
+
+#### Scenario: Error message is translated
+- **WHEN** `PricingBreakdownModal` is rendered with `open: true` and `parameters` missing `floorPlanDimensions` and locale is `"sk"`
+- **THEN** the error message SHALL display the Slovak translation from key `pricing.error`
 
 #### Scenario: Modal is hidden when open is false
 - **WHEN** `PricingBreakdownModal` is rendered with `open: false`

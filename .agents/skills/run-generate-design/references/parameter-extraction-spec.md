@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Extract all matching parameter fields from user input
-The system SHALL scan the user's message for each of the 9 construction parameter fields and record any matches found.
+The system SHALL scan the user's message for each of the 9 construction parameter fields and record any matches found. The system SHALL recognise both English and Slovak trigger patterns.
 
 #### Scenario: Building type extracted
-- **WHEN** the user mentions "house", "garage", "agricultural building", "family house", or similar building types
+- **WHEN** the user mentions "house", "garage", "agricultural building", "family house", or similar building types (EN); OR "dom", "rodinný dom", "garáž", "poľnohospodárska budova", "kancelárska budova", "zmiešaná budova" (SK)
 - **THEN** `building_type` SHALL be recorded with the extracted value
 
 #### Scenario: Floor plan dimensions extracted
@@ -12,7 +12,7 @@ The system SHALL scan the user's message for each of the 9 construction paramete
 - **THEN** `floor_plan_dimensions` SHALL be recorded with the normalized value (e.g., "10x15m")
 
 #### Scenario: Roof type extracted
-- **WHEN** the user mentions "gable", "hip", "mono-pitch", or "flat" roof
+- **WHEN** the user mentions "gable", "hip", "mono-pitch", or "flat" roof (EN); OR "štítová", "valbová", "jednosklovitá", or "plochá" (SK)
 - **THEN** `roof_type` SHALL be recorded with the value (must be one of: Gable, Hip, Mono-pitch, Flat)
 
 #### Scenario: Roof pitch extracted
@@ -20,15 +20,15 @@ The system SHALL scan the user's message for each of the 9 construction paramete
 - **THEN** `roof_pitch` SHALL be recorded as an integer
 
 #### Scenario: Attic usage extracted
-- **WHEN** the user mentions attic usage as "none", "storage", or "living space"
+- **WHEN** the user mentions attic usage as "none", "storage", or "living space" (EN); OR "žiadne", "skladovací priestor", or "obytný priestor" (SK)
 - **THEN** `attic_usage` SHALL be recorded
 
 #### Scenario: Eaves shape extracted
-- **WHEN** the user mentions "open", "boxed", or "flush" eaves
+- **WHEN** the user mentions "open", "boxed", or "flush" eaves (EN); OR "otvorené", "uzatvorené", or "hladké" okapy (SK)
 - **THEN** `eaves_shape` SHALL be recorded
 
 #### Scenario: Wall construction extracted
-- **WHEN** the user mentions "brick", "SIP panels", "concrete block", or "mixed" wall construction
+- **WHEN** the user mentions "brick", "SIP panels", "concrete block", or "mixed" wall construction (EN); OR "tehlové steny", "SIP panely", "betónové tvárnice", or "zmiešaná konštrukcia" (SK)
 - **THEN** `wall_construction` SHALL be recorded
 
 #### Scenario: Location extracted

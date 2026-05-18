@@ -1,0 +1,100 @@
+{
+  "sidebar": {
+    "title": "Asistent návrhov",
+    "greeting": "Ahoj! Pomôžem vám vytvoriť a upraviť stavebné návrhy. Na začiatok potrebujem niekoľko údajov: rozmery pôdorysu, sekciu budovy, tvar strechy a rozloženie, tvar rímsy a využitie podkrovia.",
+    "placeholder": "Napíšte správu...",
+    "suggestions": {
+      "generateSample": {
+        "title": "Vygenerovať ukážkový návrh",
+        "message": "Vygeneruj ukážkový stavebný návrh: dom 10x12m so sedlovou strechou so sklonom 30°, otvorené rímsy, tehlové steny, umiestnený v Bratislave, skladovacie podkrovie a previs 450mm."
+      },
+      "howHelp": {
+        "title": "Ako mi môžete pomôcť?",
+        "message": "Ako mi môžete pomôcť?"
+      },
+      "whatInfo": {
+        "title": "Aké informácie potrebujem na návrh?",
+        "message": "Aké informácie potrebujem na vygenerovanie návrhu?"
+      },
+      "whatsPrice": {
+        "title": "Aká je cena?",
+        "message": "Aká je cena?"
+      },
+      "clearDesigns": {
+        "title": "Vymazať návrhy.",
+        "message": "Vymazať aktuálne návrhy."
+      }
+    }
+  },
+  "designs": {
+    "heading": "Návrhy",
+    "empty": "Zatiaľ nie sú dostupné žiadne návrhy. Odošlite požiadavku na vygenerovanie prvého návrhu.",
+    "generating": "Generujem krovovú konštrukciu...",
+    "designInProgress": "Návrh sa spracováva",
+    "materialEstimate": "Odhad materiálu",
+    "price": "Cena:",
+    "currency": "€",
+    "labels": {
+      "totalTrusses": "Väzníky",
+      "timberVolume": "Objem dreva",
+      "totalJoints": "Styčníky",
+      "roofArea": "Plocha strechy"
+    },
+    "params": {
+      "buildingType": "Typ budovy",
+      "floorPlanDimensions": "Rozmery pôdorysu",
+      "roofType": "Typ strechy",
+      "roofPitch": "Sklon strechy",
+      "atticUsage": "Využitie podkrovia",
+      "eavesShape": "Tvar rímsy",
+      "wallConstruction": "Konštrukcia stien",
+      "location": "Umiestnenie",
+      "overhang": "Previs"
+    }
+  },
+  "pricing": {
+    "title": "Rozpis cien",
+    "floorArea": "Pôdorysná plocha",
+    "floorAreaTooltip": "Šírka × Výška pôdorysu",
+    "joints": "Styčníky",
+    "jointsTooltip": "Pôdorysná plocha × 1,32 (simulovaný počet styčníkov)",
+    "gussetPlateCost": "Cena styčníkových dosiek",
+    "gussetPlateCostTooltip": "Celkový počet styčníkov × Cena za styčník (40 Kč)",
+    "timberVolume": "Objem dreva",
+    "timberVolumeTooltip": "Pôdorysná plocha × 0,254 m³/m² (koeficient objemu dreva)",
+    "timberCost": "Cena dreva",
+    "timberCostTooltip": "Objem dreva × Cena dreva za m³ (4 500 Kč)",
+    "trusses": "Väzníky",
+    "trussesTooltip": "Pôdorysná plocha × 0,147 (simulovaný počet väzníkov)",
+    "assemblyCost": "Cena montáže",
+    "assemblyCostTooltip": "Celkový počet väzníkov ÷ 20 × Cena montáže za šaržu (15 000 Kč)",
+    "hangerCost": "Cena zavesov",
+    "hangerCostTooltip": "Celkový počet väzníkov × Cena zavesu za väzník (100 Kč)",
+    "subtotal": "Medzisúčet",
+    "subtotalTooltip": "Súčet ceny styčníkových dosiek + ceny dreva + ceny montáže + ceny zavesov",
+    "roofType": "Typ strechy",
+    "roofTypeTooltip": "Koeficient zložitosti podľa typu strechy (Sedlová: ×1,0, Valbová: ×1,3, Pultová: ×0,9, Plochá: ×0,8)",
+    "totalCZK": "Celkom (Kč)",
+    "totalCZKTooltip": "Medzisúčet × Koeficient typu strechy",
+    "totalEUR": "Celkom (€)",
+    "totalEURTooltip": "Celkom Kč ÷ 25 (prevodný kurz Kč na €)",
+    "unknown": "Neznámy",
+    "error": "Rozpis cien nedostupný — chýbajúce alebo nespracovateľné parametre návrhu.",
+    "storedPrice": "Uložená cena:",
+    "exclVAT": "(bez DPH)"
+  },
+  "alerts": {
+    "fileTooLarge": "Súbor \"{fileName}\" je príliš veľký (max. 2MB). Preskakujem.",
+    "uploadLimit": "Limit nahrávania dosiahnutý! Pridanie \"{fileName}\" by prekročilo maximálnu veľkosť kontextu. Nahrajte súbory v menších dávkach.",
+    "csvParseError": "Nepodarilo sa spracovať CSV súbor \"{fileName}\".",
+    "excelParseError": "Nepodarilo sa spracovať Excel súbor \"{fileName}\"."
+  },
+  "metadata": {
+    "title": "Návrhový asistent",
+    "description": "Asistent pre návrh krovových konštrukcií"
+  },
+  "addDesign": {
+    "buttonLabel": "Pridať testovací návrh",
+    "testDesignLabel": "Testovací návrh #{id}"
+  }
+}

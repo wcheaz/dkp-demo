@@ -36,6 +36,8 @@
 # - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
+import functools
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -55,8 +57,14 @@ from pydantic_ai.settings import ModelSettings
 import os
 from dotenv import load_dotenv
 
+logger = logging.getLogger("agent.timing")
+
 KNOWLEDGE_BASE_DIR = (
     Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-english"
+)
+
+KNOWLEDGE_BASE_SLOVAK_DIR = (
+    Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-slovak"
 )
 
 SKILLS_DIR = Path(__file__).resolve().parent.parent.parent / ".agents" / "skills"
@@ -65,6 +73,8 @@ load_dotenv(dotenv_path="../.env")
 
 
 class DeepSeekModel(OpenAIModel):
+    _step_counter: int = 0
+
     def _ensure_thinking_parts(self, messages: list[ModelMessage]) -> None:
         for msg in messages:
             if isinstance(msg, ModelResponse):
@@ -92,8 +102,31 @@ class DeepSeekModel(OpenAIModel):
         model_settings: ModelSettings | None,
         model_request_parameters: ModelRequestParameters,
     ) -> ModelResponse:
-        self._ensure_thinking_parts(messages)
-        return await super().request(messages, model_settings, model_request_parameters)
+        self._step_counter += 1
+        step = self._step_counter
+        t0 = time.perf_counter()
+        logger.info("[model] inference step %d started", step)
+        try:
+            self._ensure_thinking_parts(messages)
+            result = await super().request(messages, model_settings, model_request_parameters)
+            elapsed = time.perf_counter() - t0
+            tool_calls = [p for p in result.parts if isinstance(p, ToolCallPart)]
+            if tool_calls:
+                tool_names = [tc.tool_name for tc in tool_calls]
+                logger.info(
+                    "[model] inference step %d completed in %.2fs -> tool calls: %s",
+                    step, elapsed, tool_names,
+                )
+            else:
+                logger.info(
+                    "[model] inference step %d completed in %.2fs -> final response",
+                    step, elapsed,
+                )
+            return result
+        except Exception:
+            elapsed = time.perf_counter() - t0
+            logger.info("[model] inference step %d FAILED after %.2fs", step, elapsed)
+            raise
 
     @asynccontextmanager
     async def request_stream(
@@ -103,11 +136,22 @@ class DeepSeekModel(OpenAIModel):
         model_request_parameters: ModelRequestParameters,
         run_context: Any | None = None,
     ) -> AsyncIterator[StreamedResponse]:
-        self._ensure_thinking_parts(messages)
-        async with super().request_stream(
-            messages, model_settings, model_request_parameters, run_context
-        ) as stream:
-            yield stream
+        self._step_counter += 1
+        step = self._step_counter
+        t0 = time.perf_counter()
+        logger.info("[model] inference step %d started (streamed)", step)
+        try:
+            self._ensure_thinking_parts(messages)
+            async with super().request_stream(
+                messages, model_settings, model_request_parameters, run_context
+            ) as stream:
+                yield stream
+            elapsed = time.perf_counter() - t0
+            logger.info("[model] inference step %d stream completed in %.2fs", step, elapsed)
+        except Exception:
+            elapsed = time.perf_counter() - t0
+            logger.info("[model] inference step %d FAILED after %.2fs", step, elapsed)
+            raise
 
 
 model = DeepSeekModel(
@@ -151,6 +195,7 @@ class YourState(BaseModel):
     last_knowledge_result: Optional[str] = None
     # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
+    locale: str = "sk"
 
 
 # ============================================================================
@@ -193,6 +238,45 @@ class StateDeps:
 # 4. Configure retries, model_settings, or other Agent parameters as needed
 # 5. Uncomment and adapt the code below
 # ============================================================================
+_BASE_PROMPT = (
+    "You are a truss and roof engineering assistant with access to a knowledge base "
+    "of 33 construction projects designed by medop strechy s.r.o.\n\n"
+    "ABSOLUTE RULES:\n"
+    "- NEVER use emojis or Unicode symbols. Output plain ASCII text only.\n"
+    "- NEVER narrate or explain your actions. Call all tools silently, then output only the final result.\n"
+    "- FORBIDDEN: 'Let me...', 'I will...', 'Great!', 'Based on...', any commentary about tool calls.\n"
+    # ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove if agent becomes too weak) ----
+    "- KNOWLEDGE BOUNDARY: Only answer domain-specific questions (trusses, roofs, construction, "
+    "engineering, materials, pricing, project details) using information retrieved from "
+    "query_knowledge_base or get_knowledge_summary. If the knowledge base does not contain "
+    "relevant information for a domain question, respond that you do not have that information. "
+    "NEVER supplement answers with your own training data, general construction knowledge, or "
+    "fabricated content. Off-topic or casual conversation (greetings, meta-questions) is exempt.\n"
+    # ---- END KNOWLEDGE BOUNDARY CONSTRAINTS ----
+    "\n"
+    "Tool catalog:\n"
+    "- get_knowledge_summary: Overview of available knowledge base content.\n"
+    "- query_knowledge_base: Search for specific technical information.\n"
+    "- generate_design: Generate a design entry with current parameters.\n"
+    "- modify_design_entry: Modify an existing design's image or prompt text.\n"
+    "- update_design_parameters: Update collected construction parameters.\n"
+    "- generate_quote: Estimate pricing based on design parameters.\n"
+    "- reset_design: Reset or remove design entries and clear parameters.\n\n"
+    "For the full decision-loop workflow, parameter extraction rules, collection loop instructions, "
+    "pricing formula details, and response formatting guidelines, call load_skill('run-generate-design'). "
+    "Always load this skill before handling any design-related request."
+)
+
+_LANGUAGE_INSTRUCTIONS: dict[str, str] = {
+    "sk": "\n\nIMPORTANT: Respond in Slovak (Slovenčina). All user-facing text must be in Slovak.",
+    "en": "\n\nRespond in English.",
+}
+
+
+def get_system_prompt(locale: str = "sk") -> str:
+    return _BASE_PROMPT + _LANGUAGE_INSTRUCTIONS.get(locale, _LANGUAGE_INSTRUCTIONS["sk"])
+
+
 agent = Agent(
     model,
     deps_type=StateDeps,
@@ -200,30 +284,18 @@ agent = Agent(
         SkillsCapability(
             directories=[str(SKILLS_DIR)],
             exclude_tools=["run_skill_script", "list_skills"],
-            validate=True,
-            auto_reload=True,
+            validate=False,
+            auto_reload=False,
         )
     ],
-    system_prompt=(
-        "You are a truss and roof engineering assistant with access to a knowledge base "
-        "of 33 construction projects designed by medop strechy s.r.o.\n\n"
-        "ABSOLUTE RULES:\n"
-        "- NEVER use emojis or Unicode symbols. Output plain ASCII text only.\n"
-        "- NEVER narrate or explain your actions. Call all tools silently, then output only the final result.\n"
-        "- FORBIDDEN: 'Let me...', 'I will...', 'Great!', 'Based on...', any commentary about tool calls.\n\n"
-        "Tool catalog:\n"
-        "- get_knowledge_summary: Overview of available knowledge base content.\n"
-        "- query_knowledge_base: Search for specific technical information.\n"
-        "- generate_design: Generate a design entry with current parameters.\n"
-        "- modify_design_entry: Modify an existing design's image or prompt text.\n"
-        "- update_design_parameters: Update collected construction parameters.\n"
-        "- generate_quote: Estimate pricing based on design parameters.\n"
-        "- reset_design: Reset or remove design entries and clear parameters.\n\n"
-        "For the full decision-loop workflow, parameter extraction rules, collection loop instructions, "
-        "pricing formula details, and response formatting guidelines, call load_skill('run-generate-design'). "
-        "Always load this skill before handling any design-related request."
-    ),
+    system_prompt=_BASE_PROMPT,
 )
+
+
+@agent.system_prompt
+def locale_instruction(ctx: RunContext[StateDeps]) -> str:
+    locale = ctx.deps.state.locale if ctx.deps.state.locale else "sk"
+    return _LANGUAGE_INSTRUCTIONS.get(locale, _LANGUAGE_INSTRUCTIONS["sk"])
 
 
 # ============================================================================
@@ -265,7 +337,26 @@ agent = Agent(
 import re
 
 
+def _timed_tool(func):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        t0 = time.perf_counter()
+        try:
+            result = await func(*args, **kwargs)
+            elapsed = time.perf_counter() - t0
+            result_repr = str(result)
+            result_len = len(result_repr)
+            logger.info("[tool] %s completed in %.4fs (%d chars returned)", func.__name__, elapsed, result_len)
+            return result
+        except Exception:
+            elapsed = time.perf_counter() - t0
+            logger.info("[tool] %s FAILED after %.4fs", func.__name__, elapsed)
+            raise
+    return wrapper
+
+
 @agent.tool
+@_timed_tool
 async def generate_quote(
     ctx: RunContext[StateDeps],
     floor_plan_dimensions: str,
@@ -283,7 +374,7 @@ async def generate_quote(
         building_type: Building type (default "Family house")
 
     Returns:
-        The estimated price as an integer (GBP, excl. VAT).
+        The estimated price as an integer (EUR, excl. VAT).
         Returns an error string if dimensions cannot be parsed.
     """
     match = re.match(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?", floor_plan_dimensions.strip(), re.IGNORECASE)
@@ -312,10 +403,11 @@ async def generate_quote(
     factor = roof_type_factors.get(roof_type.strip().lower(), 1.0)
 
     total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
-    return round(total_czk / 30)
+    return round(total_czk / 25)
 
 
 @agent.tool
+@_timed_tool
 async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
     """Query truss and roof engineering knowledge base by reading relevant documents.
 
@@ -327,6 +419,10 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
         Relevant document contents with source file references
     """
     summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    kb_dir = KNOWLEDGE_BASE_DIR
+    if ctx.deps.state.locale == "sk":
+        kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
+        summary_path = KNOWLEDGE_BASE_SLOVAK_DIR / "summary.md"
     try:
         summary_content = summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -337,7 +433,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
 
     subdirs = [
         d
-        for d in KNOWLEDGE_BASE_DIR.iterdir()
+        for d in kb_dir.iterdir()
         if d.is_dir() and not d.name.startswith(".")
     ]
 
@@ -375,7 +471,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
         for md_file in md_files:
             try:
                 content = md_file.read_text(encoding="utf-8")
-                relative = md_file.relative_to(KNOWLEDGE_BASE_DIR.parent.parent)
+                relative = md_file.relative_to(kb_dir.parent.parent)
                 results.append(f"--- Source: {relative} ---\n{content}")
             except FileNotFoundError:
                 missing_files.append(str(md_file))
@@ -402,6 +498,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
 
 
 @agent.tool
+@_timed_tool
 async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
     """Get an overview of what information is available in the knowledge base.
 
@@ -411,7 +508,10 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
     Returns:
         Summary of knowledge base contents organized by subdirectory
     """
-    summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    kb_dir = KNOWLEDGE_BASE_DIR
+    if ctx.deps.state.locale == "sk":
+        kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
+    summary_path = kb_dir / "summary.md"
     try:
         return summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:

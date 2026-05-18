@@ -1,7 +1,11 @@
+import logging
+
 from src.agent import YourState, StateDeps, agent
 import logfire
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 logfire.configure()
 logfire.instrument_pydantic_ai()

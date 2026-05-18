@@ -11,6 +11,9 @@
 // import { YourCustomComponent } from "@/components/your-custom-component";
 
 import { DesignComponent } from "@/components/design-component";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useLanguage } from "@/i18n/language-provider";
+import { useTranslations } from "@/i18n/use-translations";
 import { AgentState, MaterialStats } from "@/lib/types";
 import {
   useCoAgent,
@@ -24,38 +27,48 @@ import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
 export default function CopilotKitPage() {
+  return <CopilotKitPageInner />;
+}
+
+function CopilotKitPageInner() {
+  const t = useTranslations();
+
+  const labels = useMemo(() => ({
+    title: t("sidebar.title"),
+    initial: t("sidebar.greeting"),
+  }), [t]);
+
+  const suggestions = useMemo(() => [
+    {
+      title: t("sidebar.suggestions.generateSample.title"),
+      message: t("sidebar.suggestions.generateSample.message"),
+    },
+    {
+      title: t("sidebar.suggestions.howHelp.title"),
+      message: t("sidebar.suggestions.howHelp.message"),
+    },
+    {
+      title: t("sidebar.suggestions.whatInfo.title"),
+      message: t("sidebar.suggestions.whatInfo.message"),
+    },
+    {
+      title: t("sidebar.suggestions.whatsPrice.title"),
+      message: t("sidebar.suggestions.whatsPrice.message"),
+    },
+    {
+      title: t("sidebar.suggestions.clearDesigns.title"),
+      message: t("sidebar.suggestions.clearDesigns.message"),
+    },
+  ], [t]);
+
   return (
-    <main>
+    <main className="relative">
       <CopilotSidebar
         defaultOpen={true}
         disableSystemMessage={true}
         clickOutsideToClose={false}
-        labels={{
-          title: "Design Assistant",
-          initial: "Hi! I can help you generate and customize building designs. To get started, I'll need a few details: floor plan dimensions, building section, roof shape and layout, eaves shape, and attic usage.",
-        }}
-        suggestions={[
-          {
-            title: "Generate a sample design",
-            message: "Generate a sample building design: a 10x12m house with a Gable roof at 30° pitch, Open eaves, Brick walls, located in Bratislava, with Storage attic and 450mm overhang.",
-          },
-          {
-            title: "How can you help me?",
-            message: "How can you help me?",
-          },
-          {
-            title: "What info do I need for a design?",
-            message: "What information do I need to generate a design?",
-          },
-          {
-            title: "What's the price?",
-            message: "What's the price?",
-          },
-          {
-            title: "Clear designs.",
-            message: "Clear the current designs.",
-          },
-        ]}
+        labels={labels}
+        suggestions={suggestions}
         Input={CustomInput}
       >
         <YourMainContent />
@@ -68,6 +81,7 @@ function CustomInput(props: InputProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<{ name: string, content: string }[]>([]);
+  const t = useTranslations();
 
   // Safety limits: ~400k chars is approx 100k tokens. Limit file size to avoid reading massive files.
   const MAX_TOTAL_CHARS = 400000;
@@ -83,7 +97,7 @@ function CustomInput(props: InputProps) {
     Array.from(files).forEach(file => {
       // 1. Check File Size BEFORE reading
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        alert(`File "${file.name}" is too large (max 2MB). Skipping.`);
+        alert(t("alerts.fileTooLarge", { fileName: file.name }));
         processedCount++;
         if (processedCount === files.length) finalizeUpload(newFiles);
         return;
@@ -95,7 +109,7 @@ function CustomInput(props: InputProps) {
         const newTotal = newFiles.reduce((sum, f) => sum + f.content.length, 0);
 
         if (currentTotal + newTotal + content.length > MAX_TOTAL_CHARS) {
-          alert(`Upload limit reached! Adding "${name}" would exceed the maximum context size. Please upload files in smaller batches.`);
+          alert(t("alerts.uploadLimit", { fileName: name }));
         } else {
           newFiles.push({ name: name, content });
         }
@@ -116,7 +130,7 @@ function CustomInput(props: InputProps) {
           },
           error: (error) => {
             console.error("CSV Parse Error:", error);
-            alert(`Failed to parse CSV file "${file.name}".`);
+            alert(t("alerts.csvParseError", { fileName: file.name }));
             processedCount++;
             if (processedCount === files.length) finalizeUpload(newFiles);
           }
@@ -142,7 +156,7 @@ function CustomInput(props: InputProps) {
             processFileContent(file.name, csvContent);
           } catch (error) {
             console.error("Excel Parse Error:", error);
-            alert(`Failed to parse Excel file "${file.name}".`);
+            alert(t("alerts.excelParseError", { fileName: file.name }));
             processedCount++;
             if (processedCount === files.length) finalizeUpload(newFiles);
           }
@@ -248,7 +262,7 @@ function CustomInput(props: InputProps) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
+          placeholder={t("sidebar.placeholder")}
           disableBranding
           className="flex-1 w-full max-h-40 overflow-y-auto overflow-x-hidden bg-transparent border-none focus:ring-0 p-3 resize-none outline-none text-base text-[#d4d4d4] placeholder-[#858585]"
           autosuggestionsConfig={{
@@ -327,6 +341,16 @@ function YourMainContent() {
       parameters: {},
     },
   });
+
+  const { locale } = useLanguage();
+
+  useEffect(() => {
+    if (latestStateRef.current.locale !== locale) {
+      const newState = { ...latestStateRef.current, locale };
+      setState(newState);
+      latestStateRef.current = newState;
+    }
+  }, [locale]);
 
   const designs = useMemo(() => {
     const d = state.designs ?? [];
@@ -408,7 +432,7 @@ function YourMainContent() {
       { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
       { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
-      { name: "price", type: "number", description: "Estimated price in GBP (integer, excl. VAT)", required: false },
+      { name: "price", type: "number", description: "Estimated price in EUR (integer, excl. VAT)", required: false },
     ],
     handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang, price }) {
       const currentState = latestStateRef.current;
@@ -482,7 +506,7 @@ function YourMainContent() {
       {
         name: "price",
         type: "string",
-        description: "The estimated price to set (integer, GBP excl. VAT). Optional.",
+        description: "The estimated price to set (integer, EUR excl. VAT). Optional.",
         required: false,
       },
     ],
@@ -605,16 +629,17 @@ function YourMainContent() {
 
       const currentDesigns = latestStateRef.current.designs ?? [];
       const validIds = currentDesigns.map((d) => d.id);
+      const paramKeySet = new Set<string>(ALL_PARAM_KEYS);
 
       if (clear_parameters && clear_parameters.length > 0) {
-        const invalid = clear_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        const invalid = clear_parameters.filter((k) => !paramKeySet.has(k));
         if (invalid.length > 0) {
           return `Error: invalid parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
         }
       }
 
       if (clear_session_parameters && clear_session_parameters.length > 0) {
-        const invalid = clear_session_parameters.filter((k) => !ALL_PARAM_KEYS.includes(k as any));
+        const invalid = clear_session_parameters.filter((k) => !paramKeySet.has(k));
         if (invalid.length > 0) {
           return `Error: invalid session parameter keys: ${invalid.join(", ")}. Valid keys: ${ALL_PARAM_KEYS.join(", ")}.`;
         }
@@ -704,15 +729,15 @@ function YourMainContent() {
   });
 
   useCopilotReadable({
-    description: "The application state data - customize this for your application",
-    value: JSON.stringify({ designs, parameters: state.parameters }),
+    description: "The application state data including the current UI locale. The agent MUST respond in the language specified by 'locale' (sk = Slovak, en = English).",
+    value: JSON.stringify({ designs, parameters: state.parameters, locale }),
   });
 
   return (
-    <div
-      style={{}}
-      className="h-screen flex items-center pt-[10vh] flex-col transition-colors duration-300"
-    >
+    <div className="h-screen w-full flex items-center pt-[10vh] flex-col transition-colors duration-300">
+      <div className="w-full flex justify-start px-4 -mt-6 mb-2">
+        <LanguageToggle />
+      </div>
       <DesignComponent state={state} setState={setState} />
     </div>
   );
