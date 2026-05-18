@@ -244,8 +244,8 @@ agent = Agent(
         SkillsCapability(
             directories=[str(SKILLS_DIR)],
             exclude_tools=["run_skill_script", "list_skills"],
-            validate=True,
-            auto_reload=True,
+            validate=False,
+            auto_reload=False,
         )
     ],
     system_prompt=_BASE_PROMPT,
