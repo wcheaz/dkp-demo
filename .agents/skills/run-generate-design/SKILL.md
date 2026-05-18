@@ -18,23 +18,6 @@ This skill encodes the pydantic-ai agent's full single-turn decision loop as a
 step-by-step workflow. Follow it for each user message to produce the same
 output the agent would — without running any Python code.
 
-<!-- ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove this block if agent becomes too weak) ---- -->
-
-## Knowledge Boundary Rule
-
-All technical and domain-specific answers **MUST** come from the knowledge base
-(`query_knowledge_base` / `get_knowledge_summary` tool outputs). If neither tool
-returns relevant information for a user's question, respond with:
-
-> I do not have that information in my knowledge base.
-
-**Do NOT** substitute general knowledge, training data, or fabricated content
-for missing knowledge base results. This applies to **ALL** intent categories,
-including `general-response`. Off-topic casual conversation (greetings,
-meta-questions about the agent itself) is exempt from this rule.
-
-<!-- ---- END KNOWLEDGE BOUNDARY CONSTRAINTS ---- -->
-
 ## Workflow
 
 ### Step 1 — Receive User Input
@@ -58,13 +41,6 @@ against both English and Slovak trigger phrases:
 | `design-reset/partial` | "change X and Y but keep Z" | "zmeň X a Y ale nechaj Z" |
 | `design-reset/full` | "scrap this design", "delete this design", "start over completely" | "začnime odznova", "zmazať návrh", "vymazať", "odznova" |
 | `general-response` | Anything that doesn't match the above | Čokoľvek, čo nezodpovedá vyššie uvedenému |
-
-<!-- ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove if agent becomes too weak) ---- -->
-For `general-response`, first attempt a knowledge base search (step 4b). If no
-relevant results are found, inform the user the information is not available.
-Do **not** answer domain questions from general knowledge — defer to the
-Knowledge Boundary Rule above.
-<!-- ---- END KNOWLEDGE BOUNDARY CONSTRAINTS ---- -->
 
 If design AND pricing are both present, flag both intents (pricing executes first).
 
