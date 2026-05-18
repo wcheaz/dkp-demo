@@ -1,7 +1,17 @@
 # Knowledge Base Search Reference
 
-The knowledge base lives at `agent/knowledge/trusses-ai-english/` and contains
-33 project subdirectories plus a top-level `summary.md`.
+## Locale-aware knowledge base selection
+
+The knowledge base directory depends on the current agent locale (`sk` or `en`):
+
+| Locale | Knowledge base directory | Summary file |
+|---|---|---|
+| `sk` | `agent/knowledge/trusses-ai-slovak/` | `agent/knowledge/trusses-ai-slovak/summary.md` |
+| `en` | `agent/knowledge/trusses-ai-english/` | `agent/knowledge/trusses-ai-english/summary.md` |
+
+Both directories contain the same 33 project subdirectories. The Slovak directory
+contains original Slovak-language documents; the English directory contains
+English translations. Always use the directory that matches the current locale.
 
 ## Scoring Algorithm
 
@@ -22,9 +32,11 @@ For each user query:
 6. Format each document with a source header:
 
 ```
---- Source: knowledge/trusses-ai-english/{subdir-name}/{file}.md ---
+--- Source: knowledge/{kb-dir}/{subdir-name}/{file}.md ---
 {file contents}
 ```
+
+Where `{kb-dir}` is `trusses-ai-slovak` or `trusses-ai-english` based on locale.
 
 ## Fallback
 
@@ -34,13 +46,9 @@ alphabetically.
 ## Source Citation Format
 
 When citing sources in the final response, use the relative file path from the
-knowledge base directory:
+knowledge base directory matching the current locale:
 
 ```
-Source: knowledge/trusses-ai-english/{subdir}/{file}.md
+Source: knowledge/trusses-ai-slovak/{subdir}/{file}.md   (locale sk)
+Source: knowledge/trusses-ai-english/{subdir}/{file}.md  (locale en)
 ```
-
-## Knowledge Summary Path
-
-The overview summary is at:
-`agent/knowledge/trusses-ai-english/summary.md`

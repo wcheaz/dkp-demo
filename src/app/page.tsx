@@ -427,7 +427,7 @@ function YourMainContent() {
       { name: "wall_construction", type: "string", description: "Wall construction (Brick, SIP panels, Concrete block, Mixed)", required: false },
       { name: "location", type: "string", description: "Location (e.g. Bratislava)", required: false },
       { name: "overhang", type: "string", description: "Overhang (e.g. 450mm)", required: false },
-      { name: "price", type: "number", description: "Estimated price in GBP (integer, excl. VAT)", required: false },
+      { name: "price", type: "number", description: "Estimated price in EUR (integer, excl. VAT)", required: false },
     ],
     handler({ prompt_text, building_type, floor_plan_dimensions, roof_type, roof_pitch, attic_usage, eaves_shape, wall_construction, location, overhang, price }) {
       const currentState = latestStateRef.current;
@@ -501,7 +501,7 @@ function YourMainContent() {
       {
         name: "price",
         type: "string",
-        description: "The estimated price to set (integer, GBP excl. VAT). Optional.",
+        description: "The estimated price to set (integer, EUR excl. VAT). Optional.",
         required: false,
       },
     ],

@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Simulate get_knowledge_summary output
-When the intent is `knowledge-query` with sub-type `summary`, the system SHALL read `agent/knowledge/trusses-ai-english/summary.md` and return its full contents.
+When the intent is `knowledge-query` with sub-type `summary`, the system SHALL read the locale-appropriate summary file and return its full contents. When locale is `sk`, read `agent/knowledge/trusses-ai-slovak/summary.md`. When locale is `en`, read `agent/knowledge/trusses-ai-english/summary.md`.
 
 #### Scenario: Summary returned
 - **WHEN** knowledge summary is requested
@@ -12,7 +12,8 @@ When the intent is `knowledge-query` with sub-type `specific`, the system SHALL 
 
 #### Scenario: Keyword search across projects
 - **WHEN** a specific knowledge query is received
-- **THEN** each subdirectory SHALL be scored: name matches get 2 points per word, section-content matches get 1 point per word
+- **THEN** the system SHALL select the knowledge base directory matching the current locale (`trusses-ai-slovak` for `sk`, `trusses-ai-english` for `en`)
+- **THEN** each subdirectory in the selected knowledge base SHALL be scored: name matches get 2 points per word, section-content matches get 1 point per word
 - **THEN** the top 3 scoring subdirectories SHALL have their `.md` files read and returned with `--- Source: <relative-path> ---` headers
 
 #### Scenario: No matches found
@@ -27,7 +28,7 @@ When the intent is `pricing-quote`, the system SHALL compute the price using the
 - **THEN** compute: `floor_area = N * M`, `total_joints = round(floor_area * 1.32)`, `timber_volume = floor_area * 0.254`, `total_trusses = round(floor_area * 0.147)`
 - **THEN** compute CZK costs: `gusset_plates = joints * 40`, `timber = volume * 4500`, `assembly = (trusses/20) * 15000`, `hangers = trusses * 100`
 - **THEN** apply roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
-- **THEN** return the price as an integer (GBP, excl. VAT) where `total_gbp = round(total_czk / 30)`
+- **THEN** return the price as an integer (EUR, excl. VAT) where `total_eur = round(total_czk / 25)`
 
 #### Scenario: Missing floor_plan_dimensions
 - **WHEN** `floor_plan_dimensions` was not extracted

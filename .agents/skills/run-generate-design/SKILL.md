@@ -175,8 +175,8 @@ CZK costs:
 
 Roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
 
-total_gbp = round(total_czk / 30)
-Output: integer (GBP, excl. VAT)
+total_eur = round(total_czk / 25)
+Output: integer (EUR, excl. VAT)
 ```
 
 If `floor_plan_dimensions` was not extracted, output a message asking the user

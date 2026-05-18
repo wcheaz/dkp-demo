@@ -59,6 +59,10 @@ KNOWLEDGE_BASE_DIR = (
     Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-english"
 )
 
+KNOWLEDGE_BASE_SLOVAK_DIR = (
+    Path(__file__).resolve().parent.parent / "knowledge" / "trusses-ai-slovak"
+)
+
 SKILLS_DIR = Path(__file__).resolve().parent.parent.parent / ".agents" / "skills"
 
 load_dotenv(dotenv_path="../.env")
@@ -302,7 +306,7 @@ async def generate_quote(
         building_type: Building type (default "Family house")
 
     Returns:
-        The estimated price as an integer (GBP, excl. VAT).
+        The estimated price as an integer (EUR, excl. VAT).
         Returns an error string if dimensions cannot be parsed.
     """
     match = re.match(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?", floor_plan_dimensions.strip(), re.IGNORECASE)
@@ -331,7 +335,7 @@ async def generate_quote(
     factor = roof_type_factors.get(roof_type.strip().lower(), 1.0)
 
     total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
-    return round(total_czk / 30)
+    return round(total_czk / 25)
 
 
 @agent.tool
@@ -346,6 +350,10 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
         Relevant document contents with source file references
     """
     summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    kb_dir = KNOWLEDGE_BASE_DIR
+    if ctx.deps.state.locale == "sk":
+        kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
+        summary_path = KNOWLEDGE_BASE_SLOVAK_DIR / "summary.md"
     try:
         summary_content = summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -356,7 +364,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
 
     subdirs = [
         d
-        for d in KNOWLEDGE_BASE_DIR.iterdir()
+        for d in kb_dir.iterdir()
         if d.is_dir() and not d.name.startswith(".")
     ]
 
@@ -394,7 +402,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
         for md_file in md_files:
             try:
                 content = md_file.read_text(encoding="utf-8")
-                relative = md_file.relative_to(KNOWLEDGE_BASE_DIR.parent.parent)
+                relative = md_file.relative_to(kb_dir.parent.parent)
                 results.append(f"--- Source: {relative} ---\n{content}")
             except FileNotFoundError:
                 missing_files.append(str(md_file))
@@ -430,7 +438,10 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
     Returns:
         Summary of knowledge base contents organized by subdirectory
     """
-    summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
+    kb_dir = KNOWLEDGE_BASE_DIR
+    if ctx.deps.state.locale == "sk":
+        kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
+    summary_path = kb_dir / "summary.md"
     try:
         return summary_path.read_text(encoding="utf-8")
     except FileNotFoundError:

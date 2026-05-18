@@ -25,9 +25,9 @@ Input: floor_plan_dimensions (e.g. "10x15m"), roof_type, roof_pitch
 8. total_czk = (7920 + 171450 + 16500 + 2200) * factor
              = 198,070 * factor
 
-9. For Gable (factor=1.0): total_gbp = round(198070 / 30) = 6,602
+9. For Gable (factor=1.0): total_eur = round(198070 / 25) = 7,923
 
-10. Output: 6602 (integer, GBP excl. VAT)
+10. Output: 7923 (integer, EUR excl. VAT)
 ```
 
 ## Example: 8x12m Hip roof
@@ -44,16 +44,24 @@ assembly = (14/20) * 15000 = 10,500
 hangers = 14 * 100 = 1,400
 
 total_czk = (5080 + 109728 + 10500 + 1400) * 1.3 = 164,710.4
-total_gbp = round(164710.4 / 30) = 5,490
+total_eur = round(164710.4 / 25) = 6,588
 
-Output: 5490 (integer, GBP excl. VAT)
+Output: 6588 (integer, EUR excl. VAT)
 ```
 
 ## Missing dimensions
 
-If `floor_plan_dimensions` was not extracted, the output must be:
+If `floor_plan_dimensions` was not extracted, the output must ask for dimensions
+in the current locale:
 
+**English (locale `en`):**
 ```
 To generate a price estimate, I need the floor plan dimensions.
 Please provide the dimensions (e.g. 10x15m).
+```
+
+**Slovak (locale `sk`):**
+```
+Na výpočet odhadu ceny potrebujem rozmery pôdorysu.
+Prosím, zadajte rozmery (napr. 10x15m).
 ```

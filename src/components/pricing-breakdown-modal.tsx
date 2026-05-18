@@ -18,7 +18,7 @@ export interface PricingBreakdown {
   roofType: string;
   roofTypeFactor: number;
   totalCZK: number;
-  totalGBP: number;
+  totalEUR: number;
 }
 
 const ROOF_TYPE_FACTORS: Record<string, number> = {
@@ -59,7 +59,7 @@ export function computePricingBreakdown(
   const subtotalCZK =
     gussetPlateCost + timberCost + assemblyCost + hangerCost;
   const totalCZK = subtotalCZK * roofTypeFactor;
-  const totalGBP = Math.round(totalCZK / 30);
+  const totalEUR = Math.round(totalCZK / 25);
 
   return {
     floorArea,
@@ -74,7 +74,7 @@ export function computePricingBreakdown(
     roofType: roofTypeStr,
     roofTypeFactor,
     totalCZK,
-    totalGBP,
+    totalEUR,
   };
 }
 
@@ -208,9 +208,9 @@ export function PricingBreakdownModal({
                 </td>
               </tr>
               <tr className="font-bold">
-                <td className="py-1.5 text-gray-100 underline decoration-dotted cursor-pointer" title={t("totalGBPTooltip")}>{t("totalGBP")}</td>
+                <td className="py-1.5 text-gray-100 underline decoration-dotted cursor-pointer" title={t("totalEURTooltip")}>{t("totalEUR")}</td>
                 <td className="py-1.5 text-white text-right">
-                  &pound;{fmt(breakdown.totalGBP)}
+                  &euro;{fmt(breakdown.totalEUR)}
                 </td>
               </tr>
             </tbody>
@@ -223,7 +223,7 @@ export function PricingBreakdownModal({
 
         {price != null && (
           <p className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-400">
-            {t("storedPrice")} {price === "---" ? "---" : `\u00A3${new Intl.NumberFormat(numberLocale).format(Number(price))}`} {t("exclVAT")}
+            {t("storedPrice")} {price === "---" ? "---" : `\u20AC${new Intl.NumberFormat(numberLocale).format(Number(price))}`} {t("exclVAT")}
           </p>
         )}
       </div>
