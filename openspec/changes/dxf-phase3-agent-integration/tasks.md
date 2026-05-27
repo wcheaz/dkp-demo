@@ -22,7 +22,7 @@
     - `cd agent && python -c "import base64; from src.agent import DesignEntry, DesignParameters; from src.dxf_builder import build_dxf; params = DesignParameters(floorPlanDimensions='10x15m', roofType='Gable', roofPitch=30); entry = DesignEntry(id=1, imageUrl='/x.svg', promptText='t', parameters=params); dxf_bytes = build_dxf(params); b64 = base64.b64encode(dxf_bytes).decode('ascii'); assert b64 == base64.b64encode(dxf_bytes).decode('ascii')"` exits 0
   - Stop and hand off if: `dxf_builder.build_dxf` signature has changed since Phase 2 and the call does not match.
 
-- [ ] 2.2 Write tests for `generate_dxf` tool logic in `test/test_generate_dxf.py`
+- [x] 2.2 Write tests for `generate_dxf` tool logic in `test/test_generate_dxf.py`
   - Scope: `test/test_generate_dxf.py`
   - Change: Unit tests covering: (a) successful DXF generation for a design with complete parameters, verifying `dxfContent` is set to valid base64, (b) error return when design ID not found, (c) error return when design has no parameters, (d) error return when `build_dxf` raises `ValueError` for invalid roofType. Tests instantiate `YourState` with mock `DesignEntry` objects, construct `StateDeps`, and call the tool function directly.
   - Done when:
