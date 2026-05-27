@@ -1,7 +1,7 @@
 import math
 import re
 from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import ezdxf
 
@@ -9,12 +9,14 @@ if TYPE_CHECKING:
     from agent.src.agent import DesignParameters
 
 _DIMENSION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?")
+_OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*m?")
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
 LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
 LAYER_TRUSSES = "Trusses"
+LAYER_DIMENSIONS = "Dimensions"
 
 
 def _parse_dimensions(raw: str) -> tuple[float, float]:
@@ -180,6 +182,86 @@ def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
                 (0, y_pos), (w, y_pos),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
+
+
+def _parse_overhang(raw: Optional[str]) -> Optional[float]:
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw) * 1000
+    m = _OVERHANG_RE.match(str(raw).strip())
+    if not m:
+        return None
+    return float(m.group(1)) * 1000
+
+
+def _draw_dimensions(
+    msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm
+) -> None:
+    text_h = 250
+
+    w_dim_offset = d * 0.1
+    dim = msp.add_linear_dim(
+        base=(0, -w_dim_offset),
+        p1=(0, 0),
+        p2=(w, 0),
+        angle=0,
+        dxfattribs={"layer": LAYER_DIMENSIONS},
+    )
+    dim.render()
+
+    d_dim_offset = w * 0.1
+    dim = msp.add_linear_dim(
+        base=(-d_dim_offset, 0),
+        p1=(0, 0),
+        p2=(0, d),
+        angle=90,
+        dxfattribs={"layer": LAYER_DIMENSIONS},
+    )
+    dim.render()
+
+    if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
+        shorter = min(w, d)
+        first_truss_y = shorter * 0.05
+        rh_offset = w * 0.1
+        dim = msp.add_linear_dim(
+            base=(w + rh_offset, 0),
+            p1=(w, first_truss_y),
+            p2=(w, first_truss_y + ridge_height_mm),
+            angle=90,
+            dxfattribs={"layer": LAYER_DIMENSIONS},
+        )
+        dim.render()
+
+    if overhang_mm is not None and overhang_mm > 0:
+        dim = msp.add_linear_dim(
+            base=(w, d + 1500),
+            p1=(w, d),
+            p2=(w + overhang_mm, d),
+            angle=0,
+            dxfattribs={"layer": LAYER_DIMENSIONS},
+        )
+        dim.render()
+
+    label_x = -d_dim_offset
+    label_y = -w_dim_offset - 1500
+
+    msp.add_text(
+        f"Width: {w_m:g}m",
+        dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+    ).dxf.insert = (label_x, label_y)
+
+    msp.add_text(
+        f"Depth: {d_m:g}m",
+        dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+    ).dxf.insert = (label_x, label_y - 500)
+
+    if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
+        ridge_m = round(ridge_height_mm / 1000, 2)
+        msp.add_text(
+            f"Ridge Height: {ridge_m:g}m",
+            dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+        ).dxf.insert = (label_x, label_y - 1000)
 
 
 _ROOF_DRAWERS = {

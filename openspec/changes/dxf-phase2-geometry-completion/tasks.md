@@ -12,7 +12,7 @@
 
 ## 3. Dimensions and annotations
 
-- [ ] 3.1 Add dimension and text annotation functions to `dxf_builder.py`. Add constants `LAYER_DIMENSIONS = "Dimensions"`, a `_parse_overhang(raw: Optional[str]) -> Optional[float]` function, and a `_draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)` function. Add horizontal `msp.add_linear_dim()` for width (below floor plan, offset = 10% of depth), vertical for depth (left of floor plan, offset = 10% of width), vertical for ridge height (right of first truss, gable/hip only), and horizontal for overhang (if parseable). Add TEXT entities for "Width: <W>m", "Depth: <D>m", "Ridge Height: <H>m". Text height = 250mm.
+- [x] 3.1 Add dimension and text annotation functions to `dxf_builder.py`. Add constants `LAYER_DIMENSIONS = "Dimensions"`, a `_parse_overhang(raw: Optional[str]) -> Optional[float]` function, and a `_draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)` function. Add horizontal `msp.add_linear_dim()` for width (below floor plan, offset = 10% of depth), vertical for depth (left of floor plan, offset = 10% of width), vertical for ridge height (right of first truss, gable/hip only), and horizontal for overhang (if parseable). Add TEXT entities for "Width: <W>m", "Depth: <D>m", "Ridge Height: <H>m". Text height = 250mm.
   - Done when: `build_dxf` output for a 10x15m gable building contains a `Dimensions` layer with at least 3 DIMENSION entities and 3 TEXT entities. Flat roof produces no ridge height dimension.
   - Verify by: Running tests, or inspecting DXF output for dimension entity presence and values.
 
