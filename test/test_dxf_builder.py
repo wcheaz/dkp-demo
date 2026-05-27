@@ -1,3 +1,4 @@
+import math
 import sys
 from io import BytesIO, StringIO
 from types import SimpleNamespace
@@ -6,7 +7,15 @@ import ezdxf
 import pytest
 
 sys.path.insert(0, "agent/src")
-from dxf_builder import build_dxf, LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE
+from dxf_builder import (
+    build_dxf,
+    _compute_truss_count,
+    LAYER_FLOOR_PLAN,
+    LAYER_ROOF_OUTLINE,
+    LAYER_TRUSSES,
+    LAYER_DIMENSIONS,
+    LAYER_TITLE_BLOCK,
+)
 
 
 def _params(**kwargs):
@@ -175,3 +184,219 @@ class TestCaseInsensitiveRoofType:
         result = build_dxf(params)
         doc = _read_dxf(result)
         assert doc.dxfversion == "AC1015"
+
+
+_ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS, LAYER_TITLE_BLOCK}
+
+
+class TestTrussCount:
+    def test_10x15m(self):
+        assert _compute_truss_count(10, 15) == 22
+
+    def test_small_building(self):
+        assert _compute_truss_count(3, 4) == 2
+
+    def test_tiny_building_minimum(self):
+        assert _compute_truss_count(0.5, 0.5) == 2
+
+    def test_large_building(self):
+        result = _compute_truss_count(20, 30)
+        assert result == max(2, round(20 * 30 * 0.147))
+
+    def test_square_building(self):
+        result = _compute_truss_count(10, 10)
+        assert result == max(2, round(10 * 10 * 0.147))
+
+
+class TestTrussCrossSectionGable:
+    def test_truss_layer_has_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        count = _compute_truss_count(10, 15)
+        assert len(lines) == count * 3
+
+    def test_first_truss_inset(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        y_coords = sorted(set(round(l.dxf.start.y, 1) for l in lines))
+        first_y = y_coords[0]
+        expected_inset = 10000 * 0.05
+        assert abs(first_y - expected_inset) < 1.0
+
+    def test_triangle_shape(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        first_y = 10000 * 0.05
+        ridge_h = (10000 / 2) * math.tan(30 * math.pi / 180)
+        truss_at_first = [l for l in lines if abs(l.dxf.start.y - first_y) < 1.0 or abs(l.dxf.end.y - first_y) < 1.0]
+        assert len(truss_at_first) == 3
+        y_values = []
+        for l in truss_at_first:
+            y_values.extend([l.dxf.start.y, l.dxf.end.y])
+        has_ridge = any(abs(yv - (first_y + ridge_h)) < 1.0 for yv in y_values)
+        assert has_ridge
+
+
+class TestTrussCrossSectionHip:
+    def test_truss_layer_has_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Hip", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        count = _compute_truss_count(10, 15)
+        assert len(lines) == count * 3
+
+
+class TestTrussCrossSectionMonoPitch:
+    def test_truss_layer_has_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=10)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        count = _compute_truss_count(10, 15)
+        assert len(lines) == count * 3
+
+    def test_right_triangle_shape(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=10)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        first_y = 10000 * 0.05
+        ridge_h = 10000 * math.tan(10 * math.pi / 180)
+        truss_lines = [l for l in lines if abs(l.dxf.start.y - first_y) < 1.0]
+        assert len(truss_lines) >= 1
+        slope_line = [l for l in truss_lines if abs(l.dxf.end.y - (first_y + ridge_h)) < 1.0]
+        assert len(slope_line) >= 1
+
+
+class TestTrussCrossSectionFlat:
+    def test_truss_layer_has_horizontal_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+        count = _compute_truss_count(10, 15)
+        assert len(lines) == count
+        for line in lines:
+            assert abs(line.dxf.start.y - line.dxf.end.y) < 0.01
+
+
+class TestDimensionEntities:
+    def test_width_and_depth_dimensions_present(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
+        assert len(dims) >= 2
+
+    def test_ridge_height_dimension_for_gable(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
+        assert len(dims) >= 3
+
+    def test_no_ridge_height_dimension_for_flat(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
+        assert len(dims) == 2
+
+    def test_overhang_dimension_present(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30, overhang="0.5m")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
+        assert len(dims) >= 4
+
+    def test_text_labels_present(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        texts = _entities_on_layer(msp, LAYER_DIMENSIONS, "TEXT")
+        text_contents = [t.dxf.text for t in texts]
+        assert any("Width: 10m" in t for t in text_contents)
+        assert any("Depth: 15m" in t for t in text_contents)
+        assert any("Ridge Height:" in t for t in text_contents)
+
+    def test_flat_no_ridge_height_text(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        texts = _entities_on_layer(msp, LAYER_DIMENSIONS, "TEXT")
+        text_contents = [t.dxf.text for t in texts]
+        assert not any("Ridge Height:" in t for t in text_contents)
+
+
+class TestTitleBlock:
+    def test_rectangle_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", buildingType="House", location="Bratislava")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "LINE")
+        assert len(lines) == 4
+
+    def test_mtext_content_populated(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", buildingType="House", location="Bratislava")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        mtexts = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "MTEXT")
+        assert len(mtexts) == 5
+        contents = [mtext.text for mtext in mtexts]
+        assert any("House" in c for c in contents)
+        assert any("Bratislava" in c for c in contents)
+        assert any("10x15m" in c for c in contents)
+        assert any("Gable" in c for c in contents)
+        assert any("Date:" in c for c in contents)
+
+    def test_none_fields_use_defaults(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        mtexts = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "MTEXT")
+        contents = [mtext.text for mtext in mtexts]
+        assert any("Building" in c for c in contents)
+        assert any("Location not specified" in c for c in contents)
+
+
+class TestRoundTripAllRoofTypes:
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_all_five_layers_present(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = {l.dxf.name for l in doc.layers}
+        assert _ALL_FIVE_LAYERS <= layer_names
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_valid_dxf_round_trip(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        msp = doc.modelspace()
+        all_entities = list(msp)
+        assert len(all_entities) > 0
