@@ -1,6 +1,6 @@
 ## 1. Freeze shared contract — dxfContent field on DesignEntry
 
-- [ ] 1.1 Add `dxfContent: Optional[str] = None` to the Python `DesignEntry` Pydantic model and the TypeScript `DesignEntry` interface
+- [x] 1.1 Add `dxfContent: Optional[str] = None` to the Python `DesignEntry` Pydantic model and the TypeScript `DesignEntry` interface
   - Scope: `agent/src/agent.py` (Python model), `src/lib/types.ts` (TypeScript interface)
   - Change: Both models gain a `dxfContent` field with `None`/`undefined` default so existing entries and constructors are unaffected.
   - Done when:

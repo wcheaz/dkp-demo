@@ -13,6 +13,7 @@ export interface DesignEntry {
   parameters?: DesignParameters;
   price?: number | "---";
   materialStats?: MaterialStats | null;
+  dxfContent?: string;
 }
 
 export interface DesignParameters {

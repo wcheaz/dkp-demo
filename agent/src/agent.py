@@ -186,6 +186,7 @@ class DesignEntry(BaseModel):
     status: str = "complete"
     parameters: Optional[DesignParameters] = None
     price: Optional[int] = None
+    dxfContent: Optional[str] = None
 
 
 class YourState(BaseModel):
