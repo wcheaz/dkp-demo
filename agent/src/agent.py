@@ -36,6 +36,7 @@
 # - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
+import base64
 import functools
 import logging
 from collections.abc import AsyncIterator
@@ -405,6 +406,38 @@ async def generate_quote(
 
     total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
     return round(total_czk / 25)
+
+
+@agent.tool
+@_timed_tool
+async def generate_dxf(ctx: RunContext[StateDeps], design_id: int) -> str:
+    """Generate a downloadable DXF CAD file for a completed design.
+
+    Args:
+        ctx: Agent context with state
+        design_id: The ID of the design entry to generate DXF for
+
+    Returns:
+        Confirmation string with file size and design ID, or an error message.
+    """
+    from src.dxf_builder import build_dxf
+
+    entry = next((d for d in ctx.deps.state.designs if d.id == design_id), None)
+    if entry is None:
+        return f"No design found with id {design_id}."
+
+    if entry.parameters is None:
+        return f"Design {design_id} has no parameters. Collect parameters first."
+
+    try:
+        dxf_bytes = build_dxf(entry.parameters)
+    except ValueError as exc:
+        return f"Cannot generate DXF: {exc}."
+
+    b64 = base64.b64encode(dxf_bytes).decode("ascii")
+    entry.dxfContent = b64
+    size_kb = len(dxf_bytes) / 1024
+    return f"DXF generated for design {design_id} ({size_kb:.1f} KB, base64-encoded and stored in dxfContent)."
 
 
 @agent.tool

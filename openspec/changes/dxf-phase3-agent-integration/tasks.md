@@ -12,7 +12,7 @@
 
 ## 2. Agent tool — generate_dxf
 
-- [ ] 2.1 Implement the `generate_dxf` agent tool in `agent/src/agent.py`
+- [x] 2.1 Implement the `generate_dxf` agent tool in `agent/src/agent.py`
   - Scope: `agent/src/agent.py`, `test/test_generate_dxf.py`
   - Change: New `@agent.tool` + `@_timed_tool` function `generate_dxf(ctx, design_id: int) -> str` that looks up the design entry by ID, calls `dxf_builder.build_dxf(entry.parameters)`, base64-encodes the result, stores it in `entry.dxfContent`, and returns a confirmation string. Handles three error cases: ID not found, no parameters, and `ValueError` from `build_dxf`.
   - Done when:
