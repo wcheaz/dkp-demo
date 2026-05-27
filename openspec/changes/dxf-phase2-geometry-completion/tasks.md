@@ -6,7 +6,7 @@
 
 ## 2. Truss layout geometry
 
-- [ ] 2.1 Add truss count calculation and cross-section drawing functions to `dxf_builder.py`. Add constants `LAYER_TRUSSES = "Trusses"`, a `_compute_truss_count(width_m, depth_m) -> int` function returning `max(2, round(width_m * depth_m * 0.147))`, and a `_draw_trusses(msp, w, d, roof_key, roof_pitch)` function that draws evenly-spaced cross-section LINE entities on the `Trusses` layer. Cross-section shape depends on roof type: isosceles triangle (gable/hip), right triangle (mono-pitch), horizontal line (flat). Ridge height = `(w/2) * tan(pitch * pi/180)` with defaults of 30° (gable/hip), 10° (mono-pitch). Edge inset = 5% of shorter dimension.
+- [x] 2.1 Add truss count calculation and cross-section drawing functions to `dxf_builder.py`. Add constants `LAYER_TRUSSES = "Trusses"`, a `_compute_truss_count(width_m, depth_m) -> int` function returning `max(2, round(width_m * depth_m * 0.147))`, and a `_draw_trusses(msp, w, d, roof_key, roof_pitch)` function that draws evenly-spaced cross-section LINE entities on the `Trusses` layer. Cross-section shape depends on roof type: isosceles triangle (gable/hip), right triangle (mono-pitch), horizontal line (flat). Ridge height = `(w/2) * tan(pitch * pi/180)` with defaults of 30° (gable/hip), 10° (mono-pitch). Edge inset = 5% of shorter dimension.
   - Done when: `build_dxf` output for a 10x15m gable building with pitch=30 contains a `Trusses` layer with LINE entities forming triangular cross-sections at the expected Y-coordinates, with 22 trusses, first inset by 500mm.
   - Verify by: Running `pytest test/ -k dxf` after writing tests, or manually inspecting DXF in a CAD viewer.
 

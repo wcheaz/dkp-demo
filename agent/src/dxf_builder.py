@@ -1,3 +1,4 @@
+import math
 import re
 from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any
@@ -13,6 +14,7 @@ _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
 LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
+LAYER_TRUSSES = "Trusses"
 
 
 def _parse_dimensions(raw: str) -> tuple[float, float]:
@@ -112,6 +114,74 @@ def _draw_flat(msp, w: float, d: float) -> None:
     )
 
 
+def _compute_truss_count(width_m: float, depth_m: float) -> int:
+    return max(2, round(width_m * depth_m * 0.147))
+
+
+def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
+    count = _compute_truss_count(w / 1000, d / 1000)
+
+    if roof_pitch is None or roof_pitch == 0:
+        if roof_key in ("gable", "hip"):
+            pitch_deg = 30.0
+        elif roof_key == "mono-pitch":
+            pitch_deg = 10.0
+        else:
+            pitch_deg = 0.0
+    else:
+        pitch_deg = float(roof_pitch)
+
+    shorter = min(w, d)
+    inset = shorter * 0.05
+
+    if count == 1:
+        positions = [d / 2]
+    else:
+        span = d - 2 * inset
+        step = span / (count - 1)
+        positions = [inset + i * step for i in range(count)]
+
+    if roof_key in ("gable", "hip"):
+        ridge_h = (w / 2) * math.tan(pitch_deg * math.pi / 180)
+    elif roof_key == "mono-pitch":
+        ridge_h = w * math.tan(pitch_deg * math.pi / 180)
+    else:
+        ridge_h = 0.0
+
+    for y_pos in positions:
+        if roof_key in ("gable", "hip"):
+            msp.add_line(
+                (0, y_pos), (w / 2, y_pos + ridge_h),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+            msp.add_line(
+                (w, y_pos), (w / 2, y_pos + ridge_h),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+            msp.add_line(
+                (0, y_pos), (w, y_pos),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+        elif roof_key == "mono-pitch":
+            msp.add_line(
+                (0, y_pos), (w, y_pos + ridge_h),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+            msp.add_line(
+                (0, y_pos), (w, y_pos),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+            msp.add_line(
+                (w, y_pos), (w, y_pos + ridge_h),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+        else:
+            msp.add_line(
+                (0, y_pos), (w, y_pos),
+                dxfattribs={"layer": LAYER_TRUSSES},
+            )
+
+
 _ROOF_DRAWERS = {
     "gable": _draw_gable,
     "hip": _draw_hip,
@@ -136,6 +206,9 @@ def build_dxf(params: Any) -> bytes:
     msp = doc.modelspace()
     _draw_floor_plan(msp, w, d)
     _ROOF_DRAWERS[roof_key](msp, w, d)
+
+    doc.layers.add(LAYER_TRUSSES)
+    _draw_trusses(msp, w, d, roof_key, params.roofPitch if hasattr(params, "roofPitch") else None)
 
     sbuf = StringIO()
     doc.write(sbuf)
