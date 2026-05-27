@@ -336,6 +336,33 @@ def build_dxf(params: Any) -> bytes:
     doc.layers.add(LAYER_TRUSSES)
     _draw_trusses(msp, w, d, roof_key, params.roofPitch if hasattr(params, "roofPitch") else None)
 
+    w_m = w / 1000
+    d_m = d / 1000
+    pitch_val = float(params.roofPitch) if hasattr(params, "roofPitch") and params.roofPitch is not None else None
+    if pitch_val is None or pitch_val == 0:
+        if roof_key in ("gable", "hip"):
+            pitch_val = 30.0
+        elif roof_key == "mono-pitch":
+            pitch_val = 10.0
+        else:
+            pitch_val = 0.0
+    if roof_key in ("gable", "hip"):
+        ridge_height_mm = (w / 2) * math.tan(pitch_val * math.pi / 180)
+    elif roof_key == "mono-pitch":
+        ridge_height_mm = w * math.tan(pitch_val * math.pi / 180)
+    else:
+        ridge_height_mm = 0.0
+
+    overhang_mm = _parse_overhang(
+        getattr(params, "overhang", None)
+    )
+
+    doc.layers.add(LAYER_DIMENSIONS)
+    _draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)
+
+    doc.layers.add(LAYER_TITLE_BLOCK)
+    _draw_title_block(msp, w, d, params)
+
     sbuf = StringIO()
     doc.write(sbuf)
     return sbuf.getvalue().encode("utf-8")

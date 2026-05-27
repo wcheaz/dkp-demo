@@ -24,7 +24,7 @@
 
 ## 5. Integration and verification
 
-- [ ] 5.1 Wire the three new drawing functions into `build_dxf`. After the existing `_draw_floor_plan` and `_ROOF_DRAWERS` calls, add layer creation for `Trusses`, `Dimensions`, `Title_Block`, then call `_draw_trusses`, `_draw_dimensions`, and `_draw_title_block` in sequence. Ensure `build_dxf` returns valid DXF for all four roof types with all five layers present.
+- [x] 5.1 Wire the three new drawing functions into `build_dxf`. After the existing `_draw_floor_plan` and `_ROOF_DRAWERS` calls, add layer creation for `Trusses`, `Dimensions`, `Title_Block`, then call `_draw_trusses`, `_draw_dimensions`, and `_draw_title_block` in sequence. Ensure `build_dxf` returns valid DXF for all four roof types with all five layers present.
   - Done when: `build_dxf` called with `floorPlanDimensions="10x15m"`, `roofType="Gable"`, `roofPitch=30` produces DXF bytes that pass `ezdxf.read()` and contain exactly 5 layers: `Floor_Plan`, `Roof_Outline`, `Trusses`, `Dimensions`, `Title_Block`.
   - Verify by: `pytest test/ -k dxf` — all tests pass, including a round-trip validation test for each roof type.
 
