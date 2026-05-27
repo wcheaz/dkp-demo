@@ -50,7 +50,7 @@
 
 ## 4. System prompt update
 
-- [ ] 4.1 Add `generate_dxf` to the tool catalog in `_BASE_PROMPT`
+- [x] 4.1 Add `generate_dxf` to the tool catalog in `_BASE_PROMPT`
   - Scope: `agent/src/agent.py` (the `_BASE_PROMPT` string)
   - Change: Add `- generate_dxf: Generate a downloadable DXF CAD file for a completed design.` to the tool catalog section. Add a trigger instruction: call `generate_dxf` after `generate_design` completes with all required parameters, or when the user explicitly requests a DXF/CAD file. Preserve all 7 existing tool catalog entries unchanged.
   - Done when:
