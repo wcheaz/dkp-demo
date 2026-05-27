@@ -61,7 +61,7 @@
 
 ## 5. Integrated quality gate
 
-- [ ] 5.1 Run full Python test suite and TypeScript typecheck
+- [x] 5.1 Run full Python test suite and TypeScript typecheck
   - Scope: no code edits; verification only
   - Change: Confirm all new and existing tests pass and the TypeScript build succeeds with the new `dxfContent` field.
   - Done when:
