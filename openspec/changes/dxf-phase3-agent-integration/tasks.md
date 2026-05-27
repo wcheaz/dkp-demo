@@ -40,7 +40,7 @@
     - `cd agent && python -c "from src.main import app; routes = [r.path for r in app.router.routes if hasattr(r, 'path')]; assert '/api/dxf/generate' in routes"` exits 0
   - Stop and hand off if: The Starlette app setup in `main.py` uses a pattern that prevents adding routes after `to_ag_ui()`.
 
-- [ ] 3.2 Write endpoint tests in `test/test_dxf_endpoint.py`
+- [x] 3.2 Write endpoint tests in `test/test_dxf_endpoint.py`
   - Scope: `test/test_dxf_endpoint.py`
   - Change: Tests using Starlette's test client (`httpx` or `requests` via `ASGITransport`) covering: (a) valid request returns 200 with DXF content and correct headers, (b) missing roofType returns 400 with error JSON, (c) invalid roofType returns 400, (d) malformed JSON returns 422, (e) minimal flat-roof request returns 200 with valid DXF.
   - Done when:
