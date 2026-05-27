@@ -1,5 +1,6 @@
 import math
 import re
+from datetime import datetime, timezone
 from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -17,6 +18,7 @@ LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
 LAYER_TRUSSES = "Trusses"
 LAYER_DIMENSIONS = "Dimensions"
+LAYER_TITLE_BLOCK = "Title_Block"
 
 
 def _parse_dimensions(raw: str) -> tuple[float, float]:
@@ -262,6 +264,48 @@ def _draw_dimensions(
             f"Ridge Height: {ridge_m:g}m",
             dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
         ).dxf.insert = (label_x, label_y - 1000)
+
+
+def _draw_title_block(msp, w: float, d: float, params) -> None:
+    tb_w = 40000.0
+    tb_h = 15000.0
+    tb_x = w - tb_w
+    tb_y = -tb_h
+
+    msp.add_line((tb_x, tb_y), (tb_x + tb_w, tb_y),
+                 dxfattribs={"layer": LAYER_TITLE_BLOCK})
+    msp.add_line((tb_x + tb_w, tb_y), (tb_x + tb_w, tb_y + tb_h),
+                 dxfattribs={"layer": LAYER_TITLE_BLOCK})
+    msp.add_line((tb_x + tb_w, tb_y + tb_h), (tb_x, tb_y + tb_h),
+                 dxfattribs={"layer": LAYER_TITLE_BLOCK})
+    msp.add_line((tb_x, tb_y + tb_h), (tb_x, tb_y),
+                 dxfattribs={"layer": LAYER_TITLE_BLOCK})
+
+    building_type = getattr(params, "buildingType", None) or "Building"
+    location = getattr(params, "location", None) or "Location not specified"
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    w_m = w / 1000
+    d_m = d / 1000
+    roof_type = getattr(params, "roofType", None) or "Unknown"
+
+    text_h = 800
+    col_x = tb_x + 1500
+    start_y = tb_y + tb_h - 2000
+    line_spacing = 2500
+
+    entries = [
+        f"Type: {building_type}",
+        f"Location: {location}",
+        f"Date: {date_str}",
+        f"Plan: {w_m:g}x{d_m:g}m",
+        f"Roof: {roof_type}",
+    ]
+
+    for i, text in enumerate(entries):
+        msp.add_mtext(
+            text,
+            dxfattribs={"layer": LAYER_TITLE_BLOCK, "char_height": text_h},
+        ).dxf.insert = (col_x, start_y - i * line_spacing)
 
 
 _ROOF_DRAWERS = {

@@ -18,7 +18,7 @@
 
 ## 4. Title block
 
-- [ ] 4.1 Add title block drawing function to `dxf_builder.py`. Add constant `LAYER_TITLE_BLOCK = "Title_Block"` and a `_draw_title_block(msp, w, d, params)` function that draws a 40000x15000mm rectangle (4 LINEs) in the lower-right area with MTEXT entities for buildingType (fallback "Building"), location (fallback "Location not specified"), current UTC date as YYYY-MM-DD, "Plan: <W>x<D>m", and "Roof: <type>". Text height = 800mm.
+- [x] 4.1 Add title block drawing function to `dxf_builder.py`. Add constant `LAYER_TITLE_BLOCK = "Title_Block"` and a `_draw_title_block(msp, w, d, params)` function that draws a 40000x15000mm rectangle (4 LINEs) in the lower-right area with MTEXT entities for buildingType (fallback "Building"), location (fallback "Location not specified"), current UTC date as YYYY-MM-DD, "Plan: <W>x<D>m", and "Roof: <type>". Text height = 800mm.
   - Done when: `build_dxf` output contains a `Title_Block` layer with 4 LINE entities forming the border rectangle and 5 MTEXT entities with correct content. Handles None values for buildingType and location without error.
   - Verify by: Running tests that check layer entity count and MTEXT content.
 
