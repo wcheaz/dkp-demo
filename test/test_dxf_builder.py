@@ -1,6 +1,7 @@
 import math
 import sys
 from io import BytesIO, StringIO
+from pathlib import Path
 from types import SimpleNamespace
 
 import ezdxf
@@ -400,3 +401,28 @@ class TestRoundTripAllRoofTypes:
         msp = doc.modelspace()
         all_entities = list(msp)
         assert len(all_entities) > 0
+
+
+_GENERATED_DIR = Path(__file__).resolve().parent.parent / "generated"
+
+_EXAMPLE_CONFIGS = [
+    ("gable", "10x15m", "Gable", 30),
+    ("hip", "10x15m", "Hip", 30),
+    ("mono-pitch", "10x15m", "Mono-pitch", 15),
+    ("flat", "10x15m", "Flat", 0),
+    ("decimal", "8.5x12.3m", "Gable", 35),
+]
+
+
+class TestGenerateExampleFiles:
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+        assert _ALL_FIVE_LAYERS <= layer_names
+        out_path = _GENERATED_DIR / f"{name}.dxf"
+        out_path.write_bytes(result)
