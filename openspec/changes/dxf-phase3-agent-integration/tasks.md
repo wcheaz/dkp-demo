@@ -32,7 +32,7 @@
 
 ## 3. Starlette endpoint — POST /api/dxf/generate
 
-- [ ] 3.1 Add `POST /api/dxf/generate` route to `agent/src/main.py`
+- [x] 3.1 Add `POST /api/dxf/generate` route to `agent/src/main.py`
   - Scope: `agent/src/main.py`
   - Change: New async route handler that accepts JSON body, constructs a `DesignParameters` model, calls `build_dxf(params)`, and returns `Response` with `content=dxf_bytes`, `media_type="application/dxf"`, and `Content-Disposition: attachment; filename="design.dxf"` header. Catches `ValueError` from `build_dxf` → HTTP 400 JSON `{"error": message}`. Malformed JSON → HTTP 422. Route registered via `app.router.add_route("/api/dxf/generate", handler, methods=["POST"])`.
   - Done when:
