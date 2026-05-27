@@ -1,13 +1,13 @@
 ## 1. Add ezdxf dependency
 
-- [ ] 1.1 Add `ezdxf` to `requirements.txt` and verify it imports successfully
+- [x] 1.1 Add `ezdxf` to `requirements.txt` and verify it imports successfully
   - Add `ezdxf` (latest stable) to `requirements.txt`
   - Run `python -c "import ezdxf; print(ezdxf.__version__)"` to confirm the import works
   - Done when: `ezdxf` appears in `requirements.txt` and `import ezdxf` succeeds without error
 
 ## 2. Implement dxf_builder module
 
-- [ ] 2.1 Create `agent/src/dxf_builder.py` with `build_dxf(params: DesignParameters) -> bytes`
+- [x] 2.1 Create `agent/src/dxf_builder.py` with `build_dxf(params: DesignParameters) -> bytes`
   - Implement `build_dxf` accepting the existing `DesignParameters` model (import the model from `agent.src.agent`)
   - Parse `floorPlanDimensions` using regex `r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?"`; raise `ValueError` on parse failure or `None` input
   - Convert meters to millimeters (multiply by 1000)
@@ -23,7 +23,7 @@
 
 ## 3. Add unit tests
 
-- [ ] 3.1 Create `test/test_dxf_builder.py` covering all spec scenarios
+- [x] 3.1 Create `test/test_dxf_builder.py` covering all spec scenarios
   - Test: valid DXF output is re-readable via `ezdxf.read(BytesIO(result))` and DXF version is AC1015
   - Test: floor-plan outline for "10x15m" — assert Floor_Plan layer has one LWPOLYLINE with correct vertices
   - Test: floor-plan outline for "8.5x12.3m" — assert decimal conversion
