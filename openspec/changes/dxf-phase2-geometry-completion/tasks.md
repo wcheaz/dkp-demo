@@ -1,6 +1,6 @@
 ## 1. Verify existing Phase 2 foundation
 
-- [ ] 1.1 Verify floor-plan and roof-outline geometry is complete. Run existing tests (if any) against `dxf_builder.py` and confirm `build_dxf("10x15m", "Gable")` produces valid DXF with `Floor_Plan` and `Roof_Outline` layers. Fix any regressions before proceeding.
+- [x] 1.1 Verify floor-plan and roof-outline geometry is complete. Run existing tests (if any) against `dxf_builder.py` and confirm `build_dxf("10x15m", "Gable")` produces valid DXF with `Floor_Plan` and `Roof_Outline` layers. Fix any regressions before proceeding.
   - Done when: `ezdxf.read(BytesIO(build_dxf(params)))` succeeds for all four roof types (gable, hip, mono-pitch, flat).
   - Verify by: Running `pytest test/ -k dxf` (or equivalent test command).
 
