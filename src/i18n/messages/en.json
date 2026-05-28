@@ -34,6 +34,7 @@
     "materialEstimate": "Material Estimate",
     "price": "Price:",
     "currency": "€",
+    "downloadDxf": "Download DXF",
     "labels": {
       "totalTrusses": "Trusses",
       "timberVolume": "Timber Vol.",

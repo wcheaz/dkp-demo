@@ -34,6 +34,7 @@
     "materialEstimate": "Odhad materiálu",
     "price": "Cena:",
     "currency": "€",
+    "downloadDxf": "Stiahnuť DXF",
     "labels": {
       "totalTrusses": "Väzníky",
       "timberVolume": "Objem dreva",

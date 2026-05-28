@@ -45,7 +45,7 @@
     - `pnpm build` exits 0, or failures match the pre-flight baseline with no new failures in this task's scope
   - Stop and hand off if: `next/dynamic` import of `CadViewer` causes build failures not present in baseline — may need to use `useEffect`-based `import()` directly in the component instead.
 
-- [ ] **Add DXF download button for entries with dxfContent**
+- [x] **Add DXF download button for entries with dxfContent**
   - Scope: `src/components/design-component.tsx`
   - Change: Render an `<a>` element with `download={`design-${entry.id}.dxf`}` below the `<CadViewer>`. Create a Blob URL from the decoded base64 content (MIME `application/dxf`) using `URL.createObjectURL()`. Use `useMemo` to create the URL and revoke it on entry change or unmount. Style consistently with existing card elements.
   - Done when:

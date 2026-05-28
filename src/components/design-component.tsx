@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
 import { useTranslations } from "@/i18n/use-translations";
@@ -42,6 +42,33 @@ function isIncomplete(value: string | number | undefined): boolean {
 function hasIncompleteParameters(params: DesignParameters | undefined): boolean {
   if (!params) return true;
   return ALL_PARAM_KEYS.some((k) => isIncomplete(params[k]));
+}
+
+function DxfDownloadButton({ dxfContent, entryId }: { dxfContent: string; entryId: string | number }) {
+  const t = useTranslations("designs");
+  const blobUrl = useMemo(() => {
+    const binary = atob(dxfContent);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: "application/dxf" }));
+  }, [dxfContent]);
+
+  useEffect(() => {
+    return () => URL.revokeObjectURL(blobUrl);
+  }, [blobUrl]);
+
+  return (
+    <a
+      href={blobUrl}
+      download={`design-${entryId}.dxf`}
+      className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1v9M3 7l4 4 4-4M1 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {t("downloadDxf")}
+    </a>
+  );
 }
 
 export interface DesignComponentProps {
@@ -106,7 +133,10 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     className="w-[55%] h-[27vh] object-contain"
                   />
                 ) : entry.dxfContent ? (
-                  <CadViewer dxfContent={entry.dxfContent} className="w-[55%] h-[27vh]" />
+                  <div className="w-[55%]">
+                    <CadViewer dxfContent={entry.dxfContent} className="w-full h-[27vh]" />
+                    <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
+                  </div>
                 ) : (
                   <img
                     src={entry.imageUrl}
