@@ -34,7 +34,7 @@
 
 ## 3. Design card integration
 
-- [ ] **Wire CadViewer into DesignComponent for entries with dxfContent**
+- [x] **Wire CadViewer into DesignComponent for entries with dxfContent**
   - Scope: `src/components/design-component.tsx`
   - Change: Import `CadViewer` via `next/dynamic({ ssr: false })`. In rendering logic for completed entries with all parameters filled, add a branch: if `entry.dxfContent` is a non-empty string, render the dynamic `CadViewer` with `dxfContent={entry.dxfContent}` and `className="w-[55%] h-[27vh]"`. Otherwise, render the existing `<img>` unchanged. Entries in `"processing"` status or with incomplete parameters remain unchanged.
   - Done when:

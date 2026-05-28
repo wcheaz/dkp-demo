@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   turbopack: {
     resolveAlias: {
-      fs: { browser: "" },
-      path: { browser: "" },
+      fs: { browser: "./src/lib/empty-module.js" },
+      path: { browser: "./src/lib/empty-module.js" },
     },
   },
 };

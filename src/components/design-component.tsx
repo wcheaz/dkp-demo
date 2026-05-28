@@ -1,10 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
 import { useTranslations } from "@/i18n/use-translations";
 import { useLanguage } from "@/i18n/language-provider";
+
+const CadViewer = dynamic(() => import("@/components/cad-viewer").then((m) => m.CadViewer), { ssr: false });
 
 const MATERIAL_STAT_UNITS: Record<keyof MaterialStats, string> = {
   totalTrusses: "",
@@ -102,6 +105,8 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     alt={t("designs.designInProgress")}
                     className="w-[55%] h-[27vh] object-contain"
                   />
+                ) : entry.dxfContent ? (
+                  <CadViewer dxfContent={entry.dxfContent} className="w-[55%] h-[27vh]" />
                 ) : (
                   <img
                     src={entry.imageUrl}
