@@ -35,6 +35,7 @@
     "price": "Price:",
     "currency": "€",
     "downloadDxf": "Download DXF",
+    "generatingCad": "Generating CAD drawing...",
     "labels": {
       "totalTrusses": "Trusses",
       "timberVolume": "Timber Vol.",

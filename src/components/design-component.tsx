@@ -138,12 +138,18 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
                   </div>
                 ) : (
-                  <img
-                    src={entry.imageUrl}
-                    alt={entry.promptText}
-                    className="w-[55%] h-[27vh] object-contain cursor-pointer"
-                    onClick={() => setModalImageUrl(entry.imageUrl)}
-                  />
+                  <div className="w-[55%]">
+                    <img
+                      src={entry.imageUrl}
+                      alt={entry.promptText}
+                      className="w-full h-[27vh] object-contain cursor-pointer"
+                      onClick={() => setModalImageUrl(entry.imageUrl)}
+                    />
+                    <div className="flex items-center justify-center gap-2 mt-1">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                      <p className="text-sm text-gray-300">{t("designs.generatingCad")}</p>
+                    </div>
+                  </div>
                 )}
               </div>
               <p className="mt-3 text-center text-sm font-medium rounded-lg px-3 py-1.5 text-design-description-text bg-design-description-bg">

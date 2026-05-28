@@ -56,7 +56,7 @@
     - `pnpm build` exits 0, or failures match the pre-flight baseline with no new failures in this task's scope
   - Stop and hand off if: Blob URL creation fails in the target browser — may need a data-URI fallback.
 
-- [ ] **Add "Generating CAD drawing..." status indicator**
+- [x] **Add "Generating CAD drawing..." status indicator**
   - Scope: `src/components/design-component.tsx`
   - Change: For completed entries with all parameters filled but `dxfContent` undefined/null/empty, render a spinner and "Generating CAD drawing..." text below the existing `<img>`. Use the same spinner animation classes as the processing overlay. Indicator disappears when `dxfContent` becomes available.
   - Done when:
