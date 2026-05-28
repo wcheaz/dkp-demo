@@ -91,7 +91,7 @@ Pre-existing blocker: `test/test_dxf_endpoint.py` imports `from src.main import 
     - `curl -X OPTIONS -i http://localhost:8000/api/dxf/generate -H "Origin: http://localhost:3000"` returns HTTP 200 with `Access-Control-Allow-Origin` header (manual check or scripted)
   - Stop and hand off if: Starlette's `CORSMiddleware` is not available in the project's dependencies (check `pip list | grep starlette`).
 
-- [ ] **4.5 Remove obsolete generate_dxf backend tool tests**
+- [x] **4.5 Remove obsolete generate_dxf backend tool tests**
   - Scope: `test/test_generate_dxf.py`
   - Change: Remove `test/test_generate_dxf.py` — it tests the backend `@agent.tool` version of `generate_dxf` which no longer exists after task 4.3. The DXF builder geometry is covered by `test/test_dxf_builder.py` (48 tests) and the HTTP endpoint by `test/test_dxf_endpoint.py` (9 tests). Frontend tool behavior requires browser-level testing (outside scope).
   - Done when:
