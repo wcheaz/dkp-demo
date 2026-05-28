@@ -742,15 +742,19 @@ function YourMainContent() {
       },
     ],
     async handler({ design_id }) {
+      console.log("[dxf] generate_dxf invoked with design_id:", design_id);
       const currentState = latestStateRef.current;
       const currentDesigns = currentState.designs ?? [];
       const entry = currentDesigns.find((d) => d.id === design_id);
 
       if (!entry) {
+        console.error("[dxf] design lookup failed — no design found with id:", design_id);
         return `No design found with id ${design_id}.`;
       }
+      console.log("[dxf] design lookup succeeded — found design:", entry.id, "status:", entry.status);
 
       if (!entry.parameters) {
+        console.error("[dxf] design", design_id, "has no parameters");
         return `Design ${design_id} has no parameters. Collect parameters first.`;
       }
 
@@ -765,29 +769,36 @@ function YourMainContent() {
       };
 
       const cleanedParams = stripPlaceholders(entry.parameters as Record<string, unknown>);
+      console.log("[dxf] sending cleaned parameters to endpoint:", JSON.stringify(cleanedParams));
 
       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
       const missing = requiredFields.filter((f) => cleanedParams[f] === undefined);
       if (missing.length > 0) {
+        console.error("[dxf] missing required parameters:", missing.join(", "));
         return `Design ${design_id} is missing required parameters: ${missing.join(", ")}. Collect these before generating DXF.`;
       }
 
       try {
         const agentUrl = process.env.AGENT_URL || "http://localhost:8000/";
-        const response = await fetch(agentUrl + "api/dxf/generate", {
+        const fetchUrl = agentUrl + "api/dxf/generate";
+        console.log("[dxf] fetching DXF from:", fetchUrl);
+        const response = await fetch(fetchUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanedParams),
         });
+        console.log("[dxf] endpoint response status:", response.status, response.statusText);
 
         if (!response.ok) {
           const errorBody = await response.text();
+          console.error("[dxf] non-2xx response:", response.status, errorBody);
           return `Cannot generate DXF: server returned ${response.status} - ${errorBody}`;
         }
 
         const dxfBytes = await response.arrayBuffer();
         const b64 = btoa(String.fromCharCode(...new Uint8Array(dxfBytes)));
         const size_kb = dxfBytes.byteLength / 1024;
+        console.log("[dxf] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
 
         const updatedDesigns = currentDesigns.map((d) =>
           d.id === design_id ? { ...d, dxfContent: b64 } : d
@@ -795,9 +806,11 @@ function YourMainContent() {
         const newState = { ...currentState, designs: updatedDesigns };
         setState(newState);
         latestStateRef.current = newState;
+        console.log("[dxf] state updated — dxfContent stored for design:", design_id);
 
         return `DXF generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in dxfContent).`;
       } catch (err) {
+        console.error("[dxf] error during DXF generation:", err instanceof Error ? err.message : String(err), err);
         return `Cannot generate DXF: ${err instanceof Error ? err.message : String(err)}`;
       }
     },

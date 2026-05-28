@@ -48,13 +48,18 @@ async def dxf_generate(request: Request):
             content={"error": "Invalid parameters"},
         )
 
+    logging.info("[dxf] request received — params: %s", body)
+
     try:
         dxf_bytes = build_dxf(params)
     except ValueError as exc:
+        logging.error("[dxf] build_dxf failed: %s", exc)
         return JSONResponse(
             status_code=400,
             content={"error": str(exc)},
         )
+
+    logging.info("[dxf] response sent — %d bytes", len(dxf_bytes))
 
     return Response(
         content=dxf_bytes,

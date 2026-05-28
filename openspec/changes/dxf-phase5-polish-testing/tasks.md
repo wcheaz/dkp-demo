@@ -111,7 +111,7 @@ Pre-existing blocker: `test/test_dxf_endpoint.py` imports `from src.main import 
     - `rg "CORSMiddleware" agent/src/main.py` returns at least 1 match (CORS middleware present)
   - Stop and hand off if: any previously-passing test from the pre-flight baseline now fails, or the skill file no longer references `generate_dxf`.
 
-- [ ] **4.7 Add DXF generation debug logging to frontend tool and endpoint**
+- [x] **4.7 Add DXF generation debug logging to frontend tool and endpoint**
   - Scope: `src/app/page.tsx` (frontend `generate_dxf` tool handler), `agent/src/main.py` (`dxf_generate` endpoint handler)
   - Change: The "Generating CAD drawing..." spinner (`src/components/design-component.tsx:149`) appears when a completed design has no `dxfContent`, and spins forever if DXF generation silently fails. Add structured `console.log` / `console.error` debug lines to the frontend `generate_dxf` tool handler at every decision point: (1) tool invoked with design_id, (2) design lookup result (found/not found), (3) parameters being sent to endpoint, (4) fetch URL and response status, (5) base64 encoding result, (6) state update, (7) any caught errors with full detail. On the agent side, add `logging.info` / `logging.error` lines to `dxf_generate` in `main.py` at: (1) request received with parameter values, (2) `build_dxf` call and byte count, (3) response sent. All log lines use a consistent prefix `"[dxf]"` for easy `grep`/filtering.
   - Done when:
