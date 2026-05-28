@@ -82,7 +82,7 @@ Pre-existing blocker: `test/test_dxf_endpoint.py` imports `from src.main import 
     - `python3 -m pytest test/test_dxf_builder.py test/test_dxf_endpoint.py -q` exits 0 (builder and endpoint unchanged)
   - Stop and hand off if: the `/api/dxf/generate` endpoint no longer returns raw DXF bytes with `application/dxf` content type, or its request schema has changed from accepting `DesignParameters` as JSON body.
 
-- [ ] **4.4 Add CORS middleware to agent server for cross-origin DXF endpoint access**
+- [x] **4.4 Add CORS middleware to agent server for cross-origin DXF endpoint access**
   - Scope: `agent/src/main.py`
   - Change: The browser sends a CORS preflight `OPTIONS` request before the cross-origin `POST` to the DXF endpoint. Currently the route only accepts `POST` (`main.py:59`), so `OPTIONS` returns 405 and the browser blocks the actual request. Add Starlette CORS middleware to `app` in `main.py` (after `app = agent.to_ag_ui(...)`) that allows `POST` and `OPTIONS` methods, `application/json` and `content-type` headers, and permits the UI origin (default `http://localhost:3000`). This is demo-only; production would restrict origins.
   - Done when:

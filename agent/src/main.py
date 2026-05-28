@@ -1,8 +1,10 @@
 import logging
+import os
 
 from src.agent import YourState, StateDeps, agent, DesignParameters
 from src.dxf_builder import build_dxf
 import logfire
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
@@ -12,6 +14,14 @@ logfire.configure()
 logfire.instrument_pydantic_ai()
 
 app = agent.to_ag_ui(deps=StateDeps(state=YourState()))
+
+ui_origin = os.getenv("UI_ORIGIN", "http://localhost:3000")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[ui_origin],
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["application/json", "content-type"],
+)
 
 
 async def health_check(request: Request):
