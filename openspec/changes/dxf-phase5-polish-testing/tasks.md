@@ -35,7 +35,7 @@
 
 ## 3. Verification
 
-- [ ] **3.1 Verify skill integration does not break existing tests**
+- [x] **3.1 Verify skill integration does not break existing tests**
   - Scope: no code edits; runs test suite and validates skill file syntax
   - Change: Confirm that adding the DXF step to the skill does not break any existing agent or DXF tests.
   - Done when:
