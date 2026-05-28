@@ -11,7 +11,7 @@
 
 ## 2. CadViewer React wrapper component
 
-- [ ] **Create CadViewer component shell with dynamic import and lifecycle cleanup**
+- [x] **Create CadViewer component shell with dynamic import and lifecycle cleanup**
   - Scope: `src/components/cad-viewer.tsx`
   - Change: New `"use client"` component file exports `CadViewer` accepting props `dxfContent: string` and optional `className?: string`. Renders a container `<div ref={containerRef}>`. In `useEffect`, dynamically imports `@mlightcad/cad-simple-viewer`, calls `AcApDocManager.createInstance({ container: containerRef.current, webworkerFileUrls: { dxfParser: '/workers/libredwg-parser-worker.js', mtextRender: '/workers/mtext-renderer-worker.js' } })`. Falls back to `AcApDocManager.instance` if `createInstance` returns `undefined` (already initialized). Cleanup calls `AcApDocManager.instance.destroy()`. Skips initialization if container ref is null.
   - Done when:
