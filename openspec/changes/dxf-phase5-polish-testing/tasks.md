@@ -58,7 +58,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `.ralph/baselines/dxf-bridge-readme.md` lists test file names, exit code, and test count
   - Stop and hand off if: any gate is nondeterministic across two runs.
 
-- [ ] **4.2 Convert generate_dxf from backend tool to frontend tool**
+- [x] **4.2 Convert generate_dxf from backend tool to frontend tool**
   - Scope: `agent/src/agent.py` (remove `@agent.tool`-decorated `generate_dxf` at lines 413-442), `src/app/page.tsx` (add `useFrontendTool` named `generate_dxf`)
   - Change: Remove the `@agent.tool`-decorated `generate_dxf` from `agent.py`. Add a `useFrontendTool` named `generate_dxf` in `page.tsx` that: (1) receives `design_id` from the agent, (2) looks up the design entry in `latestStateRef.current.designs`, (3) calls the agent server's `/api/dxf/generate` endpoint via `fetch` using `process.env.AGENT_URL` (default `http://localhost:8000/`) as the base URL — **not** a relative path, since the endpoint lives on the agent server (port 8000), not the Next.js UI server — with the entry's parameters (stripping `"---"` placeholder strings before sending), (4) base64-encodes the response bytes, (5) stores the result in the entry's `dxfContent` field in React state, (6) returns a confirmation string. Error cases return descriptive messages matching the original tool's behavior (design not found, no parameters, build error from non-2xx response).
   - Done when:
@@ -72,7 +72,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `python3 -m pytest test/test_dxf_builder.py test/test_dxf_endpoint.py -q` exits 0 (builder and endpoint unchanged)
   - Stop and hand off if: the `/api/dxf/generate` endpoint no longer returns raw DXF bytes with `application/dxf` content type, or its request schema has changed from accepting `DesignParameters` as JSON body.
 
-- [ ] **4.3 Remove obsolete generate_dxf backend tool tests**
+- [x] **4.3 Remove obsolete generate_dxf backend tool tests**
   - Scope: `test/test_generate_dxf.py`
   - Change: Remove `test/test_generate_dxf.py` — it tests the backend `@agent.tool` version of `generate_dxf` which no longer exists after task 4.2. The DXF builder geometry is covered by `test/test_dxf_builder.py` (48 tests) and the HTTP endpoint by `test/test_dxf_endpoint.py` (9 tests). Frontend tool behavior requires browser-level testing (outside scope).
   - Done when:
@@ -81,7 +81,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `python3 -m pytest test/test_dxf_builder.py test/test_dxf_endpoint.py -q` exits 0
   - Stop and hand off if: removing the file causes import errors in other test files (check with `rg "test_generate_dxf\|from test.test_generate_dxf" test/`).
 
-- [ ] **4.4 Verify design-bridge fix passes all test gates**
+- [x] **4.4 Verify design-bridge fix passes all test gates**
   - Scope: no code edits; runs full test suite and validates artifact consistency
   - Change: Confirm all DXF-related tests pass and the tool migration is complete.
   - Done when:

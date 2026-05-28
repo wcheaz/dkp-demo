@@ -773,7 +773,8 @@ function YourMainContent() {
       }
 
       try {
-        const response = await fetch("/api/dxf/generate", {
+        const agentUrl = process.env.AGENT_URL || "http://localhost:8000/";
+        const response = await fetch(agentUrl + "api/dxf/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanedParams),
