@@ -23,7 +23,7 @@
     - `grep -c "generate_dxf" .agents/skills/run-generate-design/SKILL.md` returns at least 2 matches
   - Stop and hand off if: the existing step numbering would require restructuring beyond adding a single new 4g section.
 
-- [ ] **2.2 Create DXF builder API reference doc**
+- [x] **2.2 Create DXF builder API reference doc**
   - Scope: `.agents/skills/run-generate-design/references/dxf-builder-api.md`
   - Change: A new reference document exists describing `build_dxf` function signature, `DesignParameters` field mapping, DXF output format (R2000, 5 layers), and the auto-trigger rule.
   - Done when:
