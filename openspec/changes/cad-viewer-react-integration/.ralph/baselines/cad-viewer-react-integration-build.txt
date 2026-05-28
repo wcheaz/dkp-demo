@@ -1,0 +1,32 @@
+> pydantic-ai-starter@0.1.0 build /home/ncheaz/git/dkp-demo
+> next build
+
+▲ Next.js 16.1.0 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 9.3s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+[CopilotKit Runtime] anonymous telemetry enabled — see https://docs.copilotkit.ai/telemetry to opt out (set COPILOTKIT_TELEMETRY_DISABLED=true).
+  Generating static pages using 11 workers (0/6) ...
+[CopilotKit Runtime] anonymous telemetry enabled — see https://docs.copilotkit.ai/telemetry to opt out (set COPILOTKIT_TELEMETRY_DISABLED=true).
+  Generating static pages using 11 workers (1/6)
+  Generating static pages using 11 workers (2/6)
+  Generating static pages using 11 workers (4/6)
+✓ Generating static pages using 11 workers (6/6) in 994.0ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/copilotkit
+├ ƒ /api/health
+├ ƒ /api/serve-image/[filename]
+└ ƒ /api/test-image
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+EXIT=0

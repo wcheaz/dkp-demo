@@ -1,6 +1,6 @@
 ## 1. Pre-flight baseline
 
-- [ ] **Pre-flight: record `pnpm build` baseline**
+- [x] **Pre-flight: record `pnpm build` baseline**
   - Scope: no code edits; writes only under `.ralph/baselines/`
   - Change: Capture current `pnpm build` output so later tasks can classify build failures against a known baseline.
   - Done when:
