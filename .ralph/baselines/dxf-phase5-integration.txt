@@ -1,0 +1,19 @@
+.................                                                        [100%]
+=============================== warnings summary ===============================
+<frozen abc>:106
+  <frozen abc>:106: DeprecationWarning: `OpenAIModel` was renamed to `OpenAIChatModel` to clearly distinguish it from `OpenAIResponsesModel` which uses OpenAI's newer Responses API. Use that unless you're using an OpenAI Chat Completions-compatible API, or require a feature that the Responses API doesn't support yet like audio.
+
+agent/src/main.py:14
+  /home/ncheaz/git/dkp-demo/agent/src/main.py:14: PydanticAIDeprecationWarning: `Agent.to_ag_ui()` is deprecated and will be removed in 2.0. Replace:
+      app = agent.to_ag_ui()
+  with a Starlette/FastAPI route:
+      from pydantic_ai.ui.ag_ui import AGUIAdapter
+      @app.post("/")
+      async def run_agent(request):
+          return await AGUIAdapter.dispatch_request(request, agent=agent)
+  See <https://ai.pydantic.dev/ui/ag-ui/#migrating-from-deprecated-apis> for full before/after examples.
+    app = agent.to_ag_ui(deps=StateDeps(state=YourState()))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+17 passed, 2 warnings in 0.82s
+EXIT=0

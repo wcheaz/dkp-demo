@@ -1,6 +1,6 @@
 ## 1. Pre-flight
 
-- [ ] **1.1 Pre-flight: record DXF test gate baselines**
+- [x] **1.1 Pre-flight: record DXF test gate baselines**
   - Scope: no code edits; writes under `.ralph/baselines/`
   - Change: Capture current state of DXF-related test gates so later verification tasks can classify failures against a known baseline.
   - Done when:
