@@ -49,7 +49,7 @@ Root cause: `generate_design` is a frontend `useFrontendTool` (`src/app/page.tsx
 
 Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the design from React state and calls the existing `/api/dxf/generate` endpoint (`agent/src/main.py:24-55`) to build the DXF.
 
-- [ ] **4.1 Pre-flight: record design-bridge test baselines**
+- [x] **4.1 Pre-flight: record design-bridge test baselines**
   - Scope: no code edits; writes under `.ralph/baselines/`
   - Change: Capture current test gate output for comparison after the state bridge fix.
   - Done when:
