@@ -731,7 +731,7 @@ function YourMainContent() {
   useFrontendTool({
     name: "generate_dxf",
     description:
-      "Generate a downloadable DXF CAD file for a completed design using the generate_dxf tool. " +
+      "Generate a downloadable DXF CAD file for a completed design using the " + '"generate_dxf"' + " tool. " +
       "Call after generate_design completes with all required parameters, or when the user explicitly requests a DXF/CAD file.",
     parameters: [
       {
