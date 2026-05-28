@@ -14,7 +14,7 @@
 
 ## 2. DXF Skill Integration
 
-- [ ] **2.1 Add DXF generation step to run-generate-design skill**
+- [x] **2.1 Add DXF generation step to run-generate-design skill**
   - Scope: `.agents/skills/run-generate-design/SKILL.md`
   - Change: A new Step 4g (DXF generation) is added after Step 4f. It auto-triggers when `design-generation` or `design-modification` produces `"complete"` status, instructing the agent to call `generate_dxf` with the current design ID. The Step 4 introduction's auto-execution rules are updated to mention DXF alongside pricing.
   - Done when:

@@ -180,7 +180,8 @@ Only execute the tasks matching the classified intent. Skip others with a note:
 
 **Exception:** When design-generation produces a `"complete"` status (all 4
 desirable fields present), automatically execute the pricing calculation
-(step 4c) as well — even if `pricing-quote` was not in the classified intent.
+(step 4c) and DXF generation (step 4g) — even if `pricing-quote` was not
+in the classified intent.
 
 #### 4a — Knowledge summary (`knowledge-query/summary`)
 
@@ -248,6 +249,17 @@ Produce a modified design entry with updated `image_name` (one of
 - **Partial** (`remove_designs=false`): Set specified parameter fields to `---`,
   preserve others, keep the entry.
 - **Full** (`remove_designs=true`): Remove targeted entries entirely.
+
+#### 4g — DXF generation (`generate_dxf`)
+
+Auto-triggered when step 4d (design-generation) or step 4e (design-modification)
+produces a `"complete"` status (all 4 desirable fields present). Call
+`generate_dxf` with the current design ID to produce a downloadable DXF CAD file.
+
+Simulation output: `"DXF generated for design <id> (<size> KB, base64-encoded and stored in dxfContent)."`
+
+If the design has no parameters or is not found, output the corresponding error
+message instead.
 
 ### Step 5 — Format Final Response
 
