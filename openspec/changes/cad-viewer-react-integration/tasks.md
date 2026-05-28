@@ -21,7 +21,7 @@
     - build output contains no Three.js, WebGL, `fs`, or `path` module errors
   - Stop and hand off if: `AcApDocManager.createInstance` throws or returns `undefined` even on first call — the library singleton API may have changed between versions.
 
-- [ ] **Add DXF content loading and error handling to CadViewer**
+- [x] **Add DXF content loading and error handling to CadViewer**
   - Scope: `src/components/cad-viewer.tsx`
   - Change: After successful `createInstance`, the `useEffect` decodes `dxfContent` from base64 to `ArrayBuffer` using `atob()` + char-code loop into `Uint8Array`. Calls `docManager.openDocument('design.dxf', arrayBuffer, {})`. If `openDocument` returns `false` or throws, sets an error state rendering "Failed to load CAD drawing" in the container. Re-calls `openDocument` when `dxfContent` prop changes without re-creating the instance.
   - Done when:
