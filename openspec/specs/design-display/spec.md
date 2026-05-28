@@ -13,7 +13,8 @@ For entries with `status: "processing"`, the card SHALL render a processing over
 
 For entries with `status: "complete"` (including the default), the card image area rendering SHALL follow this logic:
 1. If ANY parameter field on the entry is missing (undefined/null), empty string, or set to `"---"` → render a "Design In Progress" placeholder image (`/design-in-progress.svg`) instead of `entry.imageUrl`. Clicking the placeholder SHALL NOT open the modal.
-2. If ALL parameter fields are filled with real (non-`"---"`, non-empty) values → render `entry.imageUrl` as before, allowing click-to-enlarge.
+2. If ALL parameter fields are filled with real (non-`"---"`, non-empty) values AND `entry.dxfContent` is a non-empty string → render the `<CadViewer>` component with `dxfContent={entry.dxfContent}` instead of the `<img>` element. Clicking the viewer SHALL NOT open the modal. A "Download DXF" button SHALL be rendered below the viewer.
+3. If ALL parameter fields are filled with real values AND `entry.dxfContent` is undefined/null/empty → render `entry.imageUrl` as before via `<img>`, allowing click-to-enlarge. A "Generating CAD drawing..." status indicator SHALL be shown below the image.
 
 A static SVG file at `public/design-in-progress.svg` SHALL exist as the placeholder image. It SHALL display "Design In Progress" text with styling consistent with the existing design card aesthetic.
 
@@ -37,9 +38,19 @@ A static SVG file at `public/design-in-progress.svg` SHALL exist as the placehol
 - **WHEN** the user clicks on the processing overlay of a design entry with `status: "processing"`
 - **THEN** the modal SHALL NOT open. No modal overlay SHALL appear.
 
-#### Scenario: Entry transitions from processing to complete
-- **WHEN** a design entry transitions from `status: "processing"` to `status: "complete"` and `imageUrl` changes from `"/design-gable.svg"` to the resolved image
-- **THEN** the processing overlay SHALL disappear and the `<img>` element SHALL become visible with the updated `src` (provided all parameters are filled; otherwise the placeholder image is shown).
+#### Scenario: Entry transitions from processing to complete with dxfContent
+- **WHEN** a design entry transitions from `status: "processing"` to `status: "complete"` and `dxfContent` changes from `undefined` to a base64 string
+- **THEN** the processing overlay SHALL disappear and the `<CadViewer>` component SHALL render with the DXF content
+
+#### Scenario: Entry with all parameters filled and dxfContent renders viewer
+- **WHEN** the `designs` array contains one entry with `status: "complete"`, all parameters filled, `imageUrl: "/design-gable.svg"`, and `dxfContent: "base64string"`
+- **THEN** the card SHALL render `<CadViewer dxfContent="base64string" />` in the image area
+- **AND** SHALL NOT render an `<img>` element
+
+#### Scenario: Entry with all parameters filled but no dxfContent renders image
+- **WHEN** the `designs` array contains one entry with `status: "complete"`, all parameters filled, `imageUrl: "/design-gable.svg"`, and `dxfContent: undefined`
+- **THEN** the card SHALL render `<img src="/design-gable.svg" />` as before
+- **AND** SHALL show a "Generating CAD drawing..." status indicator below the image
 
 #### Scenario: Complete entry allows click-to-enlarge
 - **WHEN** the user clicks on the `<img>` element of a design entry with `status: "complete"` and all parameters filled
