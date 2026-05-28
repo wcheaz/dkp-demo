@@ -71,7 +71,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `python3 -m pytest test/test_dxf_builder.py test/test_dxf_endpoint.py -q` exits 0 (builder and endpoint unchanged)
   - Stop and hand off if: the `/api/dxf/generate` endpoint no longer returns raw DXF bytes with `application/dxf` content type, or its request schema has changed from accepting `DesignParameters` as JSON body.
 
-- [ ] **4.3 Remove obsolete generate_dxf backend tool tests**
+- [x] **4.3 Remove obsolete generate_dxf backend tool tests**
   - Scope: `test/test_generate_dxf.py`
   - Change: Remove `test/test_generate_dxf.py` — it tests the backend `@agent.tool` version of `generate_dxf` which no longer exists after task 4.2. The DXF builder geometry is covered by `test/test_dxf_builder.py` (48 tests) and the HTTP endpoint by `test/test_dxf_endpoint.py` (9 tests). Frontend tool behavior requires browser-level testing (outside scope).
   - Done when:
