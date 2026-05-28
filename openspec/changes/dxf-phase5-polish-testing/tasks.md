@@ -59,7 +59,7 @@ Pre-existing blocker: `test/test_dxf_endpoint.py` imports `from src.main import 
     - `python3 -m pytest test/test_dxf_builder.py -q` exits 0 (builder tests unaffected)
   - Stop and hand off if: `python-dotenv` is not installed (check `python3 -c "import dotenv"`).
 
-- [ ] **4.2 Pre-flight: record design-bridge test baselines**
+- [x] **4.2 Pre-flight: record design-bridge test baselines**
   - Scope: no code edits; writes under `.ralph/baselines/`
   - Change: Capture current test gate output for comparison after the state bridge fix.
   - Done when:
