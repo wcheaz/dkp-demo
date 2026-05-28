@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: Next.js webpack config disables Node.js built-in imports for client bundle
-`next.config.ts` SHALL include `webpack.resolve.fallback` entries that set `fs` and `path` to `false`. This prevents Three.js and the CAD viewer library from attempting Node.js-only imports during client-side bundling.
+### Requirement: Next.js config disables Node.js built-in imports for client bundle
+`next.config.ts` SHALL include `turbopack.resolveAlias` entries that map `fs` and `path` to empty strings for the browser. This prevents Three.js and the CAD viewer library from attempting Node.js-only imports during client-side bundling. Next.js 16 uses Turbopack by default; `webpack.resolve.fallback` has no effect under Turbopack.
 
-#### Scenario: webpack config includes fs and path fallbacks
+#### Scenario: Turbopack config includes fs and path aliases
 - **WHEN** `next.config.ts` is read
-- **THEN** it SHALL contain `resolve.fallback` with both `fs: false` and `path: false`
+- **THEN** it SHALL contain `turbopack.resolveAlias` with both `fs: { browser: "" }` and `path: { browser: "" }`
 
 #### Scenario: No SSR crash from Three.js imports
 - **WHEN** `pnpm build` is run

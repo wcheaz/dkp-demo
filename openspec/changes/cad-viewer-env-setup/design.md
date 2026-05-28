@@ -57,11 +57,11 @@ The exact worker file paths inside `node_modules` will be determined empirically
 
 The `postinstall` script MUST discover these files dynamically (e.g., via glob inside `node_modules/@mlightcad/`) rather than hardcoding paths, because package updates may change internal file locations.
 
-### D3: SSR safety via webpack fallbacks in `next.config.ts`
+### D3: SSR safety via Turbopack resolve aliases in `next.config.ts`
 
-**Choice:** Add `resolve.fallback: { fs: false, path: false }` to the webpack config in `next.config.ts`. Component-level dynamic import (`next/dynamic` with `ssr: false`) will be used in Phase 4b.
-**Rationale:** Three.js and the CAD viewer library may reference `fs` and `path` in their module graphs. These are Node.js-only and must be excluded from the client bundle. The webpack fallback is the most direct way to suppress them. The `next/dynamic` approach is complementary and will be applied when the component is created.
-**Alternative:** Use `externals` to exclude the package from SSR entirely — rejected because it would prevent the import from resolving at all; `resolve.fallback` is more surgical.
+**Choice:** Add `turbopack.resolveAlias: { fs: { browser: "" }, path: { browser: "" } }` to `next.config.ts`. Component-level dynamic import (`next/dynamic` with `ssr: false`) will be used in Phase 4b.
+**Rationale:** Next.js 16 uses Turbopack by default for both dev (`next dev --turbopack`) and production builds. The traditional `webpack.resolve.fallback` has no effect under Turbopack. The `resolveAlias` approach maps `fs` and `path` to empty strings in the browser context, preventing Three.js and the CAD viewer from attempting Node.js-only imports. The `next/dynamic` approach is complementary and will be applied when the component is created.
+**Alternative:** Use `webpack.resolve.fallback` — rejected because Next.js 16 defaults to Turbopack and ignores webpack fallbacks. Use `externals` to exclude the package from SSR entirely — rejected because it would prevent the import from resolving at all; `resolveAlias` is more surgical.
 
 ### D4: No changes to `serverExternalPackages`
 
@@ -71,6 +71,6 @@ The `postinstall` script MUST discover these files dynamically (e.g., via glob i
 ## Risks / Trade-offs
 
 - **Worker file paths may change across package versions** → Mitigated by using a dynamic glob-based discovery in the copy script rather than hardcoded paths. If the glob returns zero files, the script exits non-zero with a clear error message.
-- **`cad-simple-viewer` may have undocumented Node.js imports** → Mitigated by `resolve.fallback: { fs: false, path: false }`. If additional fallbacks are needed, they will be discovered during dev server testing and added incrementally.
+- **`cad-simple-viewer` may have undocumented Node.js imports** → Mitigated by `turbopack.resolveAlias` mapping `fs` and `path` to empty strings for the browser. If additional aliases are needed, they will be discovered during dev server testing and added incrementally.
 - **Package may not be compatible with Next.js 16 / React 19 / pnpm** → Mitigated by verifying `pnpm build` succeeds as an explicit task. If it fails, we fall back to a version pin or alternative approach.
 - **Worker files may be large** → Acceptable for a demo. Production use would consider CDN hosting, but that is out of scope.
