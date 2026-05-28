@@ -58,7 +58,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `.ralph/baselines/dxf-bridge-readme.md` lists test file names, exit code, and test count
   - Stop and hand off if: any gate is nondeterministic across two runs.
 
-- [ ] **4.2 Convert generate_dxf from backend tool to frontend tool**
+- [x] **4.2 Convert generate_dxf from backend tool to frontend tool**
   - Scope: `agent/src/agent.py` (remove `@agent.tool`-decorated `generate_dxf` at lines 413-442), `src/app/page.tsx` (add `useFrontendTool` named `generate_dxf`)
   - Change: Remove the `@agent.tool`-decorated `generate_dxf` from `agent.py`. Add a `useFrontendTool` named `generate_dxf` in `page.tsx` that: (1) receives `design_id` from the agent, (2) looks up the design entry in `latestStateRef.current.designs`, (3) calls `/api/dxf/generate` via `fetch` with the entry's parameters (stripping `"---"` placeholder strings before sending), (4) base64-encodes the response bytes, (5) stores the result in the entry's `dxfContent` field in React state, (6) returns a confirmation string. Error cases return descriptive messages matching the original tool's behavior (design not found, no parameters, build error from non-2xx response).
   - Done when:

@@ -728,6 +728,80 @@ function YourMainContent() {
     },
   });
 
+  useFrontendTool({
+    name: "generate_dxf",
+    description:
+      "Generate a downloadable DXF CAD file for a completed design using the generate_dxf tool. " +
+      "Call after generate_design completes with all required parameters, or when the user explicitly requests a DXF/CAD file.",
+    parameters: [
+      {
+        name: "design_id",
+        type: "number",
+        description: "The ID of the design entry to generate DXF for",
+        required: true,
+      },
+    ],
+    async handler({ design_id }) {
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
+      const entry = currentDesigns.find((d) => d.id === design_id);
+
+      if (!entry) {
+        return `No design found with id ${design_id}.`;
+      }
+
+      if (!entry.parameters) {
+        return `Design ${design_id} has no parameters. Collect parameters first.`;
+      }
+
+      const stripPlaceholders = (params: Record<string, unknown>) => {
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(params)) {
+          if (value !== undefined && value !== null && value !== "---" && value !== "") {
+            cleaned[key] = value;
+          }
+        }
+        return cleaned;
+      };
+
+      const cleanedParams = stripPlaceholders(entry.parameters as Record<string, unknown>);
+
+      const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
+      const missing = requiredFields.filter((f) => cleanedParams[f] === undefined);
+      if (missing.length > 0) {
+        return `Design ${design_id} is missing required parameters: ${missing.join(", ")}. Collect these before generating DXF.`;
+      }
+
+      try {
+        const response = await fetch("/api/dxf/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cleanedParams),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          return `Cannot generate DXF: server returned ${response.status} - ${errorBody}`;
+        }
+
+        const dxfBytes = await response.arrayBuffer();
+        const b64 = btoa(String.fromCharCode(...new Uint8Array(dxfBytes)));
+        const size_kb = dxfBytes.byteLength / 1024;
+
+        const updatedDesigns = currentDesigns.map((d) =>
+          d.id === design_id ? { ...d, dxfContent: b64 } : d
+        );
+        const newState = { ...currentState, designs: updatedDesigns };
+        setState(newState);
+        latestStateRef.current = newState;
+
+        return `DXF generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in dxfContent).`;
+      } catch (err) {
+        return `Cannot generate DXF: ${err instanceof Error ? err.message : String(err)}`;
+      }
+    },
+  });
+
   useCopilotReadable({
     description: "The application state data including the current UI locale. The agent MUST respond in the language specified by 'locale' (sk = Slovak, en = English).",
     value: JSON.stringify({ designs, parameters: state.parameters, locale }),
