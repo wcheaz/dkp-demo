@@ -80,7 +80,7 @@ Fix: convert `generate_dxf` to a frontend `useFrontendTool` that reads the desig
     - `python3 -m pytest test/test_dxf_builder.py test/test_dxf_endpoint.py -q` exits 0
   - Stop and hand off if: removing the file causes import errors in other test files (check with `rg "test_generate_dxf\|from test.test_generate_dxf" test/`).
 
-- [ ] **4.4 Verify design-bridge fix passes all test gates**
+- [x] **4.4 Verify design-bridge fix passes all test gates**
   - Scope: no code edits; runs full test suite and validates artifact consistency
   - Change: Confirm all DXF-related tests pass and the tool migration is complete.
   - Done when:
