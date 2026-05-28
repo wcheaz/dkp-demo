@@ -1,6 +1,9 @@
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / "agent" / ".env")
+
 _agent_src = str(Path(__file__).resolve().parent.parent / "agent")
 if _agent_src not in sys.path:
     sys.path.insert(0, _agent_src)
