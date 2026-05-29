@@ -39,7 +39,7 @@
 
 ## 4. Cleanup
 
-- [ ] 4.1 **Remove dxfPreview field from DesignEntry type**
+- [x] 4.1 **Remove dxfPreview field from DesignEntry type**
   - Scope: `src/lib/types.ts`
   - Change: The `dxfPreview?: string` field is removed from `DesignEntry`. No code references it.
   - Done when:
