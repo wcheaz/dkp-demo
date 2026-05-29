@@ -36,6 +36,7 @@
     "currency": "€",
     "downloadDxf": "Stiahnuť DXF",
     "generatingCad": "Generujem CAD výkres...",
+    "cadAvailableLatest": "Prehliadač CAD zobrazený na najnovšom návrhu",
     "labels": {
       "totalTrusses": "Väzníky",
       "timberVolume": "Objem dreva",

@@ -36,6 +36,7 @@
     "currency": "€",
     "downloadDxf": "Download DXF",
     "generatingCad": "Generating CAD drawing...",
+    "cadAvailableLatest": "CAD viewer shown on latest design",
     "labels": {
       "totalTrusses": "Trusses",
       "timberVolume": "Timber Vol.",
