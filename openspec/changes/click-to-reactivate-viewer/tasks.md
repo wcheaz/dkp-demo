@@ -24,7 +24,7 @@
 
 ## 3. Implement click-to-reactivate in DesignComponent
 
-- [ ] 3.1 **Replace computed activeViewerIndex with user-controllable state and add click handler**
+- [x] 3.1 **Replace computed activeViewerIndex with user-controllable state and add click handler**
   - Scope: `src/components/design-component.tsx`
   - Change: The `activeViewerIndex` becomes a `useState<number>` initialized to the last DXF-bearing index. A click handler updates it. The state resets when the `designs` array length changes (new design appended). Inactive designs with `dxfContent` render a clickable overlay instead of the placeholder `<img>`.
   - Done when:

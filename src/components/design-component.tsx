@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
 import { useTranslations } from "@/i18n/use-translations";
@@ -89,14 +89,17 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   const t = useTranslations();
   const { locale } = useLanguage();
   const numberLocale = locale === "sk" ? "sk-SK" : "en-US";
-  const activeViewerIndex = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
+  const designsLengthRef = useRef(designs.length);
+  const lastDxfIndex = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
+  const [activeViewerIndex, setActiveViewerIndex] = useState<number>(lastDxfIndex);
 
-  const handleCapturePreview = useCallback((designId: number, dataUrl: string) => {
-    const updated = (state.designs ?? []).map((d) =>
-      d.id === designId ? { ...d, dxfPreview: dataUrl } : d
-    );
-    setState({ ...state, designs: updated });
-  }, [state, setState]);
+  if (designs.length !== designsLengthRef.current) {
+    designsLengthRef.current = designs.length;
+    const newLast = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
+    if (newLast !== activeViewerIndex) {
+      setActiveViewerIndex(newLast);
+    }
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -147,14 +150,14 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                         key={entry.id}
                         dxfContent={entry.dxfContent}
                         className="w-full h-[27vh]"
-                        onCapturePreview={(dataUrl) => handleCapturePreview(entry.id, dataUrl)}
                       />
                     ) : (
-                      <img
-                        src={entry.dxfPreview || "/design-in-progress.svg"}
-                        alt={`DXF preview #${entry.id}`}
-                        className="w-full h-[27vh] object-contain bg-white/10 rounded-xl"
-                      />
+                      <div
+                        onClick={() => setActiveViewerIndex(index)}
+                        className="w-full h-[27vh] flex items-center justify-center bg-white/10 rounded-xl cursor-pointer hover:bg-white/20 transition-colors"
+                      >
+                        <span className="text-gray-300 text-sm font-medium">{t("designs.clickToView")}</span>
+                      </div>
                     )}
                     <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
                   </div>
