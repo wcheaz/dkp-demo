@@ -6,7 +6,7 @@ The CAD Viewer React Component provides a client-side React component that rende
 
 ### Requirement: CadViewer component initializes the DXF viewer on mount
 
-A `"use client"` React component SHALL be exported as `CadViewer` from `src/components/cad-viewer.tsx`. It SHALL accept props: `dxfContent: string` (base64-encoded DXF data) and optional `className?: string`. The component SHALL render a container `<div>` with a `ref` for DOM access.
+A `"use client"` React component SHALL be exported as `CadViewer` from `src/components/cad-viewer.tsx`. It SHALL accept props: `dxfContent: string` (base64-encoded DXF data) and optional `className?: string`. The component SHALL render a container `<div>` with a `ref` for DOM access. The component SHALL NOT accept an `onCapturePreview` prop.
 
 In `useEffect` on mount, the component SHALL:
 1. Dynamically `import('@mlightcad/cad-simple-viewer')`
@@ -16,6 +16,8 @@ In `useEffect` on mount, the component SHALL:
 5. The viewer SHALL auto-zoom to fit the content after loading
 
 On unmount (the `useEffect` cleanup), the component SHALL call `docManager.destroy()` to release WebGL resources and remove event listeners.
+
+The component SHALL NOT contain any screenshot capture logic (`captureViewToDataUrl`, `emitPreview`, or WebGL pixel-reading code).
 
 #### Scenario: CadViewer renders and loads DXF content
 - **WHEN** `<CadViewer dxfContent="base64encodeddxf..." />` is mounted in the browser with a valid base64 DXF string
