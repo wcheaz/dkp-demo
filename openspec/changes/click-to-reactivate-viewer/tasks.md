@@ -49,7 +49,7 @@
 
 ## 5. Final quality gate
 
-- [ ] 5.1 **Verify full build and lint pass**
+- [x] 5.1 **Verify full build and lint pass**
   - Scope: project root
   - Change: All code changes are verified clean.
   - Done when:

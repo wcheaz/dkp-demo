@@ -89,17 +89,17 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   const t = useTranslations();
   const { locale } = useLanguage();
   const numberLocale = locale === "sk" ? "sk-SK" : "en-US";
-  const designsLengthRef = useRef(designs.length);
   const lastDxfIndex = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
   const [activeViewerIndex, setActiveViewerIndex] = useState<number>(lastDxfIndex);
+  const prevDesignsLengthRef = useRef(designs.length);
 
-  if (designs.length !== designsLengthRef.current) {
-    designsLengthRef.current = designs.length;
-    const newLast = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
-    if (newLast !== activeViewerIndex) {
+  useEffect(() => {
+    if (designs.length !== prevDesignsLengthRef.current) {
+      prevDesignsLengthRef.current = designs.length;
+      const newLast = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
       setActiveViewerIndex(newLast);
     }
-  }
+  }, [designs]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
