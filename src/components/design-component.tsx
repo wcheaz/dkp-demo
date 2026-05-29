@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgentState, DesignParameters, MaterialStats } from "@/lib/types";
 import { PricingBreakdownModal } from "@/components/pricing-breakdown-modal";
 import { useTranslations } from "@/i18n/use-translations";
@@ -46,28 +46,34 @@ function hasIncompleteParameters(params: DesignParameters | undefined): boolean 
 
 function DxfDownloadButton({ dxfContent, entryId }: { dxfContent: string; entryId: string | number }) {
   const t = useTranslations("designs");
-  const blobUrl = useMemo(() => {
+  const blobUrlRef = useRef<string | null>(null);
+
+  const handleClick = useCallback(() => {
     const binary = atob(dxfContent);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: "application/dxf" }));
-  }, [dxfContent]);
-
-  useEffect(() => {
-    return () => URL.revokeObjectURL(blobUrl);
-  }, [blobUrl]);
+    const blob = new Blob([bytes], { type: "application/dxf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `design-${entryId}.dxf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    blobUrlRef.current = url;
+  }, [dxfContent, entryId]);
 
   return (
-    <a
-      href={blobUrl}
-      download={`design-${entryId}.dxf`}
+    <button
+      onClick={handleClick}
       className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M7 1v9M3 7l4 4 4-4M1 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {t("downloadDxf")}
-    </a>
+    </button>
   );
 }
 
@@ -126,17 +132,17 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                     <div className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
                     <p className="mt-3 text-sm text-gray-300">{t("designs.generating")}</p>
                   </div>
+                ) : entry.dxfContent ? (
+                  <div className="w-[55%]">
+                    <CadViewer dxfContent={entry.dxfContent} className="w-full h-[27vh]" />
+                    <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
+                  </div>
                 ) : hasIncompleteParameters(entry.parameters) ? (
                   <img
                     src="/design-in-progress.svg"
                     alt={t("designs.designInProgress")}
                     className="w-[55%] h-[27vh] object-contain"
                   />
-                ) : entry.dxfContent ? (
-                  <div className="w-[55%]">
-                    <CadViewer dxfContent={entry.dxfContent} className="w-full h-[27vh]" />
-                    <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
-                  </div>
                 ) : (
                   <div className="w-[55%]">
                     <img

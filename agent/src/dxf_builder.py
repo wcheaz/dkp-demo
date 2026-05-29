@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from agent.src.agent import DesignParameters
 
 _DIMENSION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?")
-_OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*m?")
+_OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(mm|m)?\s*$", re.IGNORECASE)
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
@@ -190,11 +190,15 @@ def _parse_overhang(raw: Optional[str]) -> Optional[float]:
     if raw is None:
         return None
     if isinstance(raw, (int, float)):
-        return float(raw) * 1000
+        return float(raw)
     m = _OVERHANG_RE.match(str(raw).strip())
     if not m:
         return None
-    return float(m.group(1)) * 1000
+    value = float(m.group(1))
+    unit = (m.group(2) or "").lower()
+    if unit == "m":
+        return value * 1000
+    return value
 
 
 def _draw_dimensions(
@@ -360,8 +364,9 @@ def build_dxf(params: Any) -> bytes:
     doc.layers.add(LAYER_DIMENSIONS)
     _draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)
 
-    doc.layers.add(LAYER_TITLE_BLOCK)
-    _draw_title_block(msp, w, d, params)
+    # Title block disabled — generated DXFs are for customer preview, not final plots.
+    # doc.layers.add(LAYER_TITLE_BLOCK)
+    # _draw_title_block(msp, w, d, params)
 
     sbuf = StringIO()
     doc.write(sbuf)

@@ -20,7 +20,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[ui_origin],
     allow_methods=["POST", "OPTIONS"],
-    allow_headers=["application/json", "content-type"],
+    allow_headers=["content-type"],
 )
 
 

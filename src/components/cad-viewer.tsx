@@ -38,8 +38,10 @@ export function CadViewer({ dxfContent, className }: CadViewerProps) {
 
       const result = mod.AcApDocManager.createInstance({
         container: containerRef.current!,
+        autoResize: true,
         webworkerFileUrls: {
-          dxfParser: "/workers/libredwg-parser-worker.js",
+          dxfParser: "/workers/dxf-parser-worker.js",
+          dwgParser: "/workers/libredwg-parser-worker.js",
           mtextRender: "/workers/mtext-renderer-worker.js",
         },
       });
@@ -57,6 +59,12 @@ export function CadViewer({ dxfContent, className }: CadViewerProps) {
             setError("Failed to load CAD drawing");
           } else {
             setError(null);
+            setTimeout(() => {
+              try {
+                docManager.regen();
+                docManager.curView.zoomToFitDrawing(5000);
+              } catch { /* best-effort zoom */ }
+            }, 500);
           }
         } catch {
           setError("Failed to load CAD drawing");
@@ -91,6 +99,12 @@ export function CadViewer({ dxfContent, className }: CadViewerProps) {
             setError("Failed to load CAD drawing");
           } else {
             setError(null);
+            setTimeout(() => {
+              try {
+                docManagerRef.current?.regen();
+                docManagerRef.current?.curView.zoomToFitDrawing(5000);
+              } catch { /* best-effort zoom */ }
+            }, 500);
           }
         }
       } catch {

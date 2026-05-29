@@ -796,7 +796,14 @@ function YourMainContent() {
         }
 
         const dxfBytes = await response.arrayBuffer();
-        const b64 = btoa(String.fromCharCode(...new Uint8Array(dxfBytes)));
+        const bytes = new Uint8Array(dxfBytes);
+        let b64 = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+          b64 += String.fromCharCode.apply(null, Array.from(chunk));
+        }
+        b64 = btoa(b64);
         const size_kb = dxfBytes.byteLength / 1024;
         console.log("[dxf] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
 
