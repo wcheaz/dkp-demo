@@ -11,7 +11,7 @@
 
 ## 2. Remove screenshot infrastructure from CadViewer
 
-- [ ] 2.1 **Remove captureViewToDataUrl, emitPreview, and onCapturePreview from cad-viewer.tsx**
+- [x] 2.1 **Remove captureViewToDataUrl, emitPreview, and onCapturePreview from cad-viewer.tsx**
   - Scope: `src/components/cad-viewer.tsx`
   - Change: The `CadViewer` component no longer accepts `onCapturePreview`, no longer contains `captureViewToDataUrl()`, `emitPreview()`, or any WebGL pixel-reading code. The component only handles live rendering: mount → load DXF → auto-zoom → unmount → destroy.
   - Done when:
