@@ -91,15 +91,14 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   const numberLocale = locale === "sk" ? "sk-SK" : "en-US";
   const lastDxfIndex = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
   const [activeViewerIndex, setActiveViewerIndex] = useState<number>(lastDxfIndex);
-  const prevDesignsLengthRef = useRef(designs.length);
+  const prevLastDxfIndexRef = useRef(lastDxfIndex);
 
   useEffect(() => {
-    if (designs.length !== prevDesignsLengthRef.current) {
-      prevDesignsLengthRef.current = designs.length;
-      const newLast = designs.reduce((last, entry, i) => (entry.dxfContent ? i : last), -1);
-      setActiveViewerIndex(newLast);
+    if (lastDxfIndex !== prevLastDxfIndexRef.current) {
+      prevLastDxfIndexRef.current = lastDxfIndex;
+      setActiveViewerIndex(lastDxfIndex);
     }
-  }, [designs]);
+  }, [lastDxfIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -146,11 +145,14 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                 ) : entry.dxfContent ? (
                   <div className="w-[55%]">
                     {index === activeViewerIndex ? (
-                      <CadViewer
-                        key={entry.id}
-                        dxfContent={entry.dxfContent}
-                        className="w-full h-[27vh]"
-                      />
+                      <>
+                        <CadViewer
+                          key={entry.id}
+                          dxfContent={entry.dxfContent}
+                          className="w-full h-[27vh]"
+                        />
+                        <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
+                      </>
                     ) : (
                       <div
                         onClick={() => setActiveViewerIndex(index)}
@@ -159,7 +161,6 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                         <span className="text-gray-300 text-sm font-medium">{t("designs.clickToView")}</span>
                       </div>
                     )}
-                    <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
                   </div>
                 ) : hasIncompleteParameters(entry.parameters) ? (
                   <img

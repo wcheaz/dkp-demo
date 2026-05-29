@@ -1,0 +1,1 @@
+/home/ncheaz/git/dkp-demo/openspec/changes/click-to-reactivate-viewer/tasks.md
