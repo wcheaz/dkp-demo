@@ -8,7 +8,9 @@
     - `.ralph/baselines/cad-test-viewer-lint.txt` exists with eslint output
     - every captured gate file ends with a literal `EXIT=<integer>` line
     - `.ralph/baselines/cad-test-viewer-readme.md` lists passing/failing gates, exit codes, and exact failing identifiers
-  - Stop and hand off if: any gate is nondeterministic across two runs, or any captured baseline file is missing the `EXIT=<integer>` final line.
+  - Stop and hand off if:
+    - any gate is nondeterministic across two runs, or any captured baseline file is missing the `EXIT=<integer>` final line.
+    - any command attempts to read or write to `/tmp` (always use the local `./tmp` folder in the project workspace).
 
 ## 2. Backend Material Colors
 

@@ -38,3 +38,6 @@ Additionally, the generated DXF files use default CAD colors (white/black lines)
 
 - **[Risk]**: Large DXF files uploaded to the browser could cause performance lag or memory crashes during base64 conversion.
 - **[Mitigation]**: Limit the uploaded file size to 10MB client-side and display a clear loading state while the file is being read and processed.
+
+> [!WARNING]
+> Do NOT use the root `/tmp/` directory for any intermediate files, logs, or temporary assets during development or task execution. All temporary operations must use the local `./tmp/` folder inside the workspace.
