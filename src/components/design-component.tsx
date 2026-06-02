@@ -86,6 +86,8 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [pricingModalIndex, setPricingModalIndex] = useState<number | null>(null);
+  const [fullscreenDxf, setFullscreenDxf] = useState<string | null>(null);
+  const [fullscreenDesignId, setFullscreenDesignId] = useState<string | number | null>(null);
   const t = useTranslations();
   const { locale } = useLanguage();
   const numberLocale = locale === "sk" ? "sk-SK" : "en-US";
@@ -110,8 +112,34 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const exitFullscreen = useCallback(() => {
+    setFullscreenDxf(null);
+    setFullscreenDesignId(null);
+  }, []);
+
   return (
     <div className="w-full p-6">
+      {fullscreenDxf ? (
+        <div className="w-full h-[80vh] flex flex-col bg-[#1e1e1e] rounded-2xl border border-gray-700 overflow-hidden relative">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-200">{t("designs.fullscreenTitle")}</h2>
+            <button
+              onClick={exitFullscreen}
+              className="px-3 py-1 text-sm rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+            >
+              {t("designs.back")}
+            </button>
+          </div>
+          <div className="flex-1 relative">
+            <CadViewer
+              key={fullscreenDesignId}
+              dxfContent={fullscreenDxf}
+              className="w-full h-full absolute inset-0"
+            />
+          </div>
+        </div>
+      ) : (
+      <>
       <h2 className="text-2xl font-bold mb-4">{t("designs.heading")}</h2>
 
       {designs.length === 0 ? (
@@ -255,6 +283,8 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             </div>
           ))}
         </div>
+      )}
+      </>
       )}
 
       {modalImageUrl && (

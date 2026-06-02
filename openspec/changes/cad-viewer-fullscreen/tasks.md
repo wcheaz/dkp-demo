@@ -6,11 +6,11 @@
 
 ## 2. Fullscreen State and Layout Integration
 
-- [ ] 2.1 Add the `fullscreenDxf` and `fullscreenDesignId` states to `DesignComponent` in `src/components/design-component.tsx`. When `fullscreenDxf` is active, conditionally render the maximized container (`w-full h-[80vh] flex flex-col bg-[#1e1e1e] rounded-2xl border border-gray-700 overflow-hidden relative`) instead of the default designs heading and list. The header of this view must contain the localized title and a "Back" button that resets the states when clicked.
+- [x] 2.1 Add the `fullscreenDxf` and `fullscreenDesignId` states to `DesignComponent` in `src/components/design-component.tsx`. When `fullscreenDxf` is active, conditionally render the maximized container (`w-full h-[80vh] flex flex-col bg-[#1e1e1e] rounded-2xl border border-gray-700 overflow-hidden relative`) instead of the default designs heading and list. The header of this view must contain the localized title and a "Back" button that resets the states when clicked.
   - **Done when**: The component conditionally renders the fullscreen container when `fullscreenDxf` is not null. Verify with: `grep -cE 'fullscreenDxf|fullscreenDesignId|rounded-2xl bg-\[#1e1e1e\]' src/components/design-component.tsx` returning at least 3 matches.
   - **Stop and hand off if**: TypeScript compile errors or syntax errors occur in `design-component.tsx`.
 
-- [ ] 2.2 Inside the fullscreen container of `DesignComponent`, render the `<CadViewer>` component with `key={fullscreenDesignId}`, `dxfContent={fullscreenDxf}`, and class `w-full h-full absolute inset-0` to fill the content area.
+- [x] 2.2 Inside the fullscreen container of `DesignComponent`, render the `<CadViewer>` component with `key={fullscreenDesignId}`, `dxfContent={fullscreenDxf}`, and class `w-full h-full absolute inset-0` to fill the content area.
   - **Done when**: The `<CadViewer>` is correctly wired inside the fullscreen container block. Verify with: `grep -A 5 'CadViewer' src/components/design-component.tsx` in the conditional fullscreen render block shows `dxfContent={fullscreenDxf}` and `className="w-full h-full absolute inset-0"`.
   - **Stop and hand off if**: Import issues or component typing mismatches arise.
 
