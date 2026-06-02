@@ -125,9 +125,14 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             <h2 className="text-lg font-semibold text-gray-200">{t("designs.fullscreenTitle")}</h2>
             <button
               onClick={exitFullscreen}
-              className="px-3 py-1 text-sm rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+              title={t("designs.back")}
+              className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
             >
-              {t("designs.back")}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+                <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="5" y1="7" x2="9" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </button>
           </div>
           <div className="flex-1 relative">
