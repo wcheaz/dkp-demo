@@ -16,6 +16,8 @@ from dxf_builder import (
     LAYER_ROOF_OUTLINE,
     LAYER_TRUSSES,
     LAYER_DIMENSIONS,
+    LAYER_LABELS,
+    LAYER_LUMBER_SPECS,
     LAYER_TITLE_BLOCK,
 )
 
@@ -221,7 +223,7 @@ class TestCaseInsensitiveRoofType:
         assert doc.dxfversion == "AC1018"
 
 
-_ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS}
+_ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS, LAYER_LABELS, LAYER_LUMBER_SPECS}
 
 
 class TestTrussCount:
@@ -367,7 +369,7 @@ class TestDimensionEntities:
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
-        texts = _entities_on_layer(msp, LAYER_DIMENSIONS, "TEXT")
+        texts = _entities_on_layer(msp, LAYER_LABELS, "TEXT")
         text_contents = [t.dxf.text for t in texts]
         assert any("Width: 10m" in t for t in text_contents)
         assert any("Depth: 15m" in t for t in text_contents)
@@ -378,9 +380,61 @@ class TestDimensionEntities:
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
-        texts = _entities_on_layer(msp, LAYER_DIMENSIONS, "TEXT")
+        texts = _entities_on_layer(msp, LAYER_LABELS, "TEXT")
         text_contents = [t.dxf.text for t in texts]
         assert not any("Ridge Height:" in t for t in text_contents)
+
+
+class TestLabelsLayer:
+    def test_labels_layer_exists(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = [l.dxf.name for l in doc.layers]
+        assert LAYER_LABELS in layer_names
+
+    def test_labels_layer_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_LABELS)
+        assert layer.rgb == (218, 165, 32)
+
+    def test_labels_text_on_labels_layer(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        texts = _entities_on_layer(msp, LAYER_LABELS, "TEXT")
+        assert len(texts) >= 2
+
+
+class TestLumberSpecsLayer:
+    def test_lumber_specs_layer_exists(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = [l.dxf.name for l in doc.layers]
+        assert LAYER_LUMBER_SPECS in layer_names
+
+    def test_lumber_specs_layer_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_LUMBER_SPECS)
+        assert layer.rgb == (128, 0, 128)
+
+    def test_lumber_specs_mtext_content(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        mtexts = _entities_on_layer(msp, LAYER_LUMBER_SPECS, "MTEXT")
+        assert len(mtexts) >= 3
+        contents = [m.text for m in mtexts]
+        assert any("C24" in c for c in contents)
+        assert any("45 mm" in c for c in contents)
+        assert any("120 mm" in c for c in contents)
 
 
 @pytest.mark.skip(reason="Title_Block layer is disabled in dxf_builder.py")

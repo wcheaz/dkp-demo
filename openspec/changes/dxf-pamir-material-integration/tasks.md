@@ -43,7 +43,7 @@
 
 ## 5. Labels and Specifications
 
-- [ ] **Separate user labels and add technical Lumber_Specs layer**
+- [x] **Separate user labels and add technical Lumber_Specs layer**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: User-facing text annotations (Width, Depth, Height) moved to the `Labels` layer. Technical specs (lumber grade C24, member thickness 45 mm, widths) written as MTEXT on the new `Lumber_Specs` layer.
   - Done when:

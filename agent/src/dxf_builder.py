@@ -21,6 +21,8 @@ LAYER_WALL_CENTERLINES = "Wall_Centerlines"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
 LAYER_TRUSSES = "Trusses"
 LAYER_DIMENSIONS = "Dimensions"
+LAYER_LABELS = "Labels"
+LAYER_LUMBER_SPECS = "Lumber_Specs"
 LAYER_TITLE_BLOCK = "Title_Block"
 
 
@@ -294,20 +296,36 @@ def _draw_dimensions(
 
     msp.add_text(
         f"Width: {w_m:g}m",
-        dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+        dxfattribs={"layer": LAYER_LABELS, "height": text_h},
     ).dxf.insert = (label_x, label_y)
 
     msp.add_text(
         f"Depth: {d_m:g}m",
-        dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+        dxfattribs={"layer": LAYER_LABELS, "height": text_h},
     ).dxf.insert = (label_x, label_y - 500)
 
     if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
         ridge_m = round(ridge_height_mm / 1000, 2)
         msp.add_text(
             f"Ridge Height: {ridge_m:g}m",
-            dxfattribs={"layer": LAYER_DIMENSIONS, "height": text_h},
+            dxfattribs={"layer": LAYER_LABELS, "height": text_h},
         ).dxf.insert = (label_x, label_y - 1000)
+
+
+def _draw_lumber_specs(msp, w: float, d: float) -> None:
+    specs = [
+        "Lumber Grade: C24",
+        "Member Thickness: 45 mm",
+        "Member Width: 120 mm",
+    ]
+    text_h = 250
+    start_x = -w * 0.1
+    start_y = -d * 0.1 - 3000
+    for i, spec in enumerate(specs):
+        msp.add_mtext(
+            spec,
+            dxfattribs={"layer": LAYER_LUMBER_SPECS, "char_height": text_h},
+        ).dxf.insert = (start_x, start_y - i * 500)
 
 
 def _draw_title_block(msp, w: float, d: float, params) -> None:
@@ -412,6 +430,13 @@ def build_dxf(params: Any) -> bytes:
     doc.layers.add(LAYER_DIMENSIONS)
     doc.layers.get(LAYER_DIMENSIONS).rgb = (0, 0, 255)
     _draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)
+
+    doc.layers.add(LAYER_LABELS)
+    doc.layers.get(LAYER_LABELS).rgb = (218, 165, 32)
+
+    doc.layers.add(LAYER_LUMBER_SPECS)
+    doc.layers.get(LAYER_LUMBER_SPECS).rgb = (128, 0, 128)
+    _draw_lumber_specs(msp, w, d)
 
     # Title block disabled — generated DXFs are for customer preview, not final plots.
     # doc.layers.add(LAYER_TITLE_BLOCK)

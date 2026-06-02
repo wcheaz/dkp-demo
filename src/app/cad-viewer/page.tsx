@@ -12,14 +12,15 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 
 function parseIfcToDxf(ifcText: string): string {
-  const lines = ifcText.split(/\r?\n/);
+  const cleanText = ifcText.replace(/\/\*[\s\S]*?\*\//g, "");
+  const statements = cleanText.split(";");
   const entities: Record<string, { type: string; args: string[] }> = {};
   
   // Regex to match #123 = ENTITYNAME(...)
-  const lineRegex = /^#(\d+)\s*=\s*([A-Z0-9_]+)\s*\((.*)\)\s*;?\s*$/i;
+  const statementRegex = /^#(\d+)\s*=\s*([A-Z0-9_]+)\s*\(([\s\S]*)\)\s*$/i;
   
-  for (const line of lines) {
-    const match = line.trim().match(lineRegex);
+  for (const statement of statements) {
+    const match = statement.trim().match(statementRegex);
     if (match) {
       const id = match[1];
       const type = match[2].toUpperCase();
@@ -122,41 +123,61 @@ function parseIfcToDxf(ifcText: string): string {
         const v6 = [v2[0], v2[1], v2[2] + depth];
         const v7 = [v3[0], v3[1], v3[2] + depth];
         const v8 = [v4[0], v4[1], v4[2] + depth];
+
+        const COS_30 = 0.86602540378;
+        const SIN_30 = 0.5;
+        const projectPoint = (pt: number[]): [number, number] => {
+          const x = pt[0];
+          const y = pt[1];
+          const z = pt[2];
+          const xIso = (x - y) * COS_30;
+          const yIso = (x + y) * SIN_30 + z;
+          return [xIso, yIso];
+        };
+
+        const p1 = projectPoint(v1);
+        const p2 = projectPoint(v2);
+        const p3 = projectPoint(v3);
+        const p4 = projectPoint(v4);
+        const p5 = projectPoint(v5);
+        const p6 = projectPoint(v6);
+        const p7 = projectPoint(v7);
+        const p8 = projectPoint(v8);
         
-        const addLine = (p1: number[], p2: number[]) => {
+        const addLine = (pt1: [number, number], pt2: [number, number]) => {
           return `  0
 LINE
   8
-Wall
+0
  10
-${p1[0]}
+${pt1[0]}
  20
-${p1[1]}
+${pt1[1]}
  30
-${p1[2]}
+0.0
  11
-${p2[0]}
+${pt2[0]}
  21
-${p2[1]}
+${pt2[1]}
  31
-${p2[2]}
+0.0
 `;
         };
         
-        dxfEntities += addLine(v1, v2);
-        dxfEntities += addLine(v2, v3);
-        dxfEntities += addLine(v3, v4);
-        dxfEntities += addLine(v4, v1);
+        dxfEntities += addLine(p1, p2);
+        dxfEntities += addLine(p2, p3);
+        dxfEntities += addLine(p3, p4);
+        dxfEntities += addLine(p4, p1);
         
-        dxfEntities += addLine(v5, v6);
-        dxfEntities += addLine(v6, v7);
-        dxfEntities += addLine(v7, v8);
-        dxfEntities += addLine(v8, v5);
+        dxfEntities += addLine(p5, p6);
+        dxfEntities += addLine(p6, p7);
+        dxfEntities += addLine(p7, p8);
+        dxfEntities += addLine(p8, p5);
         
-        dxfEntities += addLine(v1, v5);
-        dxfEntities += addLine(v2, v6);
-        dxfEntities += addLine(v3, v7);
-        dxfEntities += addLine(v4, v8);
+        dxfEntities += addLine(p1, p5);
+        dxfEntities += addLine(p2, p6);
+        dxfEntities += addLine(p3, p7);
+        dxfEntities += addLine(p4, p8);
       }
     } catch (err) {
       console.error("Error parsing solid geometry:", err);
@@ -167,7 +188,7 @@ ${p2[2]}
     dxfEntities = `  0
 LINE
   8
-Empty
+0
  10
 0.0
  20
