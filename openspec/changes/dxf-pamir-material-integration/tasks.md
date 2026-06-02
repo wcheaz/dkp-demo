@@ -1,6 +1,6 @@
 ## 1. Quality Gate Baselines
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under `openspec/changes/dxf-pamir-material-integration/.ralph/baselines/`
   - Change: Capture current state of all test runs before modifications.
   - Done when:
