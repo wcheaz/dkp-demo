@@ -24,7 +24,7 @@
 
 ## 3. Frontend Test Viewer
 
-- [ ] **Implement `/cad-viewer` page for client-side CAD rendering**
+- [x] **Implement `/cad-viewer` page for client-side CAD rendering**
   - Scope: `src/app/cad-viewer/page.tsx`
   - Change: A new isolated route at `/cad-viewer` displays a premium drag-and-drop file upload UI and renders dropped/selected DXF files in the CAD canvas.
   - Done when:
