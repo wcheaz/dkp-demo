@@ -43,7 +43,7 @@ class TestValidDxfOutput:
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        assert doc.dxfversion == "AC1015"
+        assert doc.dxfversion == "AC1018"
 
     def test_layers_exist(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
@@ -178,13 +178,13 @@ class TestCaseInsensitiveRoofType:
         params = _params(floorPlanDimensions="10x15m", roofType="gable")
         result = build_dxf(params)
         doc = _read_dxf(result)
-        assert doc.dxfversion == "AC1015"
+        assert doc.dxfversion == "AC1018"
 
     def test_case_insensitive_flat(self):
         params = _params(floorPlanDimensions="10x15m", roofType="FLAT")
         result = build_dxf(params)
         doc = _read_dxf(result)
-        assert doc.dxfversion == "AC1015"
+        assert doc.dxfversion == "AC1018"
 
 
 _ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS, LAYER_TITLE_BLOCK}
@@ -383,6 +383,36 @@ class TestTitleBlock:
         assert any("Location not specified" in c for c in contents)
 
 
+class TestLayerRgbColors:
+    def test_floor_plan_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_FLOOR_PLAN)
+        assert layer.rgb == (128, 128, 128)
+
+    def test_roof_outline_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_ROOF_OUTLINE)
+        assert layer.rgb == (70, 130, 180)
+
+    def test_trusses_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_TRUSSES)
+        assert layer.rgb == (139, 90, 43)
+
+    def test_dimensions_rgb(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer = doc.layers.get(LAYER_DIMENSIONS)
+        assert layer.rgb == (0, 0, 255)
+
+
 class TestRoundTripAllRoofTypes:
     @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
     def test_all_five_layers_present(self, roof_type):
@@ -397,7 +427,7 @@ class TestRoundTripAllRoofTypes:
         params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        assert doc.dxfversion == "AC1015"
+        assert doc.dxfversion == "AC1018"
         msp = doc.modelspace()
         all_entities = list(msp)
         assert len(all_entities) > 0
@@ -421,7 +451,7 @@ class TestGenerateExampleFiles:
         params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        assert doc.dxfversion == "AC1015"
+        assert doc.dxfversion == "AC1018"
         layer_names = {l.dxf.name for l in doc.layers}
         assert _ALL_FIVE_LAYERS <= layer_names
         out_path = _GENERATED_DIR / f"{name}.dxf"

@@ -14,7 +14,7 @@
 
 ## 2. Backend Material Colors
 
-- [ ] **Configure layer RGB colors in DXF builder and update tests**
+- [x] **Configure layer RGB colors in DXF builder and update tests**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Layer RGB attributes are assigned on layer creation in the DXF builder, and backend unit tests verify these RGB values are correctly embedded in generated files.
   - Done when:
