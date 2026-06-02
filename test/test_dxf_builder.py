@@ -187,7 +187,7 @@ class TestCaseInsensitiveRoofType:
         assert doc.dxfversion == "AC1018"
 
 
-_ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS, LAYER_TITLE_BLOCK}
+_ALL_FIVE_LAYERS = {LAYER_FLOOR_PLAN, LAYER_ROOF_OUTLINE, LAYER_TRUSSES, LAYER_DIMENSIONS}
 
 
 class TestTrussCount:
@@ -349,6 +349,7 @@ class TestDimensionEntities:
         assert not any("Ridge Height:" in t for t in text_contents)
 
 
+@pytest.mark.skip(reason="Title_Block layer is disabled in dxf_builder.py")
 class TestTitleBlock:
     def test_rectangle_lines(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", buildingType="House", location="Bratislava")

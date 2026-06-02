@@ -11,7 +11,7 @@
 
 ## 2. Code Cleanups
 
-- [ ] **Align title block tests with disabled status**
+- [x] **Align title block tests with disabled status**
   - Scope: `test/test_dxf_builder.py`
   - Change: Skip or update tests that assert on the disabled `Title_Block` layer so that the test suite runs green for base functionality.
   - Done when:
