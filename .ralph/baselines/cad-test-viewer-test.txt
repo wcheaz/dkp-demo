@@ -1,0 +1,290 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.3, pluggy-1.6.0 -- /home/ncheaz/git/dkp-demo/agent/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/ncheaz/git/dkp-demo
+plugins: logfire-4.32.1, anyio-4.13.0
+collecting ... collected 48 items
+
+../test/test_dxf_builder.py::TestValidDxfOutput::test_re_readable PASSED [  2%]
+../test/test_dxf_builder.py::TestValidDxfOutput::test_layers_exist PASSED [  4%]
+../test/test_dxf_builder.py::TestFloorPlanOutline::test_10x15m_floor_plan PASSED [  6%]
+../test/test_dxf_builder.py::TestFloorPlanOutline::test_decimal_dimensions PASSED [  8%]
+../test/test_dxf_builder.py::TestInvalidDimensions::test_none_dimensions_raises PASSED [ 10%]
+../test/test_dxf_builder.py::TestInvalidDimensions::test_malformed_dimensions_raises PASSED [ 12%]
+../test/test_dxf_builder.py::TestGableRoof::test_gable_roof_outline PASSED [ 14%]
+../test/test_dxf_builder.py::TestHipRoof::test_hip_roof_outline PASSED   [ 16%]
+../test/test_dxf_builder.py::TestMonoPitchRoof::test_mono_pitch_roof_outline PASSED [ 18%]
+../test/test_dxf_builder.py::TestFlatRoof::test_flat_roof_outline PASSED [ 20%]
+../test/test_dxf_builder.py::TestInvalidRoofType::test_none_roof_type_raises PASSED [ 22%]
+../test/test_dxf_builder.py::TestInvalidRoofType::test_unsupported_roof_type_raises PASSED [ 25%]
+../test/test_dxf_builder.py::TestCaseInsensitiveRoofType::test_case_insensitive_gable PASSED [ 27%]
+../test/test_dxf_builder.py::TestCaseInsensitiveRoofType::test_case_insensitive_flat PASSED [ 29%]
+../test/test_dxf_builder.py::TestTrussCount::test_10x15m PASSED          [ 31%]
+../test/test_dxf_builder.py::TestTrussCount::test_small_building PASSED  [ 33%]
+../test/test_dxf_builder.py::TestTrussCount::test_tiny_building_minimum PASSED [ 35%]
+../test/test_dxf_builder.py::TestTrussCount::test_large_building PASSED  [ 37%]
+../test/test_dxf_builder.py::TestTrussCount::test_square_building PASSED [ 39%]
+../test/test_dxf_builder.py::TestTrussCrossSectionGable::test_truss_layer_has_lines PASSED [ 41%]
+../test/test_dxf_builder.py::TestTrussCrossSectionGable::test_first_truss_inset PASSED [ 43%]
+../test/test_dxf_builder.py::TestTrussCrossSectionGable::test_triangle_shape PASSED [ 45%]
+../test/test_dxf_builder.py::TestTrussCrossSectionHip::test_truss_layer_has_lines PASSED [ 47%]
+../test/test_dxf_builder.py::TestTrussCrossSectionMonoPitch::test_truss_layer_has_lines PASSED [ 50%]
+../test/test_dxf_builder.py::TestTrussCrossSectionMonoPitch::test_right_triangle_shape PASSED [ 52%]
+../test/test_dxf_builder.py::TestTrussCrossSectionFlat::test_truss_layer_has_horizontal_lines PASSED [ 54%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_width_and_depth_dimensions_present PASSED [ 56%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_ridge_height_dimension_for_gable PASSED [ 58%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_no_ridge_height_dimension_for_flat PASSED [ 60%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_overhang_dimension_present PASSED [ 62%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_text_labels_present PASSED [ 64%]
+../test/test_dxf_builder.py::TestDimensionEntities::test_flat_no_ridge_height_text PASSED [ 66%]
+../test/test_dxf_builder.py::TestTitleBlock::test_rectangle_lines FAILED [ 68%]
+../test/test_dxf_builder.py::TestTitleBlock::test_mtext_content_populated FAILED [ 70%]
+../test/test_dxf_builder.py::TestTitleBlock::test_none_fields_use_defaults FAILED [ 72%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Gable] FAILED [ 75%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Hip] FAILED [ 77%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Mono-pitch] FAILED [ 79%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Flat] FAILED [ 81%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Gable] PASSED [ 83%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Hip] PASSED [ 85%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Mono-pitch] PASSED [ 87%]
+../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Flat] PASSED [ 89%]
+../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[gable] FAILED [ 91%]
+../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[hip] FAILED [ 93%]
+../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[mono-pitch] FAILED [ 95%]
+../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[flat] FAILED [ 97%]
+../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[decimal] FAILED [100%]
+
+=================================== FAILURES ===================================
+_____________________ TestTitleBlock.test_rectangle_lines ______________________
+
+self = <test_dxf_builder.TestTitleBlock object at 0x772091c86fc0>
+
+    def test_rectangle_lines(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", buildingType="House", location="Bratislava")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "LINE")
+>       assert len(lines) == 4
+E       assert 0 == 4
+E        +  where 0 = len([])
+
+../test/test_dxf_builder.py:359: AssertionError
+_________________ TestTitleBlock.test_mtext_content_populated __________________
+
+self = <test_dxf_builder.TestTitleBlock object at 0x772091c87290>
+
+    def test_mtext_content_populated(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", buildingType="House", location="Bratislava")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        mtexts = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "MTEXT")
+>       assert len(mtexts) == 5
+E       assert 0 == 5
+E        +  where 0 = len([])
+
+../test/test_dxf_builder.py:367: AssertionError
+_________________ TestTitleBlock.test_none_fields_use_defaults _________________
+
+self = <test_dxf_builder.TestTitleBlock object at 0x772091c87560>
+
+    def test_none_fields_use_defaults(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        mtexts = _entities_on_layer(msp, LAYER_TITLE_BLOCK, "MTEXT")
+        contents = [mtext.text for mtext in mtexts]
+>       assert any("Building" in c for c in contents)
+E       assert False
+E        +  where False = any(<generator object TestTitleBlock.test_none_fields_use_defaults.<locals>.<genexpr> at 0x772091c1ab50>)
+
+../test/test_dxf_builder.py:382: AssertionError
+________ TestRoundTripAllRoofTypes.test_all_five_layers_present[Gable] _________
+
+self = <test_dxf_builder.TestRoundTripAllRoofTypes object at 0x772091c87920>
+roof_type = 'Gable'
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_all_five_layers_present(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:393: AssertionError
+_________ TestRoundTripAllRoofTypes.test_all_five_layers_present[Hip] __________
+
+self = <test_dxf_builder.TestRoundTripAllRoofTypes object at 0x772091c87b00>
+roof_type = 'Hip'
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_all_five_layers_present(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:393: AssertionError
+______ TestRoundTripAllRoofTypes.test_all_five_layers_present[Mono-pitch] ______
+
+self = <test_dxf_builder.TestRoundTripAllRoofTypes object at 0x772091c87bc0>
+roof_type = 'Mono-pitch'
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_all_five_layers_present(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:393: AssertionError
+_________ TestRoundTripAllRoofTypes.test_all_five_layers_present[Flat] _________
+
+self = <test_dxf_builder.TestRoundTripAllRoofTypes object at 0x772091c4ba40>
+roof_type = 'Flat'
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_all_five_layers_present(self, roof_type):
+        params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:393: AssertionError
+____________ TestGenerateExampleFiles.test_write_example_dxf[gable] ____________
+
+self = <test_dxf_builder.TestGenerateExampleFiles object at 0x772091c869f0>
+name = 'gable', dims = '10x15m', roof = 'Gable', pitch = 30
+
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:426: AssertionError
+_____________ TestGenerateExampleFiles.test_write_example_dxf[hip] _____________
+
+self = <test_dxf_builder.TestGenerateExampleFiles object at 0x772091c86690>
+name = 'hip', dims = '10x15m', roof = 'Hip', pitch = 30
+
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:426: AssertionError
+_________ TestGenerateExampleFiles.test_write_example_dxf[mono-pitch] __________
+
+self = <test_dxf_builder.TestGenerateExampleFiles object at 0x772091c84800>
+name = 'mono-pitch', dims = '10x15m', roof = 'Mono-pitch', pitch = 15
+
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:426: AssertionError
+____________ TestGenerateExampleFiles.test_write_example_dxf[flat] _____________
+
+self = <test_dxf_builder.TestGenerateExampleFiles object at 0x772091c849b0>
+name = 'flat', dims = '10x15m', roof = 'Flat', pitch = 0
+
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:426: AssertionError
+___________ TestGenerateExampleFiles.test_write_example_dxf[decimal] ___________
+
+self = <test_dxf_builder.TestGenerateExampleFiles object at 0x772091c84a40>
+name = 'decimal', dims = '8.5x12.3m', roof = 'Gable', pitch = 35
+
+    @pytest.mark.parametrize("name,dims,roof,pitch", _EXAMPLE_CONFIGS, ids=[c[0] for c in _EXAMPLE_CONFIGS])
+    def test_write_example_dxf(self, name, dims, roof, pitch):
+        _GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+        params = _params(floorPlanDimensions=dims, roofType=roof, roofPitch=pitch)
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        assert doc.dxfversion == "AC1015"
+        layer_names = {l.dxf.name for l in doc.layers}
+>       assert _ALL_FIVE_LAYERS <= layer_names
+E       AssertionError: assert {'Dimensions'...k', 'Trusses'} <= {'0', 'Defpoi...e', 'Trusses'}
+E         
+E         Extra items in the left set:
+E         'Title_Block'
+
+../test/test_dxf_builder.py:426: AssertionError
+=========================== short test summary info ============================
+FAILED ../test/test_dxf_builder.py::TestTitleBlock::test_rectangle_lines - as...
+FAILED ../test/test_dxf_builder.py::TestTitleBlock::test_mtext_content_populated
+FAILED ../test/test_dxf_builder.py::TestTitleBlock::test_none_fields_use_defaults
+FAILED ../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Gable]
+FAILED ../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Hip]
+FAILED ../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Mono-pitch]
+FAILED ../test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Flat]
+FAILED ../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[gable]
+FAILED ../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[hip]
+FAILED ../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[mono-pitch]
+FAILED ../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[flat]
+FAILED ../test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[decimal]
+======================== 12 failed, 36 passed in 1.00s =========================
+EXIT=1
