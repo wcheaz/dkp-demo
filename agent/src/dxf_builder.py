@@ -14,7 +14,10 @@ _OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(mm|m)?\s*$", re.IGNORECASE)
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
+WALL_HEIGHT = 2700.0
+
 LAYER_FLOOR_PLAN = "Floor_Plan"
+LAYER_WALL_CENTERLINES = "Wall_Centerlines"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
 LAYER_TRUSSES = "Trusses"
 LAYER_DIMENSIONS = "Dimensions"
@@ -33,10 +36,27 @@ def _parse_dimensions(raw: str) -> tuple[float, float]:
 
 
 def _draw_floor_plan(msp, w: float, d: float) -> None:
+    corners = [(0, 0), (w, 0), (w, d), (0, d)]
+    for z in (0, WALL_HEIGHT):
+        for i in range(4):
+            sx, sy = corners[i]
+            ex, ey = corners[(i + 1) % 4]
+            msp.add_line(
+                (sx, sy, z), (ex, ey, z),
+                dxfattribs={"layer": LAYER_FLOOR_PLAN},
+            )
+    for cx, cy in corners:
+        msp.add_line(
+            (cx, cy, 0), (cx, cy, WALL_HEIGHT),
+            dxfattribs={"layer": LAYER_FLOOR_PLAN},
+        )
+
+
+def _draw_wall_centerlines(msp, w: float, d: float) -> None:
     msp.add_lwpolyline(
         [(0, 0), (w, 0), (w, d), (0, d)],
         close=True,
-        dxfattribs={"layer": LAYER_FLOOR_PLAN},
+        dxfattribs={"layer": LAYER_WALL_CENTERLINES},
     )
 
 
@@ -332,11 +352,14 @@ def build_dxf(params: Any) -> bytes:
     doc = ezdxf.new("R2004")
     doc.layers.add(LAYER_FLOOR_PLAN)
     doc.layers.get(LAYER_FLOOR_PLAN).rgb = (128, 128, 128)
+    doc.layers.add(LAYER_WALL_CENTERLINES)
+    doc.layers.get(LAYER_WALL_CENTERLINES).rgb = (34, 139, 34)
     doc.layers.add(LAYER_ROOF_OUTLINE)
     doc.layers.get(LAYER_ROOF_OUTLINE).rgb = (70, 130, 180)
 
     msp = doc.modelspace()
     _draw_floor_plan(msp, w, d)
+    _draw_wall_centerlines(msp, w, d)
     _ROOF_DRAWERS[roof_key](msp, w, d)
 
     doc.layers.add(LAYER_TRUSSES)

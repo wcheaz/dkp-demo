@@ -12,6 +12,7 @@ from dxf_builder import (
     build_dxf,
     _compute_truss_count,
     LAYER_FLOOR_PLAN,
+    LAYER_WALL_CENTERLINES,
     LAYER_ROOF_OUTLINE,
     LAYER_TRUSSES,
     LAYER_DIMENSIONS,
@@ -55,28 +56,37 @@ class TestValidDxfOutput:
 
 
 class TestFloorPlanOutline:
-    def test_10x15m_floor_plan(self):
+    def test_10x15m_floor_plan_3d(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
-        polys = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LWPOLYLINE")
-        assert len(polys) == 1
-        verts = _lwpolyline_vertices(polys[0])
-        expected = [(0, 0), (10000, 0), (10000, 15000), (0, 15000)]
-        for v, e in zip(verts, expected):
-            assert abs(v[0] - e[0]) < 0.01
-            assert abs(v[1] - e[1]) < 0.01
+        lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
+        assert len(lines) == 12
+        bottom = [l for l in lines if abs(l.dxf.start.z) < 0.01 and abs(l.dxf.end.z) < 0.01]
+        top = [l for l in lines if abs(l.dxf.start.z - 2700) < 0.01 and abs(l.dxf.end.z - 2700) < 0.01]
+        vertical = [l for l in lines if abs(l.dxf.start.z - l.dxf.end.z) > 0.01]
+        assert len(bottom) == 4
+        assert len(top) == 4
+        assert len(vertical) == 4
 
-    def test_decimal_dimensions(self):
+    def test_decimal_dimensions_3d(self):
         params = _params(floorPlanDimensions="8.5x12.3m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
-        polys = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LWPOLYLINE")
+        lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
+        assert len(lines) == 12
+
+    def test_wall_centerlines_layer(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        polys = _entities_on_layer(msp, LAYER_WALL_CENTERLINES, "LWPOLYLINE")
         assert len(polys) == 1
         verts = _lwpolyline_vertices(polys[0])
-        expected = [(0, 0), (8500, 0), (8500, 12300), (0, 12300)]
+        expected = [(0, 0), (10000, 0), (10000, 15000), (0, 15000)]
         for v, e in zip(verts, expected):
             assert abs(v[0] - e[0]) < 0.01
             assert abs(v[1] - e[1]) < 0.01

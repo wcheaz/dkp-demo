@@ -21,7 +21,7 @@
 
 ## 3. Floor Plan and Centerlines
 
-- [ ] **Implement 3D floor plan and Wall_Centerlines layer**
+- [x] **Implement 3D floor plan and Wall_Centerlines layer**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Floor plan drawn as two closed rectangles at Z=0 and Z=2700 with vertical corner lines. Centerline rectangle drawn at Z=0 on a new `Wall_Centerlines` layer.
   - Done when:
