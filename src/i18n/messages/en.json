@@ -37,6 +37,9 @@
     "downloadDxf": "Download DXF",
     "generatingCad": "Generating CAD drawing...",
     "clickToView": "Click to preview design",
+    "back": "Back",
+    "fullscreenTitle": "CAD Viewer",
+    "viewFullscreen": "View fullscreen",
     "labels": {
       "totalTrusses": "Trusses",
       "timberVolume": "Timber Vol.",

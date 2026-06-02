@@ -1,6 +1,6 @@
 ## 1. Setup & Translations
 
-- [ ] 1.1 Add translation keys to `src/i18n/messages/en.json` and `src/i18n/messages/sk.json` for back button (`designs.back`), the fullscreen view title (`designs.fullscreenTitle`), and magnifying glass tooltip (`designs.viewFullscreen`).
+- [x] 1.1 Add translation keys to `src/i18n/messages/en.json` and `src/i18n/messages/sk.json` for back button (`designs.back`), the fullscreen view title (`designs.fullscreenTitle`), and magnifying glass tooltip (`designs.viewFullscreen`).
   - **Done when**: Both files contain the new keys. Verify with: `grep -cE 'back|fullscreenTitle|viewFullscreen' src/i18n/messages/en.json` returning at least 3 matches, and `grep -cE 'back|fullscreenTitle|viewFullscreen' src/i18n/messages/sk.json` returning at least 3 matches.
   - **Stop and hand off if**: JSON parsing error occurs in either file, or the files are missing.
 

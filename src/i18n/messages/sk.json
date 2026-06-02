@@ -37,6 +37,9 @@
     "downloadDxf": "Stiahnuť DXF",
     "generatingCad": "Generujem CAD výkres...",
     "clickToView": "Kliknite pre zobrazenie návrhu",
+    "back": "Späť",
+    "fullscreenTitle": "Prehliadač CAD",
+    "viewFullscreen": "Zobraziť na celú obrazovku",
     "labels": {
       "totalTrusses": "Väzníky",
       "timberVolume": "Objem dreva",
