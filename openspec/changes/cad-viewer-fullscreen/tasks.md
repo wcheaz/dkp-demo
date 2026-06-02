@@ -16,7 +16,7 @@
 
 ## 3. Magnifying Glass Button on Card Preview
 
-- [ ] 3.1 Wrap the default card-level `CadViewer` inside a `relative w-full h-[27vh]` wrapper, and add an absolute-positioned magnifying glass button (`absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-gray-300 hover:text-white transition-colors`) that sets the fullscreen state variables on click. The button must use a zoom-in magnifying glass icon (magnifying glass with a plus sign).
+- [x] 3.1 Wrap the default card-level `CadViewer` inside a `relative w-full h-[27vh]` wrapper, and add an absolute-positioned magnifying glass button (`absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-gray-300 hover:text-white transition-colors`) that sets the fullscreen state variables on click. The button must use a zoom-in magnifying glass icon (magnifying glass with a plus sign).
   - **Done when**: The relative wrapper and the button with click handler are added to `src/components/design-component.tsx`. Verify with: `grep -c 'absolute top-2 right-2 z-10' src/components/design-component.tsx` returning at least 1 match.
   - **Stop and hand off if**: The layout breaks or positioning offsets the zoom button outside the card boundary.
 

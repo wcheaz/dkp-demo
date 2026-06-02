@@ -174,11 +174,28 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                   <div className="w-[55%]">
                     {index === activeViewerIndex ? (
                       <>
-                        <CadViewer
-                          key={entry.id}
-                          dxfContent={entry.dxfContent}
-                          className="w-full h-[27vh]"
-                        />
+                        <div className="relative w-full h-[27vh]">
+                          <CadViewer
+                            key={entry.id}
+                            dxfContent={entry.dxfContent}
+                            className="w-full h-full"
+                          />
+                          <button
+                            onClick={() => {
+                              setFullscreenDxf(entry.dxfContent!);
+                              setFullscreenDesignId(entry.id);
+                            }}
+                            title={t("designs.viewFullscreen")}
+                            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-gray-300 hover:text-white transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+                              <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                              <line x1="5" y1="7" x2="9" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                              <line x1="7" y1="5" x2="7" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                          </button>
+                        </div>
                         <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
                       </>
                     ) : (
