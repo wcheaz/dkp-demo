@@ -10,6 +10,199 @@ const CadViewer = dynamic(
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
+
+function parseIfcToDxf(ifcText: string): string {
+  const lines = ifcText.split(/\r?\n/);
+  const entities: Record<string, { type: string; args: string[] }> = {};
+  
+  // Regex to match #123 = ENTITYNAME(...)
+  const lineRegex = /^#(\d+)\s*=\s*([A-Z0-9_]+)\s*\((.*)\)\s*;?\s*$/i;
+  
+  for (const line of lines) {
+    const match = line.trim().match(lineRegex);
+    if (match) {
+      const id = match[1];
+      const type = match[2].toUpperCase();
+      const argsStr = match[3];
+      
+      const args: string[] = [];
+      let current = "";
+      let parenDepth = 0;
+      let inString = false;
+      
+      for (let i = 0; i < argsStr.length; i++) {
+        const char = argsStr[i];
+        if (char === "'" && (i === 0 || argsStr[i - 1] !== "\\")) {
+          inString = !inString;
+          current += char;
+        } else if (inString) {
+          current += char;
+        } else if (char === "(") {
+          parenDepth++;
+          current += char;
+        } else if (char === ")") {
+          parenDepth--;
+          current += char;
+        } else if (char === "," && parenDepth === 0) {
+          args.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      if (current.trim()) {
+        args.push(current.trim());
+      }
+      
+      entities[id] = { type, args };
+    }
+  }
+  
+  const extrudedSolids = Object.entries(entities).filter(
+    ([, ent]) => ent.type === "IFCEXTRUDEDAREASOLID"
+  );
+  
+  let dxfEntities = "";
+  
+  for (const [, solid] of extrudedSolids) {
+    try {
+      const sweptAreaId = solid.args[0].replace("#", "");
+      const positionId = solid.args[1].replace("#", "");
+      const depth = parseFloat(solid.args[3]);
+      
+      const sweptArea = entities[sweptAreaId];
+      if (!sweptArea) continue;
+      
+      if (sweptArea.type === "IFCRECTANGLEPROFILEDEF") {
+        const profilePosId = sweptArea.args[2].replace("#", "");
+        const xDim = parseFloat(sweptArea.args[3]);
+        const yDim = parseFloat(sweptArea.args[4]);
+        
+        let px = 0;
+        let py = 0;
+        const profilePos = entities[profilePosId];
+        if (profilePos && profilePos.type === "IFCAXIS2PLACEMENT2D") {
+          const locId = profilePos.args[0].replace("#", "");
+          const loc = entities[locId];
+          if (loc && loc.type === "IFCCARTESIANPOINT") {
+            const coordsStr = loc.args[0].replace(/[()]/g, "");
+            const coords = coordsStr.split(",").map(c => parseFloat(c));
+            px = coords[0] || 0;
+            py = coords[1] || 0;
+          }
+        }
+        
+        let sx = 0;
+        let sy = 0;
+        let sz = 0;
+        const solidPos = entities[positionId];
+        if (solidPos && solidPos.type === "IFCAXIS2PLACEMENT3D") {
+          const locId = solidPos.args[0].replace("#", "");
+          const loc = entities[locId];
+          if (loc && loc.type === "IFCCARTESIANPOINT") {
+            const coordsStr = loc.args[0].replace(/[()]/g, "");
+            const coords = coordsStr.split(",").map(c => parseFloat(c));
+            sx = coords[0] || 0;
+            sy = coords[1] || 0;
+            sz = coords[2] || 0;
+          }
+        }
+        
+        const xMin = px - xDim / 2;
+        const xMax = px + xDim / 2;
+        const yMin = py - yDim / 2;
+        const yMax = py + yDim / 2;
+        
+        const v1 = [xMin + sx, yMin + sy, sz];
+        const v2 = [xMax + sx, yMin + sy, sz];
+        const v3 = [xMax + sx, yMax + sy, sz];
+        const v4 = [xMin + sx, yMax + sy, sz];
+        
+        const v5 = [v1[0], v1[1], v1[2] + depth];
+        const v6 = [v2[0], v2[1], v2[2] + depth];
+        const v7 = [v3[0], v3[1], v3[2] + depth];
+        const v8 = [v4[0], v4[1], v4[2] + depth];
+        
+        const addLine = (p1: number[], p2: number[]) => {
+          return `  0
+LINE
+  8
+Wall
+ 10
+${p1[0]}
+ 20
+${p1[1]}
+ 30
+${p1[2]}
+ 11
+${p2[0]}
+ 21
+${p2[1]}
+ 31
+${p2[2]}
+`;
+        };
+        
+        dxfEntities += addLine(v1, v2);
+        dxfEntities += addLine(v2, v3);
+        dxfEntities += addLine(v3, v4);
+        dxfEntities += addLine(v4, v1);
+        
+        dxfEntities += addLine(v5, v6);
+        dxfEntities += addLine(v6, v7);
+        dxfEntities += addLine(v7, v8);
+        dxfEntities += addLine(v8, v5);
+        
+        dxfEntities += addLine(v1, v5);
+        dxfEntities += addLine(v2, v6);
+        dxfEntities += addLine(v3, v7);
+        dxfEntities += addLine(v4, v8);
+      }
+    } catch (err) {
+      console.error("Error parsing solid geometry:", err);
+    }
+  }
+  
+  if (!dxfEntities) {
+    dxfEntities = `  0
+LINE
+  8
+Empty
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 11
+1000.0
+ 21
+1000.0
+ 31
+1000.0
+`;
+  }
+  
+  return `  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1015
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+${dxfEntities}  0
+ENDSEC
+  0
+EOF`;
+}
+
 export default function CadViewerPage() {
   const [dxfContent, setDxfContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -19,8 +212,12 @@ export default function CadViewerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = useCallback((file: File) => {
-    if (!file.name.toLowerCase().endsWith(".dxf")) {
-      setError("Please select a .dxf file");
+    const lowerName = file.name.toLowerCase();
+    const isDxf = lowerName.endsWith(".dxf");
+    const isIfc = lowerName.endsWith(".ifc") || lowerName.endsWith(".icf");
+
+    if (!isDxf && !isIfc) {
+      setError("Please select a .dxf, .ifc, or .icf file");
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -32,24 +229,44 @@ export default function CadViewerPage() {
     setFileName(file.name);
 
     const reader = new FileReader();
-    reader.onload = () => {
-      const arrayBuffer = reader.result as ArrayBuffer;
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = "";
-      const chunkSize = 8192;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
-        binary += String.fromCharCode.apply(null, Array.from(chunk));
-      }
-      const base64 = btoa(binary);
-      setDxfContent(base64);
-      setLoading(false);
-    };
-    reader.onerror = () => {
-      setError("Failed to read file");
-      setLoading(false);
-    };
-    reader.readAsArrayBuffer(file);
+    if (isDxf) {
+      reader.onload = () => {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+          binary += String.fromCharCode.apply(null, Array.from(chunk));
+        }
+        const base64 = btoa(binary);
+        setDxfContent(base64);
+        setLoading(false);
+      };
+      reader.onerror = () => {
+        setError("Failed to read file");
+        setLoading(false);
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.onload = () => {
+        try {
+          const text = reader.result as string;
+          const dxfText = parseIfcToDxf(text);
+          const base64 = btoa(dxfText);
+          setDxfContent(base64);
+          setLoading(false);
+        } catch {
+          setError("Failed to parse IFC file to DXF");
+          setLoading(false);
+        }
+      };
+      reader.onerror = () => {
+        setError("Failed to read file");
+        setLoading(false);
+      };
+      reader.readAsText(file);
+    }
   }, []);
 
   const handleDrop = useCallback(
@@ -157,7 +374,7 @@ export default function CadViewerPage() {
                   </svg>
                   <div className="text-center">
                     <p className="text-[#d4d4d4] text-sm font-medium">
-                      Drag & drop a DXF file here
+                      Drag & drop a DXF, IFC, or ICF file here
                     </p>
                     <p className="text-[#858585] text-xs mt-1">
                       or click to browse (max 10 MB)
@@ -169,7 +386,7 @@ export default function CadViewerPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".dxf"
+              accept=".dxf,.ifc,.icf"
               className="hidden"
               onChange={handleFileInput}
             />

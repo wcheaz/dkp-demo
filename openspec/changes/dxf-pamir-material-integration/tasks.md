@@ -32,7 +32,7 @@
 
 ## 4. Roof Outline and Trusses
 
-- [ ] **Implement 3D roof outlines and 3D truss placement**
+- [x] **Implement 3D roof outlines and 3D truss placement**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Roof outlines (ridge, hips, slope lines) and trusses drawn in 3D coordinate space starting at Z=2700 up to Z=2700+ridge_height.
   - Done when:
