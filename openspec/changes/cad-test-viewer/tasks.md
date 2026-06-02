@@ -4,10 +4,10 @@
   - Scope: no code edits; writes only under `.ralph/baselines/`
   - Change: Capture current state of all gates later tasks require.
   - Done when:
-    - `.ralph/baselines/dxf-test-viewer-test.txt` exists with test suite output
-    - `.ralph/baselines/dxf-test-viewer-lint.txt` exists with eslint output
+    - `.ralph/baselines/cad-test-viewer-test.txt` exists with test suite output
+    - `.ralph/baselines/cad-test-viewer-lint.txt` exists with eslint output
     - every captured gate file ends with a literal `EXIT=<integer>` line
-    - `.ralph/baselines/dxf-test-viewer-readme.md` lists passing/failing gates, exit codes, and exact failing identifiers
+    - `.ralph/baselines/cad-test-viewer-readme.md` lists passing/failing gates, exit codes, and exact failing identifiers
   - Stop and hand off if: any gate is nondeterministic across two runs, or any captured baseline file is missing the `EXIT=<integer>` final line.
 
 ## 2. Backend Material Colors
@@ -22,11 +22,11 @@
 
 ## 3. Frontend Test Viewer
 
-- [ ] **Implement `/dxf-viewer` page for client-side DXF rendering**
-  - Scope: `src/app/dxf-viewer/page.tsx`
-  - Change: A new isolated route at `/dxf-viewer` displays a premium drag-and-drop file upload UI and renders dropped/selected DXF files in the CAD canvas.
+- [ ] **Implement `/cad-viewer` page for client-side CAD rendering**
+  - Scope: `src/app/cad-viewer/page.tsx`
+  - Change: A new isolated route at `/cad-viewer` displays a premium drag-and-drop file upload UI and renders dropped/selected DXF files in the CAD canvas.
   - Done when:
-    - `src/app/dxf-viewer/page.tsx` exists and uses `next/dynamic` with `ssr: false` to import `CadViewer`
+    - `src/app/cad-viewer/page.tsx` exists and uses `next/dynamic` with `ssr: false` to import `CadViewer`
     - `npm run build` exits 0
-    - `rg "use client"` returns a match in `src/app/dxf-viewer/page.tsx`
+    - `rg "use client"` returns a match in `src/app/cad-viewer/page.tsx`
   - Stop and hand off if: the dynamically imported `CadViewer` causes webpack build errors or is not resolvable.

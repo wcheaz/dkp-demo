@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
-### Requirement: DXF test viewer route
-The system SHALL expose an isolated client-side page at the route `/dxf-viewer`. This page MUST NOT execute server-side rendering logic and must be imported dynamically with SSR disabled.
+### Requirement: CAD test viewer route
+The system SHALL expose an isolated client-side page at the route `/cad-viewer`. This page MUST NOT execute server-side rendering logic and must be imported dynamically with SSR disabled.
 
-#### Scenario: Navigating to DXF viewer
-- **WHEN** a user visits `/dxf-viewer`
+#### Scenario: Navigating to CAD viewer
+- **WHEN** a user visits `/cad-viewer`
 - **THEN** the browser renders a clean, dark-themed page layout containing a drag-and-drop file upload zone and no compilation/SSR errors are raised.
 
 ### Requirement: Drag-and-drop or file upload parsing
