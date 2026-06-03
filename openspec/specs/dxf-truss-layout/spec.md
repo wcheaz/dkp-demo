@@ -18,15 +18,15 @@ The module SHALL compute `total_trusses` as `round(width_m * depth_m * 0.147)` w
 
 ### Requirement: Truss cross-sections on Trusses layer
 
-The module SHALL draw truss cross-sections as LINE entities on a layer named `Trusses`. Each cross-section SHALL be placed at a Y-coordinate (if building is wider than deep, X-coordinate) along the longer axis, spaced evenly with edge inset of 5% of the shorter dimension from each end.
+The module SHALL draw truss cross-sections as 3D LINE entities on a layer named `Trusses`. Each truss SHALL be placed at its actual Y-coordinate (or X-coordinate if the building is wider than deep) at Z=2700 (wall height level) and span in 3D up to the ridge height at Z=2700+ridge_height, spaced evenly with edge inset of 5% of the shorter dimension from each end.
 
 #### Scenario: Gable truss cross-sections on 10x15m building
 - **WHEN** `build_dxf` is called with `floorPlanDimensions="10x15m"` and `roofType="Gable"` and `roofPitch=30`
-- **THEN** the `Trusses` layer contains LINE entities for each truss cross-section. Each cross-section consists of three LINEs forming an isosceles triangle: two rafters from eave points to ridge point, plus a tie-beam connecting the eave points. The first truss is inset by 500mm (5% of 10000mm) from the building edge.
+- **THEN** the `Trusses` layer contains 3D LINE entities for each truss. Each truss consists of three 3D LINEs: two rafters connecting eave points at `(0, y, 2700)` and `(10000, y, 2700)` to the ridge point at `(5000, y, 2700+ridge_height)`, and a bottom chord connecting `(0, y, 2700)` to `(10000, y, 2700)`
 
 #### Scenario: Flat truss cross-sections
 - **WHEN** `build_dxf` is called with `roofType="Flat"`
-- **THEN** each truss cross-section is a single horizontal LINE (tie-beam only) on the `Trusses` layer
+- **THEN** each truss cross-section is a single horizontal 3D LINE connecting `(0, y, 2700)` to `(w, y, 2700)` on the `Trusses` layer
 
 ### Requirement: Ridge height calculated from roofPitch
 
@@ -42,8 +42,8 @@ For gable and hip roof types, the ridge height SHALL be calculated as `(width_mm
 
 ### Requirement: Mono-pitch truss cross-section
 
-For `roofType="Mono-pitch"`, each truss cross-section SHALL be a right triangle with one rafter sloping from the low-side eave to the high-side ridge, a horizontal tie-beam, and a vertical rise on the high side.
+For `roofType="Mono-pitch"`, each truss cross-section SHALL be a 3D right triangle with one rafter sloping from the low-side eave `(0, y, 2700)` to the high-side ridge `(w, y, 2700+ridge_height)`, a horizontal bottom chord at Z=2700, and a vertical rise line on the high side from Z=2700 to Z=2700+ridge_height.
 
 #### Scenario: Mono-pitch cross-section
 - **WHEN** `build_dxf` is called with `floorPlanDimensions="10x15m"` and `roofType="Mono-pitch"`
-- **THEN** each truss cross-section on the `Trusses` layer consists of three LINEs: a sloped rafter, a horizontal tie-beam, and a vertical line on the high side. The rise height is `(width_mm) * tan(10 * pi / 180)` using the default 10-degree pitch.
+- **THEN** each truss cross-section on the `Trusses` layer consists of three 3D LINEs representing the sloped rafter, bottom chord, and vertical rise member at Z=2700
