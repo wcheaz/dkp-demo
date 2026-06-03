@@ -1,6 +1,6 @@
 ## 1. Quality Gate Baselines
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under `openspec/changes/dxf-isometric-and-color/.ralph/baselines/`
   - Change: Capture current state of all test runs before modifications.
   - Done when:

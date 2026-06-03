@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.3, pluggy-1.6.0
+rootdir: /home/ncheaz/git/dkp-demo
+plugins: logfire-4.32.1, anyio-4.13.0
+collected 60 items
+
+test/test_dxf_builder.py ........................................sss.... [ 78%]
+.............                                                            [100%]
+
+======================== 57 passed, 3 skipped in 1.05s =========================
+EXIT=0
