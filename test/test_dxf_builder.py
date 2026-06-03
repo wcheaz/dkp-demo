@@ -519,37 +519,13 @@ class TestTrussCrossSectionFlat:
 
 
 class TestDimensionEntities:
-    def test_width_and_depth_dimensions_present(self):
+    def test_no_dimension_entities_generated(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
-        assert len(dims) >= 2
-
-    def test_ridge_height_dimension_for_gable(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
-        result = build_dxf(params)
-        doc = _read_dxf(result)
-        msp = doc.modelspace()
-        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
-        assert len(dims) >= 3
-
-    def test_no_ridge_height_dimension_for_flat(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
-        result = build_dxf(params)
-        doc = _read_dxf(result)
-        msp = doc.modelspace()
-        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
-        assert len(dims) == 2
-
-    def test_overhang_dimension_present(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30, overhang="0.5m")
-        result = build_dxf(params)
-        doc = _read_dxf(result)
-        msp = doc.modelspace()
-        dims = _entities_on_layer(msp, LAYER_DIMENSIONS, "DIMENSION")
-        assert len(dims) >= 4
+        assert len(dims) == 0
 
     def test_text_labels_present(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)

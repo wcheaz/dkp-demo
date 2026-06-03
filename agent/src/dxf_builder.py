@@ -258,53 +258,7 @@ def _draw_dimensions(
     text_h = 250
 
     w_dim_offset = d * 0.1
-    p1_w = _to_iso(0, 0, 0)
-    p2_w = _to_iso(w, 0, 0)
-    base_w = _to_iso(0, -w_dim_offset, 0)
-    dim = msp.add_linear_dim(
-        base=base_w,
-        p1=p1_w,
-        p2=p2_w,
-        angle=0,
-        dxfattribs={"layer": LAYER_DIMENSIONS},
-    )
-    dim.render()
-
     d_dim_offset = w * 0.1
-    p1_d = _to_iso(0, 0, 0)
-    p2_d = _to_iso(0, d, 0)
-    base_d = _to_iso(-d_dim_offset, 0, 0)
-    dim = msp.add_linear_dim(
-        base=base_d,
-        p1=p1_d,
-        p2=p2_d,
-        angle=90,
-        dxfattribs={"layer": LAYER_DIMENSIONS},
-    )
-    dim.render()
-
-    if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
-        shorter = min(w, d)
-        first_truss_y = shorter * 0.05
-        rh_offset = w * 0.1
-        dim = msp.add_linear_dim(
-            base=_to_iso(w + rh_offset, 0, 0),
-            p1=_to_iso(w, first_truss_y, 0),
-            p2=_to_iso(w, first_truss_y, ridge_height_mm),
-            angle=90,
-            dxfattribs={"layer": LAYER_DIMENSIONS},
-        )
-        dim.render()
-
-    if overhang_mm is not None and overhang_mm > 0:
-        dim = msp.add_linear_dim(
-            base=_to_iso(w, d + 1500, 0),
-            p1=_to_iso(w, d, 0),
-            p2=_to_iso(w + overhang_mm, d, 0),
-            angle=0,
-            dxfattribs={"layer": LAYER_DIMENSIONS},
-        )
-        dim.render()
 
     label_pos = _to_iso(-d_dim_offset, -w_dim_offset - 1500, 0)
     label_x, label_y = label_pos
