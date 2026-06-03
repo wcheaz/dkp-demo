@@ -33,7 +33,7 @@
 
 ## 4. Roof Outline Projection
 
-- [ ] **Implement isometric projection for roof outline**
+- [x] **Implement isometric projection for roof outline**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Apply `_to_iso` to all roof outline drawing functions. Update outline unit tests to assert the projected 2D coordinates.
   - Done when:

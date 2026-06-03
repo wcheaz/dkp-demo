@@ -204,50 +204,75 @@ class TestInvalidDimensions:
 
 class TestGableRoof:
     def test_gable_roof_outline(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        w, d = 10000.0, 15000.0
+        pitch = 30.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=pitch)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
         assert len(lines) == 5
+        ridge_h = (min(w, d) / 2) * math.tan(pitch * math.pi / 180)
+        z_ridge = 2700 + ridge_h
+        ridge_s = _to_iso(w / 2, 0, z_ridge)
+        ridge_e = _to_iso(w / 2, d, z_ridge)
+        peak = _to_iso(w / 2, d / 2, z_ridge)
+        rs = (round(ridge_s[0], 2), round(ridge_s[1], 2))
+        re_ = (round(ridge_e[0], 2), round(ridge_e[1], 2))
         ridge_found = False
         for line in lines:
-            start = (line.dxf.start.x, line.dxf.start.y, line.dxf.start.z)
-            end = (line.dxf.end.x, line.dxf.end.y, line.dxf.end.z)
-            if abs(start[0] - 5000) < 0.01 and abs(end[0] - 5000) < 0.01:
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            if (s == rs and e == re_) or (s == re_ and e == rs):
                 ridge_found = True
-                assert abs(start[2] - end[2]) < 0.01
-                assert start[2] > 2700
-        assert ridge_found, "Ridge line at x=5000 not found"
-        rafter_lines = [l for l in lines if abs(l.dxf.start.z - 2700) < 0.01 and l.dxf.end.z > 2700]
-        assert len(rafter_lines) == 4
+        assert ridge_found, "Ridge line not found at projected coordinates"
+        peak_pt = (round(peak[0], 2), round(peak[1], 2))
+        rafter_count = sum(
+            1 for l in lines
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) == peak_pt
+            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) == peak_pt
+        )
+        assert rafter_count == 4
 
 
 class TestHipRoof:
     def test_hip_roof_outline(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Hip", roofPitch=30)
+        w, d = 10000.0, 15000.0
+        pitch = 30.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Hip", roofPitch=pitch)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
         assert len(lines) == 5
+        ridge_h = (min(w, d) / 2) * math.tan(pitch * math.pi / 180)
+        z_ridge = 2700 + ridge_h
+        ridge_len = d - w
+        ry_start_2d = _to_iso(w / 2, (d - ridge_len) / 2, z_ridge)
+        ry_end_2d = _to_iso(w / 2, (d + ridge_len) / 2, z_ridge)
+        rs = (round(ry_start_2d[0], 2), round(ry_start_2d[1], 2))
+        re_ = (round(ry_end_2d[0], 2), round(ry_end_2d[1], 2))
         ridge_lines = []
         hip_lines = []
         for line in lines:
-            s = (line.dxf.start.x, line.dxf.start.y, line.dxf.start.z)
-            e = (line.dxf.end.x, line.dxf.end.y, line.dxf.end.z)
-            if abs(s[0] - 5000) < 0.01 and abs(e[0] - 5000) < 0.01:
-                ridge_len = abs(e[1] - s[1])
-                ridge_lines.append(ridge_len)
-                assert abs(s[2] - e[2]) < 0.01
-                assert s[2] > 2700
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            if (s == rs and e == re_) or (s == re_ and e == rs):
+                ridge_lines.append(line)
             else:
-                hip_lines.append((s, e))
+                hip_lines.append(line)
         assert len(ridge_lines) == 1
-        assert abs(ridge_lines[0] - 5000) < 0.01
         assert len(hip_lines) == 4
-        for s, e in hip_lines:
-            assert (abs(s[2] - 2700) < 0.01 and e[2] > 2700) or (abs(e[2] - 2700) < 0.01 and s[2] > 2700)
+        eave_corners_2d = [
+            (round(p[0], 2), round(p[1], 2))
+            for p in [_to_iso(0, 0, 2700), _to_iso(w, 0, 2700), _to_iso(0, d, 2700), _to_iso(w, d, 2700)]
+        ]
+        for hl in hip_lines:
+            s = (round(hl.dxf.start.x, 2), round(hl.dxf.start.y, 2))
+            e = (round(hl.dxf.end.x, 2), round(hl.dxf.end.y, 2))
+            connects_ridge = s == rs or s == re_ or e == rs or e == re_
+            connects_eave = s in eave_corners_2d or e in eave_corners_2d
+            assert connects_ridge and connects_eave
 
 
 class TestMonoPitchRoof:
@@ -258,39 +283,65 @@ class TestMonoPitchRoof:
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
         assert len(lines) >= 4
-        z_values = set()
-        for line in lines:
-            z_values.add(round(line.dxf.start.z, 1))
-            z_values.add(round(line.dxf.end.z, 1))
-        assert any(abs(z - 2700) < 0.01 for z in z_values)
+        w, d = 10000.0, 15000.0
+        ridge_h = w * math.tan(10 * math.pi / 180)
+        z_low = 2700
+        z_high = 2700 + ridge_h
+        expected_pts = {
+            (round(p[0], 2), round(p[1], 2))
+            for p in [
+                _to_iso(0, 0, z_low), _to_iso(w, 0, z_high),
+                _to_iso(w, d, z_high), _to_iso(0, d, z_low),
+            ]
+        }
+        drawn_pts = set()
+        for l in lines:
+            drawn_pts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
+            drawn_pts.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)))
+        assert expected_pts <= drawn_pts
 
-    def test_mono_pitch_3d_slope(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=10)
+    def test_mono_pitch_2d_projected_slope(self):
+        w, d = 10000.0, 15000.0
+        pitch = 10.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=pitch)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
-        slope_lines = [l for l in lines if abs(l.dxf.start.z - l.dxf.end.z) > 0.01]
-        assert len(slope_lines) >= 1
+        low_pt = _to_iso(0, 0, 2700)
+        high_pt = _to_iso(w, 0, 2700 + w * math.tan(pitch * math.pi / 180))
+        low_2d = (round(low_pt[0], 2), round(low_pt[1], 2))
+        high_2d = (round(high_pt[0], 2), round(high_pt[1], 2))
+        slope_found = False
+        for l in lines:
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
+            if (s == low_2d and e == high_2d) or (s == high_2d and e == low_2d):
+                slope_found = True
+        assert slope_found
 
 
 class TestFlatRoof:
     def test_flat_roof_outline(self):
+        w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
         assert len(lines) == 4
+        expected_pts = {
+            (round(p[0], 2), round(p[1], 2))
+            for p in [
+                _to_iso(0, 0, 2700), _to_iso(w, 0, 2700),
+                _to_iso(w, d, 2700), _to_iso(0, d, 2700),
+            ]
+        }
+        drawn_pts = set()
         for line in lines:
-            assert abs(line.dxf.start.z - 2700) < 0.01
-            assert abs(line.dxf.end.z - 2700) < 0.01
-        corners = set()
-        for line in lines:
-            corners.add((round(line.dxf.start.x, 1), round(line.dxf.start.y, 1)))
-            corners.add((round(line.dxf.end.x, 1), round(line.dxf.end.y, 1)))
-        expected = {(0, 0), (10000, 0), (10000, 15000), (0, 15000)}
-        assert corners == expected
+            drawn_pts.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2)))
+            drawn_pts.add((round(line.dxf.end.x, 2), round(line.dxf.end.y, 2)))
+        assert drawn_pts == expected_pts
 
 
 class TestInvalidRoofType:
