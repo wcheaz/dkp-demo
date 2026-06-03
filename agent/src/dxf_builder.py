@@ -390,10 +390,13 @@ def build_dxf(params: Any) -> bytes:
     doc = ezdxf.new("R2004")
     doc.layers.add(LAYER_FLOOR_PLAN)
     doc.layers.get(LAYER_FLOOR_PLAN).rgb = (128, 128, 128)
+    doc.layers.get(LAYER_FLOOR_PLAN).color = 9
     doc.layers.add(LAYER_WALL_CENTERLINES)
     doc.layers.get(LAYER_WALL_CENTERLINES).rgb = (34, 139, 34)
+    doc.layers.get(LAYER_WALL_CENTERLINES).color = 3
     doc.layers.add(LAYER_ROOF_OUTLINE)
     doc.layers.get(LAYER_ROOF_OUTLINE).rgb = (70, 130, 180)
+    doc.layers.get(LAYER_ROOF_OUTLINE).color = 4
 
     msp = doc.modelspace()
     _draw_floor_plan(msp, w, d)
@@ -412,6 +415,7 @@ def build_dxf(params: Any) -> bytes:
 
     doc.layers.add(LAYER_TRUSSES)
     doc.layers.get(LAYER_TRUSSES).rgb = (139, 90, 43)
+    doc.layers.get(LAYER_TRUSSES).color = 34
     _draw_trusses(msp, w, d, roof_key, params.roofPitch if hasattr(params, "roofPitch") else None)
 
     w_m = w / 1000
@@ -429,13 +433,16 @@ def build_dxf(params: Any) -> bytes:
 
     doc.layers.add(LAYER_DIMENSIONS)
     doc.layers.get(LAYER_DIMENSIONS).rgb = (0, 0, 255)
+    doc.layers.get(LAYER_DIMENSIONS).color = 5
     _draw_dimensions(msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm)
 
     doc.layers.add(LAYER_LABELS)
     doc.layers.get(LAYER_LABELS).rgb = (218, 165, 32)
+    doc.layers.get(LAYER_LABELS).color = 2
 
     doc.layers.add(LAYER_LUMBER_SPECS)
     doc.layers.get(LAYER_LUMBER_SPECS).rgb = (128, 0, 128)
+    doc.layers.get(LAYER_LUMBER_SPECS).color = 6
     _draw_lumber_specs(msp, w, d)
 
     # Title block disabled — generated DXFs are for customer preview, not final plots.

@@ -12,7 +12,7 @@
 
 ## 2. ACI Color Configuration
 
-- [ ] **Configure ACI colors on layers**
+- [x] **Configure ACI colors on layers**
   - Scope: `agent/src/dxf_builder.py`
   - Change: Layer creation calls set the `.color` property on layers in addition to `.rgb` properties, matching standard color indices.
   - Done when:
