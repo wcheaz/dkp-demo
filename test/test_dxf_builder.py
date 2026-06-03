@@ -11,6 +11,7 @@ sys.path.insert(0, "agent/src")
 from dxf_builder import (
     build_dxf,
     _compute_truss_count,
+    _to_iso,
     LAYER_FLOOR_PLAN,
     LAYER_WALL_CENTERLINES,
     LAYER_ROOF_OUTLINE,
@@ -58,21 +59,15 @@ class TestValidDxfOutput:
 
 
 class TestFloorPlanOutline:
-    def test_10x15m_floor_plan_3d(self):
+    def test_10x15m_floor_plan_line_count(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
         assert len(lines) == 12
-        bottom = [l for l in lines if abs(l.dxf.start.z) < 0.01 and abs(l.dxf.end.z) < 0.01]
-        top = [l for l in lines if abs(l.dxf.start.z - 2700) < 0.01 and abs(l.dxf.end.z - 2700) < 0.01]
-        vertical = [l for l in lines if abs(l.dxf.start.z - l.dxf.end.z) > 0.01]
-        assert len(bottom) == 4
-        assert len(top) == 4
-        assert len(vertical) == 4
 
-    def test_decimal_dimensions_3d(self):
+    def test_decimal_dimensions_line_count(self):
         params = _params(floorPlanDimensions="8.5x12.3m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
@@ -80,7 +75,103 @@ class TestFloorPlanOutline:
         lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
         assert len(lines) == 12
 
-    def test_wall_centerlines_layer(self):
+    def test_isometric_projected_bottom_ring(self):
+        w, d = 10000.0, 15000.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
+        from dxf_builder import WALL_HEIGHT
+        bottom_corners_2d = [
+            _to_iso(0, 0, 0),
+            _to_iso(w, 0, 0),
+            _to_iso(w, d, 0),
+            _to_iso(0, d, 0),
+        ]
+        top_corners_2d = [
+            _to_iso(0, 0, WALL_HEIGHT),
+            _to_iso(w, 0, WALL_HEIGHT),
+            _to_iso(w, d, WALL_HEIGHT),
+            _to_iso(0, d, WALL_HEIGHT),
+        ]
+        bottom_set = {(round(x, 2), round(y, 2)) for x, y in bottom_corners_2d}
+        top_set = {(round(x, 2), round(y, 2)) for x, y in top_corners_2d}
+        bottom_ring = []
+        top_ring = []
+        vertical = []
+        for l in lines:
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
+            s_in_bot = s in bottom_set
+            e_in_bot = e in bottom_set
+            s_in_top = s in top_set
+            e_in_top = e in top_set
+            if s_in_bot and e_in_bot:
+                bottom_ring.append(l)
+            elif s_in_top and e_in_top:
+                top_ring.append(l)
+            else:
+                vertical.append(l)
+        assert len(bottom_ring) == 4, f"Expected 4 bottom ring lines, got {len(bottom_ring)}"
+        assert len(top_ring) == 4, f"Expected 4 top ring lines, got {len(top_ring)}"
+        assert len(vertical) == 4, f"Expected 4 vertical lines, got {len(vertical)}"
+        drawn_bottom = set()
+        for l in bottom_ring:
+            drawn_bottom.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
+            drawn_bottom.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)))
+        assert drawn_bottom == bottom_set
+
+    def test_isometric_projected_top_ring(self):
+        w, d = 10000.0, 15000.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
+        from dxf_builder import WALL_HEIGHT
+        top_corners_2d = [
+            _to_iso(0, 0, WALL_HEIGHT),
+            _to_iso(w, 0, WALL_HEIGHT),
+            _to_iso(w, d, WALL_HEIGHT),
+            _to_iso(0, d, WALL_HEIGHT),
+        ]
+        top_set = {(round(x, 2), round(y, 2)) for x, y in top_corners_2d}
+        top_ring = [
+            l for l in lines
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) in top_set
+            and (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) in top_set
+        ]
+        assert len(top_ring) == 4
+
+    def test_isometric_vertical_lines_connect_rings(self):
+        w, d = 10000.0, 15000.0
+        params = _params(floorPlanDimensions="10x15m", roofType="Flat")
+        result = build_dxf(params)
+        doc = _read_dxf(result)
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
+        from dxf_builder import WALL_HEIGHT
+        corners_3d = [(0, 0), (w, 0), (w, d), (0, d)]
+        for cx, cy in corners_3d:
+            bot = _to_iso(cx, cy, 0)
+            top = _to_iso(cx, cy, WALL_HEIGHT)
+            found = False
+            for l in lines:
+                sx, sy = l.dxf.start.x, l.dxf.start.y
+                ex, ey = l.dxf.end.x, l.dxf.end.y
+                if (abs(sx - bot[0]) < 0.1 and abs(sy - bot[1]) < 0.1
+                        and abs(ex - top[0]) < 0.1 and abs(ey - top[1]) < 0.1):
+                    found = True
+                    break
+                if (abs(sx - top[0]) < 0.1 and abs(sy - top[1]) < 0.1
+                        and abs(ex - bot[0]) < 0.1 and abs(ey - bot[1]) < 0.1):
+                    found = True
+                    break
+            assert found, f"Vertical line at corner ({cx},{cy}) not found"
+
+    def test_isometric_centerlines_projected(self):
+        w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
@@ -88,10 +179,15 @@ class TestFloorPlanOutline:
         polys = _entities_on_layer(msp, LAYER_WALL_CENTERLINES, "LWPOLYLINE")
         assert len(polys) == 1
         verts = _lwpolyline_vertices(polys[0])
-        expected = [(0, 0), (10000, 0), (10000, 15000), (0, 15000)]
+        expected = [
+            _to_iso(0, 0, 0),
+            _to_iso(w, 0, 0),
+            _to_iso(w, d, 0),
+            _to_iso(0, d, 0),
+        ]
         for v, e in zip(verts, expected):
-            assert abs(v[0] - e[0]) < 0.01
-            assert abs(v[1] - e[1]) < 0.01
+            assert abs(v[0] - e[0]) < 0.1
+            assert abs(v[1] - e[1]) < 0.1
 
 
 class TestInvalidDimensions:

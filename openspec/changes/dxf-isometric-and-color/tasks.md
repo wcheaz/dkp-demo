@@ -22,7 +22,7 @@
 
 ## 3. Floor Plan and Centerlines Projection
 
-- [ ] **Implement isometric projection for walls and centerlines**
+- [x] **Implement isometric projection for walls and centerlines**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Implement `_to_iso` helper in `dxf_builder.py` and apply it to `_draw_floor_plan` and `_draw_wall_centerlines`. Update floor plan unit tests to verify the new projected 2D isometric coordinates.
   - Done when:

@@ -16,6 +16,13 @@ _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
 WALL_HEIGHT = 2700.0
 
+_ISO_COS30 = math.cos(math.pi / 6)
+_ISO_SIN30 = 0.5
+
+
+def _to_iso(x: float, y: float, z: float) -> tuple[float, float]:
+    return ((x - y) * _ISO_COS30, (x + y) * _ISO_SIN30 + z)
+
 LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_WALL_CENTERLINES = "Wall_Centerlines"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
@@ -44,19 +51,21 @@ def _draw_floor_plan(msp, w: float, d: float) -> None:
             sx, sy = corners[i]
             ex, ey = corners[(i + 1) % 4]
             msp.add_line(
-                (sx, sy, z), (ex, ey, z),
+                _to_iso(sx, sy, z), _to_iso(ex, ey, z),
                 dxfattribs={"layer": LAYER_FLOOR_PLAN},
             )
     for cx, cy in corners:
         msp.add_line(
-            (cx, cy, 0), (cx, cy, WALL_HEIGHT),
+            _to_iso(cx, cy, 0), _to_iso(cx, cy, WALL_HEIGHT),
             dxfattribs={"layer": LAYER_FLOOR_PLAN},
         )
 
 
 def _draw_wall_centerlines(msp, w: float, d: float) -> None:
+    corners_3d = [(0, 0, 0), (w, 0, 0), (w, d, 0), (0, d, 0)]
+    projected = [_to_iso(x, y, z) for x, y, z in corners_3d]
     msp.add_lwpolyline(
-        [(0, 0), (w, 0), (w, d), (0, d)],
+        projected,
         close=True,
         dxfattribs={"layer": LAYER_WALL_CENTERLINES},
     )
