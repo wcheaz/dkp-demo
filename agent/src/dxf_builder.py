@@ -206,33 +206,33 @@ def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
     for y_pos in positions:
         if roof_key in ("gable", "hip"):
             msp.add_line(
-                (0, y_pos, z_eave), (w / 2, y_pos, z_ridge),
+                _to_iso(0, y_pos, z_eave), _to_iso(w / 2, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                (w, y_pos, z_eave), (w / 2, y_pos, z_ridge),
+                _to_iso(w, y_pos, z_eave), _to_iso(w / 2, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
+                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
         elif roof_key == "mono-pitch":
             msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_ridge),
+                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
+                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                (w, y_pos, z_eave), (w, y_pos, z_ridge),
+                _to_iso(w, y_pos, z_eave), _to_iso(w, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
         else:
             msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
+                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
 
@@ -258,20 +258,26 @@ def _draw_dimensions(
     text_h = 250
 
     w_dim_offset = d * 0.1
+    p1_w = _to_iso(0, 0, 0)
+    p2_w = _to_iso(w, 0, 0)
+    base_w = _to_iso(0, -w_dim_offset, 0)
     dim = msp.add_linear_dim(
-        base=(0, -w_dim_offset),
-        p1=(0, 0),
-        p2=(w, 0),
+        base=base_w,
+        p1=p1_w,
+        p2=p2_w,
         angle=0,
         dxfattribs={"layer": LAYER_DIMENSIONS},
     )
     dim.render()
 
     d_dim_offset = w * 0.1
+    p1_d = _to_iso(0, 0, 0)
+    p2_d = _to_iso(0, d, 0)
+    base_d = _to_iso(-d_dim_offset, 0, 0)
     dim = msp.add_linear_dim(
-        base=(-d_dim_offset, 0),
-        p1=(0, 0),
-        p2=(0, d),
+        base=base_d,
+        p1=p1_d,
+        p2=p2_d,
         angle=90,
         dxfattribs={"layer": LAYER_DIMENSIONS},
     )
@@ -282,9 +288,9 @@ def _draw_dimensions(
         first_truss_y = shorter * 0.05
         rh_offset = w * 0.1
         dim = msp.add_linear_dim(
-            base=(w + rh_offset, 0),
-            p1=(w, first_truss_y),
-            p2=(w, first_truss_y + ridge_height_mm),
+            base=_to_iso(w + rh_offset, 0, 0),
+            p1=_to_iso(w, first_truss_y, 0),
+            p2=_to_iso(w, first_truss_y, ridge_height_mm),
             angle=90,
             dxfattribs={"layer": LAYER_DIMENSIONS},
         )
@@ -292,16 +298,16 @@ def _draw_dimensions(
 
     if overhang_mm is not None and overhang_mm > 0:
         dim = msp.add_linear_dim(
-            base=(w, d + 1500),
-            p1=(w, d),
-            p2=(w + overhang_mm, d),
+            base=_to_iso(w, d + 1500, 0),
+            p1=_to_iso(w, d, 0),
+            p2=_to_iso(w + overhang_mm, d, 0),
             angle=0,
             dxfattribs={"layer": LAYER_DIMENSIONS},
         )
         dim.render()
 
-    label_x = -d_dim_offset
-    label_y = -w_dim_offset - 1500
+    label_pos = _to_iso(-d_dim_offset, -w_dim_offset - 1500, 0)
+    label_x, label_y = label_pos
 
     msp.add_text(
         f"Width: {w_m:g}m",
@@ -311,14 +317,14 @@ def _draw_dimensions(
     msp.add_text(
         f"Depth: {d_m:g}m",
         dxfattribs={"layer": LAYER_LABELS, "height": text_h},
-    ).dxf.insert = (label_x, label_y - 500)
+    ).dxf.insert = _to_iso(-d_dim_offset, -w_dim_offset - 1500 - 500, 0)
 
     if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
         ridge_m = round(ridge_height_mm / 1000, 2)
         msp.add_text(
             f"Ridge Height: {ridge_m:g}m",
             dxfattribs={"layer": LAYER_LABELS, "height": text_h},
-        ).dxf.insert = (label_x, label_y - 1000)
+        ).dxf.insert = _to_iso(-d_dim_offset, -w_dim_offset - 1500 - 1000, 0)
 
 
 def _draw_lumber_specs(msp, w: float, d: float) -> None:
@@ -328,13 +334,12 @@ def _draw_lumber_specs(msp, w: float, d: float) -> None:
         "Member Width: 120 mm",
     ]
     text_h = 250
-    start_x = -w * 0.1
-    start_y = -d * 0.1 - 3000
     for i, spec in enumerate(specs):
+        px, py = _to_iso(-w * 0.1, -d * 0.1 - 3000 - i * 500, 0)
         msp.add_mtext(
             spec,
             dxfattribs={"layer": LAYER_LUMBER_SPECS, "char_height": text_h},
-        ).dxf.insert = (start_x, start_y - i * 500)
+        ).dxf.insert = (px, py)
 
 
 def _draw_title_block(msp, w: float, d: float, params) -> None:

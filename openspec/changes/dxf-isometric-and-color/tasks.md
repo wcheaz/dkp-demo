@@ -43,7 +43,7 @@
 
 ## 5. Trusses and Dimensions Projection
 
-- [ ] **Implement isometric projection for trusses, dimensions, and labels**
+- [x] **Implement isometric projection for trusses, dimensions, and labels**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Apply `_to_iso` to truss cross-sections and dimension offsets.
   - Done when:

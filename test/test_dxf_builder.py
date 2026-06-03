@@ -402,32 +402,49 @@ class TestTrussCrossSectionGable:
         count = _compute_truss_count(10, 15)
         assert len(lines) == count * 3
 
-    def test_first_truss_inset(self):
+    def test_first_truss_projected_coordinates(self):
+        w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
-        y_coords = sorted(set(round(l.dxf.start.y, 1) for l in lines))
-        first_y = y_coords[0]
-        expected_inset = 10000 * 0.05
-        assert abs(first_y - expected_inset) < 1.0
+        first_y = w * 0.05
+        ridge_h = (w / 2) * math.tan(30 * math.pi / 180)
+        z_eave = 2700
+        z_ridge = z_eave + ridge_h
+        expected_starts = {
+            (round(p[0], 2), round(p[1], 2))
+            for p in [
+                _to_iso(0, first_y, z_eave),
+                _to_iso(w, first_y, z_eave),
+            ]
+        }
+        drawn_starts = set()
+        for l in lines:
+            drawn_starts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
+        assert expected_starts <= drawn_starts
 
-    def test_triangle_shape(self):
-        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+    def test_triangle_shape_projected(self):
+        w = 10000.0
+        params = _params(floorPlanDimensions="10x10m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
-        first_y = 10000 * 0.05
-        ridge_h = (10000 / 2) * math.tan(30 * math.pi / 180)
-        truss_at_first = [l for l in lines if abs(l.dxf.start.y - first_y) < 1.0 or abs(l.dxf.end.y - first_y) < 1.0]
-        assert len(truss_at_first) == 3
-        z_values = []
-        for l in truss_at_first:
-            z_values.extend([l.dxf.start.z, l.dxf.end.z])
-        has_ridge = any(abs(zv - (2700 + ridge_h)) < 1.0 for zv in z_values)
-        assert has_ridge
+        first_y = min(w, w) * 0.05
+        ridge_h = (w / 2) * math.tan(30 * math.pi / 180)
+        z_eave = 2700
+        z_ridge = z_eave + ridge_h
+        left_eave = (round(_to_iso(0, first_y, z_eave)[0], 2), round(_to_iso(0, first_y, z_eave)[1], 2))
+        right_eave = (round(_to_iso(w, first_y, z_eave)[0], 2), round(_to_iso(w, first_y, z_eave)[1], 2))
+        ridge = (round(_to_iso(w / 2, first_y, z_ridge)[0], 2), round(_to_iso(w / 2, first_y, z_ridge)[1], 2))
+        truss_segs = [
+            l for l in lines
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) in (left_eave, right_eave, ridge)
+            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) in (left_eave, right_eave, ridge)
+        ]
+        assert len(truss_segs) >= 3
 
 
 class TestTrussCrossSectionHip:
@@ -451,22 +468,36 @@ class TestTrussCrossSectionMonoPitch:
         count = _compute_truss_count(10, 15)
         assert len(lines) == count * 3
 
-    def test_right_triangle_shape(self):
+    def test_right_triangle_shape_projected(self):
+        w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=10)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
-        first_y = 10000 * 0.05
-        ridge_h = 10000 * math.tan(10 * math.pi / 180)
-        truss_lines = [l for l in lines if abs(l.dxf.start.y - first_y) < 1.0]
-        assert len(truss_lines) >= 1
-        slope_line = [l for l in truss_lines if abs(l.dxf.end.z - (2700 + ridge_h)) < 1.0]
-        assert len(slope_line) >= 1
+        shorter = min(w, d)
+        first_y = shorter * 0.05
+        ridge_h = w * math.tan(10 * math.pi / 180)
+        z_eave = 2700
+        z_ridge = z_eave + ridge_h
+        left_eave = _to_iso(0, first_y, z_eave)
+        right_eave = _to_iso(w, first_y, z_eave)
+        right_ridge = _to_iso(w, first_y, z_ridge)
+        left_2d = (round(left_eave[0], 2), round(left_eave[1], 2))
+        right_eave_2d = (round(right_eave[0], 2), round(right_eave[1], 2))
+        right_ridge_2d = (round(right_ridge[0], 2), round(right_ridge[1], 2))
+        slope_found = False
+        for l in lines:
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
+            if (s == left_2d and e == right_ridge_2d) or (s == right_ridge_2d and e == left_2d):
+                slope_found = True
+        assert slope_found
 
 
 class TestTrussCrossSectionFlat:
-    def test_truss_layer_has_horizontal_lines(self):
+    def test_truss_layer_has_projected_lines(self):
+        w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
@@ -474,8 +505,17 @@ class TestTrussCrossSectionFlat:
         lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
         count = _compute_truss_count(10, 15)
         assert len(lines) == count
+        z_eave = 2700
+        first_y = min(w, d) * 0.05
+        expected_start = (round(_to_iso(0, first_y, z_eave)[0], 2), round(_to_iso(0, first_y, z_eave)[1], 2))
+        expected_end = (round(_to_iso(w, first_y, z_eave)[0], 2), round(_to_iso(w, first_y, z_eave)[1], 2))
+        first_line_found = False
         for line in lines:
-            assert abs(line.dxf.start.y - line.dxf.end.y) < 0.01
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            if (s == expected_start and e == expected_end) or (s == expected_end and e == expected_start):
+                first_line_found = True
+        assert first_line_found
 
 
 class TestDimensionEntities:
