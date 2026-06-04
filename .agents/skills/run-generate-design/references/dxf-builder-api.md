@@ -38,8 +38,10 @@ The DXF contains exactly 5 layers:
 | `Floor_Plan` | Closed polyline rectangle (width x depth) |
 | `Roof_Outline` | Roof geometry — ridge lines for gable/hip, filled outline for mono-pitch/flat |
 | `Trusses` | Cross-section truss lines spaced along the depth axis; count = `round(area_m2 * 0.147)` |
-| `Dimensions` | Linear dimension annotations (width, depth, ridge height, overhang) plus text labels |
+| `Labels` | Standard `TEXT` or `MTEXT` entities for all dimensional annotations (width, depth, ridge height, overhang) and text labels |
 | `Title_Block` | Border box with building type, location, date, plan size, and roof type |
+
+> **3D Compatibility Note:** `DIMENSION` entities are **excluded** from the output to prevent crashes in WebGL-based 3D viewers (e.g., `three-dxf-loader`). All dimension annotations use standard `TEXT` or `MTEXT` primitives on the `Labels` layer instead. Do **not** emit `DIMENSION`, `DIMENSION_ORDINATE`, `DIMENSION_LINEAR`, or any other `DIMENSION` sub-type entities.
 
 ## Auto-Trigger Rule
 

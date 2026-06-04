@@ -24,7 +24,7 @@
 
 ## 3. Agent Skills Compatibility
 
-- [ ] 3.1 Update agent skill references to specify 3D-compatible DXF output configurations.
+- [x] 3.1 Update agent skill references to specify 3D-compatible DXF output configurations.
   - **Done when**: The file `.agents/skills/run-generate-design/references/dxf-builder-api.md` is updated to document that the `Dimensions` and `Labels` layers use standard `TEXT` or `MTEXT` labels instead of `DIMENSION` objects, and explicitly documents the exclusion of `DIMENSION` objects to prevent WebGL viewer crashes.
   - **Verify by**: Reviewing the contents of the modified `dxf-builder-api.md` reference file.
   - **Stop and hand off if**: Document edits conflict with existing agent skill validations.
