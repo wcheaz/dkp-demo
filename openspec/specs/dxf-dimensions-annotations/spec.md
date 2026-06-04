@@ -6,19 +6,19 @@ Dimensions and annotations module for adding measurement dimensions and text lab
 
 ### Requirement: Linear dimension for building width
 
-The module SHALL add a horizontal linear dimension below the floor plan showing the building width. The dimension SHALL be placed on the `Dimensions` layer using `msp.add_linear_dim()` with an offset of 10% of the building depth below the floor-plan bottom edge.
+The module SHALL add a linear dimension showing the building width. The dimension points (p1, p2, and base) SHALL be projected onto the 2D isometric plane using the isometric formula before adding the dimension to the `Dimensions` layer.
 
 #### Scenario: Width dimension on 10x15m building
 - **WHEN** `build_dxf` is called with `floorPlanDimensions="10x15m"`
-- **THEN** the `Dimensions` layer contains a linear dimension entity measuring 10000mm (building width) placed below the floor plan at Y offset of approximately -1500mm (10% of 15000mm depth)
+- **THEN** the `Dimensions` layer contains a linear dimension entity measuring 10000mm whose point properties are mapped using the isometric projection helper
 
 ### Requirement: Linear dimension for building depth
 
-The module SHALL add a vertical linear dimension to the left of the floor plan showing the building depth. The dimension SHALL be placed on the `Dimensions` layer with an offset of 10% of the building width to the left of the floor-plan left edge.
+The module SHALL add a linear dimension showing the building depth. The dimension points (p1, p2, and base) SHALL be projected onto the 2D isometric plane using the isometric formula before adding the dimension to the `Dimensions` layer.
 
 #### Scenario: Depth dimension on 10x15m building
 - **WHEN** `build_dxf` is called with `floorPlanDimensions="10x15m"`
-- **THEN** the `Dimensions` layer contains a linear dimension entity measuring 15000mm (building depth) placed to the left of the floor plan at X offset of approximately -1000mm (10% of 10000mm width)
+- **THEN** the `Dimensions` layer contains a linear dimension entity measuring 15000mm whose point properties are mapped using the isometric projection helper
 
 ### Requirement: Ridge height dimension for gable and hip roofs
 
@@ -34,11 +34,11 @@ For gable and hip roof types, the module SHALL add a vertical linear dimension t
 
 ### Requirement: Text labels for key measurements
 
-The module SHALL add TEXT entities on a layer named `Labels` (user-facing labels) rather than the technical specifications layer. Labels SHALL include "Width: <W>m", "Depth: <D>m", and for pitched roofs "Ridge Height: <H>m". Text height SHALL be 250mm.
+The module SHALL add TEXT entities on a layer named `Labels` (user-facing labels). All label placement coordinates SHALL be projected onto the 2D isometric plane using the isometric formula. Labels SHALL include "Width: <W>m", "Depth: <D>m", and for pitched roofs "Ridge Height: <H>m".
 
 #### Scenario: Text labels on 10x15m gable building
 - **WHEN** `build_dxf` is called with `floorPlanDimensions="10x15m"` and `roofType="Gable"`
-- **THEN** the `Labels` layer contains TEXT entities with content including "Width: 10m" and "Depth: 15m" and "Ridge Height: <H>m" (where H is the computed height in meters, rounded to 2 decimal places)
+- **THEN** the `Labels` layer contains TEXT entities positioned at projected 2D isometric coordinates, including content for width, depth, and ridge height
 
 ### Requirement: Overhang dimension when parseable
 
