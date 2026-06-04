@@ -9,6 +9,7 @@ The current main page displays roof truss drawings in 2D using a flat CAD viewer
 - Support interactive camera controls (left-click to orbit, right-click to pan, mouse wheel to zoom) in fullscreen.
 - Support switching camera projection modes (Perspective vs. Orthographic) and viewport presets (Top, Front, Side, Isometric).
 - Maintain translations for Slovak and English across the fullscreen modal controls and headers.
+- Modify the agent skills (specifically `run-generate-design` and its reference documents) to document and enforce 3D-viewer compatible DXF geometries, replacing `DIMENSION` entities with standard `TEXT` or `MTEXT` labels on the `Labels` layer.
 
 ### Non-Goals
 - Adding a 2D/3D toggle inside the inline card previews on the design list (keeping cards 2D-only for speed).
@@ -22,9 +23,11 @@ The current main page displays roof truss drawings in 2D using a flat CAD viewer
 
 ### Modified Capabilities
 - `cad-viewer-fullscreen`: Maximized fullscreen workspace renders the design drawing in 3D using `CadViewer3D` instead of a 2D viewer, providing interactive orbiting, panning, zooming, projection toggling, and viewport presets, while retaining existing multi-language header and exit triggers.
+- `dxf-skill-integration`: Modified to update the DXF builder API reference document (`dxf-builder-api.md`) to document that `DIMENSION` objects are excluded and standard `TEXT`/`MTEXT` labels on the `Labels` layer are used for 3D viewer compatibility.
 
 ## Impact
 
 - `src/components/design-component.tsx`: Fullscreen modal container rendering logic.
 - `src/i18n/language-provider.tsx`: Added Slovak/English translations for 3D viewer control buttons and labels if not already present.
 - `src/components/cad-viewer-3d.tsx`: Reused as the core 3D rendering component.
+- `.agents/skills/run-generate-design/references/dxf-builder-api.md`: Updated layer description and entity rules.
