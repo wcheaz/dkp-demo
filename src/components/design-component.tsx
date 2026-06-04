@@ -137,7 +137,7 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             </button>
           </div>
           <div className="flex-1 relative">
-            <CadViewer
+            <CadViewer3D
               key={fullscreenDesignId}
               dxfContent={fullscreenDxf}
               className="w-full h-full absolute inset-0"

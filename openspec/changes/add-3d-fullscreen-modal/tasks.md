@@ -12,7 +12,7 @@
   - **Verify by**: Verifying that the import statement matches Next.js dynamic syntax guidelines.
   - **Stop and hand off if**: Dynamic import fails to resolve the component path or typescript errors occur.
 
-- [ ] 2.2 Replace the 2D CAD viewer with the dynamically imported `CadViewer3D` inside the fullscreen modal view block in `src/components/design-component.tsx`.
+- [x] 2.2 Replace the 2D CAD viewer with the dynamically imported `CadViewer3D` inside the fullscreen modal view block in `src/components/design-component.tsx`.
   - **Done when**: The JSX elements within the fullscreen view block render `<CadViewer3D>` with the correct `key`, `dxfContent`, and `className` props.
   - **Verify by**: Running typescript check or building the project to confirm there are no JSX compilation errors.
   - **Stop and hand off if**: Type mismatch or layout conflicts occur that break compilation.
