@@ -8,6 +8,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useLanguage } from "@/i18n/language-provider";
 
 const CadViewer = dynamic(() => import("@/components/cad-viewer").then((m) => m.CadViewer), { ssr: false });
+const CadViewer3D = dynamic(() => import("@/components/cad-viewer-3d").then((m) => m.CadViewer3D), { ssr: false });
 
 const MATERIAL_STAT_UNITS: Record<keyof MaterialStats, string> = {
   totalTrusses: "",

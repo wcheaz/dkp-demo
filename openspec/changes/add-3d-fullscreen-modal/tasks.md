@@ -7,7 +7,7 @@
 
 ## 2. Component Integration
 
-- [ ] 2.1 Dynamically import the `CadViewer3D` component in `src/components/design-component.tsx`.
+- [x] 2.1 Dynamically import the `CadViewer3D` component in `src/components/design-component.tsx`.
   - **Done when**: `CadViewer3D` is imported via Next.js `dynamic()` with `ssr: false` in `src/components/design-component.tsx`.
   - **Verify by**: Verifying that the import statement matches Next.js dynamic syntax guidelines.
   - **Stop and hand off if**: Dynamic import fails to resolve the component path or typescript errors occur.
