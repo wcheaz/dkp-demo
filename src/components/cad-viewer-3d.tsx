@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "@/i18n/use-translations";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
@@ -21,6 +22,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 }
 
 export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
+  const t = useTranslations("designs");
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -390,7 +392,7 @@ export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1e1e1e]/80 text-[#d4d4d4] gap-3">
           <div className="w-8 h-8 border-2 border-[#007fd4] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium tracking-wide">Parsing 3D Geometry...</span>
+          <span className="text-sm font-medium tracking-wide">{t("parsingGeometry")}</span>
         </div>
       )}
 
@@ -410,28 +412,28 @@ export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
               className="px-2.5 py-1 text-xs font-semibold rounded bg-[#2d2d2d] hover:bg-[#3e3e3f] text-[#e0e0e0] border border-[#3e3e3f] active:bg-[#007fd4] active:border-[#007fd4] transition-all cursor-pointer"
               title="2D Top View"
             >
-              Top (2D)
+              {t("topView")}
             </button>
             <button
               onClick={() => setViewPreset("front")}
               className="px-2.5 py-1 text-xs font-semibold rounded bg-[#2d2d2d] hover:bg-[#3e3e3f] text-[#e0e0e0] border border-[#3e3e3f] transition-all cursor-pointer"
               title="Front elevation view"
             >
-              Front
+              {t("frontView")}
             </button>
             <button
               onClick={() => setViewPreset("side")}
               className="px-2.5 py-1 text-xs font-semibold rounded bg-[#2d2d2d] hover:bg-[#3e3e3f] text-[#e0e0e0] border border-[#3e3e3f] transition-all cursor-pointer"
               title="Side elevation view"
             >
-              Side
+              {t("sideView")}
             </button>
             <button
               onClick={() => setViewPreset("isometric")}
               className="px-2.5 py-1 text-xs font-semibold rounded bg-[#2d2d2d] hover:bg-[#3e3e3f] text-[#e0e0e0] border border-[#3e3e3f] transition-all cursor-pointer"
               title="Isometric 3D view"
             >
-              Isometric
+              {t("isometricView")}
             </button>
           </div>
 
@@ -445,7 +447,7 @@ export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
                   : "bg-[#2d2d2d] border-[#3e3e3f] hover:bg-[#3e3e3f] text-[#e0e0e0]"
               }`}
             >
-              Perspective
+              {t("perspective")}
             </button>
             <button
               onClick={() => setCameraType("orthographic")}
@@ -455,7 +457,7 @@ export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
                   : "bg-[#2d2d2d] border-[#3e3e3f] hover:bg-[#3e3e3f] text-[#e0e0e0]"
               }`}
             >
-              Orthographic
+              {t("orthographic")}
             </button>
           </div>
 
@@ -479,7 +481,7 @@ export function CadViewer3D({ dxfContent, className }: CadViewer3DProps) {
                 d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9V4.5M15 9h4.5M15 9l5.25-5.25M15 15v4.5M15 15h4.5M15 15l5.25 5.25"
               />
             </svg>
-            Reset View
+            {t("resetView")}
           </button>
         </div>
       )}

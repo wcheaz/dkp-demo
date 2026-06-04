@@ -17,7 +17,7 @@
   - **Verify by**: Running typescript check or building the project to confirm there are no JSX compilation errors.
   - **Stop and hand off if**: Type mismatch or layout conflicts occur that break compilation.
 
-- [ ] 2.3 Localize `src/components/cad-viewer-3d.tsx` buttons, tooltips, and loading labels.
+- [x] 2.3 Localize `src/components/cad-viewer-3d.tsx` buttons, tooltips, and loading labels.
   - **Done when**: All hardcoded English user-facing strings in `src/components/cad-viewer-3d.tsx` (such as "Top (2D)", "Front", "Side", "Isometric", "Perspective", "Orthographic", "Reset View", and "Parsing 3D Geometry...") are replaced with the `useTranslations("designs")` dictionary hooks.
   - **Verify by**: Verifying that compilation succeeds and checking that no hardcoded English strings remain in the component layout.
   - **Stop and hand off if**: Compilation fails due to `useTranslations` type issues or incorrect translation hooks.
