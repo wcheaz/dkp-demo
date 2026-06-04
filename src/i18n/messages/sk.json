@@ -46,6 +46,14 @@
       "totalJoints": "Styčníky",
       "roofArea": "Plocha strechy"
     },
+    "topView": "Zhora (2D)",
+    "frontView": " spredu",
+    "sideView": "Z boku",
+    "isometricView": "Izometrické",
+    "perspective": "Perspektíva",
+    "orthographic": "Ortografické",
+    "resetView": "Obnoviť pohľad",
+    "parsingGeometry": "Spracúvam 3D geometriu...",
     "params": {
       "buildingType": "Typ budovy",
       "floorPlanDimensions": "Rozmery pôdorysu",

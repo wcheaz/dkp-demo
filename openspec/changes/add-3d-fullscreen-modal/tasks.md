@@ -1,6 +1,6 @@
 ## 1. Localization Setup
 
-- [ ] 1.1 Add translation keys for the 3D viewport control panel and loading overlay to English and Slovak messages.
+- [x] 1.1 Add translation keys for the 3D viewport control panel and loading overlay to English and Slovak messages.
   - **Done when**: The JSON dictionaries in `src/i18n/messages/en.json` and `src/i18n/messages/sk.json` contain the keys `topView`, `frontView`, `sideView`, `isometricView`, `perspective`, `orthographic`, `resetView`, and `parsingGeometry` under the `designs` section.
   - **Verify by**: Verifying the JSON syntax is valid and `npm run build` compiles successfully.
   - **Stop and hand off if**: A syntax error in either file breaks translation parsing and cannot be recovered.

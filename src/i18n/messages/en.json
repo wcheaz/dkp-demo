@@ -46,6 +46,14 @@
       "totalJoints": "Joints",
       "roofArea": "Roof Area"
     },
+    "topView": "Top (2D)",
+    "frontView": "Front",
+    "sideView": "Side",
+    "isometricView": "Isometric",
+    "perspective": "Perspective",
+    "orthographic": "Orthographic",
+    "resetView": "Reset View",
+    "parsingGeometry": "Parsing 3D Geometry...",
     "params": {
       "buildingType": "Building Type",
       "floorPlanDimensions": "Floor Plan Dimensions",
