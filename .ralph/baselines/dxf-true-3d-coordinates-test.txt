@@ -1,0 +1,123 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- /home/ncheaz/.pyenv/versions/3.12.1/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/ncheaz/git/dkp-demo
+plugins: anyio-4.12.1, logfire-4.29.0
+collecting ... collected 68 items
+
+test/test_dxf_builder.py::TestValidDxfOutput::test_re_readable PASSED    [  1%]
+test/test_dxf_builder.py::TestValidDxfOutput::test_layers_exist PASSED   [  2%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_10x15m_floor_plan_line_count PASSED [  4%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_decimal_dimensions_line_count PASSED [  5%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_isometric_projected_bottom_ring PASSED [  7%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_isometric_projected_top_ring PASSED [  8%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_isometric_vertical_lines_connect_rings PASSED [ 10%]
+test/test_dxf_builder.py::TestFloorPlanOutline::test_isometric_centerlines_projected PASSED [ 11%]
+test/test_dxf_builder.py::TestInvalidDimensions::test_none_dimensions_raises PASSED [ 13%]
+test/test_dxf_builder.py::TestInvalidDimensions::test_malformed_dimensions_raises PASSED [ 14%]
+test/test_dxf_builder.py::TestGableRoof::test_gable_roof_outline PASSED  [ 16%]
+test/test_dxf_builder.py::TestHipRoof::test_hip_roof_outline PASSED      [ 17%]
+test/test_dxf_builder.py::TestMonoPitchRoof::test_mono_pitch_roof_outline PASSED [ 19%]
+test/test_dxf_builder.py::TestMonoPitchRoof::test_mono_pitch_2d_projected_slope PASSED [ 20%]
+test/test_dxf_builder.py::TestFlatRoof::test_flat_roof_outline PASSED    [ 22%]
+test/test_dxf_builder.py::TestInvalidRoofType::test_none_roof_type_raises PASSED [ 23%]
+test/test_dxf_builder.py::TestInvalidRoofType::test_unsupported_roof_type_raises PASSED [ 25%]
+test/test_dxf_builder.py::TestCaseInsensitiveRoofType::test_case_insensitive_gable PASSED [ 26%]
+test/test_dxf_builder.py::TestCaseInsensitiveRoofType::test_case_insensitive_flat PASSED [ 27%]
+test/test_dxf_builder.py::TestTrussCount::test_10x15m PASSED             [ 29%]
+test/test_dxf_builder.py::TestTrussCount::test_small_building PASSED     [ 30%]
+test/test_dxf_builder.py::TestTrussCount::test_tiny_building_minimum PASSED [ 32%]
+test/test_dxf_builder.py::TestTrussCount::test_large_building PASSED     [ 33%]
+test/test_dxf_builder.py::TestTrussCount::test_square_building PASSED    [ 35%]
+test/test_dxf_builder.py::TestTrussCrossSectionGable::test_truss_layer_has_lines PASSED [ 36%]
+test/test_dxf_builder.py::TestTrussCrossSectionGable::test_first_truss_projected_coordinates PASSED [ 38%]
+test/test_dxf_builder.py::TestTrussCrossSectionGable::test_triangle_shape_projected PASSED [ 39%]
+test/test_dxf_builder.py::TestTrussCrossSectionHip::test_truss_layer_has_lines PASSED [ 41%]
+test/test_dxf_builder.py::TestTrussCrossSectionMonoPitch::test_truss_layer_has_lines PASSED [ 42%]
+test/test_dxf_builder.py::TestTrussCrossSectionMonoPitch::test_right_triangle_shape_projected PASSED [ 44%]
+test/test_dxf_builder.py::TestTrussCrossSectionFlat::test_truss_layer_has_projected_lines PASSED [ 45%]
+test/test_dxf_builder.py::TestDimensionEntities::test_no_dimension_entities_generated PASSED [ 47%]
+test/test_dxf_builder.py::TestDimensionEntities::test_text_labels_present PASSED [ 48%]
+test/test_dxf_builder.py::TestDimensionEntities::test_flat_no_ridge_height_text PASSED [ 50%]
+test/test_dxf_builder.py::TestLabelsLayer::test_labels_layer_exists PASSED [ 51%]
+test/test_dxf_builder.py::TestLabelsLayer::test_labels_layer_rgb PASSED  [ 52%]
+test/test_dxf_builder.py::TestLabelsLayer::test_labels_text_on_labels_layer PASSED [ 54%]
+test/test_dxf_builder.py::TestLumberSpecsLayer::test_lumber_specs_layer_exists PASSED [ 55%]
+test/test_dxf_builder.py::TestLumberSpecsLayer::test_lumber_specs_layer_rgb PASSED [ 57%]
+test/test_dxf_builder.py::TestLumberSpecsLayer::test_lumber_specs_mtext_content PASSED [ 58%]
+test/test_dxf_builder.py::TestTitleBlock::test_rectangle_lines SKIPPED   [ 60%]
+test/test_dxf_builder.py::TestTitleBlock::test_mtext_content_populated SKIPPED [ 61%]
+test/test_dxf_builder.py::TestTitleBlock::test_none_fields_use_defaults SKIPPED [ 63%]
+test/test_dxf_builder.py::TestLayerRgbColors::test_floor_plan_rgb PASSED [ 64%]
+test/test_dxf_builder.py::TestLayerRgbColors::test_roof_outline_rgb PASSED [ 66%]
+test/test_dxf_builder.py::TestLayerRgbColors::test_trusses_rgb PASSED    [ 67%]
+test/test_dxf_builder.py::TestLayerRgbColors::test_dimensions_rgb PASSED [ 69%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Gable] PASSED [ 70%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Hip] PASSED [ 72%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Mono-pitch] PASSED [ 73%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_all_five_layers_present[Flat] PASSED [ 75%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Gable] PASSED [ 76%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Hip] PASSED [ 77%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Mono-pitch] PASSED [ 79%]
+test/test_dxf_builder.py::TestRoundTripAllRoofTypes::test_valid_dxf_round_trip[Flat] PASSED [ 80%]
+test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[gable] PASSED [ 82%]
+test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[hip] PASSED [ 83%]
+test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[mono-pitch] PASSED [ 85%]
+test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[flat] PASSED [ 86%]
+test/test_dxf_builder.py::TestGenerateExampleFiles::test_write_example_dxf[decimal] PASSED [ 88%]
+test/test_dxf_endpoint.py::TestValidRequest::test_returns_200_with_dxf_content[asyncio] PASSED [ 89%]
+test/test_dxf_endpoint.py::TestValidRequest::test_content_type_is_dxf[asyncio] PASSED [ 91%]
+test/test_dxf_endpoint.py::TestValidRequest::test_content_disposition_header[asyncio] PASSED [ 92%]
+test/test_dxf_endpoint.py::TestMissingRoofType::test_missing_roof_type_returns_400[asyncio] PASSED [ 94%]
+test/test_dxf_endpoint.py::TestInvalidRoofType::test_invalid_roof_type_returns_400[asyncio] PASSED [ 95%]
+test/test_dxf_endpoint.py::TestMalformedJson::test_malformed_json_returns_422[asyncio] PASSED [ 97%]
+test/test_dxf_endpoint.py::TestMalformedJson::test_invalid_param_types_returns_422[asyncio] PASSED [ 98%]
+test/test_dxf_endpoint.py::TestFlatRoofMinimal::test_minimal_flat_roof_returns_200[asyncio] PASSED [100%]
+
+=============================== warnings summary ===============================
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:50
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:50: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    number.addParseAction(lambda t: float(t[0]))  # convert to float
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:51
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:51: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    string_ = quotedString.addParseAction(lambda t: t[0][1:-1])  # remove quotes
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:57
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:57: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    Relation = oneOf(["==", "!=", "<", "<=", ">", ">=", "?", "!?"])
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:63
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:63: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("EntityQuery")
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:65
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:65: PyparsingDeprecationWarning: 'infixNotation' deprecated - use 'infix_notation'
+    InfixBoolQuery = infixNotation(
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:72
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:72: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("AttribQuery")
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:74
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:74: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    AttribQueryOptions = Literal("i").setResultsName("AttribQueryOptions")
+
+<frozen abc>:106
+  <frozen abc>:106: DeprecationWarning: `OpenAIModel` was renamed to `OpenAIChatModel` to clearly distinguish it from `OpenAIResponsesModel` which uses OpenAI's newer Responses API. Use that unless you're using an OpenAI Chat Completions-compatible API, or require a feature that the Responses API doesn't support yet like audio.
+
+agent/src/main.py:16
+  /home/ncheaz/git/dkp-demo/agent/src/main.py:16: PydanticAIDeprecationWarning: `Agent.to_ag_ui()` is deprecated and will be removed in 2.0. Replace:
+      app = agent.to_ag_ui()
+  with a Starlette/FastAPI route:
+      from pydantic_ai.ui.ag_ui import AGUIAdapter
+      @app.post("/")
+      async def run_agent(request):
+          return await AGUIAdapter.dispatch_request(request, agent=agent)
+  See <https://ai.pydantic.dev/ui/ag-ui/#migrating-from-deprecated-apis> for full before/after examples.
+    app = agent.to_ag_ui(deps=StateDeps(state=YourState()))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 65 passed, 3 skipped, 9 warnings in 2.39s ===================
+
+EXIT=0
