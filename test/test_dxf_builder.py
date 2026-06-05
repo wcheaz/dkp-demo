@@ -11,7 +11,6 @@ sys.path.insert(0, "agent/src")
 from dxf_builder import (
     build_dxf,
     _compute_truss_count,
-    _to_iso,
     LAYER_FLOOR_PLAN,
     LAYER_WALL_CENTERLINES,
     LAYER_ROOF_OUTLINE,
@@ -75,7 +74,7 @@ class TestFloorPlanOutline:
         lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
         assert len(lines) == 12
 
-    def test_isometric_projected_bottom_ring(self):
+    def test_3d_bottom_ring(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
@@ -83,26 +82,26 @@ class TestFloorPlanOutline:
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
         from dxf_builder import WALL_HEIGHT
-        bottom_corners_2d = [
-            _to_iso(0, 0, 0),
-            _to_iso(w, 0, 0),
-            _to_iso(w, d, 0),
-            _to_iso(0, d, 0),
+        bottom_corners_3d = [
+            (0, 0, 0),
+            (w, 0, 0),
+            (w, d, 0),
+            (0, d, 0),
         ]
-        top_corners_2d = [
-            _to_iso(0, 0, WALL_HEIGHT),
-            _to_iso(w, 0, WALL_HEIGHT),
-            _to_iso(w, d, WALL_HEIGHT),
-            _to_iso(0, d, WALL_HEIGHT),
+        top_corners_3d = [
+            (0, 0, WALL_HEIGHT),
+            (w, 0, WALL_HEIGHT),
+            (w, d, WALL_HEIGHT),
+            (0, d, WALL_HEIGHT),
         ]
-        bottom_set = {(round(x, 2), round(y, 2)) for x, y in bottom_corners_2d}
-        top_set = {(round(x, 2), round(y, 2)) for x, y in top_corners_2d}
+        bottom_set = {(round(x, 2), round(y, 2), round(z, 2)) for x, y, z in bottom_corners_3d}
+        top_set = {(round(x, 2), round(y, 2), round(z, 2)) for x, y, z in top_corners_3d}
         bottom_ring = []
         top_ring = []
         vertical = []
         for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
             s_in_bot = s in bottom_set
             e_in_bot = e in bottom_set
             s_in_top = s in top_set
@@ -118,11 +117,11 @@ class TestFloorPlanOutline:
         assert len(vertical) == 4, f"Expected 4 vertical lines, got {len(vertical)}"
         drawn_bottom = set()
         for l in bottom_ring:
-            drawn_bottom.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
-            drawn_bottom.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)))
+            drawn_bottom.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
+            drawn_bottom.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)))
         assert drawn_bottom == bottom_set
 
-    def test_isometric_projected_top_ring(self):
+    def test_3d_top_ring(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
@@ -130,21 +129,21 @@ class TestFloorPlanOutline:
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_FLOOR_PLAN, "LINE")
         from dxf_builder import WALL_HEIGHT
-        top_corners_2d = [
-            _to_iso(0, 0, WALL_HEIGHT),
-            _to_iso(w, 0, WALL_HEIGHT),
-            _to_iso(w, d, WALL_HEIGHT),
-            _to_iso(0, d, WALL_HEIGHT),
+        top_corners_3d = [
+            (0, 0, WALL_HEIGHT),
+            (w, 0, WALL_HEIGHT),
+            (w, d, WALL_HEIGHT),
+            (0, d, WALL_HEIGHT),
         ]
-        top_set = {(round(x, 2), round(y, 2)) for x, y in top_corners_2d}
+        top_set = {(round(x, 2), round(y, 2), round(z, 2)) for x, y, z in top_corners_3d}
         top_ring = [
             l for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) in top_set
-            and (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) in top_set
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) in top_set
+            and (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) in top_set
         ]
         assert len(top_ring) == 4
 
-    def test_isometric_vertical_lines_connect_rings(self):
+    def test_3d_vertical_lines_connect_rings(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
@@ -154,23 +153,23 @@ class TestFloorPlanOutline:
         from dxf_builder import WALL_HEIGHT
         corners_3d = [(0, 0), (w, 0), (w, d), (0, d)]
         for cx, cy in corners_3d:
-            bot = _to_iso(cx, cy, 0)
-            top = _to_iso(cx, cy, WALL_HEIGHT)
+            bot = (cx, cy, 0)
+            top = (cx, cy, WALL_HEIGHT)
             found = False
             for l in lines:
-                sx, sy = l.dxf.start.x, l.dxf.start.y
-                ex, ey = l.dxf.end.x, l.dxf.end.y
-                if (abs(sx - bot[0]) < 0.1 and abs(sy - bot[1]) < 0.1
-                        and abs(ex - top[0]) < 0.1 and abs(ey - top[1]) < 0.1):
+                sx, sy, sz = l.dxf.start.x, l.dxf.start.y, l.dxf.start.z
+                ex, ey, ez = l.dxf.end.x, l.dxf.end.y, l.dxf.end.z
+                if (abs(sx - bot[0]) < 0.1 and abs(sy - bot[1]) < 0.1 and abs(sz - bot[2]) < 0.1
+                        and abs(ex - top[0]) < 0.1 and abs(ey - top[1]) < 0.1 and abs(ez - top[2]) < 0.1):
                     found = True
                     break
-                if (abs(sx - top[0]) < 0.1 and abs(sy - top[1]) < 0.1
-                        and abs(ex - bot[0]) < 0.1 and abs(ey - bot[1]) < 0.1):
+                if (abs(sx - top[0]) < 0.1 and abs(sy - top[1]) < 0.1 and abs(sz - top[2]) < 0.1
+                        and abs(ex - bot[0]) < 0.1 and abs(ey - bot[1]) < 0.1 and abs(ez - bot[2]) < 0.1):
                     found = True
                     break
             assert found, f"Vertical line at corner ({cx},{cy}) not found"
 
-    def test_isometric_centerlines_projected(self):
+    def test_3d_centerlines(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
@@ -180,10 +179,10 @@ class TestFloorPlanOutline:
         assert len(polys) == 1
         verts = _lwpolyline_vertices(polys[0])
         expected = [
-            _to_iso(0, 0, 0),
-            _to_iso(w, 0, 0),
-            _to_iso(w, d, 0),
-            _to_iso(0, d, 0),
+            (0, 0),
+            (w, 0),
+            (w, d),
+            (0, d),
         ]
         for v, e in zip(verts, expected):
             assert abs(v[0] - e[0]) < 0.1
@@ -214,23 +213,23 @@ class TestGableRoof:
         assert len(lines) == 5
         ridge_h = (min(w, d) / 2) * math.tan(pitch * math.pi / 180)
         z_ridge = 2700 + ridge_h
-        ridge_s = _to_iso(w / 2, 0, z_ridge)
-        ridge_e = _to_iso(w / 2, d, z_ridge)
-        peak = _to_iso(w / 2, d / 2, z_ridge)
-        rs = (round(ridge_s[0], 2), round(ridge_s[1], 2))
-        re_ = (round(ridge_e[0], 2), round(ridge_e[1], 2))
+        ridge_s = (w / 2, 0, z_ridge)
+        ridge_e = (w / 2, d, z_ridge)
+        peak = (w / 2, d / 2, z_ridge)
+        rs = (round(ridge_s[0], 2), round(ridge_s[1], 2), round(ridge_s[2], 2))
+        re_ = (round(ridge_e[0], 2), round(ridge_e[1], 2), round(ridge_e[2], 2))
         ridge_found = False
         for line in lines:
-            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
-            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             if (s == rs and e == re_) or (s == re_ and e == rs):
                 ridge_found = True
-        assert ridge_found, "Ridge line not found at projected coordinates"
-        peak_pt = (round(peak[0], 2), round(peak[1], 2))
+        assert ridge_found, "Ridge line not found at true 3D coordinates"
+        peak_pt = (round(peak[0], 2), round(peak[1], 2), round(peak[2], 2))
         rafter_count = sum(
             1 for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) == peak_pt
-            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) == peak_pt
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) == peak_pt
+            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) == peak_pt
         )
         assert rafter_count == 4
 
@@ -248,30 +247,30 @@ class TestHipRoof:
         ridge_h = (min(w, d) / 2) * math.tan(pitch * math.pi / 180)
         z_ridge = 2700 + ridge_h
         ridge_len = d - w
-        ry_start_2d = _to_iso(w / 2, (d - ridge_len) / 2, z_ridge)
-        ry_end_2d = _to_iso(w / 2, (d + ridge_len) / 2, z_ridge)
-        rs = (round(ry_start_2d[0], 2), round(ry_start_2d[1], 2))
-        re_ = (round(ry_end_2d[0], 2), round(ry_end_2d[1], 2))
+        ry_start_3d = (w / 2, (d - ridge_len) / 2, z_ridge)
+        ry_end_3d = (w / 2, (d + ridge_len) / 2, z_ridge)
+        rs = (round(ry_start_3d[0], 2), round(ry_start_3d[1], 2), round(ry_start_3d[2], 2))
+        re_ = (round(ry_end_3d[0], 2), round(ry_end_3d[1], 2), round(ry_end_3d[2], 2))
         ridge_lines = []
         hip_lines = []
         for line in lines:
-            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
-            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             if (s == rs and e == re_) or (s == re_ and e == rs):
                 ridge_lines.append(line)
             else:
                 hip_lines.append(line)
         assert len(ridge_lines) == 1
         assert len(hip_lines) == 4
-        eave_corners_2d = [
-            (round(p[0], 2), round(p[1], 2))
-            for p in [_to_iso(0, 0, 2700), _to_iso(w, 0, 2700), _to_iso(0, d, 2700), _to_iso(w, d, 2700)]
+        eave_corners_3d = [
+            (round(p[0], 2), round(p[1], 2), round(p[2], 2))
+            for p in [(0, 0, 2700), (w, 0, 2700), (0, d, 2700), (w, d, 2700)]
         ]
         for hl in hip_lines:
-            s = (round(hl.dxf.start.x, 2), round(hl.dxf.start.y, 2))
-            e = (round(hl.dxf.end.x, 2), round(hl.dxf.end.y, 2))
+            s = (round(hl.dxf.start.x, 2), round(hl.dxf.start.y, 2), round(hl.dxf.start.z, 2))
+            e = (round(hl.dxf.end.x, 2), round(hl.dxf.end.y, 2), round(hl.dxf.end.z, 2))
             connects_ridge = s == rs or s == re_ or e == rs or e == re_
-            connects_eave = s in eave_corners_2d or e in eave_corners_2d
+            connects_eave = s in eave_corners_3d or e in eave_corners_3d
             assert connects_ridge and connects_eave
 
 
@@ -288,19 +287,19 @@ class TestMonoPitchRoof:
         z_low = 2700
         z_high = 2700 + ridge_h
         expected_pts = {
-            (round(p[0], 2), round(p[1], 2))
+            (round(p[0], 2), round(p[1], 2), round(p[2], 2))
             for p in [
-                _to_iso(0, 0, z_low), _to_iso(w, 0, z_high),
-                _to_iso(w, d, z_high), _to_iso(0, d, z_low),
+                (0, 0, z_low), (w, 0, z_high),
+                (w, d, z_high), (0, d, z_low),
             ]
         }
         drawn_pts = set()
         for l in lines:
-            drawn_pts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
-            drawn_pts.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)))
+            drawn_pts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
+            drawn_pts.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)))
         assert expected_pts <= drawn_pts
 
-    def test_mono_pitch_2d_projected_slope(self):
+    def test_mono_pitch_3d_slope(self):
         w, d = 10000.0, 15000.0
         pitch = 10.0
         params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=pitch)
@@ -308,15 +307,15 @@ class TestMonoPitchRoof:
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
-        low_pt = _to_iso(0, 0, 2700)
-        high_pt = _to_iso(w, 0, 2700 + w * math.tan(pitch * math.pi / 180))
-        low_2d = (round(low_pt[0], 2), round(low_pt[1], 2))
-        high_2d = (round(high_pt[0], 2), round(high_pt[1], 2))
+        low_pt = (0, 0, 2700)
+        high_pt = (w, 0, 2700 + w * math.tan(pitch * math.pi / 180))
+        low_3d = (round(low_pt[0], 2), round(low_pt[1], 2), round(low_pt[2], 2))
+        high_3d = (round(high_pt[0], 2), round(high_pt[1], 2), round(high_pt[2], 2))
         slope_found = False
         for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
-            if (s == low_2d and e == high_2d) or (s == high_2d and e == low_2d):
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
+            if (s == low_3d and e == high_3d) or (s == high_3d and e == low_3d):
                 slope_found = True
         assert slope_found
 
@@ -331,16 +330,16 @@ class TestFlatRoof:
         lines = _entities_on_layer(msp, LAYER_ROOF_OUTLINE, "LINE")
         assert len(lines) == 4
         expected_pts = {
-            (round(p[0], 2), round(p[1], 2))
+            (round(p[0], 2), round(p[1], 2), round(p[2], 2))
             for p in [
-                _to_iso(0, 0, 2700), _to_iso(w, 0, 2700),
-                _to_iso(w, d, 2700), _to_iso(0, d, 2700),
+                (0, 0, 2700), (w, 0, 2700),
+                (w, d, 2700), (0, d, 2700),
             ]
         }
         drawn_pts = set()
         for line in lines:
-            drawn_pts.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2)))
-            drawn_pts.add((round(line.dxf.end.x, 2), round(line.dxf.end.y, 2)))
+            drawn_pts.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)))
+            drawn_pts.add((round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)))
         assert drawn_pts == expected_pts
 
 
@@ -402,7 +401,7 @@ class TestTrussCrossSectionGable:
         count = _compute_truss_count(10, 15)
         assert len(lines) == count * 3
 
-    def test_first_truss_projected_coordinates(self):
+    def test_first_truss_3d_coordinates(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
@@ -414,18 +413,18 @@ class TestTrussCrossSectionGable:
         z_eave = 2700
         z_ridge = z_eave + ridge_h
         expected_starts = {
-            (round(p[0], 2), round(p[1], 2))
+            (round(p[0], 2), round(p[1], 2), round(p[2], 2))
             for p in [
-                _to_iso(0, first_y, z_eave),
-                _to_iso(w, first_y, z_eave),
+                (0, first_y, z_eave),
+                (w, first_y, z_eave),
             ]
         }
         drawn_starts = set()
         for l in lines:
-            drawn_starts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)))
+            drawn_starts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
         assert expected_starts <= drawn_starts
 
-    def test_triangle_shape_projected(self):
+    def test_triangle_shape_3d(self):
         w = 10000.0
         params = _params(floorPlanDimensions="10x10m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
@@ -436,13 +435,13 @@ class TestTrussCrossSectionGable:
         ridge_h = (w / 2) * math.tan(30 * math.pi / 180)
         z_eave = 2700
         z_ridge = z_eave + ridge_h
-        left_eave = (round(_to_iso(0, first_y, z_eave)[0], 2), round(_to_iso(0, first_y, z_eave)[1], 2))
-        right_eave = (round(_to_iso(w, first_y, z_eave)[0], 2), round(_to_iso(w, first_y, z_eave)[1], 2))
-        ridge = (round(_to_iso(w / 2, first_y, z_ridge)[0], 2), round(_to_iso(w / 2, first_y, z_ridge)[1], 2))
+        left_eave = (round(0, 2), round(first_y, 2), round(z_eave, 2))
+        right_eave = (round(w, 2), round(first_y, 2), round(z_eave, 2))
+        ridge = (round(w / 2, 2), round(first_y, 2), round(z_ridge, 2))
         truss_segs = [
             l for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2)) in (left_eave, right_eave, ridge)
-            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2)) in (left_eave, right_eave, ridge)
+            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) in (left_eave, right_eave, ridge)
+            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) in (left_eave, right_eave, ridge)
         ]
         assert len(truss_segs) >= 3
 
@@ -468,7 +467,7 @@ class TestTrussCrossSectionMonoPitch:
         count = _compute_truss_count(10, 15)
         assert len(lines) == count * 3
 
-    def test_right_triangle_shape_projected(self):
+    def test_right_triangle_shape_3d(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=10)
         result = build_dxf(params)
@@ -480,23 +479,23 @@ class TestTrussCrossSectionMonoPitch:
         ridge_h = w * math.tan(10 * math.pi / 180)
         z_eave = 2700
         z_ridge = z_eave + ridge_h
-        left_eave = _to_iso(0, first_y, z_eave)
-        right_eave = _to_iso(w, first_y, z_eave)
-        right_ridge = _to_iso(w, first_y, z_ridge)
-        left_2d = (round(left_eave[0], 2), round(left_eave[1], 2))
-        right_eave_2d = (round(right_eave[0], 2), round(right_eave[1], 2))
-        right_ridge_2d = (round(right_ridge[0], 2), round(right_ridge[1], 2))
+        left_eave_3d = (0, first_y, z_eave)
+        right_eave_3d = (w, first_y, z_eave)
+        right_ridge_3d = (w, first_y, z_ridge)
+        left_3d = (round(left_eave_3d[0], 2), round(left_eave_3d[1], 2), round(left_eave_3d[2], 2))
+        right_eave_3d = (round(right_eave_3d[0], 2), round(right_eave_3d[1], 2), round(right_eave_3d[2], 2))
+        right_ridge_3d = (round(right_ridge_3d[0], 2), round(right_ridge_3d[1], 2), round(right_ridge_3d[2], 2))
         slope_found = False
         for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2))
-            if (s == left_2d and e == right_ridge_2d) or (s == right_ridge_2d and e == left_2d):
+            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
+            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
+            if (s == left_3d and e == right_ridge_3d) or (s == right_ridge_3d and e == left_3d):
                 slope_found = True
         assert slope_found
 
 
 class TestTrussCrossSectionFlat:
-    def test_truss_layer_has_projected_lines(self):
+    def test_truss_layer_has_3d_lines(self):
         w, d = 10000.0, 15000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
@@ -507,12 +506,12 @@ class TestTrussCrossSectionFlat:
         assert len(lines) == count
         z_eave = 2700
         first_y = min(w, d) * 0.05
-        expected_start = (round(_to_iso(0, first_y, z_eave)[0], 2), round(_to_iso(0, first_y, z_eave)[1], 2))
-        expected_end = (round(_to_iso(w, first_y, z_eave)[0], 2), round(_to_iso(w, first_y, z_eave)[1], 2))
+        expected_start = (round(0, 2), round(first_y, 2), round(z_eave, 2))
+        expected_end = (round(w, 2), round(first_y, 2), round(z_eave, 2))
         first_line_found = False
         for line in lines:
-            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2))
-            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2))
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             if (s == expected_start and e == expected_end) or (s == expected_end and e == expected_start):
                 first_line_found = True
         assert first_line_found

@@ -16,13 +16,6 @@ _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
 WALL_HEIGHT = 2700.0
 
-_ISO_COS30 = math.cos(math.pi / 6)
-_ISO_SIN30 = 0.5
-
-
-def _to_iso(x: float, y: float, z: float) -> tuple[float, float]:
-    return ((x - y) * _ISO_COS30, (x + y) * _ISO_SIN30 + z)
-
 LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_WALL_CENTERLINES = "Wall_Centerlines"
 LAYER_ROOF_OUTLINE = "Roof_Outline"
@@ -51,21 +44,20 @@ def _draw_floor_plan(msp, w: float, d: float) -> None:
             sx, sy = corners[i]
             ex, ey = corners[(i + 1) % 4]
             msp.add_line(
-                _to_iso(sx, sy, z), _to_iso(ex, ey, z),
+                (sx, sy, z), (ex, ey, z),
                 dxfattribs={"layer": LAYER_FLOOR_PLAN},
             )
     for cx, cy in corners:
         msp.add_line(
-            _to_iso(cx, cy, 0), _to_iso(cx, cy, WALL_HEIGHT),
+            (cx, cy, 0), (cx, cy, WALL_HEIGHT),
             dxfattribs={"layer": LAYER_FLOOR_PLAN},
         )
 
 
 def _draw_wall_centerlines(msp, w: float, d: float) -> None:
-    corners_3d = [(0, 0, 0), (w, 0, 0), (w, d, 0), (0, d, 0)]
-    projected = [_to_iso(x, y, z) for x, y, z in corners_3d]
+    corners = [(0, 0), (w, 0), (w, d), (0, d)]
     msp.add_lwpolyline(
-        projected,
+        corners,
         close=True,
         dxfattribs={"layer": LAYER_WALL_CENTERLINES},
     )
@@ -77,42 +69,42 @@ def _draw_gable(msp, w: float, d: float, pitch_deg: float = 30.0) -> None:
     z_ridge = WALL_HEIGHT + ridge_h
     if d >= w:
         mid_x = w / 2
-        ridge_start = _to_iso(mid_x, 0, z_ridge)
-        ridge_end = _to_iso(mid_x, d, z_ridge)
+        ridge_start = (mid_x, 0, z_ridge)
+        ridge_end = (mid_x, d, z_ridge)
         msp.add_line(
-            _to_iso(0, 0, z_eave), _to_iso(mid_x, d / 2, z_ridge),
+            (0, 0, z_eave), (mid_x, d / 2, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(w, 0, z_eave), _to_iso(mid_x, d / 2, z_ridge),
+            (w, 0, z_eave), (mid_x, d / 2, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(0, d, z_eave), _to_iso(mid_x, d / 2, z_ridge),
+            (0, d, z_eave), (mid_x, d / 2, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(w, d, z_eave), _to_iso(mid_x, d / 2, z_ridge),
+            (w, d, z_eave), (mid_x, d / 2, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
     else:
         mid_y = d / 2
-        ridge_start = _to_iso(0, mid_y, z_ridge)
-        ridge_end = _to_iso(w, mid_y, z_ridge)
+        ridge_start = (0, mid_y, z_ridge)
+        ridge_end = (w, mid_y, z_ridge)
         msp.add_line(
-            _to_iso(0, 0, z_eave), _to_iso(w / 2, mid_y, z_ridge),
+            (0, 0, z_eave), (w / 2, mid_y, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(0, d, z_eave), _to_iso(w / 2, mid_y, z_ridge),
+            (0, d, z_eave), (w / 2, mid_y, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(w, 0, z_eave), _to_iso(w / 2, mid_y, z_ridge),
+            (w, 0, z_eave), (w / 2, mid_y, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
         msp.add_line(
-            _to_iso(w, d, z_eave), _to_iso(w / 2, mid_y, z_ridge),
+            (w, d, z_eave), (w / 2, mid_y, z_ridge),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
     msp.add_line(
@@ -126,33 +118,33 @@ def _draw_hip(msp, w: float, d: float, pitch_deg: float = 30.0) -> None:
     z_ridge = WALL_HEIGHT + ridge_h
     if d >= w:
         ridge_len = d - w
-        ry_start = _to_iso(w / 2, (d - ridge_len) / 2, z_ridge)
-        ry_end = _to_iso(w / 2, (d + ridge_len) / 2, z_ridge)
+        ry_start = (w / 2, (d - ridge_len) / 2, z_ridge)
+        ry_end = (w / 2, (d + ridge_len) / 2, z_ridge)
         msp.add_line(ry_start, ry_end, dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(ry_start, _to_iso(0, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(ry_start, _to_iso(w, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(ry_end, _to_iso(0, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(ry_end, _to_iso(w, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(ry_start, (0, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(ry_start, (w, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(ry_end, (0, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(ry_end, (w, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
     else:
         ridge_len = w - d
-        rx_start = _to_iso((w - ridge_len) / 2, d / 2, z_ridge)
-        rx_end = _to_iso((w + ridge_len) / 2, d / 2, z_ridge)
+        rx_start = ((w - ridge_len) / 2, d / 2, z_ridge)
+        rx_end = ((w + ridge_len) / 2, d / 2, z_ridge)
         msp.add_line(rx_start, rx_end, dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(rx_start, _to_iso(0, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(rx_start, _to_iso(0, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(rx_end, _to_iso(w, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-        msp.add_line(rx_end, _to_iso(w, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(rx_start, (0, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(rx_start, (0, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(rx_end, (w, 0, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+        msp.add_line(rx_end, (w, d, z_eave), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
 
 
 def _draw_mono_pitch(msp, w: float, d: float, pitch_deg: float = 10.0) -> None:
     ridge_h = w * math.tan(pitch_deg * math.pi / 180)
     z_low = WALL_HEIGHT
     z_high = WALL_HEIGHT + ridge_h
-    msp.add_line(_to_iso(0, 0, z_low), _to_iso(w, 0, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-    msp.add_line(_to_iso(w, 0, z_high), _to_iso(w, d, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-    msp.add_line(_to_iso(w, d, z_high), _to_iso(0, d, z_low), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-    msp.add_line(_to_iso(0, d, z_low), _to_iso(0, 0, z_low), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
-    msp.add_line(_to_iso(0, 0, z_low), _to_iso(w, 0, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+    msp.add_line((0, 0, z_low), (w, 0, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+    msp.add_line((w, 0, z_high), (w, d, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+    msp.add_line((w, d, z_high), (0, d, z_low), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+    msp.add_line((0, d, z_low), (0, 0, z_low), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
+    msp.add_line((0, 0, z_low), (w, 0, z_high), dxfattribs={"layer": LAYER_ROOF_OUTLINE})
 
 
 def _draw_flat(msp, w: float, d: float, pitch_deg: float = 0.0) -> None:
@@ -161,7 +153,7 @@ def _draw_flat(msp, w: float, d: float, pitch_deg: float = 0.0) -> None:
         sx, sy = corners[i]
         ex, ey = corners[(i + 1) % 4]
         msp.add_line(
-            _to_iso(sx, sy, WALL_HEIGHT), _to_iso(ex, ey, WALL_HEIGHT),
+            (sx, sy, WALL_HEIGHT), (ex, ey, WALL_HEIGHT),
             dxfattribs={"layer": LAYER_ROOF_OUTLINE},
         )
 
@@ -206,33 +198,33 @@ def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
     for y_pos in positions:
         if roof_key in ("gable", "hip"):
             msp.add_line(
-                _to_iso(0, y_pos, z_eave), _to_iso(w / 2, y_pos, z_ridge),
+                (0, y_pos, z_eave), (w / 2, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                _to_iso(w, y_pos, z_eave), _to_iso(w / 2, y_pos, z_ridge),
+                (w, y_pos, z_eave), (w / 2, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
+                (0, y_pos, z_eave), (w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
         elif roof_key == "mono-pitch":
             msp.add_line(
-                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_ridge),
+                (0, y_pos, z_eave), (w, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
+                (0, y_pos, z_eave), (w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
             msp.add_line(
-                _to_iso(w, y_pos, z_eave), _to_iso(w, y_pos, z_ridge),
+                (w, y_pos, z_eave), (w, y_pos, z_ridge),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
         else:
             msp.add_line(
-                _to_iso(0, y_pos, z_eave), _to_iso(w, y_pos, z_eave),
+                (0, y_pos, z_eave), (w, y_pos, z_eave),
                 dxfattribs={"layer": LAYER_TRUSSES},
             )
 
@@ -255,33 +247,28 @@ def _parse_overhang(raw: Optional[str]) -> Optional[float]:
 def _draw_dimensions(
     msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm
 ) -> None:
-    # WARNING: Do NOT use ezdxf DIMENSION entities (e.g. msp.add_linear_dim).
-    # The client-side three-dxf-loader crashes when parsing DIMENSION objects.
-    # Always use standard TEXT or MTEXT primitive entities on the Labels layer instead.
     text_h = 250
 
     w_dim_offset = d * 0.1
     d_dim_offset = w * 0.1
-
-    label_pos = _to_iso(-d_dim_offset, -w_dim_offset - 1500, 0)
-    label_x, label_y = label_pos
+    base_y = -w_dim_offset - 1500
 
     msp.add_text(
         f"Width: {w_m:g}m",
         dxfattribs={"layer": LAYER_LABELS, "height": text_h},
-    ).dxf.insert = (label_x, label_y)
+    ).dxf.insert = (-d_dim_offset, base_y, 0)
 
     msp.add_text(
         f"Depth: {d_m:g}m",
         dxfattribs={"layer": LAYER_LABELS, "height": text_h},
-    ).dxf.insert = _to_iso(-d_dim_offset, -w_dim_offset - 1500 - 500, 0)
+    ).dxf.insert = (-d_dim_offset, base_y - 500, 0)
 
     if roof_key in ("gable", "hip") and ridge_height_mm and ridge_height_mm > 0:
         ridge_m = round(ridge_height_mm / 1000, 2)
         msp.add_text(
             f"Ridge Height: {ridge_m:g}m",
             dxfattribs={"layer": LAYER_LABELS, "height": text_h},
-        ).dxf.insert = _to_iso(-d_dim_offset, -w_dim_offset - 1500 - 1000, 0)
+        ).dxf.insert = (-d_dim_offset, base_y - 1000, 0)
 
 
 def _draw_lumber_specs(msp, w: float, d: float) -> None:
@@ -292,11 +279,10 @@ def _draw_lumber_specs(msp, w: float, d: float) -> None:
     ]
     text_h = 250
     for i, spec in enumerate(specs):
-        px, py = _to_iso(-w * 0.1, -d * 0.1 - 3000 - i * 500, 0)
         msp.add_mtext(
             spec,
             dxfattribs={"layer": LAYER_LUMBER_SPECS, "char_height": text_h},
-        ).dxf.insert = (px, py)
+        ).dxf.insert = (-w * 0.1, -d * 0.1 - 3000 - i * 500, 0)
 
 
 def _draw_title_block(msp, w: float, d: float, params) -> None:

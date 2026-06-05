@@ -11,7 +11,7 @@
 
 ## 2. Core Transition
 
-- [ ] **Transition DXF coordinate generation and unit tests to true 3D**
+- [x] **Transition DXF coordinate generation and unit tests to true 3D**
   - Scope: `agent/src/dxf_builder.py`, `test/test_dxf_builder.py`
   - Change: Remove `_to_iso` projection helper and replace it with direct true 3D `(x, y, z)` coordinates for floor plans, roof outlines, and trusses in `dxf_builder.py`. Place annotations on the flat Z=0 ground plane. Update all coordinate assertions in `test_dxf_builder.py` to match the true 3D coordinates.
   - Done when:
