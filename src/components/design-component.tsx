@@ -126,14 +126,13 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             <h2 className="text-lg font-semibold text-gray-200">{t("designs.fullscreenTitle")}</h2>
             <button
               onClick={exitFullscreen}
-              title={t("designs.back")}
-              className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
+              title={t("designs.backTo2D")}
+              className="px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors flex items-center gap-1.5"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-                <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="5" y1="7" x2="9" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
               </svg>
+              <span className="text-xs font-bold leading-none pr-0.5">2D</span>
             </button>
           </div>
           <div className="flex-1 relative">

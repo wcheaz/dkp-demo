@@ -38,6 +38,7 @@
     "generatingCad": "Generating CAD drawing...",
     "clickToView": "Click to preview design",
     "back": "Back",
+    "backTo2D": "Back to 2D view",
     "fullscreenTitle": "CAD Viewer",
     "viewFullscreen": "View fullscreen",
     "view3D": "View interactive 3D model",
