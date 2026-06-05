@@ -40,6 +40,7 @@
     "back": "Späť",
     "fullscreenTitle": "Prehliadač CAD",
     "viewFullscreen": "Zobraziť na celú obrazovku",
+    "view3D": "Zobraziť interaktívny 3D model",
     "labels": {
       "totalTrusses": "Väzníky",
       "timberVolume": "Objem dreva",

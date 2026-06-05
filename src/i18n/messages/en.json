@@ -40,6 +40,7 @@
     "back": "Back",
     "fullscreenTitle": "CAD Viewer",
     "viewFullscreen": "View fullscreen",
+    "view3D": "View interactive 3D model",
     "labels": {
       "totalTrusses": "Trusses",
       "timberVolume": "Timber Vol.",
