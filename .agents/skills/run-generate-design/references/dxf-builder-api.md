@@ -8,7 +8,7 @@ Function signature, parameter mapping, and output shape for `build_dxf` in `agen
 build_dxf(params: Any) -> bytes
 ```
 
-Returns a UTF-8-encoded DXF string (R2000 format) as raw bytes.
+Returns a UTF-8-encoded DXF string (R2004 format) as raw bytes.
 
 ## DesignParameters Field Mapping
 
@@ -25,23 +25,27 @@ Returns a UTF-8-encoded DXF string (R2000 format) as raw bytes.
 
 ## Output Format
 
-- **DXF version:** R2000 (`AC1015`)
+- **DXF version:** R2004 (`AC1018`)
 - **Coordinate system:** millimetres, origin at bottom-left corner of floor plan
 - **Encoding:** UTF-8
 
-## Layers
+## Layers and Entity Rules
 
-The DXF contains exactly 5 layers:
+The DXF contains exactly 7 layers. To ensure full compatibility with the client-side WebGL 3D viewer (which uses `three-dxf-loader`), **`DIMENSION` entities must never be used**, as they cause WebGL parser crashes. All annotations must be drawn as `TEXT` entities.
 
-| Layer Name | Contents |
-|------------|----------|
-| `Floor_Plan` | Closed polyline rectangle (width x depth) |
-| `Roof_Outline` | Roof geometry — ridge lines for gable/hip, filled outline for mono-pitch/flat |
-| `Trusses` | Cross-section truss lines spaced along the depth axis; count = `round(area_m2 * 0.147)` |
-| `Labels` | Standard `TEXT` or `MTEXT` entities for all dimensional annotations (width, depth, ridge height, overhang) and text labels |
-| `Title_Block` | Border box with building type, location, date, plan size, and roof type |
+| Layer Name | Contents | Entity Types Allowed |
+|------------|----------|----------------------|
+| `Floor_Plan` | 2D isometric projected wireframe of 3D wall box | `LINE` |
+| `Wall_Centerlines` | Centerline rectangle of the floor plan at Z=0 | `LWPOLYLINE` |
+| `Roof_Outline` | Roof framing and ridge outline | `LINE` |
+| `Trusses` | Cross-section truss lines spaced along the depth axis | `LINE` |
+| `Dimensions` | Configured but kept empty to avoid 3D viewer issues | None |
+| `Labels` | Standard text labels for annotations (Width, Depth, Ridge Height) | `TEXT` |
+| `Lumber_Specs` | Lumber grade and member specs metadata block | `MTEXT` |
 
-> **3D Compatibility Note:** `DIMENSION` entities are **excluded** from the output to prevent crashes in WebGL-based 3D viewers (e.g., `three-dxf-loader`). All dimension annotations use standard `TEXT` or `MTEXT` primitives on the `Labels` layer instead. Do **not** emit `DIMENSION`, `DIMENSION_ORDINATE`, `DIMENSION_LINEAR`, or any other `DIMENSION` sub-type entities.
+## 3D Viewer Compatibility Constraint
+- **No `DIMENSION` Objects:** Do not use `ezdxf`'s dimension style managers or add dimension objects (`add_linear_dim`).
+- **Use Primitive text:** Write all text annotations (width, depth, ridge height, overhang) as standard `TEXT` or `MTEXT` primitives on the `Labels` and `Lumber_Specs` layers.
 
 ## Auto-Trigger Rule
 

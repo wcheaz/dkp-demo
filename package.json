@@ -14,7 +14,7 @@
     "i18n:check": "node scripts/check-i18n-parity.mjs",
     "install:agent": "./scripts/setup-agent.sh || scripts\\setup-agent.bat",
     "copy-cad-workers": "node scripts/copy-cad-workers.mjs",
-    "postinstall": "npm run install:agent && npm run copy-cad-workers"
+    "postinstall": "npm run install:agent && npm run copy-cad-workers && node scripts/patch-three-dxf-loader.js"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.48",
@@ -47,5 +47,11 @@
     "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "^16.2.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "troika-three-text": "^0.52.4",
+      "troika-three-utils": "^0.52.4"
+    }
   }
 }

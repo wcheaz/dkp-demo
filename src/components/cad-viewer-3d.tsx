@@ -6,42 +6,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { DXFLoader } from "three-dxf-loader";
-// @ts-ignore
-import { Text } from "troika-three-text";
-
-// Monkey patch troika-three-text for compatibility with newer Three.js versions (r175+)
-if (typeof window !== "undefined") {
-  try {
-    const TextPrototype = (Text as any)?.prototype;
-    if (TextPrototype) {
-      if (!Object.getOwnPropertyDescriptor(TextPrototype, "customDepthMaterial")?.set) {
-        Object.defineProperty(TextPrototype, "customDepthMaterial", {
-          get() {
-            return this._customDepthMaterial;
-          },
-          set(value) {
-            this._customDepthMaterial = value;
-          },
-          configurable: true,
-        });
-      }
-      if (!Object.getOwnPropertyDescriptor(TextPrototype, "customDistanceMaterial")?.set) {
-        Object.defineProperty(TextPrototype, "customDistanceMaterial", {
-          get() {
-            return this._customDistanceMaterial;
-          },
-          set(value) {
-            this._customDistanceMaterial = value;
-          },
-          configurable: true,
-        });
-      }
-    }
-  } catch (e) {
-    console.error("Failed to patch troika-three-text:", e);
-  }
-}
-
 interface CadViewer3DProps {
   dxfContent: string; // Base64 DXF data
   className?: string;

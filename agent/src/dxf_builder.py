@@ -255,6 +255,9 @@ def _parse_overhang(raw: Optional[str]) -> Optional[float]:
 def _draw_dimensions(
     msp, w, d, w_m, d_m, roof_key, ridge_height_mm, overhang_mm
 ) -> None:
+    # WARNING: Do NOT use ezdxf DIMENSION entities (e.g. msp.add_linear_dim).
+    # The client-side three-dxf-loader crashes when parsing DIMENSION objects.
+    # Always use standard TEXT or MTEXT primitive entities on the Labels layer instead.
     text_h = 250
 
     w_dim_offset = d * 0.1
