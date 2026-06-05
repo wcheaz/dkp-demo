@@ -20,6 +20,7 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function getStoredLocale(): Locale {
+  if (process.env.NODE_ENV !== "development") return "sk";
   if (typeof window === "undefined") return defaultLocale;
 
   const stored = localStorage.getItem("locale");
@@ -49,7 +50,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
-    localStorage.setItem("locale", next);
+    if (process.env.NODE_ENV === "development") {
+      localStorage.setItem("locale", next);
+    }
     document.documentElement.lang = next;
   }, []);
 
