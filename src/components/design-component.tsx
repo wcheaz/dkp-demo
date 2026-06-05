@@ -127,12 +127,15 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
             <button
               onClick={exitFullscreen}
               title={t("designs.backTo2D")}
-              className="px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors flex items-center gap-1.5"
+              className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m15 18-6-6 6-6" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M3 9h18" />
+                <path d="M3 15h18" />
+                <path d="M9 3v18" />
+                <path d="M15 3v18" />
               </svg>
-              <span className="text-xs font-bold leading-none pr-0.5">2D</span>
             </button>
           </div>
           <div className="flex-1 relative">
