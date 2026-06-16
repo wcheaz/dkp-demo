@@ -33,7 +33,7 @@
 
 ## 2. Shared Contracts & Refactoring
 
-- [ ] **Extend DesignEntry shared contract**
+- [x] **Extend DesignEntry shared contract**
   - Scope: [types.ts](file:///home/ncheaz/git/dkp-demo/src/lib/types.ts), [agent.py](file:///home/ncheaz/git/dkp-demo/agent/src/agent.py)
   - Change: Add `ifcContent` base64 string property to `DesignEntry` in both TypeScript and Python Pydantic models.
   - Done when:

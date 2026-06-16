@@ -14,6 +14,7 @@ export interface DesignEntry {
   price?: number | "---";
   materialStats?: MaterialStats | null;
   dxfContent?: string;
+  ifcContent?: string;
 }
 
 export interface DesignParameters {
