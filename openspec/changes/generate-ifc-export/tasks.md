@@ -1,6 +1,6 @@
 ## 1. Setup & Pre-flight
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under [baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/)
   - Change: Capture current state of all gates later tasks require.
     - Test: `PYTHONPATH=agent/src:agent uv run --project agent pytest test/ > .ralph/baselines/generate-ifc-export-test.txt; echo "EXIT=$?" >> .ralph/baselines/generate-ifc-export-test.txt`
