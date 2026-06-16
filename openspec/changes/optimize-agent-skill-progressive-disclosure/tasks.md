@@ -48,7 +48,7 @@ Note: Task 2 and Task 3 are independent and can be executed in parallel or in an
 
 ## 4. Refactor Main SKILL.md for Progressive Disclosure
 
-- [ ] **Refactor SKILL.md to act as a slim workflow coordinator**
+- [x] **Refactor SKILL.md to act as a slim workflow coordinator**
   - Scope: [SKILL.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/SKILL.md)
   - Change: `SKILL.md` is refactored to be under 100 lines, removing inline classification trigger tables, parameter extraction patterns, language mapping tables, pricing formulas, and response templates, and adding directive instructions to call `read_skill_resource`.
   - Done when:
