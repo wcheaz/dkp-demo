@@ -20,6 +20,7 @@ dependencies = [
     "pydantic-ai-skills>=0.10.0",
     "ag-ui-protocol",
     "ezdxf",
+    "ifcopenshell>=0.8.5",
 ]
 
 [tool.uv]

@@ -21,7 +21,7 @@
   - Stop and hand off if:
     - any gate is nondeterministic across two runs, or any captured baseline file is missing the `EXIT=<integer>` final line after retrying the capture command.
 
-- [ ] **Configure backend Python dependencies**
+- [x] **Configure backend Python dependencies**
   - Scope: [pyproject.toml](file:///home/ncheaz/git/dkp-demo/agent/pyproject.toml), [uv.lock](file:///home/ncheaz/git/dkp-demo/agent/uv.lock), [requirements.txt](file:///home/ncheaz/git/dkp-demo/requirements.txt)
   - Change: Add `ifcopenshell` package to Python dependencies.
   - Done when:
