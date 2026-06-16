@@ -1,13 +1,10 @@
 import math
 import re
 from datetime import datetime, timezone
-from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Any, Optional
+from io import StringIO
+from typing import Any, Optional
 
 import ezdxf
-
-if TYPE_CHECKING:
-    from agent.src.agent import DesignParameters
 
 _DIMENSION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?")
 _OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(mm|m)?\s*$", re.IGNORECASE)

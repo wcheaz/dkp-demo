@@ -36,9 +36,9 @@
 # - Model configuration: OpenAI-compatible model with configurable endpoint
 # ============================================================================
 
-import base64
 import functools
 import logging
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -50,7 +50,7 @@ import time
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai_skills import SkillsCapability
-from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, SystemPromptPart, TextPart, ThinkingPart, ToolCallPart
+from pydantic_ai.messages import ModelMessage, ModelResponse, TextPart, ThinkingPart, ToolCallPart
 from pydantic_ai.models import ModelRequestParameters, StreamedResponse
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
@@ -338,7 +338,6 @@ def locale_instruction(ctx: RunContext[StateDeps]) -> str:
 #         customer = await db.get_customer(customer_id)
 #         return f"Customer: {customer.name}, Email: {customer.email}"
 # ============================================================================
-import re
 
 
 def _timed_tool(func):
@@ -367,7 +366,7 @@ async def generate_quote(
     roof_type: str,
     roof_pitch: int = 30,
     building_type: str = "Family house",
-) -> str:
+) -> str | int:
     """Generate a deterministic cost estimate for a roof design based on floor plan dimensions and roof type.
 
     Args:
