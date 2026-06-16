@@ -93,7 +93,7 @@
   - Stop and hand off if:
     - the tool cannot update state or endpoint fetch fails.
 
-- [ ] **Implement Download IFC button in UI with localization**
+- [x] **Implement Download IFC button in UI with localization**
   - Scope: [design-component.tsx](file:///home/ncheaz/git/dkp-demo/src/components/design-component.tsx), [en.json](file:///home/ncheaz/git/dkp-demo/src/i18n/messages/en.json), [sk.json](file:///home/ncheaz/git/dkp-demo/src/i18n/messages/sk.json), [check-i18n-parity.mjs](file:///home/ncheaz/git/dkp-demo/scripts/check-i18n-parity.mjs)
   - Change: Add a localized "Download IFC" button to the design component that is visible when `ifcContent` is present.
   - Done when:

@@ -35,6 +35,7 @@
     "price": "Cena:",
     "currency": "€",
     "downloadDxf": "Stiahnuť DXF",
+    "downloadIfc": "Stiahnuť IFC",
     "generatingCad": "Generujem CAD výkres...",
     "clickToView": "Kliknite pre zobrazenie návrhu",
     "back": "Späť",

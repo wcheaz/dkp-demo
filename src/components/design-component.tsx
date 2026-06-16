@@ -68,12 +68,45 @@ function DxfDownloadButton({ dxfContent, entryId }: { dxfContent: string; entryI
   return (
     <button
       onClick={handleClick}
-      className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+      className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M7 1v9M3 7l4 4 4-4M1 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {t("downloadDxf")}
+    </button>
+  );
+}
+
+function IfcDownloadButton({ ifcContent, entryId }: { ifcContent: string; entryId: string | number }) {
+  const t = useTranslations("designs");
+  const blobUrlRef = useRef<string | null>(null);
+
+  const handleClick = useCallback(() => {
+    const binary = atob(ifcContent);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: "application/ifc" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `design-${entryId}.ifc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    blobUrlRef.current = url;
+  }, [ifcContent, entryId]);
+
+  return (
+    <button
+      onClick={handleClick}
+      className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1v9M3 7l4 4 4-4M1 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {t("downloadIfc")}
     </button>
   );
 }
@@ -203,7 +236,12 @@ export function DesignComponent({ state, setState }: DesignComponentProps) {
                             </svg>
                           </button>
                         </div>
-                        <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
+                        <div className="mt-2 flex items-center justify-center gap-4">
+                          <DxfDownloadButton dxfContent={entry.dxfContent} entryId={entry.id} />
+                          {entry.ifcContent && (
+                            <IfcDownloadButton ifcContent={entry.ifcContent} entryId={entry.id} />
+                          )}
+                        </div>
                       </>
                     ) : (
                       <div

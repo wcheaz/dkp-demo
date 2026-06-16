@@ -35,6 +35,7 @@
     "price": "Price:",
     "currency": "€",
     "downloadDxf": "Download DXF",
+    "downloadIfc": "Download IFC",
     "generatingCad": "Generating CAD drawing...",
     "clickToView": "Click to preview design",
     "back": "Back",
