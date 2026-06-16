@@ -42,11 +42,11 @@ The agent's `system_prompt` SHALL contain only: agent identity, absolute rules (
 - **THEN** the system prompt does NOT contain intent classification trigger phrases, the 9-field parameter extraction table, tool action simulation outputs, or the 3-form response formatting rules
 
 ### Requirement: On-demand skill loading via load_skill
-The LLM SHALL be able to call `load_skill("run-generate-design")` to retrieve the full decision-loop workflow, parameter extraction rules, pricing formula instructions, and response formatting guidelines from the skill's SKILL.md file.
+The LLM SHALL call `load_skill("run-generate-design")` to retrieve the high-level decision-loop workflow. The LLM MUST call `read_skill_resource` to dynamically retrieve the specific parameter extraction rules, translation dictionaries, pricing formula instructions, and response formatting guidelines from the reference files when executing those steps.
 
-#### Scenario: load_skill returns skill content
+#### Scenario: load_skill returns high-level skill content
 - **WHEN** the LLM calls `load_skill("run-generate-design")` during a request
-- **THEN** the tool returns the content of `.agents/skills/run-generate-design/SKILL.md`
+- **THEN** the tool returns the slimmed-down workflow content of `.agents/skills/run-generate-design/SKILL.md`
 
 #### Scenario: read_skill_resource returns reference files
 - **WHEN** the LLM calls `read_skill_resource("run-generate-design", "references/pricing-formula.md")` during a request
@@ -60,12 +60,13 @@ The LLM SHALL be able to call `load_skill("run-generate-design")` to retrieve th
 - **THEN** `pydantic-ai-skills` is installed and `uv sync` exits with code 0
 
 ### Requirement: Behavioral parity
-After integration, the agent SHALL produce identical outputs for identical inputs compared to the pre-integration agent. The detailed workflow rules previously in the system prompt are now loaded on-demand via the skill, but the LLM SHALL follow the same rules when the skill is loaded.
+After integration of progressive disclosure routing, the agent SHALL produce identical outputs for identical inputs compared to the monolithic skill setup. The detailed workflow rules and dictionaries are loaded on-demand via reference files, and the LLM SHALL follow these rules correctly to produce correct designs, quotes, and formatted responses.
 
 #### Scenario: Design request produces same output
 - **WHEN** the agent receives a design-related message (e.g., "I need a truss for a 10m span")
-- **THEN** the agent loads the skill, follows the same decision-loop workflow, and produces the same structured response as the pre-integration agent
+- **THEN** the agent loads the skill, calls `read_skill_resource` to read the required reference specifications on-demand, and produces the same structured response
+- **AND** the response contains the expected design output format with no emojis and no narration
 
 #### Scenario: Knowledge query produces same output
 - **WHEN** the agent receives a knowledge-base query (e.g., "What projects do you have?")
-- **THEN** the agent responds without loading the skill and produces the same response as the pre-integration agent
+- **THEN** the agent responds without loading the skill or any parameter/pricing references and produces the same response
