@@ -1,6 +1,6 @@
 ## 1. Pre-flight Baseline
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under [baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/)
   - Change: Capture the current state of all quality gates required by subsequent tasks:
     - Test: `PYTHONPATH=agent/src uv run pytest test/ > .ralph/baselines/optimize-agent-skill-progressive-disclosure-test.txt; echo "EXIT=$?" >> .ralph/baselines/optimize-agent-skill-progressive-disclosure-test.txt`
