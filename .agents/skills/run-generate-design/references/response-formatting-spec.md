@@ -30,7 +30,7 @@ The system SHALL format responses as standard markdown chat messages — using m
 
 #### Scenario: Design summary formatting (Slovak)
 - **WHEN** a design summary is produced AND locale is `sk`
-- **THEN** it SHALL use Slovak field labels and Slovak parameter values from the locale mapping table in SKILL.md. Example:
+- **THEN** it SHALL use Slovak field labels and Slovak parameter values from the locale mapping table in parameter-extraction-spec.md. Example:
 
 ```
 ## Návrh strechy

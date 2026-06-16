@@ -37,7 +37,7 @@ Note: Task 2 and Task 3 are independent and can be executed in parallel or in an
 
 ## 3. Consolidate formatting examples in response formatting spec
 
-- [ ] **Consolidate formatting examples in response formatting spec**
+- [x] **Consolidate formatting examples in response formatting spec**
   - Scope: [response-formatting-spec.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/references/response-formatting-spec.md)
   - Change: Response formatting examples and mappings in the response formatting spec are updated to reference `parameter-extraction-spec.md` instead of `SKILL.md`.
   - Done when:
