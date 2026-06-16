@@ -341,6 +341,7 @@ function YourMainContent() {
       parameters: {},
     },
   });
+  console.log("[YourMainContent] rendering with state:", JSON.stringify({ designsCount: state.designs?.length, designs: state.designs?.map(d => ({ id: d.id, dxf: !!d.dxfContent, ifc: !!d.ifcContent, status: d.status })) }));
 
   const { locale } = useLanguage();
 
@@ -743,9 +744,7 @@ function YourMainContent() {
     ],
     async handler({ design_id }) {
       console.log("[dxf] generate_dxf invoked with design_id:", design_id);
-      const currentState = latestStateRef.current;
-      const currentDesigns = currentState.designs ?? [];
-      const entry = currentDesigns.find((d) => d.id === design_id);
+      const entry = latestStateRef.current.designs?.find((d) => d.id === design_id);
 
       if (!entry) {
         console.error("[dxf] design lookup failed — no design found with id:", design_id);
@@ -807,13 +806,19 @@ function YourMainContent() {
         const size_kb = dxfBytes.byteLength / 1024;
         console.log("[dxf] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
 
-        const updatedDesigns = currentDesigns.map((d) =>
-          d.id === design_id ? { ...d, dxfContent: b64 } : d
+        // Fetch absolute freshest state ref right before writing to prevent concurrent write overrides
+        const freshState = latestStateRef.current;
+        const freshDesigns = freshState.designs ?? [];
+        const updatedDesigns = freshDesigns.map((d) =>
+          Number(d.id) === Number(design_id) ? { ...d, dxfContent: b64 } : d
         );
-        const newState = { ...currentState, designs: updatedDesigns };
+        const newState = { ...freshState, designs: updatedDesigns };
         setState(newState);
         latestStateRef.current = newState;
         console.log("[dxf] state updated — dxfContent stored for design:", design_id);
+
+        // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         return `DXF generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in dxfContent).`;
       } catch (err) {
@@ -838,9 +843,7 @@ function YourMainContent() {
     ],
     async handler({ design_id }) {
       console.log("[ifc] generate_ifc invoked with design_id:", design_id);
-      const currentState = latestStateRef.current;
-      const currentDesigns = currentState.designs ?? [];
-      const entry = currentDesigns.find((d) => d.id === design_id);
+      const entry = latestStateRef.current.designs?.find((d) => d.id === design_id);
 
       if (!entry) {
         console.error("[ifc] design lookup failed — no design found with id:", design_id);
@@ -902,13 +905,19 @@ function YourMainContent() {
         const size_kb = ifcBytes.byteLength / 1024;
         console.log("[ifc] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
 
-        const updatedDesigns = currentDesigns.map((d) =>
-          d.id === design_id ? { ...d, ifcContent: b64 } : d
+        // Fetch absolute freshest state ref right before writing to prevent concurrent write overrides
+        const freshState = latestStateRef.current;
+        const freshDesigns = freshState.designs ?? [];
+        const updatedDesigns = freshDesigns.map((d) =>
+          Number(d.id) === Number(design_id) ? { ...d, ifcContent: b64 } : d
         );
-        const newState = { ...currentState, designs: updatedDesigns };
+        const newState = { ...freshState, designs: updatedDesigns };
         setState(newState);
         latestStateRef.current = newState;
         console.log("[ifc] state updated — ifcContent stored for design:", design_id);
+
+        // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         return `IFC generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in ifcContent).`;
       } catch (err) {

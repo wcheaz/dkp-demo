@@ -9,7 +9,14 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    handlers=[
+        logging.FileHandler("/home/ncheaz/git/dkp-demo/logs/backend.log"),
+        logging.StreamHandler()
+    ]
+)
 
 logfire.configure()
 logfire.instrument_pydantic_ai()

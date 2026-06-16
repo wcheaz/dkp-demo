@@ -118,6 +118,7 @@ export interface DesignComponentProps {
 
 export function DesignComponent({ state, setState }: DesignComponentProps) {
   const designs = state.designs ?? [];
+  console.log("[DesignComponent] designs:", designs.map(d => ({ id: d.id, dxf: !!d.dxfContent, ifc: !!d.ifcContent, status: d.status })));
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [pricingModalIndex, setPricingModalIndex] = useState<number | null>(null);
   const [fullscreenDxf, setFullscreenDxf] = useState<string | null>(null);

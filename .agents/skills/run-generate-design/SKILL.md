@@ -53,8 +53,8 @@ for the output templates of each tool. Execute only the tasks matching the class
 intent; skip others with a note: "Intent does not match — skipped."
 
 **Exception:** When design-generation produces a `"complete"` status (all 4
-desirable fields present), automatically execute pricing (4c) and DXF generation
-(4g) — even if `pricing-quote` was not in the classified intent.
+desirable fields present), automatically execute pricing (4c), DXF generation
+(4g), and IFC generation — even if `pricing-quote` was not in the classified intent.
 
 Tool sub-actions:
 - **4a — Knowledge summary** (`knowledge-query/summary`): return the full contents of the locale-appropriate summary file (path in `references/knowledge-summary-path.md`).
@@ -63,7 +63,7 @@ Tool sub-actions:
 - **4d — Design generation** (`design-generation`): produce a design entry with all 9 fields (values or `---`) and status (`"complete"` or `"Design In Progress"`); auto-compute price when complete.
 - **4e — Design modification** (`design-modification`): update `image_name` ("design-alpha.svg" / "design-beta.svg") and/or `prompt_text`.
 - **4f — Design reset** (`design-reset`): partial (`remove_designs=false`) sets named fields to `---` and keeps the entry; full (`remove_designs=true`) removes entries entirely.
-- **4g — DXF generation** (`generate_dxf`): auto-triggered on a `"complete"` design (4d) or modification (4e); produce the DXF download confirmation.
+- **4g — DXF and IFC generation** (`generate_dxf`, `generate_ifc`): auto-triggered on a `"complete"` design (4d) or modification (4e); produce the DXF and IFC download confirmations.
 
 ### Step 5 — Format Final Response
 
@@ -88,3 +88,5 @@ Present the formatted response. No additional commentary.
 - `references/pricing-formula.md` — worked pricing examples
 - `references/knowledge-base-search.md` — scoring algorithm detail
 - `references/knowledge-summary-path.md` — knowledge summary file paths
+- `references/dxf-builder-api.md` — DXF generator API rules
+- `references/ifc-builder-api.md` — IFC generator API rules
