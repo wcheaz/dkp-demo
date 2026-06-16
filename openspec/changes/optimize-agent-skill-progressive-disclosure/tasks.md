@@ -22,7 +22,7 @@
 
 Note: Task 2 and Task 3 are independent and can be executed in parallel or in any order.
 
-- [ ] **Add Slovak/English parameter mappings to parameter extraction spec**
+- [x] **Add Slovak/English parameter mappings to parameter extraction spec**
   - Scope: [parameter-extraction-spec.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/references/parameter-extraction-spec.md)
   - Change: Slovak translations, English label lists, and valid parameter values dictionaries from Step 3 of the monolithic `SKILL.md` are added to the parameter extraction specification.
   - Done when:
