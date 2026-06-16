@@ -83,7 +83,7 @@
 
 ## 4. Frontend UI & Localization
 
-- [ ] **Implement generate_ifc frontend tool**
+- [x] **Implement generate_ifc frontend tool**
   - Scope: [page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/page.tsx)
   - Change: Add a `useFrontendTool` named `generate_ifc` that receives `design_id`, calls the backend's `/api/ifc/generate` endpoint, base64-encodes the response, and stores it in `entry.ifcContent` in React state.
   - Done when:

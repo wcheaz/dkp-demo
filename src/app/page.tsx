@@ -823,6 +823,101 @@ function YourMainContent() {
     },
   });
 
+  useFrontendTool({
+    name: "generate_ifc",
+    description:
+      "Generate a downloadable IFC BIM file for a completed design using the " + '"generate_ifc"' + " tool. " +
+      "Call after generate_design completes with all required parameters, or when the user explicitly requests an IFC/BIM file.",
+    parameters: [
+      {
+        name: "design_id",
+        type: "number",
+        description: "The ID of the design entry to generate IFC for",
+        required: true,
+      },
+    ],
+    async handler({ design_id }) {
+      console.log("[ifc] generate_ifc invoked with design_id:", design_id);
+      const currentState = latestStateRef.current;
+      const currentDesigns = currentState.designs ?? [];
+      const entry = currentDesigns.find((d) => d.id === design_id);
+
+      if (!entry) {
+        console.error("[ifc] design lookup failed — no design found with id:", design_id);
+        return `No design found with id ${design_id}.`;
+      }
+      console.log("[ifc] design lookup succeeded — found design:", entry.id, "status:", entry.status);
+
+      if (!entry.parameters) {
+        console.error("[ifc] design", design_id, "has no parameters");
+        return `Design ${design_id} has no parameters. Collect parameters first.`;
+      }
+
+      const stripPlaceholders = (params: Record<string, unknown>) => {
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(params)) {
+          if (value !== undefined && value !== null && value !== "---" && value !== "") {
+            cleaned[key] = value;
+          }
+        }
+        return cleaned;
+      };
+
+      const cleanedParams = stripPlaceholders(entry.parameters as Record<string, unknown>);
+      console.log("[ifc] sending cleaned parameters to endpoint:", JSON.stringify(cleanedParams));
+
+      const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
+      const missing = requiredFields.filter((f) => cleanedParams[f] === undefined);
+      if (missing.length > 0) {
+        console.error("[ifc] missing required parameters:", missing.join(", "));
+        return `Design ${design_id} is missing required parameters: ${missing.join(", ")}. Collect these before generating IFC.`;
+      }
+
+      try {
+        const agentUrl = process.env.AGENT_URL || "http://localhost:8000/";
+        const fetchUrl = agentUrl + "api/ifc/generate";
+        console.log("[ifc] fetching IFC from:", fetchUrl);
+        const response = await fetch(fetchUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cleanedParams),
+        });
+        console.log("[ifc] endpoint response status:", response.status, response.statusText);
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error("[ifc] non-2xx response:", response.status, errorBody);
+          return `Cannot generate IFC: server returned ${response.status} - ${errorBody}`;
+        }
+
+        const ifcBytes = await response.arrayBuffer();
+        const bytes = new Uint8Array(ifcBytes);
+        let b64 = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+          b64 += String.fromCharCode.apply(null, Array.from(chunk));
+        }
+        b64 = btoa(b64);
+        const size_kb = ifcBytes.byteLength / 1024;
+        console.log("[ifc] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
+
+        const updatedDesigns = currentDesigns.map((d) =>
+          d.id === design_id ? { ...d, ifcContent: b64 } : d
+        );
+        const newState = { ...currentState, designs: updatedDesigns };
+        setState(newState);
+        latestStateRef.current = newState;
+        console.log("[ifc] state updated — ifcContent stored for design:", design_id);
+
+        return `IFC generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in ifcContent).`;
+      } catch (err) {
+        console.error("[ifc] error during IFC generation:", err instanceof Error ? err.message : String(err), err);
+        return `Cannot generate IFC: ${err instanceof Error ? err.message : String(err)}`;
+      }
+    },
+  });
+
   useCopilotReadable({
     description: "The application state data including the current UI locale. The agent MUST respond in the language specified by 'locale' (sk = Slovak, en = English).",
     value: JSON.stringify({ designs, parameters: state.parameters, locale }),
