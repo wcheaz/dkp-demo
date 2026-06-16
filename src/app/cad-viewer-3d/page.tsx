@@ -58,143 +58,13 @@ function parseIfcToDxf(ifcText: string): string {
     }
   }
   
-  // Helper to trace shape representation -> product definition shape -> product -> local placement
-  function findProductLocalPlacementId(solidId: string): string | null {
-    let shapeRepId: string | null = null;
-    for (const [id, ent] of Object.entries(entities)) {
-      if (ent.type === "IFCSHAPEREPRESENTATION") {
-        const itemsStr = ent.args[3]; // 4th argument: (item1, item2, ...)
-        if (itemsStr && itemsStr.includes(`#${solidId}`)) {
-          shapeRepId = id;
-          break;
-        }
-      }
-    }
-    if (!shapeRepId) return null;
-
-    let prodDefShapeId: string | null = null;
-    for (const [id, ent] of Object.entries(entities)) {
-      if (ent.type === "IFCPRODUCTDEFINITIONSHAPE") {
-        const repsStr = ent.args[2]; // 3rd argument: (rep1, rep2, ...)
-        if (repsStr && repsStr.includes(`#${shapeRepId}`)) {
-          prodDefShapeId = id;
-          break;
-        }
-      }
-    }
-    if (!prodDefShapeId) return null;
-
-    for (const ent of Object.values(entities)) {
-      if (
-        ent.type === "IFCMEMBER" ||
-        ent.type === "IFCWALLSTANDARDCASE" ||
-        ent.type === "IFCWALL" ||
-        ent.type === "IFCBEAM" ||
-        ent.type === "IFCCOLUMN"
-      ) {
-        const shapeArg = ent.args[6]; // 7th argument
-        if (shapeArg && shapeArg.replace("#", "") === prodDefShapeId) {
-          const placementArg = ent.args[5]; // 6th argument
-          if (placementArg) {
-            return placementArg.replace("#", "");
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  // Helper to parse IFCCARTESIANPOINT
-  function parseCartesianPoint(pointId: string): [number, number, number] {
-    const ent = entities[pointId];
-    if (ent && ent.type === "IFCCARTESIANPOINT") {
-      const coordsStr = ent.args[0].replace(/[()]/g, "");
-      const coords = coordsStr.split(",").map(c => parseFloat(c));
-      return [coords[0] || 0, coords[1] || 0, coords[2] || 0];
-    }
-    return [0, 0, 0];
-  }
-
-  // Helper to parse IFCDIRECTION
-  function parseDirection(dirId: string, defVal: [number, number, number]): [number, number, number] {
-    const ent = entities[dirId];
-    if (ent && ent.type === "IFCDIRECTION") {
-      const dirStr = ent.args[0].replace(/[()]/g, "");
-      const dir = dirStr.split(",").map(d => parseFloat(d));
-      return [dir[0] ?? defVal[0], dir[1] ?? defVal[1], dir[2] ?? defVal[2]];
-    }
-    return defVal;
-  }
-
-  // Helper to resolve IFCAXIS2PLACEMENT3D coordinates and directions
-  function resolvePlacement3D(placementId: string) {
-    const placement = entities[placementId];
-    let location: [number, number, number] = [0, 0, 0];
-    let axis: [number, number, number] = [0, 0, 1];
-    let refDir: [number, number, number] = [1, 0, 0];
-
-    if (placement && placement.type === "IFCAXIS2PLACEMENT3D") {
-      const locId = placement.args[0].replace("#", "");
-      location = parseCartesianPoint(locId);
-
-      if (placement.args[1] && placement.args[1] !== "$") {
-        const axisId = placement.args[1].replace("#", "");
-        axis = parseDirection(axisId, [0, 0, 1]);
-      }
-      if (placement.args[2] && placement.args[2] !== "$") {
-        const refDirId = placement.args[2].replace("#", "");
-        refDir = parseDirection(refDirId, [1, 0, 0]);
-      }
-    }
-
-    // Orthonormalize basis
-    // 1. Z-axis
-    const zLen = Math.sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]) || 1.0;
-    const zAxis = [axis[0]/zLen, axis[1]/zLen, axis[2]/zLen];
-
-    // 2. Project refDir onto plane perpendicular to zAxis: xProj = refDir - (refDir . zAxis) * zAxis
-    const dot = refDir[0]*zAxis[0] + refDir[1]*zAxis[1] + refDir[2]*zAxis[2];
-    let xProj = [
-      refDir[0] - dot * zAxis[0],
-      refDir[1] - dot * zAxis[1],
-      refDir[2] - dot * zAxis[2]
-    ];
-
-    let xLen = Math.sqrt(xProj[0]*xProj[0] + xProj[1]*xProj[1] + xProj[2]*xProj[2]);
-    if (xLen < 1e-6) {
-      // Collinear fallback
-      if (Math.abs(zAxis[0]) > 0.9) {
-        xProj = [0, 1, 0];
-      } else {
-        xProj = [1, 0, 0];
-      }
-      const dot2 = xProj[0]*zAxis[0] + xProj[1]*zAxis[1] + xProj[2]*zAxis[2];
-      xProj = [
-        xProj[0] - dot2 * zAxis[0],
-        xProj[1] - dot2 * zAxis[1],
-        xProj[2] - dot2 * zAxis[2]
-      ];
-      xLen = Math.sqrt(xProj[0]*xProj[0] + xProj[1]*xProj[1] + xProj[2]*xProj[2]) || 1.0;
-    }
-    const xAxis = [xProj[0]/xLen, xProj[1]/xLen, xProj[2]/xLen];
-
-    // 3. Y-axis = Z-axis x X-axis
-    const yAxis = [
-      zAxis[1]*xAxis[2] - zAxis[2]*xAxis[1],
-      zAxis[2]*xAxis[0] - zAxis[0]*xAxis[2],
-      zAxis[0]*xAxis[1] - zAxis[1]*xAxis[0]
-    ];
-
-    return { location, xAxis, yAxis, zAxis };
-  }
-  
   const extrudedSolids = Object.entries(entities).filter(
     ([, ent]) => ent.type === "IFCEXTRUDEDAREASOLID"
   );
   
   let dxfEntities = "";
   
-  for (const [solidId, solid] of extrudedSolids) {
+  for (const [, solid] of extrudedSolids) {
     try {
       const sweptAreaId = solid.args[0].replace("#", "");
       const positionId = solid.args[1].replace("#", "");
@@ -222,69 +92,36 @@ function parseIfcToDxf(ifcText: string): string {
           }
         }
         
-        // 1. Resolve Solid placement coordinate transformation
-        const T_solid = resolvePlacement3D(positionId);
-
-        // 2. Compute local 3D vertices relative to the product coordinate system
+        let sx = 0;
+        let sy = 0;
+        let sz = 0;
+        const solidPos = entities[positionId];
+        if (solidPos && solidPos.type === "IFCAXIS2PLACEMENT3D") {
+          const locId = solidPos.args[0].replace("#", "");
+          const loc = entities[locId];
+          if (loc && loc.type === "IFCCARTESIANPOINT") {
+            const coordsStr = loc.args[0].replace(/[()]/g, "");
+            const coords = coordsStr.split(",").map(c => parseFloat(c));
+            sx = coords[0] || 0;
+            sy = coords[1] || 0;
+            sz = coords[2] || 0;
+          }
+        }
+        
         const xMin = px - xDim / 2;
         const xMax = px + xDim / 2;
         const yMin = py - yDim / 2;
         const yMax = py + yDim / 2;
-
-        const p_local = [
-          [xMin, yMin],
-          [xMax, yMin],
-          [xMax, yMax],
-          [xMin, yMax]
-        ];
-
-        // Transform 2D profile coordinates to local 3D coordinates using T_solid
-        const v_local: number[][] = [];
-        for (let i = 0; i < 4; i++) {
-          const pt = p_local[i];
-          v_local.push([
-            T_solid.location[0] + pt[0] * T_solid.xAxis[0] + pt[1] * T_solid.yAxis[0],
-            T_solid.location[1] + pt[0] * T_solid.xAxis[1] + pt[1] * T_solid.yAxis[1],
-            T_solid.location[2] + pt[0] * T_solid.xAxis[2] + pt[1] * T_solid.yAxis[2]
-          ]);
-        }
-        // Top profile vertices are swept along Z-axis of solid placement by depth
-        for (let i = 0; i < 4; i++) {
-          const bottom = v_local[i];
-          v_local.push([
-            bottom[0] + depth * T_solid.zAxis[0],
-            bottom[1] + depth * T_solid.zAxis[1],
-            bottom[2] + depth * T_solid.zAxis[2]
-          ]);
-        }
-
-        // 3. Resolve Product local placement (from storey to global)
-        const placementId = findProductLocalPlacementId(solidId);
-        let v_global = v_local;
-
-        if (placementId) {
-          const placement = entities[placementId];
-          if (placement && placement.type === "IFCLOCALPLACEMENT") {
-            const relPlacementId = placement.args[1].replace("#", "");
-            const T_product = resolvePlacement3D(relPlacementId);
-
-            // Transform local 3D vertices to global coordinates
-            v_global = v_local.map(vl => [
-              T_product.location[0] + vl[0] * T_product.xAxis[0] + vl[1] * T_product.yAxis[0] + vl[2] * T_product.zAxis[0],
-              T_product.location[1] + vl[0] * T_product.xAxis[1] + vl[1] * T_product.yAxis[1] + vl[2] * T_product.zAxis[1],
-              T_product.location[2] + vl[0] * T_product.xAxis[2] + vl[1] * T_product.yAxis[2] + vl[2] * T_product.zAxis[2]
-            ]);
-          }
-        }
-
-        const v1 = v_global[0];
-        const v2 = v_global[1];
-        const v3 = v_global[2];
-        const v4 = v_global[3];
-        const v5 = v_global[4];
-        const v6 = v_global[5];
-        const v7 = v_global[6];
-        const v8 = v_global[7];
+        
+        const v1 = [xMin + sx, yMin + sy, sz];
+        const v2 = [xMax + sx, yMin + sy, sz];
+        const v3 = [xMax + sx, yMax + sy, sz];
+        const v4 = [xMin + sx, yMax + sy, sz];
+        
+        const v5 = [v1[0], v1[1], v1[2] + depth];
+        const v6 = [v2[0], v2[1], v2[2] + depth];
+        const v7 = [v3[0], v3[1], v3[2] + depth];
+        const v8 = [v4[0], v4[1], v4[2] + depth];
 
         const COS_30 = 0.86602540378;
         const SIN_30 = 0.5;
