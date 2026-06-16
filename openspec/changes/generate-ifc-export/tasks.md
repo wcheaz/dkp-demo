@@ -71,7 +71,7 @@
   - Stop and hand off if:
     - `ifcopenshell` fails to compile coordinate placements or raises unhandled schema exceptions.
 
-- [ ] **Register IFC export API endpoint**
+- [x] **Register IFC export API endpoint**
   - Scope: [main.py](file:///home/ncheaz/git/dkp-demo/agent/src/main.py), [test_ifc_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_endpoint.py)
   - Change: Implement and map the `POST /api/ifc/generate` route.
   - Done when:

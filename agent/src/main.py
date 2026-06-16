@@ -3,6 +3,7 @@ import os
 
 from src.agent import YourState, StateDeps, agent, DesignParameters
 from src.dxf_builder import build_dxf
+from src.ifc_builder import build_ifc
 import logfire
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -70,8 +71,48 @@ async def dxf_generate(request: Request):
     )
 
 
+async def ifc_generate(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            status_code=422,
+            content={"error": "Invalid or malformed JSON body"},
+        )
+
+    try:
+        params = DesignParameters(**body)
+    except Exception:
+        return JSONResponse(
+            status_code=422,
+            content={"error": "Invalid parameters"},
+        )
+
+    logging.info("[ifc] request received — params: %s", body)
+
+    try:
+        ifc_bytes = build_ifc(params)
+    except ValueError as exc:
+        logging.error("[ifc] build_ifc failed: %s", exc)
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc)},
+        )
+
+    logging.info("[ifc] response sent — %d bytes", len(ifc_bytes))
+
+    return Response(
+        content=ifc_bytes,
+        media_type="application/ifc",
+        headers={
+            "Content-Disposition": 'attachment; filename="design.ifc"',
+        },
+    )
+
+
 app.router.add_route("/api/health", health_check, methods=["GET"])
 app.router.add_route("/api/dxf/generate", dxf_generate, methods=["POST"])
+app.router.add_route("/api/ifc/generate", ifc_generate, methods=["POST"])
 
 if __name__ == "__main__":
     import uvicorn
