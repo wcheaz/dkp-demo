@@ -45,7 +45,7 @@
   - Stop and hand off if:
     - model extension causes typescript compilation errors or pydantic model schema conflicts.
 
-- [ ] **Extract shared geometry calculation module**
+- [x] **Extract shared geometry calculation module**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [dxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/dxf_builder.py)
   - Change: Decouple geometry math into a single module so wall coordinates and truss layouts are shared.
   - Done when:

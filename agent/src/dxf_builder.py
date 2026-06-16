@@ -6,12 +6,33 @@ from typing import Any, Optional
 
 import ezdxf
 
-_DIMENSION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?")
+try:
+    from src.geometry_solver import (
+        WALL_HEIGHT,
+        compute_truss_count,
+        parse_dimensions,
+        resolve_pitch,
+        truss_positions,
+        truss_ridge_height,
+        wall_corners,
+    )
+except ImportError:  # pragma: no cover - direct module import in unit tests
+    from geometry_solver import (  # type: ignore[no-redef,import-not-found]
+        WALL_HEIGHT,
+        compute_truss_count,
+        parse_dimensions,
+        resolve_pitch,
+        truss_positions,
+        truss_ridge_height,
+        wall_corners,
+    )
+
 _OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(mm|m)?\s*$", re.IGNORECASE)
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
-WALL_HEIGHT = 2700.0
+# Backwards-compatible alias for tests that import the private name.
+_compute_truss_count = compute_truss_count
 
 LAYER_FLOOR_PLAN = "Floor_Plan"
 LAYER_WALL_CENTERLINES = "Wall_Centerlines"
@@ -23,19 +44,8 @@ LAYER_LUMBER_SPECS = "Lumber_Specs"
 LAYER_TITLE_BLOCK = "Title_Block"
 
 
-def _parse_dimensions(raw: str) -> tuple[float, float]:
-    if raw is None:
-        raise ValueError("floorPlanDimensions is required")
-    m = _DIMENSION_RE.match(raw.strip())
-    if not m:
-        raise ValueError(f"Cannot parse floorPlanDimensions: {raw!r}")
-    width_mm = float(m.group(1)) * 1000
-    depth_mm = float(m.group(2)) * 1000
-    return width_mm, depth_mm
-
-
 def _draw_floor_plan(msp, w: float, d: float) -> None:
-    corners = [(0, 0), (w, 0), (w, d), (0, d)]
+    corners = wall_corners(w, d)
     for z in (0, WALL_HEIGHT):
         for i in range(4):
             sx, sy = corners[i]
@@ -52,7 +62,7 @@ def _draw_floor_plan(msp, w: float, d: float) -> None:
 
 
 def _draw_wall_centerlines(msp, w: float, d: float) -> None:
-    corners = [(0, 0), (w, 0), (w, d), (0, d)]
+    corners = wall_corners(w, d)
     msp.add_lwpolyline(
         corners,
         close=True,
@@ -145,7 +155,7 @@ def _draw_mono_pitch(msp, w: float, d: float, pitch_deg: float = 10.0) -> None:
 
 
 def _draw_flat(msp, w: float, d: float, pitch_deg: float = 0.0) -> None:
-    corners = [(0, 0), (w, 0), (w, d), (0, d)]
+    corners = wall_corners(w, d)
     for i in range(4):
         sx, sy = corners[i]
         ex, ey = corners[(i + 1) % 4]
@@ -155,39 +165,13 @@ def _draw_flat(msp, w: float, d: float, pitch_deg: float = 0.0) -> None:
         )
 
 
-def _compute_truss_count(width_m: float, depth_m: float) -> int:
-    return max(2, round(width_m * depth_m * 0.147))
-
-
 def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
-    count = _compute_truss_count(w / 1000, d / 1000)
+    count = compute_truss_count(w / 1000, d / 1000)
+    pitch_deg = resolve_pitch(roof_key, roof_pitch)
 
-    if roof_pitch is None or roof_pitch == 0:
-        if roof_key in ("gable", "hip"):
-            pitch_deg = 30.0
-        elif roof_key == "mono-pitch":
-            pitch_deg = 10.0
-        else:
-            pitch_deg = 0.0
-    else:
-        pitch_deg = float(roof_pitch)
+    positions = truss_positions(w, d, count)
 
-    shorter = min(w, d)
-    inset = shorter * 0.05
-
-    if count == 1:
-        positions = [d / 2]
-    else:
-        span = d - 2 * inset
-        step = span / (count - 1)
-        positions = [inset + i * step for i in range(count)]
-
-    if roof_key in ("gable", "hip"):
-        ridge_h = (w / 2) * math.tan(pitch_deg * math.pi / 180)
-    elif roof_key == "mono-pitch":
-        ridge_h = w * math.tan(pitch_deg * math.pi / 180)
-    else:
-        ridge_h = 0.0
+    ridge_h = truss_ridge_height(w, roof_key, pitch_deg)
 
     z_eave = WALL_HEIGHT
     z_ridge = WALL_HEIGHT + ridge_h
@@ -339,7 +323,7 @@ def build_dxf(params: Any) -> bytes:
     if roof_key not in _VALID_ROOF_TYPES:
         raise ValueError(f"Unsupported roofType: {params.roofType!r}")
 
-    w, d = _parse_dimensions(params.floorPlanDimensions)
+    w, d = parse_dimensions(params.floorPlanDimensions)
 
     doc = ezdxf.new("R2004")
     doc.layers.add(LAYER_FLOOR_PLAN)
@@ -369,13 +353,7 @@ def build_dxf(params: Any) -> bytes:
     _draw_wall_centerlines(msp, w, d)
 
     pitch_val = float(params.roofPitch) if hasattr(params, "roofPitch") and params.roofPitch is not None else None
-    if pitch_val is None or pitch_val == 0:
-        if roof_key in ("gable", "hip"):
-            pitch_val = 30.0
-        elif roof_key == "mono-pitch":
-            pitch_val = 10.0
-        else:
-            pitch_val = 0.0
+    pitch_val = resolve_pitch(roof_key, pitch_val)
 
     _ROOF_DRAWERS[roof_key](msp, w, d, pitch_val)
 
@@ -383,12 +361,7 @@ def build_dxf(params: Any) -> bytes:
 
     w_m = w / 1000
     d_m = d / 1000
-    if roof_key in ("gable", "hip"):
-        ridge_height_mm = (w / 2) * math.tan(pitch_val * math.pi / 180)
-    elif roof_key == "mono-pitch":
-        ridge_height_mm = w * math.tan(pitch_val * math.pi / 180)
-    else:
-        ridge_height_mm = 0.0
+    ridge_height_mm = truss_ridge_height(w, roof_key, pitch_val)
 
     overhang_mm = _parse_overhang(
         getattr(params, "overhang", None)
