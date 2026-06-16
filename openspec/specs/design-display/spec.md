@@ -7,7 +7,7 @@ The Design Display capability provides a scrollable list of design entries with 
 ### Requirement: DesignComponent renders a scrollable list of design entries
 The `DesignComponent` SHALL accept an `AgentState` containing a `designs` array of `DesignEntry` objects and a `parameters` field of type `DesignParameters`. The component SHALL render a parameter display section above the scrollable design cards container (see `design-params-display` capability). Each `DesignEntry` SHALL have an `imageUrl` (string), a `promptText` (string), and a `status` field (`"processing" | "complete"`). The component SHALL render one card per entry inside a scrollable container. Multiple cards SHALL be visible simultaneously. The scrollable container SHALL use `overflow-y: auto` so the user can scroll through the design history. Each card SHALL contain an `<img>` element with `src` set to the entry's `imageUrl` and a text element displaying the entry's `promptText`.
 
-All user-facing text in the component SHALL be sourced from the translation dictionary via `useTranslations('designs')` hook. The following strings SHALL be translation keys, NOT hardcoded: the heading text, empty state message, processing overlay text, `MATERIAL_STAT_LABELS` values, `PARAM_LABELS` values, "Material Estimate" label, "Price:" label, and image alt text. Currency display SHALL use `Intl.NumberFormat('sk-SK', ...)` for formatting, with the currency symbol derived from the translation dictionary.
+All user-facing text in the component SHALL be sourced from the translation dictionary via `useTranslations('designs')` hook. The following strings SHALL be translation keys, NOT hardcoded: the heading text, empty state message, processing overlay text, `MATERIAL_STAT_LABELS` values, `PARAM_LABELS` values, "Material Estimate" label, "Price:" label, "Download DXF" button label, "Download IFC" button label, and image alt text. Currency display SHALL use `Intl.NumberFormat('sk-SK', ...)` for formatting, with the currency symbol derived from the translation dictionary.
 
 For entries with `status: "processing"`, the card SHALL render a processing overlay covering the image area instead of the normal image. The overlay SHALL contain a CSS-animated spinner and the translated text from the translation dictionary key `designs.generating`. The image SHALL be hidden during processing. The card ID (`#N`) and prompt text SHALL remain visible above and below the overlay. Clicking the overlay or the processing entry SHALL NOT open the modal.
 
@@ -16,8 +16,8 @@ The component SHALL maintain a `activeViewerIndex` state (type `number`) initial
 For entries with `status: "complete"` (including the default), the card image area rendering SHALL follow this logic:
 1. If ANY parameter field on the entry is missing (undefined/null), empty string, or set to `"---"` → render a "Design In Progress" placeholder image (`/design-in-progress.svg`) instead of `entry.imageUrl`. Clicking the placeholder SHALL NOT open the modal.
 2. If ALL parameter fields are filled with real (non-`"---"`, non-empty) values AND `entry.dxfContent` is a non-empty string:
-   - If `index === activeViewerIndex` → render the `<CadViewer>` component with `dxfContent={entry.dxfContent}` and `key={entry.id}`.
-   - If `index !== activeViewerIndex` → render a clickable overlay div with instructional text (e.g., "Click to view") and `cursor: pointer`. Clicking this overlay SHALL update `activeViewerIndex` to `index`. A "Download DXF" button SHALL be rendered below the overlay.
+   - If `index === activeViewerIndex` → render the `<CadViewer>` component with `dxfContent={entry.dxfContent}` and `key={entry.id}`. A "Download DXF" button SHALL be rendered below the viewer. If `entry.ifcContent` is a non-empty string, a "Download IFC" button SHALL be rendered adjacent to the "Download DXF" button.
+   - If `index !== activeViewerIndex` → render a clickable overlay div with instructional text (e.g., "Click to view") and `cursor: pointer`. Clicking this overlay SHALL update `activeViewerIndex` to `index`. A "Download DXF" button SHALL be rendered below the overlay. If `entry.ifcContent` is a non-empty string, a "Download IFC" button SHALL be rendered adjacent to the "Download DXF" button.
 3. If ALL parameter fields are filled with real values AND `entry.dxfContent` is undefined/null/empty → render `entry.imageUrl` as before via `<img>`, allowing click-to-enlarge. A "Generating CAD drawing..." status indicator SHALL be shown below the image.
 
 A static SVG file at `public/design-in-progress.svg` SHALL exist as the placeholder image. It SHALL display "Design In Progress" text with styling consistent with the existing design card aesthetic.
@@ -102,6 +102,10 @@ A static SVG file at `public/design-in-progress.svg` SHALL exist as the placehol
 #### Scenario: Cleared parameter triggers placeholder
 - **WHEN** a design entry has all parameters filled and showing `entry.imageUrl`, and then `parameters.roofType` is changed to `"---"` via `reset_design`
 - **THEN** the card SHALL re-render showing the "Design In Progress" placeholder image instead of `entry.imageUrl`.
+
+#### Scenario: Complete entry with ifcContent renders Download IFC button
+- **WHEN** a design entry has `status: "complete"`, all parameters filled, and `ifcContent` contains a valid base64 string
+- **THEN** the component SHALL render a "Download IFC" button containing the translated label from `designs.downloadIfc` adjacent to the "Download DXF" button.
 
 ### Requirement: Price display hides info icon when placeholder
 
