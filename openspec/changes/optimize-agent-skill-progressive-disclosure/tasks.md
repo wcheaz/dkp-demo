@@ -74,7 +74,7 @@ Note: Task 2 and Task 3 are independent and can be executed in parallel or in an
   - Stop and hand off if:
     - there is ambiguity in how the base system prompt should direct the agent to load and use skill resources, or editing `agent.py` causes syntax/compilation errors
 
-- [ ] **Verify entire agent decision loop behaves identically**
+- [x] **Verify entire agent decision loop behaves identically**
   - Scope: no code edits; runs pytest verification suite on [test/](file:///home/ncheaz/git/dkp-demo/test/)
   - Change: Run the full test suite to verify that the progressive disclosure routing behaves exactly as before.
   - Done when:
