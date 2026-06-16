@@ -60,7 +60,7 @@
 
 ## 3. IFC Generation & API Integration
 
-- [ ] **Implement IFC Builder module**
+- [x] **Implement IFC Builder module**
   - Scope: [ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py), [test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py)
   - Change: Create the IFC constructor to output structural wall and truss representations using the IFC2x3 schema.
   - Done when:
