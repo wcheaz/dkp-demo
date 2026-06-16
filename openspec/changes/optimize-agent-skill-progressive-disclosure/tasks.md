@@ -61,7 +61,7 @@ Note: Task 2 and Task 3 are independent and can be executed in parallel or in an
 
 ## 5. Prompt Redundancy Review & Verification
 
-- [ ] **Update agent base system prompt to reference progressive disclosure**
+- [x] **Update agent base system prompt to reference progressive disclosure**
   - Scope: [agent.py](file:///home/ncheaz/git/dkp-demo/agent/src/agent.py)
   - Change: The system prompt in `agent.py` is updated to explicitly instruct the agent to fetch detailed rules dynamically using `read_skill_resource` when the skill is loaded, and any duplicated instructions are removed.
   - Done when:
