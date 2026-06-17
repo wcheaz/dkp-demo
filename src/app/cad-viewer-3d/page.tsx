@@ -223,6 +223,128 @@ ENDSEC
 EOF`;
 }
 
+type IfcEntity = { type: string; args: string[] };
+type Vec3 = [number, number, number];
+interface Placement3D {
+  location: Vec3;
+  axis: Vec3;
+  refDir: Vec3;
+}
+
+const PRODUCT_ENTITY_TYPES = new Set([
+  "IFCMEMBER",
+  "IFCWALLSTANDARDCASE",
+  "IFCWALL",
+  "IFCBEAM",
+  "IFCCOLUMN",
+  "IFCSLAB",
+  "IFCPLATE",
+  "IFCFOOTING",
+  "IFCROOF",
+  "IFCCURTAINWALL",
+]);
+
+function parseCartesianOrDirection(
+  entities: Record<string, IfcEntity>,
+  ref: string,
+  fallback: Vec3
+): Vec3 {
+  const id = ref.replace("#", "").trim();
+  const entity = entities[id];
+  if (
+    !entity ||
+    (entity.type !== "IFCCARTESIANPOINT" && entity.type !== "IFCDIRECTION")
+  ) {
+    return fallback;
+  }
+  const coordsStr = entity.args[0].replace(/[()]/g, "");
+  const coords = coordsStr.split(",").map((c) => parseFloat(c));
+  return [coords[0] || 0, coords[1] || 0, coords[2] || 0];
+}
+
+function findProductLocalPlacementId(
+  entities: Record<string, IfcEntity>,
+  solidId: string
+): string | null {
+  let shapeRepId: string | null = null;
+  for (const [id, entity] of Object.entries(entities)) {
+    if (entity.type === "IFCSHAPEREPRESENTATION" && entity.args.length >= 4) {
+      const items = entity.args[3]
+        .replace(/[()]/g, "")
+        .split(",")
+        .map((s) => s.trim().replace("#", ""));
+      if (items.includes(solidId)) {
+        shapeRepId = id;
+        break;
+      }
+    }
+  }
+  if (shapeRepId === null) return null;
+
+  let productDefShapeId: string | null = null;
+  for (const [id, entity] of Object.entries(entities)) {
+    if (
+      entity.type === "IFCPRODUCTDEFINITIONSHAPE" &&
+      entity.args.length >= 1
+    ) {
+      const reps = entity.args[entity.args.length - 1]
+        .replace(/[()]/g, "")
+        .split(",")
+        .map((s) => s.trim().replace("#", ""));
+      if (reps.includes(shapeRepId)) {
+        productDefShapeId = id;
+        break;
+      }
+    }
+  }
+  if (productDefShapeId === null) return null;
+
+  for (const entity of Object.values(entities)) {
+    if (
+      PRODUCT_ENTITY_TYPES.has(entity.type) &&
+      entity.args.length >= 7
+    ) {
+      const repRef = entity.args[6].replace("#", "");
+      if (repRef === productDefShapeId) {
+        return entity.args[5].replace("#", "");
+      }
+    }
+  }
+  return null;
+}
+
+function resolvePlacement3D(
+  entities: Record<string, IfcEntity>,
+  placementId: string
+): Placement3D | null {
+  let entity = entities[placementId];
+  if (!entity) return null;
+
+  if (entity.type === "IFCLOCALPLACEMENT") {
+    if (entity.args.length < 2) return null;
+    entity = entities[entity.args[1].replace("#", "")];
+    if (!entity) return null;
+  }
+
+  if (entity.type !== "IFCAXIS2PLACEMENT3D") return null;
+
+  const location = parseCartesianOrDirection(entities, entity.args[0], [
+    0,
+    0,
+    0,
+  ]);
+  const axis: Vec3 =
+    entity.args.length > 1 && entity.args[1] && entity.args[1] !== "$"
+      ? parseCartesianOrDirection(entities, entity.args[1], [0, 0, 1])
+      : [0, 0, 1];
+  const refDir: Vec3 =
+    entity.args.length > 2 && entity.args[2] && entity.args[2] !== "$"
+      ? parseCartesianOrDirection(entities, entity.args[2], [1, 0, 0])
+      : [1, 0, 0];
+
+  return { location, axis, refDir };
+}
+
 export default function CadViewer3DPage() {
   const [dxfContent, setDxfContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");

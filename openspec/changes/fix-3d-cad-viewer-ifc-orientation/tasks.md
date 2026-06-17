@@ -14,7 +14,7 @@
 
 ## 2. Geometry Mapping and Coordinate Transformation
 
-- [ ] **Parse relative placements and retrieve Cartesian points**
+- [x] **Parse relative placements and retrieve Cartesian points**
   - Scope: `src/app/cad-viewer-3d/page.tsx`
   - Change: The parser traces solid geometry references to parent products and extracts product local placements (location, axis, and ref direction).
   - Done when:
