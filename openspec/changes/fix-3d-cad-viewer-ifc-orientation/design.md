@@ -1,6 +1,6 @@
 ## Context
 
-The isolated `/cad-viewer-3d` page renders IFC files by converting them to DXF format on the fly via the `parseIfcToDxf` function. Because the parser currently ignores the local coordinate placements (`IfcLocalPlacement`) and direction vectors (`Axis`, `RefDirection`) of each product (such as `IFCMEMBER` or `IFCWALLSTANDARDCASE`), it extrudes all geometry vertically at unrotated coordinates, resulting in distorted shape displays.
+The isolated `/cad-viewer-3d` page renders IFC files by converting them to a true 3D DXF format on the fly via the `parseIfcToDxf` function. Because the parser currently ignores the local coordinate placements (`IfcLocalPlacement`) and direction vectors (`Axis`, `RefDirection`) of each product (such as `IFCMEMBER` or `IFCWALLSTANDARDCASE`), it extrudes all geometry vertically at unrotated coordinates, resulting in distorted shape displays.
 
 ## Goals / Non-Goals
 
@@ -8,7 +8,7 @@ The isolated `/cad-viewer-3d` page renders IFC files by converting them to DXF f
 - Parse the coordinate axes (`Axis` and `RefDirection`) and location of `IfcAxis2Placement3D` associated with both the solid's placement and the product's local placement.
 - Derive a correct 3D orthonormal basis ($x_{axis}, y_{axis}, z_{axis}$) for each placement.
 - Apply the 3D coordinate transformations to the profile vertices to compute correct global coordinates.
-- Perform the 2D isometric projection on the transformed global vertices for rendering.
+- Write the actual 3D coordinates $(x, y, z)$ directly to the output DXF file as true 3D lines, allowing the 3D CAD viewer to render and rotate the true 3D geometry in WebGL.
 - Keep DXF file uploading, parsing, and rendering functionality fully intact.
 
 **Non-Goals:**

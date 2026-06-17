@@ -9,6 +9,6 @@ The viewer page SHALL accept `.dxf` and `.ifc`/`.icf` file uploads via drag-and-
 
 #### Scenario: Dropping an IFC file on the 3D test viewer
 - **WHEN** a user drops a valid `.ifc` or `.icf` file onto the 3D test viewer upload area at `/cad-viewer-3d`
-- **THEN** the page reads the file, parses the geometry by applying the `IfcLocalPlacement` and `IfcAxis2Placement3D` coordinate transformations (translation and rotation) for each product, and projects it to a 2D isometric DXF representation to display the correctly oriented 3D structural shape.
+- **THEN** the page reads the file, parses the geometry by applying the `IfcLocalPlacement` and `IfcAxis2Placement3D` coordinate transformations (translation and rotation) for each product, and writes it directly to a true 3D DXF representation to display the correctly oriented 3D structural shape in WebGL.
 - **AND** the main viewer page `/cad-viewer` remains unchanged and continues to use its original parsing logic.
 - **AND** parsing and rendering of `.dxf` files on both pages remains completely unaffected and functional.

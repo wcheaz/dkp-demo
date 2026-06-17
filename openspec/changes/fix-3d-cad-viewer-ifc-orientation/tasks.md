@@ -24,20 +24,21 @@
 
 - [ ] **Calculate 3D orthonormal bases and transform vertices**
   - Scope: `src/app/cad-viewer-3d/page.tsx`
-  - Change: The parser calculates the 3D orthonormal basis for both the solid and the product local placements, and maps profile vertices to global 3D space.
+  - Change: The parser calculates the 3D orthonormal basis for both the solid and the product local placements, and maps profile vertices to global 3D space (writing actual 3D coordinates to the DXF output instead of performing a 2D projection).
   - Done when:
     - `getOrthonormalBasis` helper function is defined in the module scope of `src/app/cad-viewer-3d/page.tsx` (between the `MAX_FILE_SIZE_BYTES` and `CadViewer3DPage` markers).
     - `node scripts/test-ifc-parser.js` exits 0 and prints `SUCCESS: getOrthonormalBasis math tests passed.`
     - `npx eslint src/app/cad-viewer-3d/page.tsx` exits 0.
-  - Stop and hand off if: any vector math results in division by zero or NaN values during projection.
+  - Stop and hand off if: any vector math results in division by zero or NaN values during transformation.
 
 ## 3. Final Quality Gates and Integration
 
-- [ ] **Verify integration build and lint gates**
-  - Scope: `src/app/cad-viewer-3d/page.tsx`
-  - Change: Ensure the updated 3D CAD viewer parses correctly, compiles cleanly, and satisfies type checking.
+- [ ] **Verify integration build, true 3D coordinates, and lint gates**
+  - Scope: `src/app/cad-viewer-3d/page.tsx`, `scripts/test-ifc-parser.js`
+  - Change: Add Z-coordinate validation to the integration test script, and ensure the updated 3D CAD viewer compiles cleanly, parses correctly to true 3D, and satisfies lint/type checking.
   - Done when:
-    - `node scripts/test-ifc-parser.js` exits 0 and prints `SUCCESS: Parsed IFC to DXF successfully.`
+    - `scripts/test-ifc-parser.js` parses the DXF output and validates that at least one coordinate has a non-zero Z component.
+    - `node scripts/test-ifc-parser.js` exits 0 and prints `SUCCESS: Output DXF contains true 3D coordinates.`
     - `npx eslint src/app/cad-viewer-3d/page.tsx` exits 0.
     - `npx tsc --noEmit` exits 0.
   - Stop and hand off if: TypeScript compilation yields new errors in `src/app/cad-viewer-3d/` code.
