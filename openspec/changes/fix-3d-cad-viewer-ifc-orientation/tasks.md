@@ -24,7 +24,7 @@
   - Stop and hand off if:
     - `IFCAXIS2PLACEMENT3D` entity structures in the test IFC files deviate from standard coordinate/direction mappings.
 
-- [ ] **Transform profile vertices to global 3D space**
+- [x] **Transform profile vertices to global 3D space**
   - Scope: `src/app/cad-viewer-3d/page.tsx`, `scripts/test-ifc-parser.js`
   - Change: The parser calculates the 3D orthonormal basis for both the solid and the product local placements, maps profile vertices to global 3D space (writing actual 3D coordinates to the DXF output instead of performing a 2D projection), and the test script verifies that the output DXF contains non-zero Z components.
   - Done when:

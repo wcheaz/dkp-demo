@@ -124,6 +124,27 @@ try {
     console.error("FAIL: DXF output is missing standard sections");
     process.exit(1);
   }
+
+  // Verify the output contains true 3D coordinates (non-zero Z components).
+  // DXF stores entity vertices as alternating group-code/value lines; group
+  // codes 30 and 31 are the start/end Z of a LINE entity.
+  const dxfLines = dxfText.split('\n');
+  let hasNonZeroZ = false;
+  for (let i = 0; i < dxfLines.length - 1; i++) {
+    const code = dxfLines[i].trim();
+    if (code === '30' || code === '31') {
+      const zVal = parseFloat(dxfLines[i + 1]);
+      if (Number.isFinite(zVal) && Math.abs(zVal) > 1e-6) {
+        hasNonZeroZ = true;
+        break;
+      }
+    }
+  }
+  if (!hasNonZeroZ) {
+    console.error("FAIL: Output DXF does not contain any non-zero Z coordinates");
+    process.exit(1);
+  }
+  console.log("SUCCESS: Output DXF contains true 3D coordinates.");
 } catch (e) {
   console.error("FAIL: Exception thrown during parsing", e);
   process.exit(1);

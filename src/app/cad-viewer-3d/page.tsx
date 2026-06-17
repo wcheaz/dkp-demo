@@ -64,20 +64,20 @@ function parseIfcToDxf(ifcText: string): string {
   
   let dxfEntities = "";
   
-  for (const [, solid] of extrudedSolids) {
+  for (const [solidId, solid] of extrudedSolids) {
     try {
       const sweptAreaId = solid.args[0].replace("#", "");
       const positionId = solid.args[1].replace("#", "");
       const depth = parseFloat(solid.args[3]);
-      
+
       const sweptArea = entities[sweptAreaId];
       if (!sweptArea) continue;
-      
+
       if (sweptArea.type === "IFCRECTANGLEPROFILEDEF") {
         const profilePosId = sweptArea.args[2].replace("#", "");
         const xDim = parseFloat(sweptArea.args[3]);
         const yDim = parseFloat(sweptArea.args[4]);
-        
+
         let px = 0;
         let py = 0;
         const profilePos = entities[profilePosId];
@@ -86,64 +86,59 @@ function parseIfcToDxf(ifcText: string): string {
           const loc = entities[locId];
           if (loc && loc.type === "IFCCARTESIANPOINT") {
             const coordsStr = loc.args[0].replace(/[()]/g, "");
-            const coords = coordsStr.split(",").map(c => parseFloat(c));
+            const coords = coordsStr.split(",").map((c) => parseFloat(c));
             px = coords[0] || 0;
             py = coords[1] || 0;
           }
         }
-        
-        let sx = 0;
-        let sy = 0;
-        let sz = 0;
-        const solidPos = entities[positionId];
-        if (solidPos && solidPos.type === "IFCAXIS2PLACEMENT3D") {
-          const locId = solidPos.args[0].replace("#", "");
-          const loc = entities[locId];
-          if (loc && loc.type === "IFCCARTESIANPOINT") {
-            const coordsStr = loc.args[0].replace(/[()]/g, "");
-            const coords = coordsStr.split(",").map(c => parseFloat(c));
-            sx = coords[0] || 0;
-            sy = coords[1] || 0;
-            sz = coords[2] || 0;
-          }
-        }
-        
+
+        const solidPlacement = resolvePlacement3D(entities, positionId);
+        const solidBasis = solidPlacement
+          ? getOrthonormalBasis(solidPlacement.axis, solidPlacement.refDir)
+          : getOrthonormalBasis([0, 0, 1], [1, 0, 0]);
+        const solidOrigin: Vec3 = solidPlacement
+          ? solidPlacement.location
+          : [0, 0, 0];
+
+        const productPlacementId = findProductLocalPlacementId(
+          entities,
+          solidId
+        );
+        const productPlacement = productPlacementId
+          ? resolvePlacement3D(entities, productPlacementId)
+          : null;
+        const productBasis = productPlacement
+          ? getOrthonormalBasis(productPlacement.axis, productPlacement.refDir)
+          : getOrthonormalBasis([0, 0, 1], [1, 0, 0]);
+        const productOrigin: Vec3 = productPlacement
+          ? productPlacement.location
+          : [0, 0, 0];
+
         const xMin = px - xDim / 2;
         const xMax = px + xDim / 2;
         const yMin = py - yDim / 2;
         const yMax = py + yDim / 2;
-        
-        const v1 = [xMin + sx, yMin + sy, sz];
-        const v2 = [xMax + sx, yMin + sy, sz];
-        const v3 = [xMax + sx, yMax + sy, sz];
-        const v4 = [xMin + sx, yMax + sy, sz];
-        
-        const v5 = [v1[0], v1[1], v1[2] + depth];
-        const v6 = [v2[0], v2[1], v2[2] + depth];
-        const v7 = [v3[0], v3[1], v3[2] + depth];
-        const v8 = [v4[0], v4[1], v4[2] + depth];
 
-        const COS_30 = 0.86602540378;
-        const SIN_30 = 0.5;
-        const projectPoint = (pt: number[]): [number, number] => {
-          const x = pt[0];
-          const y = pt[1];
-          const z = pt[2];
-          const xIso = (x - y) * COS_30;
-          const yIso = (x + y) * SIN_30 + z;
-          return [xIso, yIso];
-        };
+        // Profile corners in the solid's local coordinate system.
+        // Bottom face sits at z=0; top face is extruded by depth along local Z.
+        const localVerts: Vec3[] = [
+          [xMin, yMin, 0],
+          [xMax, yMin, 0],
+          [xMax, yMax, 0],
+          [xMin, yMax, 0],
+          [xMin, yMin, depth],
+          [xMax, yMin, depth],
+          [xMax, yMax, depth],
+          [xMin, yMax, depth],
+        ];
 
-        const p1 = projectPoint(v1);
-        const p2 = projectPoint(v2);
-        const p3 = projectPoint(v3);
-        const p4 = projectPoint(v4);
-        const p5 = projectPoint(v5);
-        const p6 = projectPoint(v6);
-        const p7 = projectPoint(v7);
-        const p8 = projectPoint(v8);
-        
-        const addLine = (pt1: [number, number], pt2: [number, number]) => {
+        // Map local -> solid placement frame -> product placement frame (global).
+        const verts: Vec3[] = localVerts.map((v) => {
+          const inSolidFrame = transformPoint(v, solidOrigin, solidBasis);
+          return transformPoint(inSolidFrame, productOrigin, productBasis);
+        });
+
+        const addLine = (pt1: Vec3, pt2: Vec3) => {
           return `  0
 LINE
   8
@@ -153,26 +148,28 @@ ${pt1[0]}
  20
 ${pt1[1]}
  30
-0.0
+${pt1[2]}
  11
 ${pt2[0]}
  21
 ${pt2[1]}
  31
-0.0
+${pt2[2]}
 `;
         };
-        
+
+        const [p1, p2, p3, p4, p5, p6, p7, p8] = verts;
+
         dxfEntities += addLine(p1, p2);
         dxfEntities += addLine(p2, p3);
         dxfEntities += addLine(p3, p4);
         dxfEntities += addLine(p4, p1);
-        
+
         dxfEntities += addLine(p5, p6);
         dxfEntities += addLine(p6, p7);
         dxfEntities += addLine(p7, p8);
         dxfEntities += addLine(p8, p5);
-        
+
         dxfEntities += addLine(p1, p5);
         dxfEntities += addLine(p2, p6);
         dxfEntities += addLine(p3, p7);
@@ -343,6 +340,50 @@ function resolvePlacement3D(
       : [1, 0, 0];
 
   return { location, axis, refDir };
+}
+
+function vecDot(a: Vec3, b: Vec3): number {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function vecCross(a: Vec3, b: Vec3): Vec3 {
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+}
+
+function vecNormalize(v: Vec3): Vec3 {
+  const len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  if (len < 1e-12) return [0, 0, 1];
+  return [v[0] / len, v[1] / len, v[2] / len];
+}
+
+function getOrthonormalBasis(axis: Vec3, refDir: Vec3): [Vec3, Vec3, Vec3] {
+  const z = vecNormalize(axis);
+  const dot = vecDot(refDir, z);
+  const proj: Vec3 = [
+    refDir[0] - dot * z[0],
+    refDir[1] - dot * z[1],
+    refDir[2] - dot * z[2],
+  ];
+  const x = vecNormalize(proj);
+  const y = vecCross(z, x);
+  return [x, y, z];
+}
+
+function transformPoint(
+  pt: Vec3,
+  origin: Vec3,
+  basis: [Vec3, Vec3, Vec3]
+): Vec3 {
+  const [bx, by, bz] = basis;
+  return [
+    origin[0] + bx[0] * pt[0] + by[0] * pt[1] + bz[0] * pt[2],
+    origin[1] + bx[1] * pt[0] + by[1] * pt[1] + bz[1] * pt[2],
+    origin[2] + bx[2] * pt[0] + by[2] * pt[1] + bz[2] * pt[2],
+  ];
 }
 
 export default function CadViewer3DPage() {
