@@ -1,6 +1,6 @@
 ## 1. Quality Gate Baseline
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under `.ralph/baselines/`
   - Change: Capture current state of all gates later tasks require.
   - Done when:

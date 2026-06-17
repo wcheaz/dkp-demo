@@ -1,0 +1,3 @@
+SUCCESS: Parsed IFC to DXF successfully.
+DXF line count: 13458
+EXIT=0
