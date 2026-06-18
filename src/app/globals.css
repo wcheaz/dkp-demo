@@ -81,3 +81,8 @@ html {
 .copilotKitInput textarea {
   color: black !important;
 }
+
+/* Hide tool calls/execution from rendering in the chat UI */
+[data-testid="copilot-tool-render"] {
+  display: none !important;
+}
