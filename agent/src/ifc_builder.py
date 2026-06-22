@@ -50,6 +50,10 @@ MEMBER_THICKNESS = 45.0
 MEMBER_WIDTH = 120.0
 MEMBER_PROFILE_NAME = "45x120"
 
+# Lumber material assigned to every generated IfcMember. Hardcoded for now;
+# see ``build_ifc`` for notes on making it dynamic via ``DesignParameters``.
+TIMBER_MATERIAL_NAME = "Timber - C24"
+
 WALL_THICKNESS = 200.0
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
@@ -321,6 +325,7 @@ def build_ifc(params: DesignParameters) -> bytes:
     )
 
     elements: list[Any] = []
+    members: list[Any] = []
 
     corners = wall_corners(width_mm, depth_mm)
     for i in range(4):
@@ -340,19 +345,19 @@ def build_ifc(params: DesignParameters) -> bytes:
         )
 
     for start, end in _member_segments(width_mm, depth_mm, roof_key, pitch_raw):
-        elements.append(
-            _add_member(
-                f,
-                context,
-                owner_history,
-                storey_placement,
-                start,
-                end,
-                MEMBER_PROFILE_NAME,
-                MEMBER_THICKNESS,
-                MEMBER_WIDTH,
-            )
+        member = _add_member(
+            f,
+            context,
+            owner_history,
+            storey_placement,
+            start,
+            end,
+            MEMBER_PROFILE_NAME,
+            MEMBER_THICKNESS,
+            MEMBER_WIDTH,
         )
+        elements.append(member)
+        members.append(member)
 
     f.createIfcRelContainedInSpatialStructure(
         ifcopenshell.guid.new(),
@@ -362,6 +367,26 @@ def build_ifc(params: DesignParameters) -> bytes:
         elements,
         storey,
     )
+
+    # Associate every generated timber IfcMember with a lumber material. A
+    # single project-level IfcMaterial is mapped to all members via one
+    # IfcRelAssociatesMaterial, keeping the STEP output compact while still
+    # surfacing material data to downstream tools such as MiTek Pamir.
+    #
+    # The material name is currently hardcoded as "Timber - C24". To make it
+    # dynamic, ``DesignParameters`` could expose a field such as
+    # ``lumberMaterial: str`` and this value would be read from ``params``
+    # instead of the module-level constant above.
+    if members:
+        timber_material = f.createIfcMaterial(TIMBER_MATERIAL_NAME)
+        f.createIfcRelAssociatesMaterial(
+            ifcopenshell.guid.new(),
+            owner_history,
+            "MemberMaterial",
+            None,
+            members,
+            timber_material,
+        )
 
     text = str(f.wrapped_data.to_string())
     return text.encode("utf-8")

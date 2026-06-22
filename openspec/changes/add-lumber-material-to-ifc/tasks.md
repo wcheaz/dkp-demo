@@ -12,7 +12,7 @@
 
 ## 2. Implementation
 
-- [ ] **Associate "Timber - C24" material with generated IfcMember elements**
+- [x] **Associate "Timber - C24" material with generated IfcMember elements**
   - Scope: `agent/src/ifc_builder.py`
   - Change: Creates an `IfcMaterial` representing the lumber material and links it to all generated structural members using `IfcRelAssociatesMaterial`. Adds comments explaining future dynamic configuration.
   - Done when:
