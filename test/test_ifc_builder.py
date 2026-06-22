@@ -131,6 +131,37 @@ class TestMemberGeometry:
             assert _body_item(wall).is_a("IfcExtrudedAreaSolid")
 
 
+class TestMaterialAssociation:
+    def test_timber_material_association(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        model = _parse(build_ifc(params))
+
+        materials = model.by_type("IfcMaterial")
+        assert len(materials) >= 1
+        timber = [m for m in materials if m.Name == "Timber - C24"]
+        assert len(timber) == 1
+
+        rels = model.by_type("IfcRelAssociatesMaterial")
+        assert len(rels) >= 1
+
+        members = model.by_type("IfcMember")
+        assert len(members) >= 1
+
+        # Every IfcMember must be linked to the "Timber - C24" material via an
+        # IfcRelAssociatesMaterial whose RelatingMaterial is that IfcMaterial.
+        linked_members: list = []
+        timber_relation_found = False
+        for rel in rels:
+            if rel.RelatingMaterial == timber[0]:
+                timber_relation_found = True
+                linked_members.extend(
+                    obj for obj in rel.RelatedObjects if obj.is_a("IfcMember")
+                )
+        assert timber_relation_found
+        for member in members:
+            assert member in linked_members
+
+
 class TestSharedGeometry:
     @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
     def test_member_count_matches_geometry_solver(self, roof_type):

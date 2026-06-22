@@ -24,7 +24,7 @@
   - Stop and hand off if:
     - `ifcopenshell` fails with entity creation errors, or there is ambiguity in how material associations should be structured.
 
-- [ ] **Add unit tests verifying material association in generated IFC output**
+- [x] **Add unit tests verifying material association in generated IFC output**
   - Scope: `test/test_ifc_builder.py`
   - Change: Verifies that the generated IFC model contains the `"Timber - C24"` material and that it is associated with `IfcMember` elements.
   - Done when:
