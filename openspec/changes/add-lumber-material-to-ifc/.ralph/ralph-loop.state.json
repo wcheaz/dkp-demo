@@ -1,0 +1,28 @@
+{
+  "active": true,
+  "iteration": 1,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "blockedHandoffPromise": "BLOCKED_HANDOFF",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/add-lumber-material-to-ifc/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-06-22T17:06:13.525Z",
+  "resumedAt": null,
+  "completedAt": null,
+  "stoppedAt": null,
+  "exitReason": null,
+  "pendingDirtyPaths": null,
+  "autoResolveHandoffs": {
+    "enabled": true,
+    "maxPerRun": 6,
+    "totalAttempts": 0,
+    "attempts": {},
+    "lastDecision": null
+  }
+}

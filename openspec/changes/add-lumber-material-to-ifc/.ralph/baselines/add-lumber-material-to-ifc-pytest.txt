@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/ncheaz/git/dkp-demo
+plugins: anyio-4.12.1, logfire-4.29.0
+collected 26 items
+
+test/test_ifc_builder.py ..........................                      [100%]
+
+============================== 26 passed in 0.47s ==============================
+EXIT=0

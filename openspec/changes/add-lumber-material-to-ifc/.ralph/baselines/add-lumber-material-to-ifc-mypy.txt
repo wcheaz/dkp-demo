@@ -1,0 +1,3 @@
+agent/src/dxf_builder.py:99: error: Incompatible types in assignment (expression has type "tuple[int, float, float]", variable has type "tuple[float, int, float]")  [assignment]
+Found 1 error in 1 file (checked 6 source files)
+EXIT=1
