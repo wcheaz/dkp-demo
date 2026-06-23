@@ -24,7 +24,7 @@
   - Stop and hand off if:
     - `ifcopenshell` fails with entity creation errors, or there is ambiguity in how property sets are defined or structured in IFC2x3.
 
-- [ ] **Add unit tests verifying member role ObjectType and property sets in generated IFC output**
+- [x] **Add unit tests verifying member role ObjectType and property sets in generated IFC output**
   - Scope: `test/test_ifc_builder.py`
   - Change: Adds test assertions to verify that all generated `IfcMember` elements have their `ObjectType` set to structural role strings, and that they are correctly linked to a property set defining `Grade` and `IsTreated` properties.
   - Done when:

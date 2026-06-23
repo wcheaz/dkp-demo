@@ -162,6 +162,52 @@ class TestMaterialAssociation:
             assert member in linked_members
 
 
+class TestPricingMetadata:
+    _VALID_ROLES = {"TOP_CHORD", "BOTTOM_CHORD", "WEB", "PLATE"}
+
+    def test_timber_member_pricing_metadata(self):
+        params = _params(
+            floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+
+        members = model.by_type("IfcMember")
+        assert len(members) >= 1
+
+        # Every IfcMember must carry a functional role on ObjectType.
+        for member in members:
+            assert member.ObjectType in self._VALID_ROLES
+        assert {member.ObjectType for member in members} <= self._VALID_ROLES
+
+        # A shared PricingMetadata property set defines Grade and IsTreated.
+        pricing_psets = [
+            ps
+            for ps in model.by_type("IfcPropertySet")
+            if ps.Name == "PricingMetadata"
+        ]
+        assert len(pricing_psets) == 1
+        pset = pricing_psets[0]
+        prop_values = {
+            prop.Name: prop.NominalValue.wrappedValue
+            for prop in pset.HasProperties
+        }
+        assert prop_values["Grade"] == "C24"
+        assert prop_values["IsTreated"] is True
+
+        # Every IfcMember is linked to that property set via exactly one
+        # IfcRelDefinesByProperties.
+        rels = model.by_type("IfcRelDefinesByProperties")
+        member_links = [
+            rel
+            for rel in rels
+            if rel.RelatingPropertyDefinition == pset
+        ]
+        assert len(member_links) == 1
+        related_objects = list(member_links[0].RelatedObjects)
+        for member in members:
+            assert member in related_objects
+
+
 class TestSharedGeometry:
     @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
     def test_member_count_matches_geometry_solver(self, roof_type):
