@@ -54,6 +54,20 @@ MEMBER_PROFILE_NAME = "45x120"
 # see ``build_ifc`` for notes on making it dynamic via ``DesignParameters``.
 TIMBER_MATERIAL_NAME = "Timber - C24"
 
+# Pricing metadata attached to every timber IfcMember via a shared
+# IfcPropertySet. Hardcoded for now; see ``build_ifc`` for notes on making
+# these dynamic via ``DesignParameters`` (e.g. ``woodGrade`` / ``isTreated``).
+TIMBER_GRADE = "C24"
+TIMBER_IS_TREATED = True
+PRICING_PROPERTY_SET_NAME = "PricingMetadata"
+
+# Functional roles written to the ``IfcMember.ObjectType`` attribute so BIM
+# viewers and estimating tools can classify timber members.
+ROLE_TOP_CHORD = "TOP_CHORD"
+ROLE_BOTTOM_CHORD = "BOTTOM_CHORD"
+ROLE_WEB = "WEB"
+ROLE_PLATE = "PLATE"
+
 WALL_THICKNESS = 200.0
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
@@ -158,8 +172,15 @@ def _add_member(
     profile_name: str,
     thickness: float,
     width: float,
+    object_type: str,
 ) -> Any:
-    """Add an ``IfcMember`` swept along the segment centreline."""
+    """Add an ``IfcMember`` swept along the segment centreline.
+
+    ``object_type`` records the member's functional role (e.g.
+    ``"TOP_CHORD"``, ``"BOTTOM_CHORD"``, ``"WEB"``, ``"PLATE"``) on the
+    standard ``ObjectType`` attribute so BIM viewers and estimating tools
+    such as MiTek Pamir can classify and filter timber members.
+    """
     ax, ay, az = start
     bx, by, bz = end
     dx, dy, dz = bx - ax, by - ay, bz - az
@@ -178,7 +199,7 @@ def _add_member(
         owner_history,
         profile_name,
         None,
-        None,
+        object_type,
         local_placement,
         shape,
         None,
@@ -190,12 +211,19 @@ def _member_segments(
     depth_mm: float,
     roof_key: str,
     roof_pitch: float | None,
-) -> list[tuple[tuple[float, float, float], tuple[float, float, float]]]:
-    """Return the start/end coordinates of every timber member.
+) -> list[tuple[tuple[float, float, float], tuple[float, float, float], str]]:
+    """Return the start/end coordinates and structural role of every timber member.
 
     Mirrors ``dxf_builder._draw_trusses`` exactly, sourcing the truss count,
     spacing and ridge height from the shared :mod:`geometry_solver` so DXF and
-    IFC outputs stay geometrically congruent.
+    IFC outputs stay geometrically congruent. Each segment is paired with a
+    functional role string written to the ``IfcMember.ObjectType`` attribute:
+
+    - ``"TOP_CHORD"`` — sloping rafter running from eave up to the ridge.
+    - ``"BOTTOM_CHORD"`` — horizontal ceiling joist tying the eaves together.
+    - ``"WEB"`` — vertical/inclined strut (e.g. the high-side post of a
+      mono-pitch truss) that transfers load between chords.
+    - ``"PLATE"`` — the single horizontal member of a flat-roof assembly.
     """
     count = compute_truss_count(width_mm / 1000, depth_mm / 1000)
     pitch_deg = resolve_pitch(roof_key, roof_pitch)
@@ -206,18 +234,20 @@ def _member_segments(
     z_ridge = WALL_HEIGHT + ridge_h
     w = width_mm
 
-    segments: list[tuple[tuple[float, float, float], tuple[float, float, float]]] = []
+    segments: list[
+        tuple[tuple[float, float, float], tuple[float, float, float], str]
+    ] = []
     for y in positions:
         if roof_key in ("gable", "hip"):
-            segments.append(((0.0, y, z_eave), (w / 2, y, z_ridge)))
-            segments.append(((w, y, z_eave), (w / 2, y, z_ridge)))
-            segments.append(((0.0, y, z_eave), (w, y, z_eave)))
+            segments.append(((0.0, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
+            segments.append(((w, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
+            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD))
         elif roof_key == "mono-pitch":
-            segments.append(((0.0, y, z_eave), (w, y, z_ridge)))
-            segments.append(((0.0, y, z_eave), (w, y, z_eave)))
-            segments.append(((w, y, z_eave), (w, y, z_ridge)))
+            segments.append(((0.0, y, z_eave), (w, y, z_ridge), ROLE_TOP_CHORD))
+            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD))
+            segments.append(((w, y, z_eave), (w, y, z_ridge), ROLE_WEB))
         else:  # flat roof: single ceiling joist
-            segments.append(((0.0, y, z_eave), (w, y, z_eave)))
+            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_PLATE))
     return segments
 
 
@@ -344,7 +374,7 @@ def build_ifc(params: DesignParameters) -> bytes:
             )
         )
 
-    for start, end in _member_segments(width_mm, depth_mm, roof_key, pitch_raw):
+    for start, end, role in _member_segments(width_mm, depth_mm, roof_key, pitch_raw):
         member = _add_member(
             f,
             context,
@@ -355,6 +385,7 @@ def build_ifc(params: DesignParameters) -> bytes:
             MEMBER_PROFILE_NAME,
             MEMBER_THICKNESS,
             MEMBER_WIDTH,
+            role,
         )
         elements.append(member)
         members.append(member)
@@ -386,6 +417,40 @@ def build_ifc(params: DesignParameters) -> bytes:
             None,
             members,
             timber_material,
+        )
+
+    # Attach a shared pricing metadata property set to every timber IfcMember.
+    # A single project-level IfcPropertySet defining the wood ``Grade`` ("C24")
+    # and treatment status (``IsTreated`` = True) is linked to all members via
+    # one IfcRelDefinesByProperties, surfacing pricing-relevant data to
+    # estimating tools such as MiTek Pamir while keeping the STEP output
+    # compact.
+    #
+    # The values below are currently static. To derive them dynamically,
+    # ``DesignParameters`` could expose fields such as ``woodGrade: str`` and
+    # ``isTreated: bool``; these would then be read from ``params`` here
+    # instead of the hardcoded constants.
+    if members:
+        grade_property = f.createIfcPropertySingleValue(
+            "Grade", None, f.createIfcLabel(TIMBER_GRADE), None
+        )
+        treated_property = f.createIfcPropertySingleValue(
+            "IsTreated", None, f.createIfcBoolean(TIMBER_IS_TREATED), None
+        )
+        pricing_pset = f.createIfcPropertySet(
+            ifcopenshell.guid.new(),
+            owner_history,
+            PRICING_PROPERTY_SET_NAME,
+            None,
+            [grade_property, treated_property],
+        )
+        f.createIfcRelDefinesByProperties(
+            ifcopenshell.guid.new(),
+            owner_history,
+            "MemberPricingMetadata",
+            None,
+            members,
+            pricing_pset,
         )
 
     text = str(f.wrapped_data.to_string())

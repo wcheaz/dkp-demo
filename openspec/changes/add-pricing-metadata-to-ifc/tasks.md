@@ -12,7 +12,7 @@
 
 ## 2. Implementation
 
-- [ ] **Classify timber members and associate pricing property sets in generated IFC output**
+- [x] **Classify timber members and associate pricing property sets in generated IFC output**
   - Scope: `agent/src/ifc_builder.py`
   - Change: Sets the `ObjectType` attribute of all generated `IfcMember` elements according to their structural role (`"TOP_CHORD"`, `"BOTTOM_CHORD"`, `"WEB"`, `"PLATE"`), creates an `IfcPropertySet` containing `Grade="C24"` and `IsTreated=True`, and associates it with the members using `IfcRelDefinesByProperties`.
   - Done when:
