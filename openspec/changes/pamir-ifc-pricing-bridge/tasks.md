@@ -12,7 +12,7 @@
 
 ## 2. Client-side Parser Upgrades
 
-- [ ] **Implement B-Rep parsing in parseIfcToDxf**
+- [x] **Implement B-Rep parsing in parseIfcToDxf**
   - Scope: `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/cad-viewer-3d/page.tsx)`, `[test-ifc-parser.js](file:///home/ncheaz/git/dkp-demo/scripts/test-ifc-parser.js)`
   - Change: Add parsing support for `IFCFACETEDBREP` and `IFCCLOSEDSHELL` entities in `parseIfcToDxf` and add test cases to `test-ifc-parser.js`.
   - Done when:

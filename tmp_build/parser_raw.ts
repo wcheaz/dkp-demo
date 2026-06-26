@@ -169,7 +169,81 @@ ${pt2[2]}
       console.error("Error parsing solid geometry:", err);
     }
   }
-  
+
+  // B-Rep geometry: IFCFACETEDBREP -> IFCCLOSEDSHELL -> IFCFACE ->
+  // IFCFACEOUTERBOUND/IFCFACEBOUND -> IFCPOLYLOOP -> IFCCARTESIANPOINT.
+  // Each polyloop edge becomes a DXF LINE so Pamir B-Rep meshes render as
+  // a wireframe without a client-side solid kernel.
+  const brepSolids = Object.entries(entities).filter(
+    ([, ent]) => ent.type === "IFCFACETEDBREP"
+  );
+
+  for (const [brepId, brep] of brepSolids) {
+    try {
+      if (brep.args.length < 1) continue;
+      const closedShellId = brep.args[0].replace("#", "").trim();
+      const closedShell = entities[closedShellId];
+      if (
+        !closedShell ||
+        (closedShell.type !== "IFCCLOSEDSHELL" &&
+          closedShell.type !== "IFCOPENSHELL")
+      )
+        continue;
+
+      const faceRefs = closedShell.args[0]
+        .replace(/[()]/g, "")
+        .split(",")
+        .map((s) => s.trim().replace("#", ""))
+        .filter(Boolean);
+
+      const productPlacementId = findProductLocalPlacementId(
+        entities,
+        brepId
+      );
+      const productPlacement = productPlacementId
+        ? resolvePlacement3D(entities, productPlacementId)
+        : null;
+      const productBasis = productPlacement
+        ? getOrthonormalBasis(productPlacement.axis, productPlacement.refDir)
+        : getOrthonormalBasis([0, 0, 1], [1, 0, 0]);
+      const productOrigin: Vec3 = productPlacement
+        ? productPlacement.location
+        : [0, 0, 0];
+
+      for (const faceRef of faceRefs) {
+        const face = entities[faceRef];
+        if (!face || face.type !== "IFCFACE" || face.args.length < 1)
+          continue;
+        const boundRefs = face.args[0]
+          .replace(/[()]/g, "")
+          .split(",")
+          .map((s) => s.trim().replace("#", ""))
+          .filter(Boolean);
+        for (const boundRef of boundRefs) {
+          const bound = entities[boundRef];
+          if (
+            !bound ||
+            (bound.type !== "IFCFACEOUTERBOUND" &&
+              bound.type !== "IFCFACEBOUND")
+          )
+            continue;
+          const pts = resolvePolyLoop(entities, bound.args[0]);
+          if (pts.length < 2) continue;
+          const verts = pts.map((v) =>
+            transformPoint(v, productOrigin, productBasis)
+          );
+          for (let i = 0; i < verts.length; i++) {
+            const a = verts[i];
+            const b = verts[(i + 1) % verts.length];
+            dxfEntities += formatDxfLine(a, b);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error parsing B-Rep geometry:", err);
+    }
+  }
+
   if (!dxfEntities) {
     dxfEntities = `  0
 LINE
@@ -376,5 +450,43 @@ function transformPoint(
   ];
 }
 
+function formatDxfLine(pt1: Vec3, pt2: Vec3): string {
+  return `  0
+LINE
+  8
+0
+ 10
+${pt1[0]}
+ 20
+${pt1[1]}
+ 30
+${pt1[2]}
+ 11
+${pt2[0]}
+ 21
+${pt2[1]}
+ 31
+${pt2[2]}
+`;
+}
 
-export { parseIfcToDxf, findProductLocalPlacementId, resolvePlacement3D, getOrthonormalBasis };
+function resolvePolyLoop(
+  entities: Record<string, IfcEntity>,
+  loopRef: string
+): Vec3[] {
+  const loop = entities[loopRef.replace("#", "").trim()];
+  if (!loop || loop.type !== "IFCPOLYLOOP" || loop.args.length < 1) return [];
+  const pointRefs = loop.args[0]
+    .replace(/[()]/g, "")
+    .split(",")
+    .map((s) => s.trim().replace("#", ""))
+    .filter(Boolean);
+  const pts: Vec3[] = [];
+  for (const ref of pointRefs) {
+    pts.push(parseCartesianOrDirection(entities, "#" + ref, [0, 0, 0]));
+  }
+  return pts;
+}
+
+
+export { parseIfcToDxf, findProductLocalPlacementId, resolvePlacement3D, getOrthonormalBasis, resolvePolyLoop };

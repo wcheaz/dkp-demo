@@ -27,6 +27,7 @@ const exportsList = ['parseIfcToDxf'];
 if (functionCode.includes('findProductLocalPlacementId')) exportsList.push('findProductLocalPlacementId');
 if (functionCode.includes('resolvePlacement3D')) exportsList.push('resolvePlacement3D');
 if (functionCode.includes('getOrthonormalBasis')) exportsList.push('getOrthonormalBasis');
+if (functionCode.includes('resolvePolyLoop')) exportsList.push('resolvePolyLoop');
 
 const exportStatement = `\nexport { ${exportsList.join(', ')} };`;
 
@@ -147,5 +148,69 @@ try {
   console.log("SUCCESS: Output DXF contains true 3D coordinates.");
 } catch (e) {
   console.error("FAIL: Exception thrown during parsing", e);
+  process.exit(1);
+}
+
+// Phase 4: Verify B-Rep (IFCFACETEDBREP / IFCCLOSEDSHELL) parsing
+if (parser.resolvePolyLoop) {
+  console.log("Testing resolvePolyLoop...");
+  const brepEntities = {
+    '5': { type: 'IFCPOLYLOOP', args: ['(#6,#7,#8)'] },
+    '6': { type: 'IFCCARTESIANPOINT', args: ['(0.0,0.0,0.0)'] },
+    '7': { type: 'IFCCARTESIANPOINT', args: ['(2.0,0.0,0.0)'] },
+    '8': { type: 'IFCCARTESIANPOINT', args: ['(2.0,3.0,0.0)'] }
+  };
+  const loopPts = parser.resolvePolyLoop(brepEntities, '#5');
+  if (
+    loopPts.length !== 3 ||
+    !vecEquals(loopPts[0], [0, 0, 0]) ||
+    !vecEquals(loopPts[1], [2, 0, 0]) ||
+    !vecEquals(loopPts[2], [2, 3, 0])
+  ) {
+    console.error("FAIL: resolvePolyLoop did not extract expected vertices", loopPts);
+    process.exit(1);
+  }
+  // Non-polyloop / malformed refs must return empty arrays, not throw.
+  if (parser.resolvePolyLoop(brepEntities, '#999').length !== 0) {
+    console.error("FAIL: resolvePolyLoop did not handle missing loop ref");
+    process.exit(1);
+  }
+  console.log("SUCCESS: resolvePolyLoop extracted polyloop vertices.");
+}
+
+console.log("Testing IFCFACETEDBREP parsing...");
+const brepIfc = [
+  '#1 = IFCFACETEDBREP(#2);',
+  '#2 = IFCCLOSEDSHELL((#3));',
+  '#3 = IFCFACE((#4));',
+  '#4 = IFCFACEOUTERBOUND(#5,.T.);',
+  '#5 = IFCPOLYLOOP((#6,#7,#8));',
+  '#6 = IFCCARTESIANPOINT((0.0,0.0,0.0));',
+  '#7 = IFCCARTESIANPOINT((5.0,0.0,0.0));',
+  '#8 = IFCCARTESIANPOINT((5.0,5.0,0.0));'
+].join('\n');
+try {
+  const brepDxf = parser.parseIfcToDxf(brepIfc);
+  const brepLineCount = (brepDxf.match(/^LINE$/gm) || []).length;
+  // A triangle polyloop yields 3 closed-loop edges.
+  if (brepLineCount < 3) {
+    console.error(`FAIL: B-Rep parse produced ${brepLineCount} LINE entities, expected at least 3`);
+    process.exit(1);
+  }
+  // Collect X coordinates (group code 10) and verify the triangle vertices survived.
+  const brepXCoords = new Set();
+  const brepDxfLines = brepDxf.split('\n');
+  for (let i = 0; i < brepDxfLines.length - 1; i++) {
+    if (brepDxfLines[i].trim() === '10') {
+      brepXCoords.add(parseFloat(brepDxfLines[i + 1]));
+    }
+  }
+  if (!brepXCoords.has(0) || !brepXCoords.has(5)) {
+    console.error("FAIL: B-Rep DXF output missing expected X coordinates (0 and 5)", Array.from(brepXCoords));
+    process.exit(1);
+  }
+  console.log(`SUCCESS: B-Rep parse produced ${brepLineCount} LINE entities with expected vertices.`);
+} catch (e) {
+  console.error("FAIL: Exception thrown during B-Rep parsing", e);
   process.exit(1);
 }
