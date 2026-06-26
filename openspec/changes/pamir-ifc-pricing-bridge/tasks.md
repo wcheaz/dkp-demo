@@ -94,7 +94,7 @@
     - `npm run lint` exits 0, or failures match the baseline in `[.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt)` with no new failures.
   - Stop and hand off if: Any regression failures occur.
 
-- [ ] **Create bridging summary documentation**
+- [x] **Create bridging summary documentation**
   - Scope: `[PAMIR_IFC_BRIDGING_SUMMARY.md](file:///home/ncheaz/git/dkp-demo/docs/PAMIR_IFC_BRIDGING_SUMMARY.md)`
   - Change: Write a markdown summary outlining the implemented B-Rep parsing, coordinate transform, assembly nesting, custom property sets, and calibrated pricing rules.
   - Done when:
