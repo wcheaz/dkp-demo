@@ -85,6 +85,110 @@ if (parser.resolvePlacement3D) {
     process.exit(1);
   }
   console.log("SUCCESS: resolvePlacement3D basic tests passed.");
+
+  // Recursive placement: an IFCLOCALPLACEMENT with a PlacementRelTo parent must
+  // accumulate the parent translation into the absolute frame. With identity
+  // rotations, the combined location is simply parent + child offsets.
+  const nestedEntities = {
+    '1': { type: 'IFCLOCALPLACEMENT', args: ['$', '#2'] },
+    '2': { type: 'IFCAXIS2PLACEMENT3D', args: ['#5', '#6', '#7'] },
+    '5': { type: 'IFCCARTESIANPOINT', args: ['(100.0,200.0,0.0)'] },
+    '6': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '7': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] },
+    // Member placement nested inside assembly #1 via PlacementRelTo.
+    '10': { type: 'IFCLOCALPLACEMENT', args: ['#1', '#11'] },
+    '11': { type: 'IFCAXIS2PLACEMENT3D', args: ['#15', '#16', '#17'] },
+    '15': { type: 'IFCCARTESIANPOINT', args: ['(10.0,20.0,30.0)'] },
+    '16': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '17': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] }
+  };
+  const nestedRes = parser.resolvePlacement3D(nestedEntities, '10');
+  if (
+    !nestedRes ||
+    !vecEquals(nestedRes.location, [110, 220, 30]) ||
+    !vecEquals(nestedRes.axis, [0, 0, 1]) ||
+    !vecEquals(nestedRes.refDir, [1, 0, 0])
+  ) {
+    console.error("FAIL: recursive placement did not combine translations", nestedRes);
+    process.exit(1);
+  }
+  console.log("SUCCESS: recursive placement combined nested translations.");
+
+  // Deep chain: storey -> assembly -> member. Translations must accumulate
+  // across every level down to the storey root.
+  const deepEntities = {
+    '100': { type: 'IFCLOCALPLACEMENT', args: ['$', '#101'] },
+    '101': { type: 'IFCAXIS2PLACEMENT3D', args: ['#105', '#106', '#107'] },
+    '105': { type: 'IFCCARTESIANPOINT', args: ['(0.0,0.0,0.0)'] },
+    '106': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '107': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] },
+    '110': { type: 'IFCLOCALPLACEMENT', args: ['#100', '#111'] },
+    '111': { type: 'IFCAXIS2PLACEMENT3D', args: ['#115', '#116', '#117'] },
+    '115': { type: 'IFCCARTESIANPOINT', args: ['(1000.0,0.0,0.0)'] },
+    '116': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '117': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] },
+    '120': { type: 'IFCLOCALPLACEMENT', args: ['#110', '#121'] },
+    '121': { type: 'IFCAXIS2PLACEMENT3D', args: ['#125', '#126', '#127'] },
+    '125': { type: 'IFCCARTESIANPOINT', args: ['(0.0,500.0,300.0)'] },
+    '126': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '127': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] }
+  };
+  const deepRes = parser.resolvePlacement3D(deepEntities, '120');
+  if (!deepRes || !vecEquals(deepRes.location, [1000, 500, 300])) {
+    console.error("FAIL: deep placement chain did not accumulate translations", deepRes);
+    process.exit(1);
+  }
+  console.log("SUCCESS: deep placement chain accumulated translations.");
+
+  // Rotated parent: a parent rotated 90 deg about Z must rotate the child's
+  // local offset and basis into the parent frame (child X -> parent Y).
+  const rotatedEntities = {
+    '200': { type: 'IFCLOCALPLACEMENT', args: ['$', '#201'] },
+    '201': { type: 'IFCAXIS2PLACEMENT3D', args: ['#205', '#206', '#207'] },
+    '205': { type: 'IFCCARTESIANPOINT', args: ['(0.0,0.0,0.0)'] },
+    '206': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '207': { type: 'IFCDIRECTION', args: ['(0.0,1.0,0.0)'] },
+    '210': { type: 'IFCLOCALPLACEMENT', args: ['#200', '#211'] },
+    '211': { type: 'IFCAXIS2PLACEMENT3D', args: ['#215', '#216', '#217'] },
+    '215': { type: 'IFCCARTESIANPOINT', args: ['(10.0,0.0,0.0)'] },
+    '216': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '217': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] }
+  };
+  const rotRes = parser.resolvePlacement3D(rotatedEntities, '210');
+  if (
+    !rotRes ||
+    !vecEquals(rotRes.location, [0, 10, 0]) ||
+    !vecEquals(rotRes.axis, [0, 0, 1]) ||
+    !vecEquals(rotRes.refDir, [0, 1, 0])
+  ) {
+    console.error("FAIL: rotated parent placement did not transform child frame", rotRes);
+    process.exit(1);
+  }
+  console.log("SUCCESS: rotated parent placement transformed child frame.");
+
+  // Cycle guard: a self-referential PlacementRelTo must terminate (return null
+  // or a frame) rather than blow the stack with infinite recursion.
+  const cyclicEntities = {
+    '300': { type: 'IFCLOCALPLACEMENT', args: ['#300', '#301'] },
+    '301': { type: 'IFCAXIS2PLACEMENT3D', args: ['#305', '#306', '#307'] },
+    '305': { type: 'IFCCARTESIANPOINT', args: ['(1.0,2.0,3.0)'] },
+    '306': { type: 'IFCDIRECTION', args: ['(0.0,0.0,1.0)'] },
+    '307': { type: 'IFCDIRECTION', args: ['(1.0,0.0,0.0)'] }
+  };
+  let cyclicOk = true;
+  try {
+    const cyclicRes = parser.resolvePlacement3D(cyclicEntities, '300');
+    if (cyclicRes === null) cyclicOk = true;
+    else if (!vecEquals(cyclicRes.location, [1, 2, 3])) cyclicOk = false;
+  } catch (e) {
+    cyclicOk = false;
+    console.error("FAIL: cyclic placement threw instead of terminating", e);
+  }
+  if (!cyclicOk) {
+    console.error("FAIL: cyclic placement did not terminate safely");
+    process.exit(1);
+  }
+  console.log("SUCCESS: cyclic placement terminated safely.");
 }
 
 // Phase 2: Verify math helpers if implemented

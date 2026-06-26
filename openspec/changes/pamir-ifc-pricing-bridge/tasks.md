@@ -30,7 +30,7 @@
     - `npm run lint` exits 0, or failures match the baseline in `[.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt)` with no new errors in `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/cad-viewer-3d/page.tsx)`
   - Stop and hand off if: The curve segment parsing logic does not close or fails to find referenced polyline vertices.
 
-- [ ] **Implement recursive placement transformation**
+- [x] **Implement recursive placement transformation**
   - Scope: `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/cad-viewer-3d/page.tsx)`, `[test-ifc-parser.js](file:///home/ncheaz/git/dkp-demo/scripts/test-ifc-parser.js)`
   - Change: Recursively traverse nested `IFCLOCALPLACEMENT` parent lines (`PlacementRelTo`) to compute absolute translation and rotation matrices for transforming vertices, and add test cases to `test-ifc-parser.js`.
   - Done when:

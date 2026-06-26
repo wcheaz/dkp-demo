@@ -438,20 +438,14 @@ function findProductLocalPlacementId(
   return null;
 }
 
-function resolvePlacement3D(
+// Parse a bare IFCAXIS2PLACEMENT3D entity into a LOCAL Placement3D frame
+// (location + axis + refDir), without walking any parent placement chain.
+function parseAxis2Placement3D(
   entities: Record<string, IfcEntity>,
   placementId: string
 ): Placement3D | null {
-  let entity = entities[placementId];
-  if (!entity) return null;
-
-  if (entity.type === "IFCLOCALPLACEMENT") {
-    if (entity.args.length < 2) return null;
-    entity = entities[entity.args[1].replace("#", "")];
-    if (!entity) return null;
-  }
-
-  if (entity.type !== "IFCAXIS2PLACEMENT3D") return null;
+  const entity = entities[placementId];
+  if (!entity || entity.type !== "IFCAXIS2PLACEMENT3D") return null;
 
   const location = parseCartesianOrDirection(entities, entity.args[0], [
     0,
@@ -468,6 +462,79 @@ function resolvePlacement3D(
       : [1, 0, 0];
 
   return { location, axis, refDir };
+}
+
+// Recursively resolves an IFCLOCALPLACEMENT (or bare IFCAXIS2PLACEMENT3D) into
+// an ABSOLUTE Placement3D frame by walking the PlacementRelTo parent chain and
+// accumulating nested coordinate transforms via matrix multiplication:
+//   M_global = M_parent * M_local
+// The `visited` set guards against malformed cyclic placement graphs: a repeat
+// reference short-circuits to null instead of recursing forever.
+function resolvePlacement3D(
+  entities: Record<string, IfcEntity>,
+  placementId: string,
+  visited: Set<string> = new Set()
+): Placement3D | null {
+  const id = placementId.replace("#", "").trim();
+  if (!id || visited.has(id)) return null;
+  visited.add(id);
+
+  const entity = entities[id];
+  if (!entity) return null;
+
+  // A bare IFCAXIS2PLACEMENT3D has no parent chain — return its local frame.
+  if (entity.type === "IFCAXIS2PLACEMENT3D") {
+    return parseAxis2Placement3D(entities, id);
+  }
+
+  if (entity.type !== "IFCLOCALPLACEMENT") return null;
+  if (entity.args.length < 2) return null;
+
+  // IFCLOCALPLACEMENT args: (PlacementRelTo, RelativePlacement).
+  // PlacementRelTo (args[0]) is optional and "$" when this is the storey root.
+  const parentRef =
+    entity.args[0] && entity.args[0] !== "$"
+      ? entity.args[0].replace("#", "").trim()
+      : null;
+  const relativeRef = entity.args[1].replace("#", "").trim();
+
+  const localFrame = parseAxis2Placement3D(entities, relativeRef);
+  if (!localFrame) return null;
+  if (!parentRef) return localFrame;
+
+  const parentFrame = resolvePlacement3D(entities, "#" + parentRef, visited);
+  if (!parentFrame) return localFrame;
+
+  return combinePlacements(parentFrame, localFrame);
+}
+
+// Combines a parent Placement3D frame with a child Placement3D frame to produce
+// the child's absolute frame (M_parent * M_local), expressed back as a
+// Placement3D: axis = combined Z column, refDir = combined X column, and
+// location = parent origin plus the rotated child translation.
+function combinePlacements(
+  parent: Placement3D,
+  child: Placement3D
+): Placement3D {
+  const [px, py, pz] = getOrthonormalBasis(parent.axis, parent.refDir);
+  const [cx, , cz] = getOrthonormalBasis(child.axis, child.refDir);
+
+  const rotateIntoParent = (v: Vec3): Vec3 => [
+    px[0] * v[0] + py[0] * v[1] + pz[0] * v[2],
+    px[1] * v[0] + py[1] * v[1] + pz[1] * v[2],
+    px[2] * v[0] + py[2] * v[1] + pz[2] * v[2],
+  ];
+
+  const combinedAxis = rotateIntoParent(cz);
+  const combinedRefDir = rotateIntoParent(cx);
+  const localOffset = rotateIntoParent(child.location);
+  const combinedLocation: Vec3 = [
+    parent.location[0] + localOffset[0],
+    parent.location[1] + localOffset[1],
+    parent.location[2] + localOffset[2],
+  ];
+
+  return { location: combinedLocation, axis: combinedAxis, refDir: combinedRefDir };
 }
 
 function vecDot(a: Vec3, b: Vec3): number {
