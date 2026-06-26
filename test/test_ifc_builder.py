@@ -86,9 +86,55 @@ class TestSpatialHierarchy:
             contained.extend(rel.RelatedElements)
         for wall in model.by_type("IfcWallStandardCase"):
             assert wall in contained
+        # Walls and truss assemblies are placed directly in the storey, while
+        # the individual timber members are aggregated under their assemblies
+        # (see TestElementAssemblyAggregation) rather than being contained in
+        # the spatial structure themselves.
         for member in model.by_type("IfcMember"):
-            assert member in contained
+            assert member not in contained
+        for assembly in model.by_type("IfcElementAssembly"):
+            assert assembly in contained
         assert any(rel.RelatingStructure == storey for rel in rels)
+
+
+class TestElementAssemblyAggregation:
+    def test_ifc_element_assembly_aggregation(self):
+        params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
+        model = _parse(build_ifc(params))
+
+        assemblies = model.by_type("IfcElementAssembly")
+        members = model.by_type("IfcMember")
+        assert len(assemblies) > 0
+        assert len(members) > 0
+
+        # Every assembly is a factory-fabricated truss frame.
+        for assembly in assemblies:
+            assert assembly.PredefinedType == "TRUSS"
+            assert assembly.AssemblyPlace == "FACTORY"
+
+        # Every member is aggregated under exactly one IfcElementAssembly via
+        # an IfcRelAggregates relationship, and no member is duplicated.
+        agg_rels = model.by_type("IfcRelAggregates")
+        aggregated_members: list = []
+        for rel in agg_rels:
+            relating = rel.RelatingObject
+            if relating.is_a("IfcElementAssembly"):
+                assert all(o.is_a("IfcMember") for o in rel.RelatedObjects)
+                aggregated_members.extend(rel.RelatedObjects)
+        for member in members:
+            assert member in aggregated_members
+        assert len(aggregated_members) == len(members)
+
+        # Members must not be placed directly in the spatial structure; only
+        # walls and assemblies are.
+        containment = model.by_type("IfcRelContainedInSpatialStructure")
+        spatially_contained: list = []
+        for rel in containment:
+            spatially_contained.extend(rel.RelatedElements)
+        for member in members:
+            assert member not in spatially_contained
+        for assembly in assemblies:
+            assert assembly in spatially_contained
 
 
 class TestUnits:

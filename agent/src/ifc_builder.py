@@ -68,6 +68,16 @@ ROLE_BOTTOM_CHORD = "BOTTOM_CHORD"
 ROLE_WEB = "WEB"
 ROLE_PLATE = "PLATE"
 
+# Truss assembly container metadata. The chords and webs of each generated
+# truss are wrapped in an ``IfcElementAssembly`` so that estimating tools such
+# as MiTek Pamir treat the members as a single coherent structural frame.
+# ``PredefinedType`` and ``AssemblyPlace`` are ``IfcElementAssemblyTypeEnum``
+# and ``IfcAssemblyPlaceEnum`` members that serialize as ``.TRUSS.`` and
+# ``.FACTORY.`` in the STEP output.
+ASSEMBLY_PREDEFINED_TYPE = "TRUSS"
+ASSEMBLY_PLACE = "FACTORY"
+ASSEMBLY_NAME_PREFIX = "S"
+
 WALL_THICKNESS = 200.0
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
@@ -211,8 +221,12 @@ def _member_segments(
     depth_mm: float,
     roof_key: str,
     roof_pitch: float | None,
-) -> list[tuple[tuple[float, float, float], tuple[float, float, float], str]]:
-    """Return the start/end coordinates and structural role of every timber member.
+) -> list[list[tuple[tuple[float, float, float], tuple[float, float, float], str]]]:
+    """Return the truss groups of start/end coordinates and structural roles.
+
+    The outer list contains one entry per truss position (i.e. one
+    ``IfcElementAssembly``); each inner list holds the ``(start, end, role)``
+    segments that make up that single truss frame.
 
     Mirrors ``dxf_builder._draw_trusses`` exactly, sourcing the truss count,
     spacing and ridge height from the shared :mod:`geometry_solver` so DXF and
@@ -234,10 +248,13 @@ def _member_segments(
     z_ridge = WALL_HEIGHT + ridge_h
     w = width_mm
 
-    segments: list[
-        tuple[tuple[float, float, float], tuple[float, float, float], str]
+    trusses: list[
+        list[tuple[tuple[float, float, float], tuple[float, float, float], str]]
     ] = []
     for y in positions:
+        segments: list[
+            tuple[tuple[float, float, float], tuple[float, float, float], str]
+        ] = []
         if roof_key in ("gable", "hip"):
             segments.append(((0.0, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
             segments.append(((w, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
@@ -248,7 +265,8 @@ def _member_segments(
             segments.append(((w, y, z_eave), (w, y, z_ridge), ROLE_WEB))
         else:  # flat roof: single ceiling joist
             segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_PLATE))
-    return segments
+        trusses.append(segments)
+    return trusses
 
 
 def build_ifc(params: DesignParameters) -> bytes:
@@ -374,21 +392,51 @@ def build_ifc(params: DesignParameters) -> bytes:
             )
         )
 
-    for start, end, role in _member_segments(width_mm, depth_mm, roof_key, pitch_raw):
-        member = _add_member(
-            f,
-            context,
+    for index, truss_segments in enumerate(
+        _member_segments(width_mm, depth_mm, roof_key, pitch_raw), start=1
+    ):
+        # Each truss position becomes its own ``IfcElementAssembly`` frame.
+        # The assembly placement is an identity transform relative to the
+        # storey, so the member local coordinates (which are absolute) keep
+        # resolving to the same global positions as before.
+        assembly_placement = f.createIfcLocalPlacement(storey_placement, world)
+        assembly = f.createIfcElementAssembly(
+            ifcopenshell.guid.new(),
             owner_history,
-            storey_placement,
-            start,
-            end,
-            MEMBER_PROFILE_NAME,
-            MEMBER_THICKNESS,
-            MEMBER_WIDTH,
-            role,
+            f"{ASSEMBLY_NAME_PREFIX}{index}",
+            None,
+            None,
+            assembly_placement,
+            None,
+            None,
+            ASSEMBLY_PLACE,
+            ASSEMBLY_PREDEFINED_TYPE,
         )
-        elements.append(member)
-        members.append(member)
+        assembly_members: list[Any] = []
+        for start, end, role in truss_segments:
+            member = _add_member(
+                f,
+                context,
+                owner_history,
+                assembly_placement,
+                start,
+                end,
+                MEMBER_PROFILE_NAME,
+                MEMBER_THICKNESS,
+                MEMBER_WIDTH,
+                role,
+            )
+            assembly_members.append(member)
+            members.append(member)
+        f.createIfcRelAggregates(
+            ifcopenshell.guid.new(),
+            owner_history,
+            "TrussAssembly",
+            None,
+            assembly,
+            assembly_members,
+        )
+        elements.append(assembly)
 
     f.createIfcRelContainedInSpatialStructure(
         ifcopenshell.guid.new(),

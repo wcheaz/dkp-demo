@@ -41,7 +41,7 @@
 
 ## 3. Backend spatial structure and formatting upgrades
 
-- [ ] **Aggregate members inside IfcElementAssembly**
+- [x] **Aggregate members inside IfcElementAssembly**
   - Scope: `[ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)`, `[test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py)`
   - Change: Group `IfcMember` elements inside `IfcElementAssembly` containers (typed as `.TRUSS.` and assembly place `.FACTORY.`), link them using `IfcRelAggregates`, and add unit tests to `test_ifc_builder.py`.
   - Done when:
