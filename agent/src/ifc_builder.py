@@ -87,6 +87,35 @@ ASSEMBLY_PREDEFINED_TYPE = "TRUSS"
 ASSEMBLY_PLACE = "FACTORY"
 ASSEMBLY_NAME_PREFIX = "S"
 
+# --- Custom Pamir pricing property sets -------------------------------------
+# MiTek Pamir reads three custom IfcPropertySet families to drive its
+# automated quoting module. They are attached to the generated assemblies,
+# support proxies, and timber members respectively:
+# - "Pamir Frame"   -> IfcElementAssembly (one per truss frame).
+# - "Pamir Support" -> IfcBuildingElementProxy support points.
+# - "Pamir Member"  -> IfcMember timber elements.
+PAMIR_FRAME_PSET_NAME = "Pamir Frame"
+PAMIR_SUPPORT_PSET_NAME = "Pamir Support"
+PAMIR_MEMBER_PSET_NAME = "Pamir Member"
+
+# Pamir Frame property values. ``Weight`` is computed per assembly from the
+# summed timber volume of its members; the engineering/production fields are
+# static for this demo.
+PAMIR_DESIGN_RESULT_TYPE = "Success"
+PAMIR_PRODUCTION_SET = "1"
+
+# Pamir Support property values. Every generated truss in this demo rests on
+# timber wall plates, so all bearing proxies share the same type and face.
+PAMIR_SUPPORT_TYPE = "WoodWall"
+PAMIR_SUPPORT_FACE = "Bottom"
+
+# Pamir Member property values. Members are factory-fabricated inside the
+# truss assembly (AssemblyPlace = FACTORY), so they are not fixed on site.
+PAMIR_MEMBER_SITE_FIXED = False
+
+# Nominal C24 timber density (kg/m^3) used to compute the "Pamir Frame" Weight.
+TIMBER_DENSITY_KG_PER_M3 = 420.0
+
 WALL_THICKNESS = 200.0
 
 _VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
@@ -120,6 +149,65 @@ def _extruded_solid(f: Any, profile: Any, depth: float) -> Any:
 def _body_shape(f: Any, context: Any, extruded: Any) -> Any:
     body = f.createIfcShapeRepresentation(context, "Body", "SweptSolid", [extruded])
     return f.createIfcProductDefinitionShape(None, None, [body])
+
+
+def _single_value_property(
+    f: Any, name: str, value: Any, value_type: str
+) -> Any:
+    """Create an ``IfcPropertySingleValue`` wrapping a primitive.
+
+    ``value_type`` selects the IFC simple-type wrapper: ``"Label"`` ->
+    ``IfcLabel``, ``"Boolean"`` -> ``IfcBoolean``, ``"Real"`` -> ``IfcReal``.
+    """
+    if value_type == "Label":
+        wrapped = f.createIfcLabel(value)
+    elif value_type == "Boolean":
+        wrapped = f.createIfcBoolean(value)
+    elif value_type == "Real":
+        wrapped = f.createIfcReal(value)
+    else:
+        raise ValueError(f"Unsupported property value type: {value_type!r}")
+    return f.createIfcPropertySingleValue(name, None, wrapped, None)
+
+
+def _attach_property_set(
+    f: Any,
+    owner_history: Any,
+    name: str,
+    properties: list[Any],
+    objects: list[Any],
+    rel_name: str,
+) -> Any:
+    """Create an ``IfcPropertySet`` named ``name`` and link it to ``objects``.
+
+    The new property set is associated with every element in ``objects`` via a
+    single ``IfcRelDefinesByProperties`` relationship, mirroring how the
+    existing ``PricingMetadata`` set is attached to timber members.
+    """
+    pset = f.createIfcPropertySet(
+        ifcopenshell.guid.new(), owner_history, name, None, properties
+    )
+    f.createIfcRelDefinesByProperties(
+        ifcopenshell.guid.new(), owner_history, rel_name, None, objects, pset
+    )
+    return pset
+
+
+def _segment_volume_m3(
+    start: tuple[float, float, float],
+    end: tuple[float, float, float],
+    thickness: float,
+    width: float,
+) -> float:
+    """Return the volume (m^3) of a rectangular member spanning ``start``->``end``.
+
+    All inputs are millimetres; the result is converted to cubic metres so it
+    can be multiplied by a density in kg/m^3 to obtain a mass in kilograms.
+    """
+    ax, ay, az = start
+    bx, by, bz = end
+    length_mm = math.sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
+    return (thickness * width * length_mm) / 1_000_000_000.0
 
 
 def _perpendicular(direction: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -227,6 +315,34 @@ def _add_member(
         local_placement,
         shape,
         None,
+    )
+
+
+def _add_support_proxy(
+    f: Any,
+    owner_history: Any,
+    storey_placement: Any,
+    location: tuple[float, float, float],
+    name: str,
+) -> Any:
+    """Add an ``IfcBuildingElementProxy`` support point at ``location``.
+
+    The proxy is a virtual connector marker (no body geometry) placed where a
+    truss bottom chord / plate rests on a wall plate, allowing the Pamir
+    quoting module to estimate connection hardware costs at each bearing.
+    """
+    placement3d = _axis3d(f, location, (0.0, 0.0, 1.0), (1.0, 0.0, 0.0))
+    local_placement = f.createIfcLocalPlacement(storey_placement, placement3d)
+    return f.createIfcBuildingElementProxy(
+        ifcopenshell.guid.new(),
+        owner_history,
+        name,
+        None,
+        None,
+        local_placement,
+        None,
+        None,
+        "ELEMENT",
     )
 
 
@@ -388,6 +504,7 @@ def build_ifc(params: DesignParameters) -> bytes:
 
     elements: list[Any] = []
     members: list[Any] = []
+    support_proxies: list[Any] = []
 
     corners = wall_corners(width_mm, depth_mm)
     for i in range(4):
@@ -458,6 +575,48 @@ def build_ifc(params: DesignParameters) -> bytes:
         )
         elements.append(assembly)
 
+        # Attach the custom "Pamir Frame" pricing property set to this
+        # assembly. ``Weight`` is the frame mass derived from the summed
+        # timber volume of its members (m^3 * density kg/m^3 = kg); the
+        # engineering validation and production batch fields are static.
+        assembly_volume_m3 = sum(
+            _segment_volume_m3(start, end, MEMBER_THICKNESS, MEMBER_WIDTH)
+            for start, end, _role in truss_segments
+        )
+        assembly_weight_kg = assembly_volume_m3 * TIMBER_DENSITY_KG_PER_M3
+        _attach_property_set(
+            f,
+            owner_history,
+            PAMIR_FRAME_PSET_NAME,
+            [
+                _single_value_property(f, "Weight", assembly_weight_kg, "Real"),
+                _single_value_property(
+                    f, "DesignResultType", PAMIR_DESIGN_RESULT_TYPE, "Label"
+                ),
+                _single_value_property(
+                    f, "ProductionSet", PAMIR_PRODUCTION_SET, "Label"
+                ),
+            ],
+            [assembly],
+            "PamirFrameProperties",
+        )
+
+        # Emit an IfcBuildingElementProxy at each wall bearing (the two ends
+        # of the bottom chord / plate) so Pamir can price the connection
+        # hardware at every support point.
+        for start, end, role in truss_segments:
+            if role in (ROLE_BOTTOM_CHORD, ROLE_PLATE):
+                for bearing_index, bearing in enumerate((start, end), start=1):
+                    proxy = _add_support_proxy(
+                        f,
+                        owner_history,
+                        storey_placement,
+                        bearing,
+                        f"{ASSEMBLY_NAME_PREFIX}{index}-S{bearing_index}",
+                    )
+                    support_proxies.append(proxy)
+                    elements.append(proxy)
+
     f.createIfcRelContainedInSpatialStructure(
         ifcopenshell.guid.new(),
         owner_history,
@@ -499,26 +658,53 @@ def build_ifc(params: DesignParameters) -> bytes:
     # ``isTreated: bool``; these would then be read from ``params`` here
     # instead of the hardcoded constants.
     if members:
-        grade_property = f.createIfcPropertySingleValue(
-            "Grade", None, f.createIfcLabel(TIMBER_GRADE), None
-        )
-        treated_property = f.createIfcPropertySingleValue(
-            "IsTreated", None, f.createIfcBoolean(TIMBER_IS_TREATED), None
-        )
-        pricing_pset = f.createIfcPropertySet(
-            ifcopenshell.guid.new(),
+        _attach_property_set(
+            f,
             owner_history,
             PRICING_PROPERTY_SET_NAME,
-            None,
-            [grade_property, treated_property],
-        )
-        f.createIfcRelDefinesByProperties(
-            ifcopenshell.guid.new(),
-            owner_history,
-            "MemberPricingMetadata",
-            None,
+            [
+                _single_value_property(f, "Grade", TIMBER_GRADE, "Label"),
+                _single_value_property(f, "IsTreated", TIMBER_IS_TREATED, "Boolean"),
+            ],
             members,
-            pricing_pset,
+            "MemberPricingMetadata",
+        )
+
+    # Attach the custom "Pamir Support" pricing property set to every support
+    # proxy so Pamir can classify the bearing type and face for connection
+    # hardware cost estimation.
+    if support_proxies:
+        _attach_property_set(
+            f,
+            owner_history,
+            PAMIR_SUPPORT_PSET_NAME,
+            [
+                _single_value_property(
+                    f, "SupportType", PAMIR_SUPPORT_TYPE, "Label"
+                ),
+                _single_value_property(
+                    f, "SupportFace", PAMIR_SUPPORT_FACE, "Label"
+                ),
+            ],
+            support_proxies,
+            "PamirSupportProperties",
+        )
+
+    # Attach the custom "Pamir Member" pricing property set to every timber
+    # IfcMember, recording whether the member is fixed on site. Generated
+    # members are factory-fabricated, so ``SiteFixed`` is False.
+    if members:
+        _attach_property_set(
+            f,
+            owner_history,
+            PAMIR_MEMBER_PSET_NAME,
+            [
+                _single_value_property(
+                    f, "SiteFixed", PAMIR_MEMBER_SITE_FIXED, "Boolean"
+                ),
+            ],
+            members,
+            "PamirMemberProperties",
         )
 
     text = str(f.wrapped_data.to_string())

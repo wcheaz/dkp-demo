@@ -298,6 +298,88 @@ class TestPricingMetadata:
             assert member in related_objects
 
 
+class TestSupportProxiesAndPropertySets:
+    """Verifies IfcBuildingElementProxy support points and the custom
+    Pamir Frame / Pamir Support / Pamir Member pricing property sets."""
+
+    def _build(self):
+        params = _params(
+            floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30
+        )
+        return _parse(build_ifc(params))
+
+    @staticmethod
+    def _object_psets(model, obj):
+        """Return ``{pset_name: {prop_name: value}}`` for all psets on ``obj``."""
+        out: dict = {}
+        for rel in model.by_type("IfcRelDefinesByProperties"):
+            if obj in list(rel.RelatedObjects):
+                pd = rel.RelatingPropertyDefinition
+                if pd.is_a("IfcPropertySet"):
+                    out[pd.Name] = {
+                        p.Name: p.NominalValue.wrappedValue
+                        for p in pd.HasProperties
+                    }
+        return out
+
+    def test_support_proxies_and_property_sets(self):
+        model = self._build()
+
+        # --- Support proxies at wall bearings ---------------------------
+        proxies = model.by_type("IfcBuildingElementProxy")
+        assert len(proxies) > 0
+        # Two bearings per truss (one per bottom-chord / plate end).
+        assemblies = model.by_type("IfcElementAssembly")
+        assert len(proxies) == 2 * len(assemblies)
+
+        # Every proxy carries a Pamir Support pset with type and face.
+        for proxy in proxies:
+            psets = self._object_psets(model, proxy)
+            assert "Pamir Support" in psets
+            support = psets["Pamir Support"]
+            assert support["SupportType"] == "WoodWall"
+            assert support["SupportFace"] == "Bottom"
+
+        # Proxies are contained in the building storey (they are building
+        # elements, not aggregated under an assembly).
+        contained: list = []
+        for rel in model.by_type("IfcRelContainedInSpatialStructure"):
+            contained.extend(rel.RelatedElements)
+        for proxy in proxies:
+            assert proxy in contained
+
+        # --- Pamir Frame pset on every assembly -------------------------
+        for assembly in assemblies:
+            psets = self._object_psets(model, assembly)
+            assert "Pamir Frame" in psets
+            frame = psets["Pamir Frame"]
+            assert isinstance(frame["Weight"], float)
+            assert frame["Weight"] > 0
+            assert frame["DesignResultType"] == "Success"
+            assert frame["ProductionSet"] == "1"
+
+        # --- Pamir Member pset on every timber member -------------------
+        members = model.by_type("IfcMember")
+        assert len(members) > 0
+        for member in members:
+            psets = self._object_psets(model, member)
+            assert "Pamir Member" in psets
+            assert psets["Pamir Member"]["SiteFixed"] is False
+            # The existing PricingMetadata set must still be attached.
+            assert "PricingMetadata" in psets
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_support_proxies_present_across_roof_types(self, roof_type):
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+        proxies = model.by_type("IfcBuildingElementProxy")
+        assemblies = model.by_type("IfcElementAssembly")
+        assert len(assemblies) > 0
+        assert len(proxies) == 2 * len(assemblies)
+
+
 class TestSharedGeometry:
     @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
     def test_member_count_matches_geometry_solver(self, roof_type):

@@ -61,7 +61,7 @@
     - `pytest test/test_ifc_builder.py` exits 0, or failures match the baseline in `[.ralph/baselines/pamir-ifc-pricing-bridge-test.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/pamir-ifc-pricing-bridge-test.txt)` with no new test failures in `[ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)`
   - Stop and hand off if: String formatting rules are ambiguous or fail to match Pamir import specs.
 
-- [ ] **Output support proxies and attach custom pricing property sets**
+- [x] **Output support proxies and attach custom pricing property sets**
   - Scope: `[ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)`, `[test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py)`
   - Change: Generate `IfcBuildingElementProxy` support points at wall bearings, attach custom pricing property sets (`Pamir Frame`, `Pamir Support`, `Pamir Member`), and add unit tests to `test_ifc_builder.py`.
   - Done when:
