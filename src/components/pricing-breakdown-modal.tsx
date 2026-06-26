@@ -10,10 +10,13 @@ export interface PricingBreakdown {
   totalJoints: number;
   timberVolume: number;
   totalTrusses: number;
+  supportNodes: number;
+  bracketCount: number;
   gussetPlateCost: number;
   timberCost: number;
   assemblyCost: number;
   hangerCost: number;
+  metalworkCost: number;
   subtotalCZK: number;
   roofType: string;
   roofTypeFactor: number;
@@ -46,18 +49,21 @@ export function computePricingBreakdown(
   const totalJoints = Math.round(floorArea * 1.32);
   const timberVolume = floorArea * 0.254;
   const totalTrusses = Math.round(floorArea * 0.147);
+  const supportNodes = totalTrusses * 2;
+  const bracketCount = Math.round(supportNodes * 1.6);
 
-  const gussetPlateCost = totalJoints * 40;
-  const timberCost = timberVolume * 4500;
-  const assemblyCost = (totalTrusses / 20) * 15000;
-  const hangerCost = totalTrusses * 100;
+  const gussetPlateCost = totalJoints * 50;
+  const timberCost = timberVolume * 6200;
+  const assemblyCost = (totalTrusses / 20) * 18000;
+  const hangerCost = totalTrusses * 120;
+  const metalworkCost = bracketCount * 370;
 
   const roofTypeStr = parameters.roofType?.trim() ?? "";
   const roofTypeFactor =
     ROOF_TYPE_FACTORS[roofTypeStr.toLowerCase()] ?? 1.0;
 
   const subtotalCZK =
-    gussetPlateCost + timberCost + assemblyCost + hangerCost;
+    gussetPlateCost + timberCost + assemblyCost + hangerCost + metalworkCost;
   const totalCZK = subtotalCZK * roofTypeFactor;
   const totalEUR = Math.round(totalCZK / 25);
 
@@ -66,10 +72,13 @@ export function computePricingBreakdown(
     totalJoints,
     timberVolume,
     totalTrusses,
+    supportNodes,
+    bracketCount,
     gussetPlateCost,
     timberCost,
     assemblyCost,
     hangerCost,
+    metalworkCost,
     subtotalCZK,
     roofType: roofTypeStr,
     roofTypeFactor,
@@ -151,7 +160,7 @@ export function PricingBreakdownModal({
               <tr className="border-b border-white/10">
                 <td className="py-1.5 text-gray-300 underline decoration-dotted cursor-pointer" title={t("gussetPlateCostTooltip")}>{t("gussetPlateCost")}</td>
                 <td className="py-1.5 text-white text-right">
-                  {fmt(breakdown.totalJoints)} &times; 40 ={" "}
+                  {fmt(breakdown.totalJoints)} &times; 50 ={" "}
                   {fmt(breakdown.gussetPlateCost)} CZK
                 </td>
               </tr>
@@ -164,7 +173,7 @@ export function PricingBreakdownModal({
               <tr className="border-b border-white/10">
                 <td className="py-1.5 text-gray-300 underline decoration-dotted cursor-pointer" title={t("timberCostTooltip")}>{t("timberCost")}</td>
                 <td className="py-1.5 text-white text-right">
-                  {fmt(breakdown.timberVolume)} &times; 4,500 ={" "}
+                  {fmt(breakdown.timberVolume)} &times; 6,200 ={" "}
                   {fmt(breakdown.timberCost)} CZK
                 </td>
               </tr>
@@ -177,15 +186,22 @@ export function PricingBreakdownModal({
               <tr className="border-b border-white/10">
                 <td className="py-1.5 text-gray-300 underline decoration-dotted cursor-pointer" title={t("assemblyCostTooltip")}>{t("assemblyCost")}</td>
                 <td className="py-1.5 text-white text-right">
-                  {fmt(breakdown.totalTrusses)}/20 &times; 15,000 ={" "}
+                  {fmt(breakdown.totalTrusses)}/20 &times; 18,000 ={" "}
                   {fmt(breakdown.assemblyCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/10">
                 <td className="py-1.5 text-gray-300 underline decoration-dotted cursor-pointer" title={t("hangerCostTooltip")}>{t("hangerCost")}</td>
                 <td className="py-1.5 text-white text-right">
-                  {fmt(breakdown.totalTrusses)} &times; 100 ={" "}
+                  {fmt(breakdown.totalTrusses)} &times; 120 ={" "}
                   {fmt(breakdown.hangerCost)} CZK
+                </td>
+              </tr>
+              <tr className="border-b border-white/10">
+                <td className="py-1.5 text-gray-300 underline decoration-dotted cursor-pointer" title={t("metalworkCostTooltip")}>{t("metalworkCost")}</td>
+                <td className="py-1.5 text-white text-right">
+                  {fmt(breakdown.bracketCount)} &times; 370 ={" "}
+                  {fmt(breakdown.metalworkCost)} CZK
                 </td>
               </tr>
               <tr className="border-b border-white/20 font-semibold">

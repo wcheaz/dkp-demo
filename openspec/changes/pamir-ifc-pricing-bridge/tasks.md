@@ -73,7 +73,7 @@
 
 ## 4. Pricing formula calibration
 
-- [ ] **Calibrate pricing formula coefficients across backend and frontend**
+- [x] **Calibrate pricing formula coefficients across backend and frontend**
   - Scope: `[agent.py](file:///home/ncheaz/git/dkp-demo/agent/src/agent.py)`, `[pricing-breakdown-modal.tsx](file:///home/ncheaz/git/dkp-demo/src/components/pricing-breakdown-modal.tsx)`, `[pricing-formula.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/references/pricing-formula.md)`, `[tool-execution-simulation-spec.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/references/tool-execution-simulation-spec.md)`, `[test_pricing.py](file:///home/ncheaz/git/dkp-demo/test/test_pricing.py)`
   - Change: Update `generate_quote` in the backend, the frontend `computePricingBreakdown`, and the agent skill references to use the calibrated Pamir coefficients (timber @ 6200 CZK, brackets @ 370 CZK, updated joints/assembly/hanger costs), and create unit tests in `test_pricing.py`.
   - Done when:

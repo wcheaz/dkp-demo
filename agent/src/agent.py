@@ -364,8 +364,11 @@ async def generate_quote(
     roof_type: str,
     roof_pitch: int = 30,
     building_type: str = "Family house",
-) -> str | int:
+) -> str:
     """Generate a deterministic cost estimate for a roof design based on floor plan dimensions and roof type.
+
+    Uses the calibrated Pamir coefficients (C24 timber @ 6200 CZK/m³, ABR90
+    angle brackets @ 370 CZK, and updated gusset/assembly/hanger costs).
 
     Args:
         ctx: Agent context with state
@@ -375,7 +378,7 @@ async def generate_quote(
         building_type: Building type (default "Family house")
 
     Returns:
-        The estimated price as an integer (EUR, excl. VAT).
+        A formatted price string "Estimated price: €<EUR> (excl. VAT)".
         Returns an error string if dimensions cannot be parsed.
     """
     match = re.match(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?", floor_plan_dimensions.strip(), re.IGNORECASE)
@@ -389,11 +392,14 @@ async def generate_quote(
     total_joints = round(floor_area * 1.32)
     timber_volume = floor_area * 0.254
     total_trusses = round(floor_area * 0.147)
+    support_nodes = total_trusses * 2
+    bracket_count = round(support_nodes * 1.6)
 
-    gusset_plate_cost = total_joints * 40
-    timber_cost = timber_volume * 4500
-    assembly_cost = (total_trusses / 20) * 15000
-    hanger_cost = total_trusses * 100
+    gusset_plate_cost = total_joints * 50
+    timber_cost = timber_volume * 6200
+    assembly_cost = (total_trusses / 20) * 18000
+    hanger_cost = total_trusses * 120
+    metalwork_cost = bracket_count * 370
 
     roof_type_factors = {
         "gable": 1.0,
@@ -403,8 +409,11 @@ async def generate_quote(
     }
     factor = roof_type_factors.get(roof_type.strip().lower(), 1.0)
 
-    total_czk = (gusset_plate_cost + timber_cost + assembly_cost + hanger_cost) * factor
-    return round(total_czk / 25)
+    total_czk = (
+        gusset_plate_cost + timber_cost + assembly_cost + hanger_cost + metalwork_cost
+    ) * factor
+    total_eur = round(total_czk / 25)
+    return f"Estimated price: \u20ac{total_eur} (excl. VAT)"
 
 
 @agent.tool

@@ -21,14 +21,15 @@ When the intent is `knowledge-query` with sub-type `specific`, the system SHALL 
 - **THEN** the first 3 subdirectories alphabetically SHALL be used as fallback
 
 ### Requirement: Simulate generate_quote output
-When the intent is `pricing-quote`, the system SHALL compute the price using the deterministic formula and return a formatted string.
+When the intent is `pricing-quote`, the system SHALL compute the price using the deterministic calibrated Pamir formula and return a formatted string.
 
 #### Scenario: Valid dimensions pricing
 - **WHEN** `floor_plan_dimensions` is parseable as `NxMm`
-- **THEN** compute: `floor_area = N * M`, `total_joints = round(floor_area * 1.32)`, `timber_volume = floor_area * 0.254`, `total_trusses = round(floor_area * 0.147)`
-- **THEN** compute CZK costs: `gusset_plates = joints * 40`, `timber = volume * 4500`, `assembly = (trusses/20) * 15000`, `hangers = trusses * 100`
+- **THEN** compute: `floor_area = N * M`, `total_joints = round(floor_area * 1.32)`, `timber_volume = floor_area * 0.254`, `total_trusses = round(floor_area * 0.147)`, `support_nodes = total_trusses * 2`, `bracket_count = round(support_nodes * 1.6)`
+- **THEN** compute CZK costs: `gusset_plates = joints * 50`, `timber = volume * 6200`, `assembly = (trusses/20) * 18000`, `hangers = trusses * 120`, `metalwork = bracket_count * 370`
 - **THEN** apply roof type factor: Gable=1.0, Hip=1.3, Mono-pitch=0.9, Flat=0.8
-- **THEN** return the price as an integer (EUR, excl. VAT) where `total_eur = round(total_czk / 25)`
+- **THEN** compute `total_czk = (gusset_plates + timber + assembly + hangers + metalwork) * factor` and `total_eur = round(total_czk / 25)`
+- **THEN** return the formatted string `"Estimated price: €{total_eur} (excl. VAT)"` where total_eur is an integer (EUR, excl. VAT)
 
 #### Scenario: Missing floor_plan_dimensions
 - **WHEN** `floor_plan_dimensions` was not extracted
