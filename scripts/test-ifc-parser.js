@@ -28,6 +28,7 @@ if (functionCode.includes('findProductLocalPlacementId')) exportsList.push('find
 if (functionCode.includes('resolvePlacement3D')) exportsList.push('resolvePlacement3D');
 if (functionCode.includes('getOrthonormalBasis')) exportsList.push('getOrthonormalBasis');
 if (functionCode.includes('resolvePolyLoop')) exportsList.push('resolvePolyLoop');
+if (functionCode.includes('resolveCompositeCurvePoints')) exportsList.push('resolveCompositeCurvePoints');
 
 const exportStatement = `\nexport { ${exportsList.join(', ')} };`;
 
@@ -212,5 +213,102 @@ try {
   console.log(`SUCCESS: B-Rep parse produced ${brepLineCount} LINE entities with expected vertices.`);
 } catch (e) {
   console.error("FAIL: Exception thrown during B-Rep parsing", e);
+  process.exit(1);
+}
+
+// Phase 5: Verify arbitrary closed profile (IFCARBITRARYCLOSEDPROFILEDEF +
+// IFCCOMPOSITECURVE) parsing.
+if (parser.resolveCompositeCurvePoints) {
+  console.log("Testing resolveCompositeCurvePoints...");
+  const profEntities = {
+    '20': { type: 'IFCCOMPOSITECURVE', args: ['(#21,#22,#23,#24)', '.F.'] },
+    '21': { type: 'IFCCOMPOSITECURVESEGMENT', args: ['.CONTINUOUS.', '.T.', '#30'] },
+    '22': { type: 'IFCCOMPOSITECURVESEGMENT', args: ['.CONTINUOUS.', '.T.', '#31'] },
+    '23': { type: 'IFCCOMPOSITECURVESEGMENT', args: ['.CONTINUOUS.', '.T.', '#32'] },
+    '24': { type: 'IFCCOMPOSITECURVESEGMENT', args: ['.CONTINUOUS.', '.T.', '#33'] },
+    '30': { type: 'IFCPOLYLINE', args: ['(#40,#41)'] },
+    '31': { type: 'IFCPOLYLINE', args: ['(#41,#42)'] },
+    '32': { type: 'IFCPOLYLINE', args: ['(#42,#43)'] },
+    '33': { type: 'IFCPOLYLINE', args: ['(#43,#40)'] },
+    '40': { type: 'IFCCARTESIANPOINT', args: ['(0.0,0.0)'] },
+    '41': { type: 'IFCCARTESIANPOINT', args: ['(5000.0,0.0)'] },
+    '42': { type: 'IFCCARTESIANPOINT', args: ['(5000.0,200.0)'] },
+    '43': { type: 'IFCCARTESIANPOINT', args: ['(0.0,200.0)'] }
+  };
+  const cpts = parser.resolveCompositeCurvePoints(profEntities, '#20');
+  if (cpts.length !== 4) {
+    console.error(`FAIL: resolveCompositeCurvePoints returned ${cpts.length} points, expected 4`, cpts);
+    process.exit(1);
+  }
+  if (
+    !vecEquals(cpts[0], [0, 0, 0]) ||
+    !vecEquals(cpts[1], [5000, 0, 0]) ||
+    !vecEquals(cpts[2], [5000, 200, 0]) ||
+    !vecEquals(cpts[3], [0, 200, 0])
+  ) {
+    console.error("FAIL: resolveCompositeCurvePoints did not produce expected closed loop", cpts);
+    process.exit(1);
+  }
+  // Missing / malformed refs must return empty arrays, not throw.
+  if (parser.resolveCompositeCurvePoints(profEntities, '#999').length !== 0) {
+    console.error("FAIL: resolveCompositeCurvePoints did not handle missing curve ref");
+    process.exit(1);
+  }
+  console.log("SUCCESS: resolveCompositeCurvePoints built closed polygon loop.");
+}
+
+console.log("Testing IFCARBITRARYCLOSEDPROFILEDEF parsing...");
+const profIfc = [
+  '#10 = IFCEXTRUDEDAREASOLID(#11,#12,#13,1000.0);',
+  '#11 = IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#20);',
+  '#12 = IFCAXIS2PLACEMENT3D(#14,$,$);',
+  "#13 = IFCDIRECTION((0.0,0.0,1.0));",
+  "#14 = IFCCARTESIANPOINT((0.0,0.0,0.0));",
+  "#20 = IFCCOMPOSITECURVE((#21,#22,#23,#24),.F.);",
+  "#21 = IFCCOMPOSITECURVESEGMENT(.CONTINUOUS.,.T.,#30);",
+  "#22 = IFCCOMPOSITECURVESEGMENT(.CONTINUOUS.,.T.,#31);",
+  "#23 = IFCCOMPOSITECURVESEGMENT(.CONTINUOUS.,.T.,#32);",
+  "#24 = IFCCOMPOSITECURVESEGMENT(.CONTINUOUS.,.T.,#33);",
+  "#30 = IFCPOLYLINE((#40,#41));",
+  "#31 = IFCPOLYLINE((#41,#42));",
+  "#32 = IFCPOLYLINE((#42,#43));",
+  "#33 = IFCPOLYLINE((#43,#40));",
+  "#40 = IFCCARTESIANPOINT((0.0,0.0));",
+  "#41 = IFCCARTESIANPOINT((5000.0,0.0));",
+  "#42 = IFCCARTESIANPOINT((5000.0,200.0));",
+  "#43 = IFCCARTESIANPOINT((0.0,200.0));"
+].join("\n");
+try {
+  const profDxf = parser.parseIfcToDxf(profIfc);
+  const profLineCount = (profDxf.match(/^LINE$/gm) || []).length;
+  // A 4-vertex swept loop yields 4 bottom + 4 top + 4 vertical edges = 12.
+  if (profLineCount < 12) {
+    console.error(`FAIL: Arbitrary profile parse produced ${profLineCount} LINE entities, expected at least 12`);
+    process.exit(1);
+  }
+  // Collect X (group code 10) and Z (group code 30) coordinates and verify the
+  // swept profile vertices survived the extrusion.
+  const profXCoords = new Set();
+  const profZCoords = new Set();
+  const profDxfLines = profDxf.split('\n');
+  for (let i = 0; i < profDxfLines.length - 1; i++) {
+    const code = profDxfLines[i].trim();
+    if (code === '10') {
+      profXCoords.add(parseFloat(profDxfLines[i + 1]));
+    } else if (code === '30') {
+      profZCoords.add(parseFloat(profDxfLines[i + 1]));
+    }
+  }
+  if (!profXCoords.has(0) || !profXCoords.has(5000)) {
+    console.error("FAIL: Arbitrary profile DXF output missing expected X coordinates (0 and 5000)", Array.from(profXCoords));
+    process.exit(1);
+  }
+  if (!profZCoords.has(0) || !profZCoords.has(1000)) {
+    console.error("FAIL: Arbitrary profile DXF output missing expected Z coordinates (0 and 1000)", Array.from(profZCoords));
+    process.exit(1);
+  }
+  console.log(`SUCCESS: Arbitrary profile parse produced ${profLineCount} LINE entities with swept vertices.`);
+} catch (e) {
+  console.error("FAIL: Exception thrown during arbitrary profile parsing", e);
   process.exit(1);
 }

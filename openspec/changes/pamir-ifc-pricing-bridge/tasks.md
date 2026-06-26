@@ -21,7 +21,7 @@
     - `npm run lint` exits 0, or failures match the baseline in `[.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/pamir-ifc-pricing-bridge-lint.txt)` with no new errors in `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/cad-viewer-3d/page.tsx)`
   - Stop and hand off if: B-Rep parsing algorithm is ambiguous or conflicts with existing swept solid parsing structures.
 
-- [ ] **Implement arbitrary closed profile parsing**
+- [x] **Implement arbitrary closed profile parsing**
   - Scope: `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/cad-viewer-3d/page.tsx)`, `[test-ifc-parser.js](file:///home/ncheaz/git/dkp-demo/scripts/test-ifc-parser.js)`
   - Change: Add support for `IFCARBITRARYCLOSEDPROFILEDEF` linked to `IFCCOMPOSITECURVE` segments to construct polygon loops and add test cases to `test-ifc-parser.js`.
   - Done when:

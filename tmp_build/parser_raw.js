@@ -5,6 +5,7 @@ exports.findProductLocalPlacementId = findProductLocalPlacementId;
 exports.resolvePlacement3D = resolvePlacement3D;
 exports.getOrthonormalBasis = getOrthonormalBasis;
 exports.resolvePolyLoop = resolvePolyLoop;
+exports.resolveCompositeCurvePoints = resolveCompositeCurvePoints;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 function parseIfcToDxf(ifcText) {
     const cleanText = ifcText.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -150,6 +151,51 @@ ${pt2[2]}
                 dxfEntities += addLine(p2, p6);
                 dxfEntities += addLine(p3, p7);
                 dxfEntities += addLine(p4, p8);
+            }
+            else if (sweptArea.type === "IFCARBITRARYCLOSEDPROFILEDEF") {
+                // Arbitrary closed profile: resolve the polyline path defined by an
+                // IFCCOMPOSITECURVE (or a direct IFCPOLYLINE) and sweep the 2D loop
+                // along the local extrusion axis by the solid depth.
+                if (sweptArea.args.length < 3)
+                    continue;
+                const profilePts = resolveCompositeCurvePoints(entities, sweptArea.args[2]);
+                if (profilePts.length < 2)
+                    continue;
+                const solidPlacement = resolvePlacement3D(entities, positionId);
+                const solidBasis = solidPlacement
+                    ? getOrthonormalBasis(solidPlacement.axis, solidPlacement.refDir)
+                    : getOrthonormalBasis([0, 0, 1], [1, 0, 0]);
+                const solidOrigin = solidPlacement
+                    ? solidPlacement.location
+                    : [0, 0, 0];
+                const productPlacementId = findProductLocalPlacementId(entities, solidId);
+                const productPlacement = productPlacementId
+                    ? resolvePlacement3D(entities, productPlacementId)
+                    : null;
+                const productBasis = productPlacement
+                    ? getOrthonormalBasis(productPlacement.axis, productPlacement.refDir)
+                    : getOrthonormalBasis([0, 0, 1], [1, 0, 0]);
+                const productOrigin = productPlacement
+                    ? productPlacement.location
+                    : [0, 0, 0];
+                // Bottom face sits at local Z=0; top face is swept by depth.
+                const projectLoop = (zOffset) => profilePts.map((p) => {
+                    const local = [p[0], p[1], zOffset];
+                    const inSolid = transformPoint(local, solidOrigin, solidBasis);
+                    return transformPoint(inSolid, productOrigin, productBasis);
+                });
+                const bottom = projectLoop(0);
+                const top = projectLoop(depth);
+                const n = bottom.length;
+                for (let i = 0; i < n; i++) {
+                    dxfEntities += formatDxfLine(bottom[i], bottom[(i + 1) % n]);
+                }
+                for (let i = 0; i < n; i++) {
+                    dxfEntities += formatDxfLine(top[i], top[(i + 1) % n]);
+                }
+                for (let i = 0; i < n; i++) {
+                    dxfEntities += formatDxfLine(bottom[i], top[i]);
+                }
             }
         }
         catch (err) {
@@ -414,6 +460,69 @@ function resolvePolyLoop(entities, loopRef) {
     const pts = [];
     for (const ref of pointRefs) {
         pts.push(parseCartesianOrDirection(entities, "#" + ref, [0, 0, 0]));
+    }
+    return pts;
+}
+// Resolves an IFCARBITRARYCLOSEDPROFILEDEF outer curve into an ordered list of
+// 2D polygon vertices (with z=0). Supports IFCCOMPOSITECURVE (traversing each
+// IFCCOMPOSITECURVESEGMENT's parent IFCPOLYLINE) and direct IFCPOLYLINE paths.
+// Shared segment endpoints are deduplicated and the implicit closing vertex is
+// dropped so the returned loop is a minimal closed polygon.
+function resolveCompositeCurvePoints(entities, curveRef) {
+    const curveId = curveRef.replace("#", "").trim();
+    const curve = entities[curveId];
+    if (!curve)
+        return [];
+    const pts = [];
+    const samePoint = (a, b) => Math.abs(a[0] - b[0]) < 1e-6 &&
+        Math.abs(a[1] - b[1]) < 1e-6 &&
+        Math.abs(a[2] - b[2]) < 1e-6;
+    const collectPolyline = (polylineRef) => {
+        const pl = entities[polylineRef.replace("#", "").trim()];
+        if (!pl || pl.type !== "IFCPOLYLINE" || pl.args.length < 1)
+            return [];
+        const refs = pl.args[0]
+            .replace(/[()]/g, "")
+            .split(",")
+            .map((s) => s.trim().replace("#", ""))
+            .filter(Boolean);
+        const out = [];
+        for (const r of refs) {
+            out.push(parseCartesianOrDirection(entities, "#" + r, [0, 0, 0]));
+        }
+        return out;
+    };
+    if (curve.type === "IFCPOLYLINE") {
+        pts.push(...collectPolyline("#" + curveId));
+    }
+    else if (curve.type === "IFCCOMPOSITECURVE") {
+        const segRefs = curve.args[0]
+            .replace(/[()]/g, "")
+            .split(",")
+            .map((s) => s.trim().replace("#", ""))
+            .filter(Boolean);
+        for (const segRef of segRefs) {
+            const seg = entities[segRef];
+            if (!seg)
+                continue;
+            let parentRef;
+            if (seg.type === "IFCCOMPOSITECURVESEGMENT" && seg.args.length >= 3) {
+                parentRef = seg.args[2];
+            }
+            else {
+                parentRef = "#" + segRef;
+            }
+            const segPts = collectPolyline(parentRef);
+            for (const p of segPts) {
+                if (pts.length === 0 || !samePoint(p, pts[pts.length - 1])) {
+                    pts.push(p);
+                }
+            }
+        }
+    }
+    // Drop a trailing duplicate of the first point so the loop is implicit.
+    if (pts.length >= 2 && samePoint(pts[0], pts[pts.length - 1])) {
+        pts.pop();
     }
     return pts;
 }
