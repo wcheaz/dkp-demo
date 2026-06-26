@@ -51,7 +51,7 @@
     - `pytest test/test_ifc_builder.py` exits 0, or failures match the baseline in `[.ralph/baselines/pamir-ifc-pricing-bridge-test.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/pamir-ifc-pricing-bridge-test.txt)` with no new test failures in `[ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)`
   - Stop and hand off if: Assembly structure breaks existing standard container specifications.
 
-- [ ] **Format member Name and Description metadata**
+- [x] **Format member Name and Description metadata**
   - Scope: `[ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)`, `[test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py)`
   - Change: Format member Name as `"T<index>"` and Description as `"Grade ThicknessxWidth"` (e.g. `"C24 45x120"`) in generated `IfcMember` instances, and add unit tests to `test_ifc_builder.py`.
   - Done when:

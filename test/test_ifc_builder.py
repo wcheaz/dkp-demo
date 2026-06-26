@@ -137,6 +137,50 @@ class TestElementAssemblyAggregation:
             assert assembly in spatially_contained
 
 
+class TestMemberNameAndDescriptionFormatting:
+    def test_member_name_and_description_formatting(self):
+        params = _params(
+            floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+
+        members = model.by_type("IfcMember")
+        assert len(members) > 0
+
+        # Every member Name is the serial label "T<index>" (e.g. "T1", "T21").
+        for member in members:
+            assert member.Name.startswith("T")
+            suffix = member.Name[1:]
+            assert suffix.isdigit()
+            assert int(suffix) >= 1
+
+        # Names are unique and assigned as a contiguous sequence from T1.
+        indices = sorted(int(m.Name[1:]) for m in members)
+        assert indices == list(range(1, len(members) + 1))
+
+        # Every member Description embeds grade and cross-section using the
+        # "Grade ThicknessxWidth" form required by the IFC generation spec,
+        # e.g. "C24 45x120".
+        for member in members:
+            assert member.Description == "C24 45x120"
+            assert member.Description.startswith("C24 ")
+            assert member.Description.split(" ", 1)[1] == "45x120"
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_member_name_and_description_across_roof_types(self, roof_type):
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+        members = model.by_type("IfcMember")
+        assert len(members) > 0
+        indices = sorted(int(m.Name[1:]) for m in members)
+        assert indices == list(range(1, len(members) + 1))
+        for member in members:
+            assert member.Name.startswith("T")
+            assert member.Description == "C24 45x120"
+
+
 class TestUnits:
     def test_length_unit_milli_metre(self):
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)

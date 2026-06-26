@@ -61,6 +61,15 @@ TIMBER_GRADE = "C24"
 TIMBER_IS_TREATED = True
 PRICING_PROPERTY_SET_NAME = "PricingMetadata"
 
+# Inline metadata written directly to each ``IfcMember`` so estimating tools
+# such as MiTek Pamir can read the timber grade and cross-section without
+# resolving a property set:
+# - ``Name`` is the serial member label ``"<prefix><index>"`` (e.g. ``"T21"``).
+# - ``Description`` follows the ``"Grade ThicknessxWidth"`` form required by
+#   the IFC generation spec (e.g. ``"C24 45x120"``).
+MEMBER_NAME_PREFIX = "T"
+MEMBER_DESCRIPTION = f"{TIMBER_GRADE} {MEMBER_PROFILE_NAME}"
+
 # Functional roles written to the ``IfcMember.ObjectType`` attribute so BIM
 # viewers and estimating tools can classify timber members.
 ROLE_TOP_CHORD = "TOP_CHORD"
@@ -183,13 +192,18 @@ def _add_member(
     thickness: float,
     width: float,
     object_type: str,
+    name: str,
+    description: str,
 ) -> Any:
     """Add an ``IfcMember`` swept along the segment centreline.
 
     ``object_type`` records the member's functional role (e.g.
     ``"TOP_CHORD"``, ``"BOTTOM_CHORD"``, ``"WEB"``, ``"PLATE"``) on the
     standard ``ObjectType`` attribute so BIM viewers and estimating tools
-    such as MiTek Pamir can classify and filter timber members.
+    such as MiTek Pamir can classify and filter timber members. ``name`` is
+    written to ``Name`` as the member serial label (e.g. ``"T21"``) and
+    ``description`` is written to ``Description`` using the
+    ``"Grade ThicknessxWidth"`` form (e.g. ``"C24 45x120"``).
     """
     ax, ay, az = start
     bx, by, bz = end
@@ -207,8 +221,8 @@ def _add_member(
     return f.createIfcMember(
         ifcopenshell.guid.new(),
         owner_history,
-        profile_name,
-        None,
+        name,
+        description,
         object_type,
         local_placement,
         shape,
@@ -392,6 +406,9 @@ def build_ifc(params: DesignParameters) -> bytes:
             )
         )
 
+    # Global running index used to stamp each ``IfcMember`` with a unique
+    # serial ``Name`` (e.g. "T1", "T2", ...) in document order.
+    member_index = 0
     for index, truss_segments in enumerate(
         _member_segments(width_mm, depth_mm, roof_key, pitch_raw), start=1
     ):
@@ -414,6 +431,7 @@ def build_ifc(params: DesignParameters) -> bytes:
         )
         assembly_members: list[Any] = []
         for start, end, role in truss_segments:
+            member_index += 1
             member = _add_member(
                 f,
                 context,
@@ -425,6 +443,8 @@ def build_ifc(params: DesignParameters) -> bytes:
                 MEMBER_THICKNESS,
                 MEMBER_WIDTH,
                 role,
+                f"{MEMBER_NAME_PREFIX}{member_index}",
+                MEMBER_DESCRIPTION,
             )
             assembly_members.append(member)
             members.append(member)
