@@ -71,7 +71,17 @@
     - `rg "MXF surface generation" hidden/TODO.md` exits 0
   - Stop and hand off if: the `docs/` directory is unwritable.
 
-## 7. Quality Gates Verification
+## 7. Wall Plate and Testing Suite Bug Fixes
+
+- [ ] **Generate WallPlateList under Wall elements in MXF layout XML**
+  - Scope: `[mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py)`, `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)`
+  - Change: The generated MXF layout XML contains a `<WallPlateList>` containing a `<WallPlate offset="0.05" height="0.05" width="0.1" />` element under every `<Wall>`, and the test suite asserts this structure.
+  - Done when:
+    - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_wall_plate_list` exits 0
+    - `uv run --project agent ruff check agent/src/mxf_builder.py test/test_mxf_builder.py` exits 0
+  - Stop and hand off if: the wall plate parameters (offset, width, height) are dynamically configured elsewhere and contradict standard defaults, or the XML parsing library fails to navigate the updated structure.
+
+## 8. Quality Gates Verification
 
 - [ ] **Verify final integrated quality gates**
   - Scope: no code edits; project-wide quality gates
@@ -83,3 +93,5 @@
     - `npm run lint` exits 0, or failures match the baseline in `[.ralph/baselines/mxf-layout-generation-lint.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/mxf-layout-generation-lint.txt)` with no new failures.
     - `npm run i18n:check` exits 0, or failures match the baseline in `[.ralph/baselines/mxf-layout-generation-i18n.txt](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/mxf-layout-generation-i18n.txt)` with no new failures.
   - Stop and hand off if: any regression is found in files untouched by this change.
+
+

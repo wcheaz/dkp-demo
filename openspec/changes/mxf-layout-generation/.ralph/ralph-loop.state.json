@@ -1,0 +1,34 @@
+{
+  "active": false,
+  "iteration": 7,
+  "minIterations": 1,
+  "maxIterations": 50,
+  "completionPromise": "COMPLETE",
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "blockedHandoffPromise": "BLOCKED_HANDOFF",
+  "tasksMode": true,
+  "tasksFile": "/home/ncheaz/git/dkp-demo/openspec/changes/mxf-layout-generation/tasks.md",
+  "promptFile": null,
+  "promptTemplate": null,
+  "noCommit": false,
+  "model": "",
+  "startedAt": "2026-06-30T15:22:25.309Z",
+  "resumedAt": null,
+  "completedAt": null,
+  "stoppedAt": "2026-06-30T16:05:37.768Z",
+  "exitReason": "blocked_handoff",
+  "pendingDirtyPaths": null,
+  "autoResolveHandoffs": {
+    "enabled": true,
+    "maxPerRun": 6,
+    "totalAttempts": 0,
+    "attempts": {},
+    "lastDecision": null
+  },
+  "supervisor": {
+    "currentBlockerHash": "0822a34d75c991eb",
+    "triesUsedForCurrentBlocker": 1,
+    "totalAttemptsForCurrentBlocker": 1,
+    "lastOutcome": "declined"
+  }
+}
