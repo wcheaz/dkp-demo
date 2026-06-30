@@ -4,6 +4,7 @@ import os
 from src.agent import YourState, StateDeps, agent, DesignParameters
 from src.dxf_builder import build_dxf
 from src.ifc_builder import build_ifc
+from src.mxf_builder import build_mxf
 import logfire
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -117,9 +118,49 @@ async def ifc_generate(request: Request):
     )
 
 
+async def mxf_generate(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            status_code=422,
+            content={"error": "Invalid or malformed JSON body"},
+        )
+
+    try:
+        params = DesignParameters(**body)
+    except Exception:
+        return JSONResponse(
+            status_code=422,
+            content={"error": "Invalid parameters"},
+        )
+
+    logging.info("[mxf] request received — params: %s", body)
+
+    try:
+        mxf_bytes = build_mxf(params)
+    except ValueError as exc:
+        logging.error("[mxf] build_mxf failed: %s", exc)
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc)},
+        )
+
+    logging.info("[mxf] response sent — %d bytes", len(mxf_bytes))
+
+    return Response(
+        content=mxf_bytes,
+        media_type="application/mxf",
+        headers={
+            "Content-Disposition": 'attachment; filename="design.mxf"',
+        },
+    )
+
+
 app.router.add_route("/api/health", health_check, methods=["GET"])
 app.router.add_route("/api/dxf/generate", dxf_generate, methods=["POST"])
 app.router.add_route("/api/ifc/generate", ifc_generate, methods=["POST"])
+app.router.add_route("/api/mxf/generate", mxf_generate, methods=["POST"])
 
 if __name__ == "__main__":
     import uvicorn

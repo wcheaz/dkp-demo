@@ -37,7 +37,7 @@
 
 ## 4. Backend API Integration
 
-- [ ] **Expose the REST API endpoint for MXF generation**
+- [x] **Expose the REST API endpoint for MXF generation**
   - Scope: `[main.py](file:///home/ncheaz/git/dkp-demo/agent/src/main.py)`, `[test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py)` [NEW]
   - Change: Add a `/api/mxf/generate` POST route in `main.py` returning layout MXF bytes from a `DesignParameters` payload.
   - Done when:
