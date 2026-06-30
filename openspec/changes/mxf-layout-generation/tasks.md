@@ -25,7 +25,7 @@
 
 ## 3. Backend MXF Generator
 
-- [ ] **Create the MXF builder module**
+- [x] **Create the MXF builder module**
   - Scope: `[mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py)` [NEW], `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)` [NEW]
   - Change: Implement a layout MXF builder that parses `[DesignParameters](file:///home/ncheaz/git/dkp-demo/agent/src/agent.py#L170-L180)`, converts coordinates to meters, writes a valid XML structure representing the 4 building walls with inward-pointing thickness vectors, and write unit tests for coordinate calculations.
   - Done when:
