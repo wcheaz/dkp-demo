@@ -1,0 +1,6 @@
+
+> pydantic-ai-starter@0.1.0 i18n:check
+> node scripts/check-i18n-parity.mjs
+
+i18n parity OK: 89 keys verified.
+EXIT=0

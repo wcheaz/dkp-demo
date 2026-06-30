@@ -1,6 +1,6 @@
 ## 1. Pre-flight and Baselines
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under `[.ralph/baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/)`
   - Change: Capture current state of all gates later tasks require.
   - Done when:
