@@ -73,7 +73,7 @@
 
 ## 7. Wall Plate and Testing Suite Bug Fixes
 
-- [ ] **Generate WallPlateList under Wall elements in MXF layout XML**
+- [x] **Generate WallPlateList under Wall elements in MXF layout XML**
   - Scope: `[mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py)`, `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)`
   - Change: The generated MXF layout XML contains a `<WallPlateList>` containing a `<WallPlate offset="0.05" height="0.05" width="0.1" />` element under every `<Wall>`, and the test suite asserts this structure.
   - Done when:

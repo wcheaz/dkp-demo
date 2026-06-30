@@ -182,6 +182,39 @@ class TestSkinPolygons:
             assert skin.attrib["id"] == f"{wall.attrib['id']}_S0"
 
 
+class TestWallPlateList:
+    def test_wall_plate_list_under_every_wall(self):
+        params = _params(floorPlanDimensions="10x6m", buildingType="Test")
+        root = _parse(build_mxf(params))
+
+        walls = root.findall(".//Wall")
+        assert len(walls) == 4
+        for wall in walls:
+            plate_list = wall.find("./WallPlateList")
+            assert plate_list is not None, (
+                f"Wall {wall.attrib['id']} is missing a WallPlateList"
+            )
+            plate = plate_list.find("./WallPlate")
+            assert plate is not None, (
+                f"Wall {wall.attrib['id']} WallPlateList has no WallPlate"
+            )
+            assert plate.attrib["offset"] == "0.05"
+            assert plate.attrib["height"] == "0.05"
+            assert plate.attrib["width"] == "0.1"
+
+    def test_wall_plate_list_is_sibling_of_skin_list(self):
+        params = _params(floorPlanDimensions="10x6m")
+        root = _parse(build_mxf(params))
+
+        for wall in root.findall(".//Wall"):
+            child_tags = [child.tag for child in wall]
+            assert "SkinList" in child_tags
+            assert "WallPlateList" in child_tags
+            assert child_tags.index("SkinList") < child_tags.index("WallPlateList"), (
+                f"Wall {wall.attrib['id']}: WallPlateList must follow SkinList"
+            )
+
+
 class TestInvalidDimensions:
     def test_mxf_generation_invalid_dimensions(self):
         params = _params(floorPlanDimensions=None)
