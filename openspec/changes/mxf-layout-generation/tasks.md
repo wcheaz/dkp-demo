@@ -63,7 +63,7 @@
 
 ## 6. Documentation
 
-- [ ] **Document future roadmaps**
+- [x] **Document future roadmaps**
   - Scope: `[TODO.md](file:///home/ncheaz/git/dkp-demo/hidden/TODO.md)`, `[MXF_GENERATION_SUMMARY.md](file:///home/ncheaz/git/dkp-demo/docs/MXF_GENERATION_SUMMARY.md)` [NEW]
   - Change: Append roadmap notes on roof and floor surfaces in `[TODO.md](file:///home/ncheaz/git/dkp-demo/hidden/TODO.md)` and create a summary documentation file under the `docs/` directory.
   - Done when:
