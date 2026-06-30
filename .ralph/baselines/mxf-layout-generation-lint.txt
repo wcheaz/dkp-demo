@@ -1843,8 +1843,8 @@
   16:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
 
 /home/ncheaz/git/dkp-demo/src/app/page.tsx
-  354:6   warning  React Hook useEffect has a missing dependency: 'setState'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
-  376:21  error    Error: This value cannot be modified
+   354:6   warning  React Hook useEffect has a missing dependency: 'setState'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+   376:21  error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1855,9 +1855,9 @@ Modifying a value used previously in an effect function or as an effect dependen
       |                     ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   377 |
   378 |   useEffect(() => {
-  379 |     const currentDesigns = state.designs ?? [];                                                                                                   react-hooks/immutability
-  411:6   warning  React Hook useEffect has a missing dependency: 'setState'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
-  471:7   error    Error: This value cannot be modified
+  379 |     const currentDesigns = state.designs ?? [];                                                                                                           react-hooks/immutability
+   411:6   warning  React Hook useEffect has a missing dependency: 'setState'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+   471:7   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1868,8 +1868,8 @@ Modifying a value used previously in an effect function or as an effect dependen
       |       ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   472 |
   473 |       return `Design #${nextId} created. Missing fields show as placeholders.`;
-  474 |     },                                                                                              react-hooks/immutability
-  546:7   error    Error: This value cannot be modified
+  474 |     },                                                                                                      react-hooks/immutability
+   546:7   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1880,8 +1880,8 @@ Modifying a value used previously in an effect function or as an effect dependen
       |       ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   547 |       return `Design entry #${design_id} updated successfully.`;
   548 |     },
-  549 |   });                                                                                                                             react-hooks/immutability
-  599:9   error    Error: This value cannot be modified
+  549 |   });                                                                                                                                     react-hooks/immutability
+   599:9   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1892,8 +1892,8 @@ Modifying a value used previously in an effect function or as an effect dependen
       |         ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   600 |       }
   601 |
-  602 |       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];                                                          react-hooks/immutability
-  711:9   error    Error: This value cannot be modified
+  602 |       const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];                                                                  react-hooks/immutability
+   711:9   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1904,8 +1904,8 @@ Modifying a value used previously in an effect function or as an effect dependen
       |         ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   712 |
   713 |         const remaining = Object.entries(newParams)
-  714 |           .filter(([, v]) => v != null && v !== "")                                                             react-hooks/immutability
-  817:9   error    Error: This value cannot be modified
+  714 |           .filter(([, v]) => v != null && v !== "")                                                                     react-hooks/immutability
+   817:9   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1916,8 +1916,8 @@ Modifying a value used previously in an effect function or as an effect dependen
       |         ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   818 |         console.log("[dxf] state updated — dxfContent stored for design:", design_id);
   819 |
-  820 |         // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns  react-hooks/immutability
-  916:9   error    Error: This value cannot be modified
+  820 |         // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns          react-hooks/immutability
+   916:9   error    Error: This value cannot be modified
 
 Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
 
@@ -1928,7 +1928,19 @@ Modifying a value used previously in an effect function or as an effect dependen
       |         ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
   917 |         console.log("[ifc] state updated — ifcContent stored for design:", design_id);
   918 |
-  919 |         // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns  react-hooks/immutability
+  919 |         // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns          react-hooks/immutability
+  1015:9   error    Error: This value cannot be modified
+
+Modifying a value used previously in an effect function or as an effect dependency is not allowed. Consider moving the modification before calling useEffect().
+
+/home/ncheaz/git/dkp-demo/src/app/page.tsx:1015:9
+  1013 |         const newState = { ...freshState, designs: updatedDesigns };
+  1014 |         setState(newState);
+> 1015 |         latestStateRef.current = newState;
+       |         ^^^^^^^^^^^^^^ `latestStateRef` cannot be modified
+  1016 |         console.log("[mxf] state updated — mxfContent stored for design:", design_id);
+  1017 |
+  1018 |         // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns  react-hooks/immutability
 
 /home/ncheaz/git/dkp-demo/src/components/cad-viewer-3d.tsx
   160:6   warning  React Hook useEffect has a missing dependency: 'cameraType'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
@@ -1971,7 +1983,7 @@ Modifying a value used previously in an effect function or as an effect dependen
   86:6  warning  React Hook useEffect has a missing dependency: 'dxfContent'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 /home/ncheaz/git/dkp-demo/src/components/design-component.tsx
-  136:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+  169:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -1979,17 +1991,17 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-/home/ncheaz/git/dkp-demo/src/components/design-component.tsx:136:7
-  134 |     if (lastDxfIndex !== prevLastDxfIndexRef.current) {
-  135 |       prevLastDxfIndexRef.current = lastDxfIndex;
-> 136 |       setActiveViewerIndex(lastDxfIndex);
+/home/ncheaz/git/dkp-demo/src/components/design-component.tsx:169:7
+  167 |     if (lastDxfIndex !== prevLastDxfIndexRef.current) {
+  168 |       prevLastDxfIndexRef.current = lastDxfIndex;
+> 169 |       setActiveViewerIndex(lastDxfIndex);
       |       ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  137 |     }
-  138 |   }, [lastDxfIndex]);
-  139 |  react-hooks/set-state-in-effect
-  257:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
-  264:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
-  358:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
+  170 |     }
+  171 |   }, [lastDxfIndex]);
+  172 |  react-hooks/set-state-in-effect
+  293:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
+  300:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
+  394:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @next/next/no-img-element
 
 /home/ncheaz/git/dkp-demo/tmp_build/page.js
   5:19  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
@@ -2008,6 +2020,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 /home/ncheaz/git/dkp-demo/tmp_build/parser_raw.ts
   1:7  warning  'MAX_FILE_SIZE_BYTES' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-✖ 1852 problems (44 errors, 1808 warnings)
+✖ 1853 problems (45 errors, 1808 warnings)
+
 
 EXIT=1
