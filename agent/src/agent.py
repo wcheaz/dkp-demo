@@ -189,6 +189,7 @@ class DesignEntry(BaseModel):
     price: Optional[int] = None
     dxfContent: Optional[str] = None
     ifcContent: Optional[str] = None
+    mxfContent: Optional[str] = None
 
 
 class YourState(BaseModel):

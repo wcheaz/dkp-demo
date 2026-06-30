@@ -12,7 +12,7 @@
 
 ## 2. Shared Data Contract
 
-- [ ] **Freeze MXF layout generation data contract**
+- [x] **Freeze MXF layout generation data contract**
   - Scope: `[agent.py](file:///home/ncheaz/git/dkp-demo/agent/src/agent.py)`, `[types.ts](file:///home/ncheaz/git/dkp-demo/src/lib/types.ts)`
   - Change: Add the optional `mxfContent` property to both the Python and TypeScript definitions of `DesignEntry`.
   - Done when:

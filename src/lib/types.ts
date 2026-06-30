@@ -15,6 +15,7 @@ export interface DesignEntry {
   materialStats?: MaterialStats | null;
   dxfContent?: string;
   ifcContent?: string;
+  mxfContent?: string;
 }
 
 export interface DesignParameters {
