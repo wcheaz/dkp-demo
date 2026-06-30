@@ -54,7 +54,7 @@ intent; skip others with a note: "Intent does not match — skipped."
 
 **Exception:** When design-generation produces a `"complete"` status (all 4
 desirable fields present), automatically execute pricing (4c), DXF generation
-(4g), and IFC generation — even if `pricing-quote` was not in the classified intent.
+(4g), IFC generation, and MXF generation — even if `pricing-quote` was not in the classified intent.
 
 Tool sub-actions:
 - **4a — Knowledge summary** (`knowledge-query/summary`): return the full contents of the locale-appropriate summary file (path in `references/knowledge-summary-path.md`).
@@ -63,7 +63,7 @@ Tool sub-actions:
 - **4d — Design generation** (`design-generation`): produce a design entry with all 9 fields (values or `---`) and status (`"complete"` or `"Design In Progress"`); auto-compute price when complete.
 - **4e — Design modification** (`design-modification`): update `image_name` ("design-alpha.svg" / "design-beta.svg") and/or `prompt_text`.
 - **4f — Design reset** (`design-reset`): partial (`remove_designs=false`) sets named fields to `---` and keeps the entry; full (`remove_designs=true`) removes entries entirely.
-- **4g — DXF and IFC generation** (`generate_dxf`, `generate_ifc`): auto-triggered on a `"complete"` design (4d) or modification (4e); produce the DXF and IFC download confirmations.
+- **4g — DXF, IFC, and MXF generation** (`generate_dxf`, `generate_ifc`, `generate_mxf`): auto-triggered on a `"complete"` design (4d) or modification (4e); produce the DXF, IFC, and MXF (MiTek Pamir Layout) download confirmations.
 
 ### Step 5 — Format Final Response
 
@@ -90,3 +90,4 @@ Present the formatted response. No additional commentary.
 - `references/knowledge-summary-path.md` — knowledge summary file paths
 - `references/dxf-builder-api.md` — DXF generator API rules
 - `references/ifc-builder-api.md` — IFC generator API rules
+- `references/mxf-builder-api.md` — MXF (MiTek Pamir Layout) generator API rules

@@ -48,7 +48,7 @@
 
 ## 5. Frontend Integration & Skill Updates
 
-- [ ] **Integrate frontend MXF download and update agent skill capabilities**
+- [x] **Integrate frontend MXF download and update agent skill capabilities**
   - Scope: `[page.tsx](file:///home/ncheaz/git/dkp-demo/src/app/page.tsx)`, `[design-component.tsx](file:///home/ncheaz/git/dkp-demo/src/components/design-component.tsx)`, `[en.json](file:///home/ncheaz/git/dkp-demo/src/i18n/messages/en.json)`, `[sk.json](file:///home/ncheaz/git/dkp-demo/src/i18n/messages/sk.json)`, `[SKILL.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/SKILL.md)`, `[mxf-builder-api.md](file:///home/ncheaz/git/dkp-demo/.agents/skills/run-generate-design/references/mxf-builder-api.md)` [NEW]
   - Change: Register client-side `generate_mxf` frontend tool in page layout (fetches from `/api/mxf/generate`, base64 encodes it, and stores in `mxfContent` in React state), add translation keys for MXF downloading, render `MxfDownloadButton` next to the IFC download button, and update agent skill runner guidelines and reference documentation to include MXF generation capability.
   - Done when:

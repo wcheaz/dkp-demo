@@ -36,6 +36,7 @@
     "currency": "€",
     "downloadDxf": "Download DXF",
     "downloadIfc": "Download IFC",
+    "downloadMxf": "Download MXF",
     "generatingCad": "Generating CAD drawing...",
     "clickToView": "Click to preview design",
     "back": "Back",

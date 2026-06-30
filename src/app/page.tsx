@@ -927,6 +927,105 @@ function YourMainContent() {
     },
   });
 
+  useFrontendTool({
+    name: "generate_mxf",
+    description:
+      "Generate a downloadable MXF (MiTek Pamir Layout) file for a completed design using the " + '"generate_mxf"' + " tool. " +
+      "Call after generate_design completes with all required parameters, or when the user explicitly requests an MXF/Pamir file.",
+    parameters: [
+      {
+        name: "design_id",
+        type: "number",
+        description: "The ID of the design entry to generate MXF for",
+        required: true,
+      },
+    ],
+    async handler({ design_id }) {
+      console.log("[mxf] generate_mxf invoked with design_id:", design_id);
+      const entry = latestStateRef.current.designs?.find((d) => d.id === design_id);
+
+      if (!entry) {
+        console.error("[mxf] design lookup failed — no design found with id:", design_id);
+        return `No design found with id ${design_id}.`;
+      }
+      console.log("[mxf] design lookup succeeded — found design:", entry.id, "status:", entry.status);
+
+      if (!entry.parameters) {
+        console.error("[mxf] design", design_id, "has no parameters");
+        return `Design ${design_id} has no parameters. Collect parameters first.`;
+      }
+
+      const stripPlaceholders = (params: Record<string, unknown>) => {
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(params)) {
+          if (value !== undefined && value !== null && value !== "---" && value !== "") {
+            cleaned[key] = value;
+          }
+        }
+        return cleaned;
+      };
+
+      const cleanedParams = stripPlaceholders(entry.parameters as Record<string, unknown>);
+      console.log("[mxf] sending cleaned parameters to endpoint:", JSON.stringify(cleanedParams));
+
+      const requiredFields = ["buildingType", "floorPlanDimensions", "roofType", "roofPitch"];
+      const missing = requiredFields.filter((f) => cleanedParams[f] === undefined);
+      if (missing.length > 0) {
+        console.error("[mxf] missing required parameters:", missing.join(", "));
+        return `Design ${design_id} is missing required parameters: ${missing.join(", ")}. Collect these before generating MXF.`;
+      }
+
+      try {
+        const agentUrl = process.env.AGENT_URL || "http://localhost:8000/";
+        const fetchUrl = agentUrl + "api/mxf/generate";
+        console.log("[mxf] fetching MXF from:", fetchUrl);
+        const response = await fetch(fetchUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cleanedParams),
+        });
+        console.log("[mxf] endpoint response status:", response.status, response.statusText);
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error("[mxf] non-2xx response:", response.status, errorBody);
+          return `Cannot generate MXF: server returned ${response.status} - ${errorBody}`;
+        }
+
+        const mxfBytes = await response.arrayBuffer();
+        const bytes = new Uint8Array(mxfBytes);
+        let b64 = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+          b64 += String.fromCharCode.apply(null, Array.from(chunk));
+        }
+        b64 = btoa(b64);
+        const size_kb = mxfBytes.byteLength / 1024;
+        console.log("[mxf] base64 encoding complete — size:", size_kb.toFixed(1), "KB, b64 length:", b64.length);
+
+        // Fetch absolute freshest state ref right before writing to prevent concurrent write overrides
+        const freshState = latestStateRef.current;
+        const freshDesigns = freshState.designs ?? [];
+        const updatedDesigns = freshDesigns.map((d) =>
+          Number(d.id) === Number(design_id) ? { ...d, mxfContent: b64 } : d
+        );
+        const newState = { ...freshState, designs: updatedDesigns };
+        setState(newState);
+        latestStateRef.current = newState;
+        console.log("[mxf] state updated — mxfContent stored for design:", design_id);
+
+        // Wait 500ms to ensure co-agent state synchronization completes before tool handler returns
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        return `MXF generated for design ${design_id} (${size_kb.toFixed(1)} KB, base64-encoded and stored in mxfContent).`;
+      } catch (err) {
+        console.error("[mxf] error during MXF generation:", err instanceof Error ? err.message : String(err), err);
+        return `Cannot generate MXF: ${err instanceof Error ? err.message : String(err)}`;
+      }
+    },
+  });
+
   useCopilotReadable({
     description: "The application state data including the current UI locale. The agent MUST respond in the language specified by 'locale' (sk = Slovak, en = English).",
     value: JSON.stringify({ designs, parameters: state.parameters, locale }),
