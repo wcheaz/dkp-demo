@@ -1,6 +1,6 @@
 {
-  "active": false,
-  "iteration": 7,
+  "active": true,
+  "iteration": 10,
   "minIterations": 1,
   "maxIterations": 50,
   "completionPromise": "COMPLETE",
@@ -13,10 +13,10 @@
   "noCommit": false,
   "model": "",
   "startedAt": "2026-06-30T15:22:25.309Z",
-  "resumedAt": null,
+  "resumedAt": "2026-06-30T17:18:05.823Z",
   "completedAt": null,
-  "stoppedAt": "2026-06-30T16:05:37.768Z",
-  "exitReason": "blocked_handoff",
+  "stoppedAt": null,
+  "exitReason": null,
   "pendingDirtyPaths": null,
   "autoResolveHandoffs": {
     "enabled": true,
@@ -24,11 +24,5 @@
     "totalAttempts": 0,
     "attempts": {},
     "lastDecision": null
-  },
-  "supervisor": {
-    "currentBlockerHash": "0822a34d75c991eb",
-    "triesUsedForCurrentBlocker": 1,
-    "totalAttemptsForCurrentBlocker": 1,
-    "lastOutcome": "declined"
   }
 }
