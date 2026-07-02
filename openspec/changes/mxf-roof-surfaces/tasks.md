@@ -64,15 +64,16 @@
 
 ## 3. Test Validation and Quality Gates
 
-- [ ] **Integrate roof/floor surface parameters into layout generation endpoint**
-  - Scope: `[main.py](file:///home/ncheaz/git/dkp-demo/agent/src/main.py)`, `[test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py)`
+- [x] **Integrate roof/floor surface parameters into layout generation endpoint**
+  - Scope: `[main.py](file:///home/ncheaz/git/dkp-demo/agent/src/main.py)`, `[test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py)`, `[dxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/dxf_builder.py)`
   - Change: Support `roofType`, `roofPitch`, and `overhang` parameters in the `/api/mxf/generate` POST request body and return layouts with generated surfaces.
   - Done when:
     - `[test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py)` verifies that `/api/mxf/generate` processes requests with `roofType`, `roofPitch`, and `overhang` and returns the expected surface XML nodes
     - `uv run --project agent ruff check agent/src/main.py` exits 0
-    - `uv run --project agent mypy agent/src/main.py` exits 0
+    - `uv run --project agent mypy agent/src/main.py` exits 0 after fixing the named baseline failures in `[dxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/dxf_builder.py)`
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_endpoint.py` exits 0; baseline failures are not allowed for this task
   - Stop and hand off if: endpoint fails to parse request body or serialize generated surfaces into the final response payload.
+
 
 ## 4. Quality Gates Verification
 
