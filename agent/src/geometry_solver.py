@@ -157,6 +157,41 @@ def flat_roof_surface_polygon(
     ]
 
 
+def monopitch_roof_surface_polygon(
+    width_m: float,
+    depth_m: float,
+    pitch_deg: float,
+    overhang_m: float,
+    z_base: float = MXF_ROOF_Z_BASE,
+) -> list[Point3]:
+    """Closed single-slope (mono-pitch) roof polygon (metres).
+
+    The roof plane slopes up along the width (X) axis: it rests on the low
+    wall plate at ``X = 0`` (``Z = z_base``) and rises to the ridge at
+    ``X = width_m``. Following the design formulas:
+
+      * ``Z_eaves = z_base - overhang * tan(theta)``  (low overhang edge)
+      * ``Z_ridge = z_base + width_m * tan(theta)``   (high ridge edge, run = W)
+
+    The footprint overhangs by ``overhang_m`` on the low (eaves) side and on
+    both depth (Y) ends; the high ridge edge sits at the high wall (``X =
+    width_m``) so the ridge height matches ``run_ridge = W`` and the plane
+    keeps a constant ``tan(theta)`` slope. Points trace the rectangle clockwise
+    from the low-front corner.
+    """
+    rise = math.tan(math.radians(pitch_deg))
+    z_eaves = z_base - overhang_m * rise
+    z_ridge = z_base + width_m * rise
+    o = overhang_m
+    return [
+        (-o, -o, z_eaves),
+        (width_m, -o, z_ridge),
+        (width_m, depth_m + o, z_ridge),
+        (-o, depth_m + o, z_eaves),
+        (-o, -o, z_eaves),
+    ]
+
+
 def roof_surface_polygons(
     roof_key: str,
     width_m: float,
@@ -166,14 +201,16 @@ def roof_surface_polygons(
 ) -> list[list[Point3]]:
     """Return the closed roof surface polygons (metres) for a roof type.
 
-    Dispatches to the per-type geometry routine. Only ``flat`` is supported in
-    this phase; ``gable``, ``hip`` and ``mono-pitch`` are added by later tasks.
-    ``pitch_deg`` is unused for a flat roof but kept in the signature so every
-    roof type shares one entry point.
+    Dispatches to the per-type geometry routine. ``flat`` and ``mono-pitch``
+    are supported; ``gable`` and ``hip`` are added by later tasks. ``pitch_deg``
+    is unused for a flat roof but kept in the signature so every roof type
+    shares one entry point.
     """
     key = (roof_key or "flat").strip().lower()
     if key == "flat":
         return [flat_roof_surface_polygon(width_m, depth_m, overhang_m)]
+    if key == "mono-pitch":
+        return [monopitch_roof_surface_polygon(width_m, depth_m, pitch_deg, overhang_m)]
     raise ValueError(
         f"MXF roof surface generation not implemented for roofType: {roof_key!r}"
     )

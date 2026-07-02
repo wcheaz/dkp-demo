@@ -1,3 +1,4 @@
+import math
 import sys
 import xml.etree.ElementTree as ET
 from types import SimpleNamespace
@@ -343,3 +344,89 @@ class TestFlatRoofSurfaces:
         assert sr0 is not None
         # No overhang => roof exactly covers the 10x15 footprint at Z=3.05.
         assert sr0.attrib["polygon"] == "0,0,3.05 10,0,3.05 10,15,3.05 0,15,3.05 0,0,3.05"
+
+
+class TestMonopitchRoofSurfaces:
+    """Mono-pitch (single-slope) roof surface generation (roofType="Mono-pitch")."""
+
+    _WIDTH = 10.0
+    _DEPTH = 15.0
+    _PITCH = 18.0
+    _OVERHANG_M = 0.5
+    _Z_BASE = 3.05
+
+    def _build_root(self, **overrides):
+        defaults = {
+            "floorPlanDimensions": "10x15m",
+            "roofType": "Mono-pitch",
+            "roofPitch": 18,
+            "overhang": "0.5m",
+        }
+        defaults.update(overrides)
+        return _parse(build_mxf(_params(**defaults)))
+
+    def _expected_z(self):
+        rise = math.tan(math.radians(self._PITCH))
+        z_eaves = self._Z_BASE - self._OVERHANG_M * rise
+        z_ridge = self._Z_BASE + self._WIDTH * rise
+        return z_eaves, z_ridge
+
+    def test_monopitch_roof_generation(self):
+        # One roof surface (SR0-0) emitted under Building/RoofList + root SurfaceList.
+        root = self._build_root()
+        roof_ids = [r.attrib["surfaceID"] for r in root.findall(".//RoofList/Roof")]
+        assert roof_ids == ["SR0-0"]
+        floor_ids = [f.attrib["surfaceID"] for f in root.findall(".//FloorList/Floor")]
+        assert floor_ids == ["SF0-0"]
+        surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        assert surface is not None
+        assert surface.attrib["covering"] == "undefined"
+
+    def test_monopitch_surface_polygon_xy_matches_footprint(self):
+        # Eaves side at X=-overhang, ridge side at X=W; Y overhangs both ends.
+        root = self._build_root()
+        surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        pts = [
+            (float(p.split(",")[0]), float(p.split(",")[1]))
+            for p in surface.attrib["polygon"].split(" ")
+        ]
+        assert pts[0] == pytest.approx((-0.5, -0.5))
+        assert pts[1] == pytest.approx((10.0, -0.5))
+        assert pts[2] == pytest.approx((10.0, 15.5))
+        assert pts[3] == pytest.approx((-0.5, 15.5))
+        assert pts[4] == pytest.approx((-0.5, -0.5))  # closing point
+
+    def test_monopitch_eaves_and_ridge_heights_match_spec(self):
+        # Z_eaves = 3.05 - overhang*tan(theta); Z_ridge = 3.05 + W*tan(theta).
+        root = self._build_root()
+        surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
+        z_eaves, z_ridge = self._expected_z()
+        # Low (eaves) corners share Z_eaves; high (ridge) corners share Z_ridge.
+        assert zs[0] == pytest.approx(z_eaves)
+        assert zs[3] == pytest.approx(z_eaves)
+        assert zs[4] == pytest.approx(z_eaves)  # closing point
+        assert zs[1] == pytest.approx(z_ridge)
+        assert zs[2] == pytest.approx(z_ridge)
+        # Eaves sits below the wall-plate baseline; ridge rises above it.
+        assert z_eaves < self._Z_BASE < z_ridge
+
+    def test_monopitch_slope_matches_pitch(self):
+        # rise/run between the eaves edge and ridge edge == tan(pitch).
+        root = self._build_root()
+        surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        pts = [p.split(",") for p in surface.attrib["polygon"].split(" ")]
+        run = float(pts[1][0]) - float(pts[0][0])
+        rise = float(pts[1][2]) - float(pts[0][2])
+        assert rise / run == pytest.approx(math.tan(math.radians(self._PITCH)))
+
+    def test_monopitch_zero_overhang(self):
+        # No overhang: low edge sits on the low wall (X=0, Z=z_base).
+        root = self._build_root(overhang=None)
+        surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        pts = [p.split(",") for p in surface.attrib["polygon"].split(" ")]
+        assert float(pts[0][0]) == pytest.approx(0.0)            # low edge at X=0
+        assert float(pts[0][2]) == pytest.approx(self._Z_BASE)   # eaves = plate height
+        assert float(pts[1][0]) == pytest.approx(self._WIDTH)    # ridge at X=W
+        z_ridge = self._Z_BASE + self._WIDTH * math.tan(math.radians(self._PITCH))
+        assert float(pts[1][2]) == pytest.approx(z_ridge)

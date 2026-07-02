@@ -32,7 +32,7 @@
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_flat` exits 0, or failures match the pre-flight baseline with no new failures in this task's scope
   - Stop and hand off if: XML namespace definitions cause import errors or schema validation warnings, or geometry calculation formulas in design.md result in self-intersecting polygons.
 
-- [ ] **Generate Mono-pitch roof surfaces**
+- [x] **Generate Mono-pitch roof surfaces**
   - Scope: `[mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py)`, `[geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py)`, `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)`
   - Change: Add `<RoofList>` and `<SurfaceList>` nodes into the output XML mapping Mono-pitch roof structures with exact 3D coordinates.
   - Done when:
