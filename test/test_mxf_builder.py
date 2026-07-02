@@ -266,3 +266,80 @@ class TestOverhangParsing:
         assert parse_overhang("abc") is None
         assert parse_overhang("") is None
         assert parse_overhang("twenty mm") is None
+
+
+class TestFlatRoofSurfaces:
+    """Flat roof and floor surface generation (roofType="Flat")."""
+
+    def _build_root(self, **overrides):
+        defaults = {
+            "floorPlanDimensions": "10x15m",
+            "roofType": "Flat",
+            "roofPitch": 0,
+            "overhang": "0.5m",
+        }
+        defaults.update(overrides)
+        return _parse(build_mxf(_params(**defaults)))
+
+    def test_flat_roof_generation(self):
+        # Spec scenario: 10x15m, Flat, pitch 0, overhang 0.5m.
+        root = self._build_root()
+
+        roof_ids = [r.attrib["surfaceID"] for r in root.findall(".//RoofList/Roof")]
+        floor_ids = [f.attrib["surfaceID"] for f in root.findall(".//FloorList/Floor")]
+        assert roof_ids == ["SR0-0"]
+        assert floor_ids == ["SF0-0"]
+
+        # RoofList/FloorList live inside <Building>, SurfaceList at the root.
+        assert root.find(".//Building/RoofList") is not None
+        assert root.find(".//Building/FloorList") is not None
+        assert root.find("SurfaceList") is not None
+
+    def test_flat_roof_surface_polygon_matches_spec(self):
+        root = self._build_root()
+        sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        assert sr0 is not None
+        assert sr0.attrib["covering"] == "undefined"
+        expected = (
+            "-0.5,-0.5,3.05 10.5,-0.5,3.05 10.5,15.5,3.05 "
+            "-0.5,15.5,3.05 -0.5,-0.5,3.05"
+        )
+        assert sr0.attrib["polygon"] == expected
+
+    def test_flat_floor_surface_polygon_matches_spec(self):
+        # Floor maps the building footprint at Z=0 (no overhang).
+        root = self._build_root()
+        sf0 = root.find('.//SurfaceList/Surface[@id="SF0-0"]')
+        assert sf0 is not None
+        assert sf0.attrib["verticalOffset"] == "0"
+        assert sf0.attrib["polygon"] == "0,0,0 10,0,0 10,15,0 0,15,0 0,0,0"
+
+    def test_flat_roof_is_horizontal_at_plate_baseline(self):
+        # Zero pitch: every Z coordinate on the roof surface equals 3.05.
+        root = self._build_root()
+        sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        zs = [float(p.split(",")[2]) for p in sr0.attrib["polygon"].split(" ")]
+        assert all(z == pytest.approx(3.05) for z in zs)
+
+    def test_flat_roof_overhang_expands_footprint(self):
+        # 10x15 plan + 0.5m overhang => roof spans 11 x 16.
+        root = self._build_root()
+        sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        pts = [
+            (float(p.split(",")[0]), float(p.split(",")[1]))
+            for p in sr0.attrib["polygon"].split(" ")
+        ]
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        assert min(xs) == pytest.approx(-0.5)
+        assert max(xs) == pytest.approx(10.5)
+        assert min(ys) == pytest.approx(-0.5)
+        assert max(ys) == pytest.approx(15.5)
+
+    def test_flat_roof_defaults_when_roof_type_missing(self):
+        # Without roofType the generator falls back to a flat roof.
+        root = self._build_root(roofType=None, overhang=None)
+        sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
+        assert sr0 is not None
+        # No overhang => roof exactly covers the 10x15 footprint at Z=3.05.
+        assert sr0.attrib["polygon"] == "0,0,3.05 10,0,3.05 10,15,3.05 0,15,3.05 0,0,3.05"

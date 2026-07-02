@@ -1,14 +1,15 @@
 """Layout MXF (MiTek Exchange XML) builder.
 
 Consumes a ``DesignParameters``-like object and emits a Pamir-compatible Layout
-MXF document describing the four outer building walls.
+MXF document describing the four outer building walls together with the roof
+and floor surfaces.
 
 All coordinates are written in metres and the building is placed at local origin
 ``(0, 0, 0)``. The four walls run clockwise around the floor-plan rectangle and
 each wall's thickness (Z) axis points inward so the perimeter matches the
-standard Pamir import convention. Roof/floor ``<SurfaceList>`` nodes are
-intentionally omitted in this phase (see openspec change ``mxf-layout-generation``
-design.md non-goals).
+standard Pamir import convention. Roof planes and the floor are emitted as
+``<RoofList>`` / ``<FloorList>`` (under ``<Building>``) plus a root-level
+``<SurfaceList>`` so Pamir imports the intended roof shape and pitch.
 """
 
 import xml.etree.ElementTree as ET
@@ -16,9 +17,19 @@ from typing import Any
 from xml.dom import minidom
 
 try:
-    from src.geometry_solver import parse_dimensions
+    from src.geometry_solver import (
+        floor_surface_polygon,
+        parse_dimensions,
+        parse_overhang,
+        roof_surface_polygons,
+    )
 except ImportError:  # pragma: no cover - direct module import in unit tests
-    from geometry_solver import parse_dimensions  # type: ignore[no-redef,import-not-found]
+    from geometry_solver import (  # type: ignore[no-redef,import-not-found]
+        floor_surface_polygon,
+        parse_dimensions,
+        parse_overhang,
+        roof_surface_polygons,
+    )
 
 # Wall thickness and skin height in metres. These mirror the Pamir reference
 # export (``hidden/Sample_Project/Test Project 2.mxf``) so generated layouts
@@ -41,8 +52,12 @@ XSI_NS = "http://www.w3.org/2001/XMLSchema-instance"
 
 
 def _format_point(*coords: float) -> str:
-    """Render a coordinate tuple as a comma-separated MXF point string."""
-    return ",".join(f"{c:g}" for c in coords)
+    """Render a coordinate tuple as a comma-separated MXF point string.
+
+    ``c + 0.0`` normalizes negative zero (e.g. from ``-0.0`` overhangs) to
+    ``0`` so coordinate strings stay clean for Pamir to parse.
+    """
+    return ",".join(f"{c + 0.0:g}" for c in coords)
 
 
 def _face_polygon(start: float, end: float) -> str:
@@ -69,21 +84,30 @@ def wall_specs(width_m: float, depth_m: float) -> list[dict[str, Any]]:
     building centre.
     """
     w, d = width_m, depth_m
-    definitions = [
-        {"id": "W0", "origin": (0.0, 0.0, 0.0), "run": (1.0, 0.0, 0.0),  "inward": (0.0, 1.0, 0.0)},
-        {"id": "W1", "origin": (w,   0.0, 0.0), "run": (0.0, 1.0, 0.0),  "inward": (-1.0, 0.0, 0.0)},
-        {"id": "W2", "origin": (w,   d,   0.0), "run": (-1.0, 0.0, 0.0), "inward": (0.0, -1.0, 0.0)},
-        {"id": "W3", "origin": (0.0, d,   0.0), "run": (0.0, -1.0, 0.0), "inward": (1.0, 0.0, 0.0)},
+    # (id, origin, running direction, inward thickness direction) per wall.
+    base = [
+        ("W0", (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        ("W1", (w,   0.0, 0.0), (0.0, 1.0, 0.0), (-1.0, 0.0, 0.0)),
+        ("W2", (w,   d,   0.0), (-1.0, 0.0, 0.0), (0.0, -1.0, 0.0)),
+        ("W3", (0.0, d,   0.0), (0.0, -1.0, 0.0), (1.0, 0.0, 0.0)),
     ]
-    for index, spec in enumerate(definitions):
-        ox, oy, oz = spec["origin"]
-        rx, ry, rz = spec["run"]
-        ix, iy, iz = spec["inward"]
-        spec["x_axis"] = (ox + rx, oy + ry, oz + rz)
-        spec["y_axis"] = (ox, oy, oz + 1.0)
-        spec["z_axis"] = (ox + ix, oy + iy, oz + iz)
-        # W0/W2 run along the width; W1/W3 run along the depth.
-        spec["length"] = width_m if index in (0, 2) else depth_m
+    definitions: list[dict[str, Any]] = []
+    for index, (wall_id, origin, run, inward) in enumerate(base):
+        ox, oy, oz = origin
+        rx, ry, rz = run
+        ix, iy, iz = inward
+        spec: dict[str, Any] = {
+            "id": wall_id,
+            "origin": origin,
+            "run": run,
+            "inward": inward,
+            "x_axis": (ox + rx, oy + ry, oz + rz),
+            "y_axis": (ox, oy, oz + 1.0),
+            "z_axis": (ox + ix, oy + iy, oz + iz),
+            # W0/W2 run along the width; W1/W3 run along the depth.
+            "length": width_m if index in (0, 2) else depth_m,
+        }
+        definitions.append(spec)
     return definitions
 
 
@@ -185,6 +209,64 @@ def _build_metadata(parent: ET.Element, batch_name: str) -> None:
     )
 
 
+def _format_polygon(points: list[tuple[float, float, float]]) -> str:
+    """Render a list of ``(x, y, z)`` points as an MXF ``polygon`` attribute."""
+    return " ".join(_format_point(x, y, z) for x, y, z in points)
+
+
+def _resolve_roof_key(params: Any) -> str:
+    raw = getattr(params, "roofType", None)
+    return (raw or "flat").strip().lower()
+
+
+def _resolve_overhang_m(params: Any) -> float:
+    """Resolve the overhang in metres, defaulting to 0 when unset/unparseable."""
+    mm = parse_overhang(getattr(params, "overhang", None))
+    return (mm or 0.0) / 1000.0
+
+
+def _resolve_pitch(params: Any) -> float:
+    raw = getattr(params, "roofPitch", None)
+    return float(raw) if raw is not None else 0.0
+
+
+def _build_surfaces(
+    root: ET.Element,
+    building: ET.Element,
+    floor_points: list[tuple[float, float, float]],
+    roof_polygons: list[list[tuple[float, float, float]]],
+) -> None:
+    """Emit ``<RoofList>``/``<FloorList>`` under ``<Building>`` and the root
+    ``<SurfaceList>`` mapping roof surface IDs ``SR0-*`` and floor ``SF0-0``."""
+    roof_list = ET.SubElement(building, "RoofList")
+    for index in range(len(roof_polygons)):
+        ET.SubElement(roof_list, "Roof", {"surfaceID": f"SR0-{index}"})
+
+    floor_list = ET.SubElement(building, "FloorList")
+    ET.SubElement(floor_list, "Floor", {"surfaceID": "SF0-0"})
+
+    surface_list = ET.SubElement(root, "SurfaceList")
+    for index, polygon in enumerate(roof_polygons):
+        ET.SubElement(
+            surface_list,
+            "Surface",
+            {
+                "id": f"SR0-{index}",
+                "polygon": _format_polygon(polygon),
+                "covering": "undefined",
+            },
+        )
+    ET.SubElement(
+        surface_list,
+        "Surface",
+        {
+            "id": "SF0-0",
+            "polygon": _format_polygon(floor_points),
+            "verticalOffset": "0",
+        },
+    )
+
+
 def build_mxf(params: Any) -> bytes:
     """Generate a Layout MXF document (UTF-8 bytes) from ``DesignParameters``.
 
@@ -198,6 +280,12 @@ def build_mxf(params: Any) -> bytes:
 
     specs = wall_specs(width_m, depth_m)
     batch_name = getattr(params, "buildingType", None) or "Building"
+
+    roof_key = _resolve_roof_key(params)
+    pitch_deg = _resolve_pitch(params)
+    overhang_m = _resolve_overhang_m(params)
+    roof_polygons = roof_surface_polygons(roof_key, width_m, depth_m, pitch_deg, overhang_m)
+    floor_points = floor_surface_polygon(width_m, depth_m)
 
     root = ET.Element("Mxf")
     root.set("xmlns:xsd", XSD_NS)
@@ -214,6 +302,7 @@ def build_mxf(params: Any) -> bytes:
     )
     _build_building_walls(building, specs)
     _build_walls(root, specs)
+    _build_surfaces(root, building, floor_points, roof_polygons)
     _build_metadata(root, batch_name)
 
     raw = ET.tostring(root, encoding="utf-8")

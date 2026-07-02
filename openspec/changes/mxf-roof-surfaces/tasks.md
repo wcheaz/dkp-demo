@@ -22,7 +22,7 @@
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_overhang_parsing` exits 0, or failures match the pre-flight baseline with no new failures in this task's scope
   - Stop and hand off if: modifying `geometry_solver.py` breaks existing imports/tests for DXF or IFC generation, or overhang parsing rules cannot be reconciled with design.md.
 
-- [ ] **Generate Flat roof and floor surfaces**
+- [x] **Generate Flat roof and floor surfaces**
   - Scope: `[mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py)`, `[geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py)`, `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)`
   - Change: Add `<RoofList>`, `<FloorList>`, and `<SurfaceList>` nodes into the output XML mapping Flat roof structures and building floors with exact 3D coordinates.
   - Done when:

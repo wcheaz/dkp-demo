@@ -102,3 +102,78 @@ def truss_positions(width_mm: float, depth_mm: float, count: int) -> list[float]
     span = depth_mm - 2 * inset
     step = span / (count - 1)
     return [inset + i * step for i in range(count)]
+
+
+# ---------------------------------------------------------------------------
+# MXF roof/floor surface geometry
+# ---------------------------------------------------------------------------
+# The helpers below compute 3D surface polygons for the Layout MXF (Pamir)
+# export. Unlike the millimetre-based DXF/IFC helpers above, these coordinates
+# are expressed in **metres** to match the MXF convention. The vertical
+# reference is the MXF wall height (3.0 m) plus the wall plate (0.05 m).
+
+# MXF wall geometry in metres (matches the Pamir reference export).
+MXF_WALL_HEIGHT = 3.0
+MXF_WALL_PLATE_HEIGHT = 0.05
+# Vertical position of the eaves / wall top plate baseline in metres.
+MXF_ROOF_Z_BASE = MXF_WALL_HEIGHT + MXF_WALL_PLATE_HEIGHT
+
+
+Point3 = tuple[float, float, float]
+
+
+def floor_surface_polygon(width_m: float, depth_m: float) -> list[Point3]:
+    """Closed building-footprint polygon at ``Z = 0`` (metres).
+
+    Returns five points (the first repeated to close the loop) tracing the
+    rectangle clockwise from the local origin: ``(0,0) -> (W,0) -> (W,D) ->
+    (0,D) -> (0,0)``.
+    """
+    return [
+        (0.0, 0.0, 0.0),
+        (width_m, 0.0, 0.0),
+        (width_m, depth_m, 0.0),
+        (0.0, depth_m, 0.0),
+        (0.0, 0.0, 0.0),
+    ]
+
+
+def flat_roof_surface_polygon(
+    width_m: float, depth_m: float, overhang_m: float, z_base: float = MXF_ROOF_Z_BASE
+) -> list[Point3]:
+    """Closed horizontal roof polygon at ``z_base`` (metres).
+
+    The building footprint is expanded by ``overhang_m`` on every side so the
+    roof edge (eaves) sits beyond the outer walls. A flat roof has zero pitch,
+    so every point shares the same Z (``z_base``).
+    """
+    o = overhang_m
+    return [
+        (-o, -o, z_base),
+        (width_m + o, -o, z_base),
+        (width_m + o, depth_m + o, z_base),
+        (-o, depth_m + o, z_base),
+        (-o, -o, z_base),
+    ]
+
+
+def roof_surface_polygons(
+    roof_key: str,
+    width_m: float,
+    depth_m: float,
+    pitch_deg: float,
+    overhang_m: float,
+) -> list[list[Point3]]:
+    """Return the closed roof surface polygons (metres) for a roof type.
+
+    Dispatches to the per-type geometry routine. Only ``flat`` is supported in
+    this phase; ``gable``, ``hip`` and ``mono-pitch`` are added by later tasks.
+    ``pitch_deg`` is unused for a flat roof but kept in the signature so every
+    roof type shares one entry point.
+    """
+    key = (roof_key or "flat").strip().lower()
+    if key == "flat":
+        return [flat_roof_surface_polygon(width_m, depth_m, overhang_m)]
+    raise ValueError(
+        f"MXF roof surface generation not implemented for roofType: {roof_key!r}"
+    )
