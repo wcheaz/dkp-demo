@@ -171,7 +171,7 @@ class DesignParameters(BaseModel):
     buildingType: Optional[str] = None
     floorPlanDimensions: Optional[str] = None
     roofType: Optional[str] = None
-    roofPitch: Optional[int] = None
+    roofPitch: Optional[float] = None
     atticUsage: Optional[str] = None
     eavesShape: Optional[str] = None
     wallConstruction: Optional[str] = None

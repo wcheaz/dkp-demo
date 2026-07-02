@@ -107,3 +107,21 @@ class TestFlatRoofMinimal:
         body = resp.content.decode("utf-8", errors="replace")
         assert "SECTION" in body
         assert "application/dxf" in resp.headers.get("content-type", "")
+
+
+class TestFloatRoofPitch:
+    @pytest.mark.anyio
+    async def test_float_roof_pitch_returns_200(self, client):
+        resp = await client.post(
+            "/api/dxf/generate",
+            json={
+                "floorPlanDimensions": "17.5x11.2m",
+                "roofType": "Mono-pitch",
+                "roofPitch": 2.5,
+            },
+        )
+        assert resp.status_code == 200
+        body = resp.content.decode("utf-8", errors="replace")
+        assert "SECTION" in body
+        assert "application/dxf" in resp.headers.get("content-type", "")
+
