@@ -76,7 +76,7 @@ def _draw_gable(msp, w: float, d: float, pitch_deg: float = 30.0) -> None:
     z_ridge = WALL_HEIGHT + ridge_h
     if d >= w:
         mid_x = w / 2
-        ridge_start = (mid_x, 0, z_ridge)
+        ridge_start = (mid_x, 0.0, z_ridge)
         ridge_end = (mid_x, d, z_ridge)
         msp.add_line(
             (0, 0, z_eave), (mid_x, d / 2, z_ridge),
@@ -96,7 +96,7 @@ def _draw_gable(msp, w: float, d: float, pitch_deg: float = 30.0) -> None:
         )
     else:
         mid_y = d / 2
-        ridge_start = (0, mid_y, z_ridge)
+        ridge_start = (0.0, mid_y, z_ridge)
         ridge_end = (w, mid_y, z_ridge)
         msp.add_line(
             (0, 0, z_eave), (w / 2, mid_y, z_ridge),
