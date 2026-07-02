@@ -1,0 +1,7 @@
+agent/src/mxf_builder.py:82: error: Unsupported left operand type for + ("object")  [operator]
+agent/src/mxf_builder.py:83: error: Unsupported operand types for + ("object" and "float")  [operator]
+agent/src/mxf_builder.py:84: error: Unsupported left operand type for + ("object")  [operator]
+agent/src/mxf_builder.py:86: error: Incompatible types in assignment (expression has type "float", target has type "Sequence[object]")  [assignment]
+agent/src/dxf_builder.py:99: error: Incompatible types in assignment (expression has type "tuple[int, float, float]", variable has type "tuple[float, int, float]")  [assignment]
+Found 5 errors in 2 files (checked 7 source files)
+EXIT=1
