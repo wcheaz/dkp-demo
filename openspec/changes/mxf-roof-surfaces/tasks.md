@@ -12,7 +12,7 @@
 
 ## 2. Core Geometry and XML Builder Implementation
 
-- [ ] **Implement overhang parsing helper in geometry solver**
+- [x] **Implement overhang parsing helper in geometry solver**
   - Scope: `[geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py)`, `[test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)`
   - Change: Expose parsed numeric values for overhang parameter matching raw numbers, "mm", or "m" units in millimetres.
   - Done when:

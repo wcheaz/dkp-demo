@@ -15,6 +15,9 @@ VALID_ROOF_TYPES = {"gable", "hip", "mono-pitch", "flat"}
 
 _DIMENSION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*m?")
 
+# Matches a numeric overhang with an optional ``mm`` or ``m`` unit suffix.
+_OVERHANG_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(mm|m)?\s*$", re.IGNORECASE)
+
 
 def parse_dimensions(raw: str | None) -> tuple[float, float]:
     """Parse a ``WxDm`` floor-plan string into ``(width_mm, depth_mm)``."""
@@ -26,6 +29,29 @@ def parse_dimensions(raw: str | None) -> tuple[float, float]:
     width_mm = float(match.group(1)) * 1000
     depth_mm = float(match.group(2)) * 1000
     return width_mm, depth_mm
+
+
+def parse_overhang(raw: str | int | float | None) -> float | None:
+    """Parse an overhang value into millimetres.
+
+    Accepts raw numbers (``int``/``float``) and strings carrying an optional
+    ``mm`` or ``m`` unit suffix, e.g. ``250``, ``"250mm"``, ``"0.5m"``. Plain
+    numbers and ``mm`` suffixes are returned verbatim; ``m`` values are
+    converted to millimetres. Returns ``None`` when ``raw`` is ``None`` or the
+    string cannot be parsed, so callers can fall back to a default overhang.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    match = _OVERHANG_RE.match(str(raw).strip())
+    if not match:
+        return None
+    value = float(match.group(1))
+    unit = (match.group(2) or "").lower()
+    if unit == "m":
+        return value * 1000.0
+    return value
 
 
 def wall_corners(width_mm: float, depth_mm: float) -> list[tuple[float, float]]:

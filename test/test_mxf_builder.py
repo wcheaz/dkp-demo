@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 sys.path.insert(0, "agent/src")
+from geometry_solver import parse_overhang  # noqa: E402
 from mxf_builder import (  # noqa: E402
     WALL_HEIGHT,
     WALL_THICKNESS,
@@ -230,3 +231,38 @@ class TestInvalidDimensions:
         params = _params(floorPlanDimensions="0x10m")
         with pytest.raises(ValueError):
             build_mxf(params)
+
+
+class TestOverhangParsing:
+    """parse_overhang exposes numeric millimetre values for the overhang param."""
+
+    def test_overhang_parsing(self):
+        # Raw number stays as-is (millimetres); "m" suffix converts to mm.
+        assert parse_overhang(250) == 250.0
+        assert parse_overhang("250mm") == 250.0
+        assert parse_overhang("0.5m") == 500.0
+        assert parse_overhang(None) is None
+
+    def test_overhang_parsing_none_returns_none(self):
+        assert parse_overhang(None) is None
+
+    def test_overhang_parsing_plain_number(self):
+        assert parse_overhang("250") == 250.0
+        assert parse_overhang(300) == 300.0
+        assert parse_overhang(0.0) == 0.0
+
+    def test_overhang_parsing_mm_suffix(self):
+        assert parse_overhang("250mm") == 250.0
+        assert parse_overhang("250 mm") == 250.0
+        assert parse_overhang("250MM") == 250.0
+        assert parse_overhang("  450mm  ") == 450.0
+
+    def test_overhang_parsing_metres_suffix(self):
+        assert parse_overhang("0.5m") == 500.0
+        assert parse_overhang("1m") == 1000.0
+        assert parse_overhang("1.2 m") == 1200.0
+
+    def test_overhang_parsing_invalid_returns_none(self):
+        assert parse_overhang("abc") is None
+        assert parse_overhang("") is None
+        assert parse_overhang("twenty mm") is None
