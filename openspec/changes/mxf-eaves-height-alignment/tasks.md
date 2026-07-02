@@ -12,7 +12,7 @@
 
 ## 2. Geometry Engine and Test Implementation
 
-- [ ] **Anchor eaves height to 3.12m in MXF roof geometry**
+- [x] **Anchor eaves height to 3.12m in MXF roof geometry**
   - Scope: `agent/src/geometry_solver.py`, `test/test_mxf_builder.py`, `test/test_mxf_endpoint.py`
   - Change: Anchor the eaves vertical height at exactly 3.12m and recalculate flat, mono-pitch, gable, and hip roof surface Z coordinates based on this baseline, updating unit test assertions to match.
   - Done when:

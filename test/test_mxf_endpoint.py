@@ -182,9 +182,9 @@ class TestMxfEndpointRoofSurfaces:
         assert roof_ids == ["SR0-0"]
         surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         assert surface is not None
-        # Flat (zero pitch) => horizontal plane at the plate baseline Z=3.05.
+        # Flat (zero pitch) => horizontal plane at the anchored eaves baseline Z=3.12.
         zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
-        assert all(z == pytest.approx(3.05) for z in zs)
+        assert all(z == pytest.approx(3.12) for z in zs)
 
     @pytest.mark.anyio
     async def test_mxf_endpoint_overhang_unit_string_expands_footprint(self, client):

@@ -302,8 +302,8 @@ class TestFlatRoofSurfaces:
         assert sr0 is not None
         assert sr0.attrib["covering"] == "undefined"
         expected = (
-            "-0.5,-0.5,3.05 10.5,-0.5,3.05 10.5,15.5,3.05 "
-            "-0.5,15.5,3.05 -0.5,-0.5,3.05"
+            "-0.5,-0.5,3.12 10.5,-0.5,3.12 10.5,15.5,3.12 "
+            "-0.5,15.5,3.12 -0.5,-0.5,3.12"
         )
         assert sr0.attrib["polygon"] == expected
 
@@ -315,12 +315,13 @@ class TestFlatRoofSurfaces:
         assert sf0.attrib["verticalOffset"] == "0"
         assert sf0.attrib["polygon"] == "0,0,0 10,0,0 10,15,0 0,15,0 0,0,0"
 
-    def test_flat_roof_is_horizontal_at_plate_baseline(self):
-        # Zero pitch: every Z coordinate on the roof surface equals 3.05.
+    def test_flat_roof_is_horizontal_at_eaves_baseline(self):
+        # Zero pitch: every Z coordinate on the roof surface equals the anchored
+        # eaves baseline of 3.12 m.
         root = self._build_root()
         sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         zs = [float(p.split(",")[2]) for p in sr0.attrib["polygon"].split(" ")]
-        assert all(z == pytest.approx(3.05) for z in zs)
+        assert all(z == pytest.approx(3.12) for z in zs)
 
     def test_flat_roof_overhang_expands_footprint(self):
         # 10x15 plan + 0.5m overhang => roof spans 11 x 16.
@@ -342,8 +343,8 @@ class TestFlatRoofSurfaces:
         root = self._build_root(roofType=None, overhang=None)
         sr0 = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         assert sr0 is not None
-        # No overhang => roof exactly covers the 10x15 footprint at Z=3.05.
-        assert sr0.attrib["polygon"] == "0,0,3.05 10,0,3.05 10,15,3.05 0,15,3.05 0,0,3.05"
+        # No overhang => roof exactly covers the 10x15 footprint at Z=3.12.
+        assert sr0.attrib["polygon"] == "0,0,3.12 10,0,3.12 10,15,3.12 0,15,3.12 0,0,3.12"
 
 
 class TestMonopitchRoofSurfaces:
@@ -353,7 +354,7 @@ class TestMonopitchRoofSurfaces:
     _DEPTH = 15.0
     _PITCH = 18.0
     _OVERHANG_M = 0.5
-    _Z_BASE = 3.05
+    _Z_EAVES = 3.12
 
     def _build_root(self, **overrides):
         defaults = {
@@ -367,8 +368,8 @@ class TestMonopitchRoofSurfaces:
 
     def _expected_z(self):
         rise = math.tan(math.radians(self._PITCH))
-        z_eaves = self._Z_BASE - self._OVERHANG_M * rise
-        z_ridge = self._Z_BASE + self._WIDTH * rise
+        z_eaves = self._Z_EAVES
+        z_ridge = z_eaves + (self._WIDTH + self._OVERHANG_M) * rise
         return z_eaves, z_ridge
 
     def test_monopitch_roof_generation(self):
@@ -397,7 +398,7 @@ class TestMonopitchRoofSurfaces:
         assert pts[4] == pytest.approx((-0.5, -0.5))  # closing point
 
     def test_monopitch_eaves_and_ridge_heights_match_spec(self):
-        # Z_eaves = 3.05 - overhang*tan(theta); Z_ridge = 3.05 + W*tan(theta).
+        # Z_eaves = 3.12 (anchored); Z_ridge = 3.12 + (W + O) * tan(theta).
         root = self._build_root()
         surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
@@ -408,8 +409,9 @@ class TestMonopitchRoofSurfaces:
         assert zs[4] == pytest.approx(z_eaves)  # closing point
         assert zs[1] == pytest.approx(z_ridge)
         assert zs[2] == pytest.approx(z_ridge)
-        # Eaves sits below the wall-plate baseline; ridge rises above it.
-        assert z_eaves < self._Z_BASE < z_ridge
+        # Eaves sits at the anchored eaves baseline; ridge rises above it.
+        assert z_eaves == pytest.approx(self._Z_EAVES)
+        assert z_ridge > self._Z_EAVES
 
     def test_monopitch_slope_matches_pitch(self):
         # rise/run between the eaves edge and ridge edge == tan(pitch).
@@ -421,14 +423,14 @@ class TestMonopitchRoofSurfaces:
         assert rise / run == pytest.approx(math.tan(math.radians(self._PITCH)))
 
     def test_monopitch_zero_overhang(self):
-        # No overhang: low edge sits on the low wall (X=0, Z=z_base).
+        # No overhang: low edge sits on the low wall (X=0, Z=z_eaves).
         root = self._build_root(overhang=None)
         surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         pts = [p.split(",") for p in surface.attrib["polygon"].split(" ")]
-        assert float(pts[0][0]) == pytest.approx(0.0)            # low edge at X=0
-        assert float(pts[0][2]) == pytest.approx(self._Z_BASE)   # eaves = plate height
-        assert float(pts[1][0]) == pytest.approx(self._WIDTH)    # ridge at X=W
-        z_ridge = self._Z_BASE + self._WIDTH * math.tan(math.radians(self._PITCH))
+        assert float(pts[0][0]) == pytest.approx(0.0)             # low edge at X=0
+        assert float(pts[0][2]) == pytest.approx(self._Z_EAVES)   # eaves = 3.12
+        assert float(pts[1][0]) == pytest.approx(self._WIDTH)     # ridge at X=W
+        z_ridge = self._Z_EAVES + self._WIDTH * math.tan(math.radians(self._PITCH))
         assert float(pts[1][2]) == pytest.approx(z_ridge)
 
 
@@ -439,7 +441,7 @@ class TestGableRoofSurfaces:
     _DEPTH = 15.0
     _PITCH = 30.0
     _OVERHANG_M = 0.5
-    _Z_BASE = 3.05
+    _Z_EAVES = 3.12
 
     def _build_root(self, **overrides):
         defaults = {
@@ -454,8 +456,8 @@ class TestGableRoofSurfaces:
     def _expected_z(self):
         rise = math.tan(math.radians(self._PITCH))
         run_ridge = min(self._WIDTH, self._DEPTH) / 2.0
-        z_eaves = self._Z_BASE - self._OVERHANG_M * rise
-        z_ridge = self._Z_BASE + run_ridge * rise
+        z_eaves = self._Z_EAVES
+        z_ridge = z_eaves + (run_ridge + self._OVERHANG_M) * rise
         return z_eaves, z_ridge
 
     def test_gable_roof_generation(self):
@@ -478,10 +480,10 @@ class TestGableRoofSurfaces:
         assert sf0.attrib["polygon"] == "0,0,0 10,0,0 10,15,0 0,15,0 0,0,0"
 
     def test_gable_eaves_and_ridge_heights_match_spec(self):
-        # Z_eaves = 3.05 - overhang*tan(theta); Z_ridge = 3.05 + (W/2)*tan(theta).
+        # Z_eaves = 3.12 (anchored); Z_ridge = 3.12 + (W/2 + O) * tan(theta).
         # Coordinates are serialized with ``:g`` (6 significant figures), so a
-        # 1 mm tolerance accommodates the documented rounding (spec: ≈ 2.761,
-        # ≈ 5.937).
+        # 1 mm tolerance accommodates the documented rounding (spec: = 3.12,
+        # ≈ 6.295).
         root = self._build_root()
         z_eaves, z_ridge = self._expected_z()
         for sid in ("SR0-0", "SR0-1"):
@@ -489,7 +491,8 @@ class TestGableRoofSurfaces:
             zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
             assert min(zs) == pytest.approx(z_eaves, abs=1e-3)
             assert max(zs) == pytest.approx(z_ridge, abs=1e-3)
-        assert z_eaves < self._Z_BASE < z_ridge
+        assert z_eaves == pytest.approx(self._Z_EAVES, abs=1e-3)
+        assert z_ridge > self._Z_EAVES
 
     def test_gable_ridge_runs_along_depth_at_mid_width(self):
         # Ridge from (W/2, -overhang, Z_ridge) to (W/2, D+overhang, Z_ridge).
@@ -537,18 +540,22 @@ class TestGableRoofSurfaces:
         assert max(all_ys) == pytest.approx(self._DEPTH + self._OVERHANG_M)
 
     def test_gable_zero_overhang(self):
-        # No overhang: eaves sit on the outer walls (X=0 / X=W) at z_base.
+        # No overhang: eaves sit on the outer walls (X=0 / X=W) at z_eaves.
         root = self._build_root(overhang=None)
-        z_eaves, _ = self._expected_z()
-        # Re-compute eaves without overhang: z_base - 0 = z_base.
+        # Re-compute ridge without overhang: z_eaves + (run_ridge + 0) * rise.
+        rise = math.tan(math.radians(self._PITCH))
+        run_ridge = min(self._WIDTH, self._DEPTH) / 2.0
+        z_ridge = self._Z_EAVES + run_ridge * rise
         surface = root.find('.//SurfaceList/Surface[@id="SR0-0"]')
         pts = [p.split(",") for p in surface.attrib["polygon"].split(" ")]
         assert float(pts[0][0]) == pytest.approx(0.0)        # low eaves at X=0
-        assert float(pts[0][2]) == pytest.approx(self._Z_BASE)
+        assert float(pts[0][2]) == pytest.approx(self._Z_EAVES)
         surface_hi = root.find('.//SurfaceList/Surface[@id="SR0-1"]')
         pts_hi = [p.split(",") for p in surface_hi.attrib["polygon"].split(" ")]
         assert float(pts_hi[1][0]) == pytest.approx(self._WIDTH)  # high eaves at X=W
-        assert float(pts_hi[1][2]) == pytest.approx(self._Z_BASE)
+        assert float(pts_hi[1][2]) == pytest.approx(self._Z_EAVES)
+        # Ridge points reach z_ridge.
+        assert float(pts[1][2]) == pytest.approx(z_ridge)
 
 
 class TestHipRoofSurfaces:
@@ -556,15 +563,15 @@ class TestHipRoofSurfaces:
 
     Spec scenario (spec.md): W=8.0m, D=9.6m, roofType="Hip", roofPitch=18,
     overhang=0.25m -> 4 surfaces (2 trapezoids + 2 hip-end triangles),
-    Z_eaves ~ 2.969, Z_ridge ~ 4.350, ridge from (4.0, 4.0, 4.350) to
-    (4.0, 5.6, 4.350).
+    Z_eaves = 3.12, Z_ridge ~ 4.501, ridge from (4.0, 4.0, 4.501) to
+    (4.0, 5.6, 4.501).
     """
 
     _WIDTH = 8.0
     _DEPTH = 9.6
     _PITCH = 18.0
     _OVERHANG_M = 0.25
-    _Z_BASE = 3.05
+    _Z_EAVES = 3.12
 
     def _build_root(self, **overrides):
         defaults = {
@@ -579,8 +586,8 @@ class TestHipRoofSurfaces:
     def _expected_z(self):
         rise = math.tan(math.radians(self._PITCH))
         run_ridge = min(self._WIDTH, self._DEPTH) / 2.0
-        z_eaves = self._Z_BASE - self._OVERHANG_M * rise
-        z_ridge = self._Z_BASE + run_ridge * rise
+        z_eaves = self._Z_EAVES
+        z_ridge = z_eaves + (run_ridge + self._OVERHANG_M) * rise
         return z_eaves, z_ridge
 
     def test_hip_roof_generation(self):
@@ -603,10 +610,10 @@ class TestHipRoofSurfaces:
         assert sf0.attrib["polygon"] == "0,0,0 8,0,0 8,9.6,0 0,9.6,0 0,0,0"
 
     def test_hip_eaves_and_ridge_heights_match_spec(self):
-        # Z_eaves = 3.05 - overhang*tan(theta); Z_ridge = 3.05 + (W/2)*tan(theta).
+        # Z_eaves = 3.12 (anchored); Z_ridge = 3.12 + (W/2 + O) * tan(theta).
         # Coordinates are serialized with ``:g`` (6 significant figures), so a
-        # 1 mm tolerance accommodates the documented rounding (spec: ~2.969,
-        # ~4.350).
+        # 1 mm tolerance accommodates the documented rounding (spec: = 3.12,
+        # ~4.501).
         root = self._build_root()
         z_eaves, z_ridge = self._expected_z()
         for sid in ("SR0-0", "SR0-1", "SR0-2", "SR0-3"):
@@ -614,7 +621,8 @@ class TestHipRoofSurfaces:
             zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
             assert min(zs) == pytest.approx(z_eaves, abs=1e-3)
             assert max(zs) == pytest.approx(z_ridge, abs=1e-3)
-        assert z_eaves < self._Z_BASE < z_ridge
+        assert z_eaves == pytest.approx(self._Z_EAVES, abs=1e-3)
+        assert z_ridge > self._Z_EAVES
 
     def test_hip_ridge_runs_shortened_along_depth(self):
         # Ridge from (W/2, W/2, Z_ridge) to (W/2, D-W/2, Z_ridge) -- shorter
@@ -664,9 +672,9 @@ class TestHipRoofSurfaces:
         assert max(all_ys) == pytest.approx(self._DEPTH + self._OVERHANG_M)
 
     def test_hip_zero_overhang(self):
-        # No overhang: eaves sit on the outer walls at z_base (3.05).
+        # No overhang: eaves sit on the outer walls at z_eaves (3.12).
         root = self._build_root(overhang=None)
         for sid in ("SR0-0", "SR0-1", "SR0-2", "SR0-3"):
             surface = root.find(f'.//SurfaceList/Surface[@id="{sid}"]')
             zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
-            assert min(zs) == pytest.approx(self._Z_BASE, abs=1e-3)
+            assert min(zs) == pytest.approx(self._Z_EAVES, abs=1e-3)
