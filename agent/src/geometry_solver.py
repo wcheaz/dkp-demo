@@ -257,6 +257,80 @@ def gable_roof_surface_polygons(
     return [plane_low, plane_high]
 
 
+def hip_roof_surface_polygons(
+    width_m: float,
+    depth_m: float,
+    pitch_deg: float,
+    overhang_m: float,
+    z_base: float = MXF_ROOF_Z_BASE,
+) -> list[list[Point3]]:
+    """Closed four-plane (hip) roof polygons (metres).
+
+    The roof slopes along the shorter plan axis: the ridge sits at the midpoint
+    of ``min(W, D)`` (run_ridge = ``min(W, D)/2``) and runs along the longer
+    axis, shortened by the shorter side on each end so the four hip planes
+    converge at the ridge endpoints. Following the design formulas:
+
+      * ``Z_eaves = z_base - overhang * tan(theta)``
+      * ``Z_ridge = z_base + run_ridge * tan(theta)``  with ``run_ridge = min(W, D)/2``
+
+    The footprint overhangs by ``overhang_m`` on all sides. Four surfaces are
+    returned in surface-ID order (``SR0-0``..``SR0-3``): two trapezoidal planes
+    along the longer axis (low-then-high side of the ridge) and two triangular
+    hip-end planes capping the shorter axis (low-then-high side). Each polygon
+    closes back to its first point and the points trace clockwise.
+
+    For ``width_m <= depth_m`` the ridge runs along Y at ``X = W/2`` between
+    ``Y = W/2`` and ``Y = D - W/2``; for ``depth_m < width_m`` the axes swap.
+    """
+    rise = math.tan(math.radians(pitch_deg))
+    run_ridge = min(width_m, depth_m) / 2.0
+    z_eaves = z_base - overhang_m * rise
+    z_ridge = z_base + run_ridge * rise
+    o = overhang_m
+
+    if width_m <= depth_m:
+        # Ridge runs along Y at X = width_m/2; roof slopes along X.
+        mid_x = width_m / 2.0
+        # Ridge Y endpoints are inset by W/2 from each depth end (with overhang).
+        ridge_front = (mid_x, mid_x, z_ridge)
+        ridge_back = (mid_x, depth_m - mid_x, z_ridge)
+        sw = (-o, -o, z_eaves)
+        se = (width_m + o, -o, z_eaves)
+        ne = (width_m + o, depth_m + o, z_eaves)
+        nw = (-o, depth_m + o, z_eaves)
+
+        # SR0-0: low-X trapezoid (SW -> front ridge -> back ridge -> NW -> close).
+        plane_low = [sw, ridge_front, ridge_back, nw, sw]
+        # SR0-1: high-X trapezoid (front ridge -> SE -> NE -> back ridge -> close).
+        plane_high = [ridge_front, se, ne, ridge_back, ridge_front]
+        # SR0-2: low-Y hip triangle (SW -> SE -> front ridge -> close).
+        hip_front = [sw, se, ridge_front, sw]
+        # SR0-3: high-Y hip triangle (NE -> NW -> back ridge -> close).
+        hip_back = [ne, nw, ridge_back, ne]
+        return [plane_low, plane_high, hip_front, hip_back]
+
+    # Ridge runs along X at Y = depth_m/2; roof slopes along Y.
+    mid_y = depth_m / 2.0
+    # Ridge X endpoints are inset by D/2 from each width end (with overhang).
+    ridge_left = (mid_y, mid_y, z_ridge)
+    ridge_right = (width_m - mid_y, mid_y, z_ridge)
+    sw = (-o, -o, z_eaves)
+    se = (width_m + o, -o, z_eaves)
+    ne = (width_m + o, depth_m + o, z_eaves)
+    nw = (-o, depth_m + o, z_eaves)
+
+    # SR0-0: low-Y trapezoid (SW -> SE -> right ridge -> left ridge -> close).
+    plane_low = [sw, se, ridge_right, ridge_left, sw]
+    # SR0-1: high-Y trapezoid (left ridge -> right ridge -> NE -> NW -> close).
+    plane_high = [ridge_left, ridge_right, ne, nw, ridge_left]
+    # SR0-2: low-X hip triangle (SW -> left ridge -> NW -> close).
+    hip_left = [sw, ridge_left, nw, sw]
+    # SR0-3: high-X hip triangle (SE -> NE -> right ridge -> close).
+    hip_right = [se, ne, ridge_right, se]
+    return [plane_low, plane_high, hip_left, hip_right]
+
+
 def roof_surface_polygons(
     roof_key: str,
     width_m: float,
@@ -266,10 +340,9 @@ def roof_surface_polygons(
 ) -> list[list[Point3]]:
     """Return the closed roof surface polygons (metres) for a roof type.
 
-    Dispatches to the per-type geometry routine. ``flat``, ``mono-pitch``, and
-    ``gable`` are supported; ``hip`` is added by a later task. ``pitch_deg`` is
-    unused for a flat roof but kept in the signature so every roof type shares
-    one entry point.
+    Dispatches to the per-type geometry routine. ``flat``, ``mono-pitch``,
+    ``gable``, and ``hip`` are supported. ``pitch_deg`` is unused for a flat
+    roof but kept in the signature so every roof type shares one entry point.
     """
     key = (roof_key or "flat").strip().lower()
     if key == "flat":
@@ -278,6 +351,8 @@ def roof_surface_polygons(
         return [monopitch_roof_surface_polygon(width_m, depth_m, pitch_deg, overhang_m)]
     if key == "gable":
         return gable_roof_surface_polygons(width_m, depth_m, pitch_deg, overhang_m)
+    if key == "hip":
+        return hip_roof_surface_polygons(width_m, depth_m, pitch_deg, overhang_m)
     raise ValueError(
         f"MXF roof surface generation not implemented for roofType: {roof_key!r}"
     )
