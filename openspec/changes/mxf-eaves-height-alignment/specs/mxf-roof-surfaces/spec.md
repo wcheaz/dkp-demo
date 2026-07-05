@@ -8,13 +8,13 @@ Normative requirements:
 - The `<Building>` node SHALL contain a `<RoofList>` node mapping the roof surfaces and a `<FloorList>` node mapping the floor surfaces.
 - Floor surfaces (id starting with `SF`) SHALL be placed at $Z = 0$ mapping the building footprint: from $(0,0,0)$ to $(W,0,0)$ to $(W,D,0)$ to $(0,D,0)$ to $(0,0,0)$.
 - Roof surfaces (id starting with `SR`) SHALL include the eaves overhang $O$ on all outer edges.
-- Vertical offsets SHALL be calculated using an anchored eaves height baseline of $Z_{\text{eaves}} = 3.12\text{ m}$ (representing wall height $3.0\text{ m}$ + wall plate height $0.05\text{ m}$ + standard eaves offset $0.07\text{ m}$).
-- For all sloped roofs, the vertical position of the eaves edge SHALL be $Z_{\text{eaves}} = 3.12\text{ m}$.
-- The vertical position of the ridge is calculated as $Z_{\text{ridge}} = 3.12 + (Run_{\text{ridge}} + O) \cdot \tan(\theta)$, where $Run_{\text{ridge}}$ is the horizontal distance from the wall to the ridge, and $O$ is the overhang.
-- For flat roofs, the roof surface SHALL be flat at a constant height of $Z = 3.12\text{ m}$.
+- Vertical offsets SHALL be calculated using an anchored eaves height baseline of $Z_{\text{eaves}} = z\_base + 0.07\text{ m}$ (representing wall height + plate height + standard eaves vertical offset $0.07\text{ m}$).
+- For all sloped roofs, the vertical position of the eaves edge SHALL be $Z_{\text{eaves}} = z\_base + 0.07\text{ m}$.
+- The vertical position of the ridge is calculated as $Z_{\text{ridge}} = Z_{\text{eaves}} + (Run_{\text{ridge}} + O) \cdot \tan(\theta)$, where $Run_{\text{ridge}}$ is the horizontal distance from the wall to the ridge, and $O$ is the overhang.
+- For flat roofs, the roof surface SHALL be flat at a constant height of $Z = z\_base + 0.07\text{ m}$.
 
 #### Scenario: Successful Gable roof surface generation
-- **GIVEN** active DesignParameters specifying width = 10.0m, depth = 15.0m, roofType = "Gable", roofPitch = 30, and overhang = 0.5m
+- **GIVEN** active DesignParameters specifying width = 10.0m, depth = 15.0m, roofType = "Gable", roofPitch = 30, and overhang = 0.5m, and z_base = 3.05m
 - **WHEN** build_mxf is invoked
 - **THEN** the generated XML SHALL contain:
   - A `<RoofList>` with exactly 2 `<Roof>` nodes referencing surface IDs `SR0-0` and `SR0-1`
@@ -25,7 +25,7 @@ Normative requirements:
     - A ridge running from $(5.0, -0.5, 6.29548)$ to $(5.0, 15.5, 6.29548)$
 
 #### Scenario: Successful Hip roof surface generation
-- **GIVEN** active DesignParameters specifying width = 8.0m, depth = 9.6m, roofType = "Hip", roofPitch = 18, and overhang = 0.25m
+- **GIVEN** active DesignParameters specifying width = 8.0m, depth = 9.6m, roofType = "Hip", roofPitch = 18, and overhang = 0.25m, and z_base = 3.05m
 - **WHEN** build_mxf is invoked
 - **THEN** the generated XML SHALL contain:
   - A `<RoofList>` with exactly 4 `<Roof>` nodes referencing surface IDs `SR0-0`, `SR0-1`, `SR0-2`, and `SR0-3`
@@ -33,7 +33,7 @@ Normative requirements:
   - A ridge running from $(4.0, 4.0, 4.50091)$ to $(4.0, 5.6, 4.50091)$
 
 #### Scenario: Successful Flat roof surface generation
-- **GIVEN** active DesignParameters specifying width = 10.0m, depth = 15.0m, roofType = "Flat", roofPitch = 0, and overhang = 0.5m
+- **GIVEN** active DesignParameters specifying width = 10.0m, depth = 15.0m, roofType = "Flat", roofPitch = 0, and overhang = 0.5m, and z_base = 3.05m
 - **WHEN** build_mxf is invoked
 - **THEN** the generated XML SHALL contain:
   - A `<RoofList>` referencing surface ID `SR0-0`

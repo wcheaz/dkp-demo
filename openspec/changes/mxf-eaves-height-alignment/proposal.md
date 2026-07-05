@@ -4,17 +4,17 @@ After importing our auto-generated layout MXF files into MiTek Pamir and perform
 
 ## What Changes
 
-- **Eaves Height Anchoring**: Anchor the base vertical eaves coordinate ($Z_{\text{eaves}}$) at exactly $3.12\text{ m}$ (wall height $3.0\text{ m}$ + wall plate $0.05\text{ m}$ + standard eaves vertical offset $0.07\text{ m}$) for all roof types.
-- **Slope Height Adjustment**: Calculate sloped roof surface points by starting at $Z_{\text{eaves}} = 3.12\text{ m}$ at the eaves edge and sloping upward towards the ridge, ensuring the top of the rafter matches the roof surface.
-- **Flat Roof Height Adjustment**: Set flat roof surfaces at a constant height of $3.12\text{ m}$ to provide consistent vertical clearance matching the rafter/joist depth.
+- **Dynamic Eaves Height Calculation**: Dynamically calculate the vertical eaves height ($Z_{\text{eaves}}$) as $z\_base + 0.07\text{ m}$ (representing wall height + plate height + standard eaves vertical offset $0.07\text{ m}$) for all roof types, instead of hardcoding a fixed value.
+- **Slope Height Adjustment**: Calculate sloped roof surface points by starting at the dynamic $Z_{\text{eaves}}$ baseline at the eaves edge and sloping upward towards the ridge, ensuring the top of the rafter matches the roof surface.
+- **Flat Roof Height Adjustment**: Set flat roof surfaces at a constant height of $z\_base + 0.07\text{ m}$ to provide consistent vertical clearance matching the rafter/joist depth.
 
 ## Capabilities
 
 ### New Capabilities
 
 ### Modified Capabilities
-- `mxf-roof-surfaces`: Update the vertical calculation of roof surfaces to anchor eaves at $Z_{\text{eaves}} = 3.12\text{ m}$ and slope upwards, preventing auto-framed trusses from protruding above the roof surfaces.
+- `mxf-roof-surfaces`: Update the vertical calculation of roof surfaces to dynamically anchor eaves at $Z_{\text{eaves}} = z\_base + 0.07\text{ m}$ and slope upwards, preventing auto-framed trusses from protruding above the roof surfaces.
 
 ## Impact
-- `agent/src/geometry_solver.py`: Update flat, mono-pitch, gable, and hip roof surface polygon builders to use the correct eaves height anchoring ($3.12\text{ m}$) and slope calculations.
-- `test/test_mxf_builder.py`: Update unit tests to reflect the new, correct vertical coordinate values for all roof types.
+- `agent/src/geometry_solver.py`: Update flat, mono-pitch, gable, and hip roof surface polygon builders to use the dynamic eaves height anchoring ($z\_base + 0.07\text{ m}$) and slope calculations.
+- `test/test_mxf_builder.py`: Update unit tests to reflect the corrected vertical coordinate values for all roof types.

@@ -12,11 +12,11 @@
 
 ## 2. Geometry Engine and Test Implementation
 
-- [x] **Anchor eaves height to 3.12m in MXF roof geometry**
+- [x] **Implement dynamic eaves height calculation in MXF roof geometry**
   - Scope: `agent/src/geometry_solver.py`, `test/test_mxf_builder.py`, `test/test_mxf_endpoint.py`
-  - Change: Anchor the eaves vertical height at exactly 3.12m and recalculate flat, mono-pitch, gable, and hip roof surface Z coordinates based on this baseline, updating unit test assertions to match.
+  - Change: Calculate the eaves vertical height dynamically as `z_base + 0.07` and recalculate flat, mono-pitch, gable, and hip roof surface Z coordinates based on this baseline, updating unit test assertions to match.
   - Done when:
-    - `rg "MXF_ROOF_EAVES_Z = MXF_ROOF_Z_BASE \+ 0.07" agent/src/geometry_solver.py` exits 0.
+    - `rg "z_eaves = z_base \+ 0.07" agent/src/geometry_solver.py` exits 0.
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py test/test_mxf_endpoint.py` exits 0.
     - `uv run --project agent ruff check agent/src/geometry_solver.py` exits 0.
     - `uv run --project agent mypy agent/src/geometry_solver.py` exits 0.
@@ -34,4 +34,3 @@
     - `uv run --project agent mypy agent/src` exits 0.
   - Stop and hand off if:
     - any regression is found in files untouched by this change.
-

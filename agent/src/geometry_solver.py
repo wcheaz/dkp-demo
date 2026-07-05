@@ -117,10 +117,8 @@ MXF_WALL_HEIGHT = 3.0
 MXF_WALL_PLATE_HEIGHT = 0.05
 # Vertical position of the eaves / wall top plate baseline in metres.
 MXF_ROOF_Z_BASE = MXF_WALL_HEIGHT + MXF_WALL_PLATE_HEIGHT
-# Anchored eaves height (3.12 m) = wall top plate + 70 mm rafter / heel offset,
-# matching the MiTek Pamir roof plane convention so auto-framed trusses sit
-# flush with the roof surface at the eaves.
-MXF_ROOF_EAVES_Z = MXF_ROOF_Z_BASE + 0.07
+# Standard vertical eaves offset (rafter end thickness) in metres.
+MXF_EAVES_OFFSET = 0.07
 
 
 Point3 = tuple[float, float, float]
@@ -143,22 +141,22 @@ def floor_surface_polygon(width_m: float, depth_m: float) -> list[Point3]:
 
 
 def flat_roof_surface_polygon(
-    width_m: float, depth_m: float, overhang_m: float, z_base: float = MXF_ROOF_EAVES_Z
+    width_m: float, depth_m: float, overhang_m: float, z_base: float = MXF_ROOF_Z_BASE
 ) -> list[Point3]:
-    """Closed horizontal roof polygon at ``z_base`` (metres).
+    """Closed horizontal roof polygon at ``z_base + MXF_EAVES_OFFSET`` (metres).
 
     The building footprint is expanded by ``overhang_m`` on every side so the
     roof edge (eaves) sits beyond the outer walls. A flat roof has zero pitch,
-    so every point shares the same Z (``z_base``), defaulting to the anchored
-    eaves baseline of 3.12 m to match the rafter/joist depth.
+    so every point shares the same Z (``z_base + MXF_EAVES_OFFSET``).
     """
     o = overhang_m
+    z_val = z_base + MXF_EAVES_OFFSET
     return [
-        (-o, -o, z_base),
-        (width_m + o, -o, z_base),
-        (width_m + o, depth_m + o, z_base),
-        (-o, depth_m + o, z_base),
-        (-o, -o, z_base),
+        (-o, -o, z_val),
+        (width_m + o, -o, z_val),
+        (width_m + o, depth_m + o, z_val),
+        (-o, depth_m + o, z_val),
+        (-o, -o, z_val),
     ]
 
 
@@ -167,26 +165,25 @@ def monopitch_roof_surface_polygon(
     depth_m: float,
     pitch_deg: float,
     overhang_m: float,
-    z_base: float = MXF_ROOF_EAVES_Z,
+    z_base: float = MXF_ROOF_Z_BASE,
 ) -> list[Point3]:
     """Closed single-slope (mono-pitch) roof polygon (metres).
 
     The roof plane slopes up along the width (X) axis: it rests on the low
-    eaves edge at ``X = -overhang`` and rises to the ridge at ``X = width_m``.
-    The eaves height is anchored at ``z_base`` (3.12 m by default) and the
-    ridge rises by the horizontal run times the pitch:
+    wall plate at ``X = 0`` (``Z = z_base``) and rises to the ridge at
+    ``X = width_m``. Following the design formulas:
 
-      * ``Z_eaves = z_base``                                  (anchored eaves)
-      * ``Z_ridge = z_eaves + (width_m + overhang_m) * tan(theta)``  (run = W + O)
+      * ``Z_eaves = z_base + MXF_EAVES_OFFSET``  (low overhang edge)
+      * ``Z_ridge = Z_eaves + (width_m + overhang_m) * tan(theta)``   (high ridge edge, run = W + O)
 
     The footprint overhangs by ``overhang_m`` on the low (eaves) side and on
     both depth (Y) ends; the high ridge edge sits at the high wall (``X =
-    width_m``) so the ridge run is ``width_m + overhang_m`` and the plane
+    width_m``) so the ridge height matches ``run_ridge = W`` and the plane
     keeps a constant ``tan(theta)`` slope. Points trace the rectangle clockwise
     from the low-front corner.
     """
     rise = math.tan(math.radians(pitch_deg))
-    z_eaves = z_base
+    z_eaves = z_base + MXF_EAVES_OFFSET
     z_ridge = z_eaves + (width_m + overhang_m) * rise
     o = overhang_m
     return [
@@ -203,18 +200,16 @@ def gable_roof_surface_polygons(
     depth_m: float,
     pitch_deg: float,
     overhang_m: float,
-    z_base: float = MXF_ROOF_EAVES_Z,
+    z_base: float = MXF_ROOF_Z_BASE,
 ) -> list[list[Point3]]:
     """Closed two-plane (gable) roof polygons (metres).
 
     The roof slopes along the shorter plan axis: the ridge sits at the midpoint
-    of ``min(W, D)`` and runs along the longer axis. The eaves height is
-    anchored at ``z_base`` (3.12 m by default) and the ridge rises by the
-    horizontal run times the pitch:
+    of ``min(W, D)`` and runs along the longer axis. Following the design
+    formulas:
 
-      * ``Z_eaves = z_base``
-      * ``Z_ridge = z_eaves + (run_ridge + overhang_m) * tan(theta)``
-        with ``run_ridge = min(W, D)/2``
+      * ``Z_eaves = z_base + MXF_EAVES_OFFSET``
+      * ``Z_ridge = Z_eaves + (run_ridge + overhang_m) * tan(theta)``  with ``run_ridge = min(W, D)/2``
 
     The footprint overhangs by ``overhang_m`` on all sides. Two rectangular
     surfaces are returned (``SR0-0`` on the low-X/Y side, ``SR0-1`` on the high
@@ -223,7 +218,7 @@ def gable_roof_surface_polygons(
     """
     rise = math.tan(math.radians(pitch_deg))
     run_ridge = min(width_m, depth_m) / 2.0
-    z_eaves = z_base
+    z_eaves = z_base + MXF_EAVES_OFFSET
     z_ridge = z_eaves + (run_ridge + overhang_m) * rise
     o = overhang_m
 
@@ -270,20 +265,17 @@ def hip_roof_surface_polygons(
     depth_m: float,
     pitch_deg: float,
     overhang_m: float,
-    z_base: float = MXF_ROOF_EAVES_Z,
+    z_base: float = MXF_ROOF_Z_BASE,
 ) -> list[list[Point3]]:
     """Closed four-plane (hip) roof polygons (metres).
 
     The roof slopes along the shorter plan axis: the ridge sits at the midpoint
     of ``min(W, D)`` (run_ridge = ``min(W, D)/2``) and runs along the longer
     axis, shortened by the shorter side on each end so the four hip planes
-    converge at the ridge endpoints. The eaves height is anchored at ``z_base``
-    (3.12 m by default) and the ridge rises by the horizontal run times the
-    pitch:
+    converge at the ridge endpoints. Following the design formulas:
 
-      * ``Z_eaves = z_base``
-      * ``Z_ridge = z_eaves + (run_ridge + overhang_m) * tan(theta)``
-        with ``run_ridge = min(W, D)/2``
+      * ``Z_eaves = z_base + MXF_EAVES_OFFSET``
+      * ``Z_ridge = Z_eaves + (run_ridge + overhang_m) * tan(theta)``  with ``run_ridge = min(W, D)/2``
 
     The footprint overhangs by ``overhang_m`` on all sides. Four surfaces are
     returned in surface-ID order (``SR0-0``..``SR0-3``): two trapezoidal planes
@@ -296,7 +288,7 @@ def hip_roof_surface_polygons(
     """
     rise = math.tan(math.radians(pitch_deg))
     run_ridge = min(width_m, depth_m) / 2.0
-    z_eaves = z_base
+    z_eaves = z_base + MXF_EAVES_OFFSET
     z_ridge = z_eaves + (run_ridge + overhang_m) * rise
     o = overhang_m
 

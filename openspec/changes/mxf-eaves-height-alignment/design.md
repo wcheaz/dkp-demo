@@ -1,13 +1,13 @@
 ## Context
 
-In our current geometry engine implementation, roof surfaces for Layout MXFs are calculated using a baseline where the roof plane intersects the wall top plate ($3.05\text{ m}$) exactly at the wall face. This sets the eaves height to $3.05 - overhang \cdot \tan(\theta)$, which falls below $3.05\text{ m}$. In contrast, MiTek Pamir imports layout planes by anchoring them at the eaves height ($Z_{\text{eaves}}$), which is kept constant at $3.12\text{ m}$ (representing the top of the wall plate plus a standard $70\text{ mm}$ rafter thickness offset). Because our generated roof surfaces are too low, the physical trusses generated during auto-framing protrude above the roof plane at the eaves, causing "Frame too short" warnings in Pamir.
+In our current geometry engine implementation, roof surfaces for Layout MXFs are calculated using a baseline where the roof plane intersects the wall top plate ($3.05\text{ m}$) exactly at the wall face. This sets the eaves height to $3.05 - overhang \cdot \tan(\theta)$, which falls below $3.05\text{ m}$. In contrast, MiTek Pamir imports layout planes by anchoring them at the eaves height ($Z_{\text{eaves}}$), which is kept constant at $z\_base + 0.07\text{ m}$ (representing the top of the wall plate plus a standard $70\text{ mm}$ rafter thickness offset). Because our generated roof surfaces are too low, the physical trusses generated during auto-framing protrude above the roof plane at the eaves, causing "Frame too short" warnings in Pamir.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Adjust the MXF roof surface Z-coordinate calculations in `geometry_solver.py` to anchor the eaves height at $3.12\text{ m}$ ($3.05\text{ m} + 0.07\text{ m}$ eaves offset).
-- Ensure all sloped roof types (Gable, Hip, Mono-pitch) calculate their ridge height starting from the anchored $Z_{\text{eaves}} = 3.12\text{ m}$ and sloping upward.
-- Ensure flat roofs generate a flat plane at a constant $Z = 3.12\text{ m}$ to match the rafter/joist depth.
+- Adjust the MXF roof surface Z-coordinate calculations in `geometry_solver.py` to anchor the eaves height dynamically at $z\_base + 0.07\text{ m}$ eaves offset.
+- Ensure all sloped roof types (Gable, Hip, Mono-pitch) calculate their ridge height starting from the dynamically anchored $Z_{\text{eaves}} = z\_base + 0.07\text{ m}$ and sloping upward.
+- Ensure flat roofs generate a flat plane at a constant $Z = z\_base + 0.07\text{ m}$ to match the rafter/joist depth.
 - Fix all unit test assertions in `test_mxf_builder.py` to match the adjusted Z-coordinates.
 
 **Non-Goals:**
@@ -16,17 +16,17 @@ In our current geometry engine implementation, roof surfaces for Layout MXFs are
 
 ## Decisions
 
-### 1. Anchor Eaves Height
-- **Decision**: Define a new module-level constant in `geometry_solver.py`:
-  `MXF_ROOF_EAVES_Z = MXF_ROOF_Z_BASE + 0.07` (evaluates to $3.12\text{ m}$).
-  Use `MXF_ROOF_EAVES_Z` as the base height for all roof surface polygons.
-- **Rationale**: This mirrors the exact roof plane definitions exported by Pamir (such as in `Test Project 2.mxf`), resolving the frame overhang clash at the eaves.
+### 1. Anchor Eaves Height Dynamically
+- **Decision**: Define a new module-level constant or helper variable in `geometry_solver.py`:
+  `z_eaves = z_base + 0.07`
+  Use this dynamic `z_eaves` as the base height for all roof surface polygons.
+- **Rationale**: This matches the actual wall top height dynamically rather than assuming a hardcoded wall height of $3.0\text{ m}$ and plate of $0.05\text{ m}$. It ensures vertical coordinates remain correct even if the wall height varies.
 
 ### 2. Update Slope Formulations
-- **Flat**: `Z = MXF_ROOF_EAVES_Z` ($3.12\text{ m}$).
-- **Mono-pitch**: `z_eaves = MXF_ROOF_EAVES_Z`, `z_ridge = z_eaves + (width_m + overhang_m) * rise`.
-- **Gable/Hip**: `z_eaves = MXF_ROOF_EAVES_Z`, `z_ridge = z_eaves + (run_ridge + overhang_m) * rise`.
-- **Rationale**: Ensures the slope matches the pitch $\theta$ exactly while referencing the correct eaves baseline.
+- **Flat**: `Z = z_base + 0.07` ($3.12\text{ m}$ when $z\_base = 3.05\text{ m}$).
+- **Mono-pitch**: `z_eaves = z_base + 0.07`, `z_ridge = z_eaves + (width_m + overhang_m) * rise`.
+- **Gable/Hip**: `z_eaves = z_base + 0.07`, `z_ridge = z_eaves + (run_ridge + overhang_m) * rise`.
+- **Rationale**: Ensures the slope matches the pitch $\theta$ exactly while referencing the correct dynamic eaves baseline.
 
 ## Risks / Trade-offs
 

@@ -678,3 +678,33 @@ class TestHipRoofSurfaces:
             surface = root.find(f'.//SurfaceList/Surface[@id="{sid}"]')
             zs = [float(p.split(",")[2]) for p in surface.attrib["polygon"].split(" ")]
             assert min(zs) == pytest.approx(self._Z_EAVES, abs=1e-3)
+
+
+class TestDynamicEavesHeight:
+    def test_dynamic_z_base_applied(self):
+        from src.geometry_solver import (
+            flat_roof_surface_polygon,
+            monopitch_roof_surface_polygon,
+            gable_roof_surface_polygons,
+            hip_roof_surface_polygons,
+        )
+        custom_z_base = 2.50  # 2.5m wall top instead of 3.05m
+        expected_z_eaves = 2.50 + 0.07  # 2.57m
+
+        # 1. Flat roof
+        flat_poly = flat_roof_surface_polygon(10.0, 15.0, 0.5, z_base=custom_z_base)
+        for pt in flat_poly:
+            assert pt[2] == pytest.approx(expected_z_eaves)
+
+        # 2. Monopitch roof
+        mono_poly = monopitch_roof_surface_polygon(10.0, 15.0, 30.0, 0.5, z_base=custom_z_base)
+        assert mono_poly[0][2] == pytest.approx(expected_z_eaves)
+
+        # 3. Gable roof
+        gable_polys = gable_roof_surface_polygons(10.0, 15.0, 30.0, 0.5, z_base=custom_z_base)
+        assert gable_polys[0][0][2] == pytest.approx(expected_z_eaves)
+
+        # 4. Hip roof
+        hip_polys = hip_roof_surface_polygons(8.0, 9.6, 18.0, 0.25, z_base=custom_z_base)
+        assert hip_polys[0][0][2] == pytest.approx(expected_z_eaves)
+
