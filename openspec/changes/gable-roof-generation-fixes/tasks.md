@@ -125,7 +125,7 @@
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_gable_timber_and_plate_lists` exits 0
   - Stop and hand off if: standard plate IDs are not defined in `design.md` or need dynamic parameterization.
 
-- [ ] **Integrate transport-height splitting into the MXF builder**
+- [x] **Integrate transport-height splitting into the MXF builder**
   - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: The MXF builder calls `solver.mxf_truss_parts(overhang_m)` to output split frames (with Part 1 base and Part 2 cap elements) instead of `mxf_truss_frames()` when the ridge height exceeds 3.3m.
   - Done when:
