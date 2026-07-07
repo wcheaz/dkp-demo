@@ -105,7 +105,7 @@
 
 ## 5. Final Quality Gates
 
-- [ ] **Run final integrated quality gates**
+- [x] **Run final integrated quality gates**
   - Scope: [.ralph/baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/), [agent/src/](file:///home/ncheaz/git/dkp-demo/agent/src/), [test/](file:///home/ncheaz/git/dkp-demo/test/)
   - Change: All tests, linting, and typechecking run clean or match pre-flight baselines across the whole repository.
   - Done when:
