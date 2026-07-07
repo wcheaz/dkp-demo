@@ -1,6 +1,6 @@
 ## 1. Quality Gate Baselines
 
-- [ ] **Pre-flight: record quality gate baselines**
+- [x] **Pre-flight: record quality gate baselines**
   - Scope: no code edits; writes only under [.ralph/baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/)
   - Change: Capture current state of testing, linting, and typechecking gates.
   - Done when:

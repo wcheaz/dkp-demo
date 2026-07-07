@@ -1,0 +1,63 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/ncheaz/git/dkp-demo
+plugins: anyio-4.12.1, logfire-4.29.0
+collected 211 items
+
+test/test_dxf_builder.py ........................................sss.... [ 22%]
+.............                                                            [ 28%]
+test/test_dxf_endpoint.py .........                                      [ 32%]
+test/test_ifc_builder.py .......................................         [ 51%]
+test/test_ifc_endpoint.py ........                                       [ 54%]
+test/test_mxf_builder.py ............................................... [ 77%]
+.                                                                        [ 77%]
+test/test_mxf_endpoint.py ..............                                 [ 84%]
+test/test_pricing.py ...........                                         [ 89%]
+test/test_reset_design.py ......................                         [100%]
+
+=============================== warnings summary ===============================
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:50
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:50: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    number.addParseAction(lambda t: float(t[0]))  # convert to float
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:51
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:51: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    string_ = quotedString.addParseAction(lambda t: t[0][1:-1])  # remove quotes
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:57
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:57: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    Relation = oneOf(["==", "!=", "<", "<=", ">", ">=", "?", "!?"])
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:63
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:63: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("EntityQuery")
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:65
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:65: PyparsingDeprecationWarning: 'infixNotation' deprecated - use 'infix_notation'
+    InfixBoolQuery = infixNotation(
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:72
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:72: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("AttribQuery")
+
+../../.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:74
+  /home/ncheaz/.pyenv/versions/3.12.1/lib/python3.12/site-packages/ezdxf/queryparser.py:74: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    AttribQueryOptions = Literal("i").setResultsName("AttribQueryOptions")
+
+<frozen abc>:106
+  <frozen abc>:106: DeprecationWarning: `OpenAIModel` was renamed to `OpenAIChatModel` to clearly distinguish it from `OpenAIResponsesModel` which uses OpenAI's newer Responses API. Use that unless you're using an OpenAI Chat Completions-compatible API, or require a feature that the Responses API doesn't support yet like audio.
+
+agent/src/main.py:25
+  /home/ncheaz/git/dkp-demo/agent/src/main.py:25: PydanticAIDeprecationWarning: `Agent.to_ag_ui()` is deprecated and will be removed in 2.0. Replace:
+      app = agent.to_ag_ui()
+  with a Starlette/FastAPI route:
+      from pydantic_ai.ui.ag_ui import AGUIAdapter
+      @app.post("/")
+      async def run_agent(request):
+          return await AGUIAdapter.dispatch_request(request, agent=agent)
+  See <https://ai.pydantic.dev/ui/ag-ui/#migrating-from-deprecated-apis> for full before/after examples.
+    app = agent.to_ag_ui(deps=StateDeps(state=YourState()))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 208 passed, 3 skipped, 9 warnings in 3.21s ==================
+EXIT=0
