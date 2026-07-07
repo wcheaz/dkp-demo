@@ -93,7 +93,7 @@
     - the tests in [test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py) pass under `pytest`, verifying congruent 3D model generation based on updated [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py) calculations
   - Stop and hand off if: `ifc_builder.py` geometry changes require modifications to the IFC export schema that are not specified in [design.md](file:///home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/design.md).
 
-- [ ] **Align DXF builder with the unified geometry solver**
+- [x] **Align DXF builder with the unified geometry solver**
   - Scope: [dxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/dxf_builder.py), [test_dxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_dxf_builder.py)
   - Change: Update `dxf_builder.py` to use the unified `GeometrySolver` calculations so that generated DXF coordinates match the updated structural solver exactly.
   - Done when:

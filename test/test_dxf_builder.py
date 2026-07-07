@@ -1,6 +1,6 @@
 import math
 import sys
-from io import BytesIO, StringIO
+from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,7 +8,7 @@ import ezdxf
 import pytest
 
 sys.path.insert(0, "agent/src")
-from dxf_builder import (
+from dxf_builder import (  # type: ignore[import-not-found]
     build_dxf,
     _compute_truss_count,
     LAYER_FLOOR_PLAN,
@@ -20,6 +20,7 @@ from dxf_builder import (
     LAYER_LUMBER_SPECS,
     LAYER_TITLE_BLOCK,
 )
+from geometry_solver import GeometrySolver  # type: ignore[import-not-found]
 
 
 def _params(**kwargs):
@@ -52,7 +53,7 @@ class TestValidDxfOutput:
         params = _params(floorPlanDimensions="10x15m", roofType="Flat")
         result = build_dxf(params)
         doc = _read_dxf(result)
-        layer_names = [l.dxf.name for l in doc.layers]
+        layer_names = [layer.dxf.name for layer in doc.layers]
         assert LAYER_FLOOR_PLAN in layer_names
         assert LAYER_ROOF_OUTLINE in layer_names
 
@@ -99,26 +100,26 @@ class TestFloorPlanOutline:
         bottom_ring = []
         top_ring = []
         vertical = []
-        for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
+        for line in lines:
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             s_in_bot = s in bottom_set
             e_in_bot = e in bottom_set
             s_in_top = s in top_set
             e_in_top = e in top_set
             if s_in_bot and e_in_bot:
-                bottom_ring.append(l)
+                bottom_ring.append(line)
             elif s_in_top and e_in_top:
-                top_ring.append(l)
+                top_ring.append(line)
             else:
-                vertical.append(l)
+                vertical.append(line)
         assert len(bottom_ring) == 4, f"Expected 4 bottom ring lines, got {len(bottom_ring)}"
         assert len(top_ring) == 4, f"Expected 4 top ring lines, got {len(top_ring)}"
         assert len(vertical) == 4, f"Expected 4 vertical lines, got {len(vertical)}"
         drawn_bottom = set()
-        for l in bottom_ring:
-            drawn_bottom.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
-            drawn_bottom.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)))
+        for line in bottom_ring:
+            drawn_bottom.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)))
+            drawn_bottom.add((round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)))
         assert drawn_bottom == bottom_set
 
     def test_3d_top_ring(self):
@@ -137,9 +138,9 @@ class TestFloorPlanOutline:
         ]
         top_set = {(round(x, 2), round(y, 2), round(z, 2)) for x, y, z in top_corners_3d}
         top_ring = [
-            l for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) in top_set
-            and (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) in top_set
+            line for line in lines
+            if (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)) in top_set
+            and (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)) in top_set
         ]
         assert len(top_ring) == 4
 
@@ -156,9 +157,9 @@ class TestFloorPlanOutline:
             bot = (cx, cy, 0)
             top = (cx, cy, WALL_HEIGHT)
             found = False
-            for l in lines:
-                sx, sy, sz = l.dxf.start.x, l.dxf.start.y, l.dxf.start.z
-                ex, ey, ez = l.dxf.end.x, l.dxf.end.y, l.dxf.end.z
+            for line in lines:
+                sx, sy, sz = line.dxf.start.x, line.dxf.start.y, line.dxf.start.z
+                ex, ey, ez = line.dxf.end.x, line.dxf.end.y, line.dxf.end.z
                 if (abs(sx - bot[0]) < 0.1 and abs(sy - bot[1]) < 0.1 and abs(sz - bot[2]) < 0.1
                         and abs(ex - top[0]) < 0.1 and abs(ey - top[1]) < 0.1 and abs(ez - top[2]) < 0.1):
                     found = True
@@ -227,9 +228,9 @@ class TestGableRoof:
         assert ridge_found, "Ridge line not found at true 3D coordinates"
         peak_pt = (round(peak[0], 2), round(peak[1], 2), round(peak[2], 2))
         rafter_count = sum(
-            1 for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) == peak_pt
-            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) == peak_pt
+            1 for line in lines
+            if (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)) == peak_pt
+            or (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)) == peak_pt
         )
         assert rafter_count == 4
 
@@ -294,13 +295,13 @@ class TestMonoPitchRoof:
             ]
         }
         drawn_pts = set()
-        for l in lines:
-            drawn_pts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
-            drawn_pts.add((round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)))
+        for line in lines:
+            drawn_pts.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)))
+            drawn_pts.add((round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)))
         assert expected_pts <= drawn_pts
 
     def test_mono_pitch_3d_slope(self):
-        w, d = 10000.0, 15000.0
+        w = 10000.0
         pitch = 10.0
         params = _params(floorPlanDimensions="10x15m", roofType="Mono-pitch", roofPitch=pitch)
         result = build_dxf(params)
@@ -312,9 +313,9 @@ class TestMonoPitchRoof:
         low_3d = (round(low_pt[0], 2), round(low_pt[1], 2), round(low_pt[2], 2))
         high_3d = (round(high_pt[0], 2), round(high_pt[1], 2), round(high_pt[2], 2))
         slope_found = False
-        for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
+        for line in lines:
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             if (s == low_3d and e == high_3d) or (s == high_3d and e == low_3d):
                 slope_found = True
         assert slope_found
@@ -402,16 +403,14 @@ class TestTrussCrossSectionGable:
         assert len(lines) == count * 3
 
     def test_first_truss_3d_coordinates(self):
-        w, d = 10000.0, 15000.0
+        w = 10000.0
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
         msp = doc.modelspace()
         lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
         first_y = w * 0.05
-        ridge_h = (w / 2) * math.tan(30 * math.pi / 180)
         z_eave = 2700
-        z_ridge = z_eave + ridge_h
         expected_starts = {
             (round(p[0], 2), round(p[1], 2), round(p[2], 2))
             for p in [
@@ -420,8 +419,8 @@ class TestTrussCrossSectionGable:
             ]
         }
         drawn_starts = set()
-        for l in lines:
-            drawn_starts.add((round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)))
+        for line in lines:
+            drawn_starts.add((round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)))
         assert expected_starts <= drawn_starts
 
     def test_triangle_shape_3d(self):
@@ -439,9 +438,9 @@ class TestTrussCrossSectionGable:
         right_eave = (round(w, 2), round(first_y, 2), round(z_eave, 2))
         ridge = (round(w / 2, 2), round(first_y, 2), round(z_ridge, 2))
         truss_segs = [
-            l for l in lines
-            if (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2)) in (left_eave, right_eave, ridge)
-            or (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2)) in (left_eave, right_eave, ridge)
+            line for line in lines
+            if (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2)) in (left_eave, right_eave, ridge)
+            or (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2)) in (left_eave, right_eave, ridge)
         ]
         assert len(truss_segs) >= 3
 
@@ -486,9 +485,9 @@ class TestTrussCrossSectionMonoPitch:
         right_eave_3d = (round(right_eave_3d[0], 2), round(right_eave_3d[1], 2), round(right_eave_3d[2], 2))
         right_ridge_3d = (round(right_ridge_3d[0], 2), round(right_ridge_3d[1], 2), round(right_ridge_3d[2], 2))
         slope_found = False
-        for l in lines:
-            s = (round(l.dxf.start.x, 2), round(l.dxf.start.y, 2), round(l.dxf.start.z, 2))
-            e = (round(l.dxf.end.x, 2), round(l.dxf.end.y, 2), round(l.dxf.end.z, 2))
+        for line in lines:
+            s = (round(line.dxf.start.x, 2), round(line.dxf.start.y, 2), round(line.dxf.start.z, 2))
+            e = (round(line.dxf.end.x, 2), round(line.dxf.end.y, 2), round(line.dxf.end.z, 2))
             if (s == left_3d and e == right_ridge_3d) or (s == right_ridge_3d and e == left_3d):
                 slope_found = True
         assert slope_found
@@ -515,6 +514,104 @@ class TestTrussCrossSectionFlat:
             if (s == expected_start and e == expected_end) or (s == expected_end and e == expected_start):
                 first_line_found = True
         assert first_line_found
+
+
+class TestSharedGeometry:
+    """DXF truss lines must be geometrically congruent with GeometrySolver.
+
+    The DXF builder delegates all chord/web/plate coordinate math to
+    :meth:`GeometrySolver.member_segments`, so the multiset of truss-line
+    segments on the ``Trusses`` layer must equal the multiset of segments
+    produced by the unified solver. This mirrors the equivalent
+    ``TestSharedGeometry`` checks in ``test_ifc_builder.py`` so the 2D CAD
+    output stays congruent with the 3D IFC model.
+    """
+
+    @staticmethod
+    def _normalized_segments(lines) -> list:
+        """Return a sorted list of endpoint-normalized segments from DXF lines.
+
+        Each line's endpoints are rounded to 2 dp and the ``(start, end)`` pair
+        is sorted so a segment drawn ``A -> B`` compares equal to the same
+        segment drawn ``B -> A``.
+        """
+        segs = []
+        for line in lines:
+            s = (
+                round(line.dxf.start.x, 2),
+                round(line.dxf.start.y, 2),
+                round(line.dxf.start.z, 2),
+            )
+            e = (
+                round(line.dxf.end.x, 2),
+                round(line.dxf.end.y, 2),
+                round(line.dxf.end.z, 2),
+            )
+            segs.append(tuple(sorted((s, e))))
+        return sorted(segs)
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_truss_line_count_matches_geometry_solver(self, roof_type):
+        w_mm, d_mm = 10000.0, 15000.0
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        doc = _read_dxf(build_dxf(params))
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+
+        solver = GeometrySolver(w_mm, d_mm, roof_type.lower(), 30)
+        expected_count = sum(len(truss) for truss in solver.member_segments())
+        assert len(lines) == expected_count
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_truss_lines_match_geometry_solver_segments(self, roof_type):
+        """Every DXF truss LINE matches a GeometrySolver segment endpoint-for-endpoint."""
+        w_mm, d_mm = 10000.0, 15000.0
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        doc = _read_dxf(build_dxf(params))
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+
+        solver = GeometrySolver(w_mm, d_mm, roof_type.lower(), 30)
+        expected: list = []
+        for truss in solver.member_segments():
+            for start, end, _role in truss:
+                s = (round(start[0], 2), round(start[1], 2), round(start[2], 2))
+                e = (round(end[0], 2), round(end[1], 2), round(end[2], 2))
+                expected.append(tuple(sorted((s, e))))
+        expected = sorted(expected)
+
+        actual = self._normalized_segments(lines)
+        assert len(actual) == len(expected)
+        for actual_seg, expected_seg in zip(actual, expected):
+            assert actual_seg == expected_seg
+
+    def test_decimal_plan_truss_lines_match_geometry_solver_segments(self):
+        """Congruency holds for non-integer (decimal) floor-plan dimensions."""
+        w_mm, d_mm = 8500.0, 12300.0
+        params = _params(
+            floorPlanDimensions="8.5x12.3m", roofType="Gable", roofPitch=35
+        )
+        doc = _read_dxf(build_dxf(params))
+        msp = doc.modelspace()
+        lines = _entities_on_layer(msp, LAYER_TRUSSES, "LINE")
+
+        solver = GeometrySolver(w_mm, d_mm, "gable", 35)
+        expected: list = []
+        for truss in solver.member_segments():
+            for start, end, _role in truss:
+                s = (round(start[0], 2), round(start[1], 2), round(start[2], 2))
+                e = (round(end[0], 2), round(end[1], 2), round(end[2], 2))
+                expected.append(tuple(sorted((s, e))))
+        expected = sorted(expected)
+
+        actual = self._normalized_segments(lines)
+        assert len(actual) == len(expected)
+        for actual_seg, expected_seg in zip(actual, expected):
+            assert actual_seg == expected_seg
 
 
 class TestDimensionEntities:
@@ -552,7 +649,7 @@ class TestLabelsLayer:
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        layer_names = [l.dxf.name for l in doc.layers]
+        layer_names = [layer.dxf.name for layer in doc.layers]
         assert LAYER_LABELS in layer_names
 
     def test_labels_layer_rgb(self):
@@ -576,7 +673,7 @@ class TestLumberSpecsLayer:
         params = _params(floorPlanDimensions="10x15m", roofType="Gable", roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        layer_names = [l.dxf.name for l in doc.layers]
+        layer_names = [layer.dxf.name for layer in doc.layers]
         assert LAYER_LUMBER_SPECS in layer_names
 
     def test_lumber_specs_layer_rgb(self):
@@ -670,7 +767,7 @@ class TestRoundTripAllRoofTypes:
         params = _params(floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30)
         result = build_dxf(params)
         doc = _read_dxf(result)
-        layer_names = {l.dxf.name for l in doc.layers}
+        layer_names = {layer.dxf.name for layer in doc.layers}
         assert _ALL_FIVE_LAYERS <= layer_names
 
     @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
@@ -703,7 +800,7 @@ class TestGenerateExampleFiles:
         result = build_dxf(params)
         doc = _read_dxf(result)
         assert doc.dxfversion == "AC1018"
-        layer_names = {l.dxf.name for l in doc.layers}
+        layer_names = {layer.dxf.name for layer in doc.layers}
         assert _ALL_FIVE_LAYERS <= layer_names
         out_path = _GENERATED_DIR / f"{name}.dxf"
         out_path.write_bytes(result)

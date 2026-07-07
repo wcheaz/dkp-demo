@@ -9,20 +9,20 @@ import ezdxf
 try:
     from src.geometry_solver import (
         WALL_HEIGHT,
+        GeometrySolver,
         compute_truss_count,
         parse_dimensions,
         resolve_pitch,
-        truss_positions,
         truss_ridge_height,
         wall_corners,
     )
 except ImportError:  # pragma: no cover - direct module import in unit tests
     from geometry_solver import (  # type: ignore[no-redef,import-not-found]
         WALL_HEIGHT,
+        GeometrySolver,
         compute_truss_count,
         parse_dimensions,
         resolve_pitch,
-        truss_positions,
         truss_ridge_height,
         wall_corners,
     )
@@ -166,48 +166,11 @@ def _draw_flat(msp, w: float, d: float, pitch_deg: float = 0.0) -> None:
 
 
 def _draw_trusses(msp, w: float, d: float, roof_key: str, roof_pitch) -> None:
-    count = compute_truss_count(w / 1000, d / 1000)
-    pitch_deg = resolve_pitch(roof_key, roof_pitch)
-
-    positions = truss_positions(w, d, count)
-
-    ridge_h = truss_ridge_height(w, roof_key, pitch_deg)
-
-    z_eave = WALL_HEIGHT
-    z_ridge = WALL_HEIGHT + ridge_h
-
-    for y_pos in positions:
-        if roof_key in ("gable", "hip"):
-            msp.add_line(
-                (0, y_pos, z_eave), (w / 2, y_pos, z_ridge),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-            msp.add_line(
-                (w, y_pos, z_eave), (w / 2, y_pos, z_ridge),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-            msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-        elif roof_key == "mono-pitch":
-            msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_ridge),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-            msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-            msp.add_line(
-                (w, y_pos, z_eave), (w, y_pos, z_ridge),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
-        else:
-            msp.add_line(
-                (0, y_pos, z_eave), (w, y_pos, z_eave),
-                dxfattribs={"layer": LAYER_TRUSSES},
-            )
+    pitch_raw = float(roof_pitch) if roof_pitch is not None else None
+    solver = GeometrySolver(w, d, roof_key, pitch_raw)
+    for truss_segments in solver.member_segments():
+        for start, end, _role in truss_segments:
+            msp.add_line(start, end, dxfattribs={"layer": LAYER_TRUSSES})
 
 
 def _parse_overhang(raw: Optional[str]) -> Optional[float]:
