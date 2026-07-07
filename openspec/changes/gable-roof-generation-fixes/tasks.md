@@ -115,7 +115,7 @@
     - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_gable_timber_and_plate_lists` exits 0
   - Stop and hand off if: standard timber IDs are not defined in `design.md` or need dynamic parameterization.
 
-- [ ] **Generate `<PlateTypeList>` in the MXF builder**
+- [x] **Generate `<PlateTypeList>` in the MXF builder**
   - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: MXF builder generates `<PlateTypeList>` containing valid M20/M14 connector plates to resolve plate ID references, along with `<PlateTypeQuantityList>` inside the `<Job>`.
   - Done when:
