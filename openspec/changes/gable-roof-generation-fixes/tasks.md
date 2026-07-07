@@ -83,7 +83,7 @@
     - a test in [test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py) verifying that `/api/mxf/generate` returns XML containing `<FrameList>` and `<BuildingFrameList>` tags is added/updated and passes under `pytest`
   - Stop and hand off if: the REST API contract or XML response schema for `/api/mxf/generate` is modified in a way not documented in [design.md](file:///home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/design.md).
 
-- [ ] **Align IFC builder with the unified geometry solver**
+- [x] **Align IFC builder with the unified geometry solver**
   - Scope: [ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py), [test_ifc_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_ifc_builder.py)
   - Change: IFC generator outputs match the newly updated geometry solver layout.
   - Done when:

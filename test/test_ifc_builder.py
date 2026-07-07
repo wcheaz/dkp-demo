@@ -7,12 +7,11 @@ import ifcopenshell
 import pytest
 
 sys.path.insert(0, "agent/src")
-from ifc_builder import build_ifc
-from geometry_solver import (
-    WALL_HEIGHT,
+from ifc_builder import build_ifc  # type: ignore[import-not-found]
+from geometry_solver import (  # type: ignore[import-not-found]
+    GeometrySolver,
     compute_truss_count,
     resolve_pitch,
-    truss_positions,
     truss_ridge_height,
 )
 
@@ -398,13 +397,68 @@ class TestSharedGeometry:
         w = 10000.0
         params = _params(floorPlanDimensions="10x10m", roofType="Gable", roofPitch=30)
         model = _parse(build_ifc(params))
-        positions = truss_positions(w, w, compute_truss_count(10, 10))
         pitch_deg = resolve_pitch("gable", 30)
         ridge_h = truss_ridge_height(w, "gable", pitch_deg)
-        z_rise = WALL_HEIGHT + ridge_h - WALL_HEIGHT
-        expected = math.sqrt((w / 2) ** 2 + z_rise ** 2)
+        expected = math.sqrt((w / 2) ** 2 + ridge_h ** 2)
         depths = [_body_item(m).Depth for m in model.by_type("IfcMember")]
         assert any(abs(d - expected) < 1.0 for d in depths)
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_member_depths_match_geometry_solver_segments(self, roof_type):
+        """Every IFC member extrusion depth matches a GeometrySolver segment.
+
+        The IFC builder delegates all chord/web/plate coordinate math to
+        :class:`GeometrySolver`, so the multiset of member extrusion depths
+        must equal the multiset of segment lengths produced by
+        :meth:`GeometrySolver.member_segments`.
+        """
+        w_mm, d_mm = 10000.0, 15000.0
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+
+        solver = GeometrySolver(w_mm, d_mm, roof_type.lower(), 30)
+        expected_lengths = sorted(
+            math.sqrt(
+                (end[0] - start[0]) ** 2
+                + (end[1] - start[1]) ** 2
+                + (end[2] - start[2]) ** 2
+            )
+            for truss in solver.member_segments()
+            for start, end, _role in truss
+        )
+        actual_lengths = sorted(
+            _body_item(m).Depth for m in model.by_type("IfcMember")
+        )
+        assert len(actual_lengths) == len(expected_lengths)
+        for actual, expected in zip(actual_lengths, expected_lengths):
+            assert abs(actual - expected) < 1.0
+
+    @pytest.mark.parametrize("roof_type", ["Gable", "Hip", "Mono-pitch", "Flat"])
+    def test_member_roles_match_geometry_solver_segments(self, roof_type):
+        """IFC member ObjectType roles match GeometrySolver segment roles.
+
+        The role distribution (TOP_CHORD / BOTTOM_CHORD / WEB / PLATE) stamped
+        on each ``IfcMember.ObjectType`` must match the role distribution from
+        :meth:`GeometrySolver.member_segments`.
+        """
+        w_mm, d_mm = 10000.0, 15000.0
+        params = _params(
+            floorPlanDimensions="10x15m", roofType=roof_type, roofPitch=30
+        )
+        model = _parse(build_ifc(params))
+
+        solver = GeometrySolver(w_mm, d_mm, roof_type.lower(), 30)
+        expected_roles = sorted(
+            role
+            for truss in solver.member_segments()
+            for _start, _end, role in truss
+        )
+        actual_roles = sorted(
+            m.ObjectType for m in model.by_type("IfcMember")
+        )
+        assert actual_roles == expected_roles
 
 
 class TestRoundTripAllRoofTypes:
