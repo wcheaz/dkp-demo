@@ -983,6 +983,215 @@ class TestGableEndPanels:
         assert root.find("FrameList") is None
 
 
+class TestSlopedBracing:
+    """Sloped bracing generation for gable truss top chords (roofType="Gable").
+
+    Verifies the MXF ``<FrameList>`` carries ``<EngineeredBrace>`` elements
+    along the roof slope: purlins spaced at 1.0 m intervals along each top
+    chord plus diagonal wind braces at 45 degrees relative to the truss span,
+    per design.md §"Sloped Bracing System" / spec.md "Roof Slope Bracing".
+    Tested at the builder level (rather than the solver alone) because the
+    ``<EngineeredBraceList>`` is emitted inline under each ``<Frame>`` and
+    must reference real chord member ids.
+    """
+
+    _WIDTH = 10.0
+    _DEPTH = 15.0
+    _PITCH = 30.0
+    _OVERHANG_M = 0.5
+    _PURLIN_SPACING_M = 1.0
+    _WIND_BRACE_ANGLE_DEG = 45.0
+
+    def _build_root(self, **overrides):
+        defaults = {
+            "floorPlanDimensions": "10x15m",
+            "roofType": "Gable",
+            "roofPitch": 30,
+            "overhang": "0.5m",
+        }
+        defaults.update(overrides)
+        return _parse(build_mxf(_params(**defaults)))
+
+    @staticmethod
+    def _brace_anchor(brace) -> tuple[float, float]:
+        """Return the ``(x, y)`` anchor of an EngineeredBrace."""
+        pos = brace.find("Position3d")
+        assert pos is not None, "EngineeredBrace must carry a <Position3d> anchor"
+        return (float(pos.attrib["x"]), float(pos.attrib["y"]))
+
+    @staticmethod
+    def _brace_member_index(brace) -> int:
+        """Return the 0-based chord index referenced by an EngineeredBrace."""
+        links = brace.findall("MemberLinkList/MemberLink")
+        assert len(links) == 1, (
+            "EngineeredBrace must reference exactly one chord via MemberLink"
+        )
+        # Member id format: ``{frame_id}-0-{member_index}`` (see
+        # _emit_frame_definition).
+        return int(links[0].attrib["memberID"].split("-")[-1])
+
+    def test_sloped_bracing(self):
+        # The MXF must carry <EngineeredBrace> elements along the roof slope:
+        # purlins at 1m centres along each top chord + diagonal wind braces
+        # at 45 degrees relative to the truss span.
+        root = self._build_root()
+        frame_list = root.find("FrameList")
+        assert frame_list is not None, "MXF must emit a <FrameList> for gable roofs"
+
+        common = next(
+            f for f in frame_list.findall("Frame") if f.attrib["family"] == "Truss"
+        )
+        brace_list = common.find("EngineeredBraceList")
+        assert brace_list is not None, (
+            "Common-truss Frame must carry an <EngineeredBraceList>"
+        )
+
+        braces = brace_list.findall("EngineeredBrace")
+        assert len(braces) > 0, "EngineeredBraceList must contain braces"
+
+        purlins = [b for b in braces if b.attrib["braceType"] == "purlin"]
+        wind_braces = [b for b in braces if b.attrib["braceType"] == "windBrace"]
+        assert len(purlins) >= 2, "Must emit purlins along both top chords"
+        assert len(wind_braces) >= 2, "Must emit wind braces on both top chords"
+
+        # --- Wind braces carry a 45-degree angle (or 180-45 = 135 for the
+        # right chord, mirroring the left across the ridge). ---
+        for wb in wind_braces:
+            angle = float(wb.attrib["angle"])
+            assert angle == pytest.approx(self._WIND_BRACE_ANGLE_DEG) or angle == (
+                pytest.approx(180.0 - self._WIND_BRACE_ANGLE_DEG)
+            ), f"Wind brace angle must be 45° (or 135°), got {angle}"
+
+        # --- Purlins anchor on the top chords; group by linked chord index. ---
+        left_purlins = []
+        right_purlins = []
+        for p in purlins:
+            anchor = self._brace_anchor(p)
+            idx = self._brace_member_index(p)
+            if idx == 0:
+                left_purlins.append(anchor)
+            elif idx == 1:
+                right_purlins.append(anchor)
+            else:
+                pytest.fail(f"Purlin references unexpected member index {idx}")
+
+        assert len(left_purlins) >= 1, "Left top chord must carry purlins"
+        assert len(right_purlins) >= 1, "Right top chord must carry purlins"
+
+        # Each purlin sits ON its top chord line. Left chord rises from (0, 0)
+        # to (mid, ridge): y = x * tan(pitch). Right chord falls from (mid,
+        # ridge) to (width, 0): y = (width - x) * tan(pitch).
+        tan_pitch = math.tan(math.radians(self._PITCH))
+        mid = self._WIDTH / 2.0
+        for x, y in left_purlins:
+            assert y == pytest.approx(x * tan_pitch, abs=1e-3), (
+                f"Left purlin at ({x},{y}) is not on the top chord line"
+            )
+            assert x <= mid + 1e-3, f"Left purlin X={x} must be left of the ridge"
+        for x, y in right_purlins:
+            assert y == pytest.approx((self._WIDTH - x) * tan_pitch, abs=1e-3), (
+                f"Right purlin at ({x},{y}) is not on the top chord line"
+            )
+            assert x >= mid - 1e-3, f"Right purlin X={x} must be right of the ridge"
+
+        # --- Purlin spacing along each chord == 1.0 m (Euclidean distance
+        # between consecutive anchors along the chord). ---
+        def chord_distance(p1, p2):
+            return math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
+        for chord_purlins in (left_purlins, right_purlins):
+            # Sort along the chord (left: ascending X; right: descending X ->
+            # negate X so the sort key is monotonic along the chord from eave
+            # to ridge for both sides).
+            chord_purlins.sort()
+            if chord_purlins is right_purlins:
+                chord_purlins.reverse()
+            spacings = [
+                chord_distance(chord_purlins[i + 1], chord_purlins[i])
+                for i in range(len(chord_purlins) - 1)
+            ]
+            assert all(
+                s == pytest.approx(self._PURLIN_SPACING_M, abs=1e-3) for s in spacings
+            ), f"Purlin spacing must be 1.0 m along the chord, got {spacings}"
+
+    def test_sloped_bracing_purlin_angle_matches_pitch(self):
+        # The purlin angle attribute mirrors the roof pitch on the left chord
+        # and 180 - pitch on the right chord so each purlin renders square to
+        # its slope.
+        root = self._build_root()
+        common = next(
+            f for f in root.findall("FrameList/Frame") if f.attrib["family"] == "Truss"
+        )
+        purlins = [
+            b
+            for b in common.findall("EngineeredBraceList/EngineeredBrace")
+            if b.attrib["braceType"] == "purlin"
+        ]
+        for p in purlins:
+            angle = float(p.attrib["angle"])
+            idx = self._brace_member_index(p)
+            if idx == 0:
+                assert angle == pytest.approx(self._PITCH), (
+                    f"Left purlin angle must equal pitch ({self._PITCH}°), got {angle}"
+                )
+            else:
+                assert angle == pytest.approx(180.0 - self._PITCH), (
+                    f"Right purlin angle must equal 180-pitch "
+                    f"({180.0 - self._PITCH}°), got {angle}"
+                )
+
+    def test_sloped_bracing_links_resolve_to_top_chords(self):
+        # Each EngineeredBrace MemberLink must resolve to a real WoodMember of
+        # type "TopChord" inside the same Frame (the brace references the top
+        # chord it braces, per spec.md "Roof Slope Bracing").
+        root = self._build_root()
+        common = next(
+            f for f in root.findall("FrameList/Frame") if f.attrib["family"] == "Truss"
+        )
+        member_by_id = {
+            m.attrib["id"]: m
+            for m in common.findall("./PartList/Part/MemberList/WoodMember")
+        }
+        braces = common.findall("EngineeredBraceList/EngineeredBrace")
+        assert braces, "Common-truss Frame must carry engineered braces"
+        for brace in braces:
+            link = brace.find("MemberLinkList/MemberLink")
+            assert link is not None
+            target = member_by_id.get(link.attrib["memberID"])
+            assert target is not None, (
+                f"Brace {brace.attrib['id']} references unknown member "
+                f"{link.attrib['memberID']}"
+            )
+            assert target.attrib["type"] == "TopChord", (
+                f"Brace {brace.attrib['id']} must reference a TopChord, got "
+                f"{target.attrib['type']}"
+            )
+
+    def test_sloped_bracing_emitted_on_gable_end_frame(self):
+        # The gable-end Frame shares the same full-span top-chord profile as a
+        # common truss (the studs are additional members), so it must also
+        # carry an EngineeredBraceList with purlins + wind braces.
+        root = self._build_root()
+        gable = next(
+            f for f in root.findall("FrameList/Frame")
+            if f.attrib["family"] == "GableEnd"
+        )
+        brace_list = gable.find("EngineeredBraceList")
+        assert brace_list is not None, (
+            "GableEnd Frame must also carry an <EngineeredBraceList>"
+        )
+        braces = brace_list.findall("EngineeredBrace")
+        purlins = [b for b in braces if b.attrib["braceType"] == "purlin"]
+        wind_braces = [b for b in braces if b.attrib["braceType"] == "windBrace"]
+        assert len(purlins) >= 2
+        assert len(wind_braces) >= 2
+
+    def test_sloped_bracing_non_gable_emits_none(self):
+        # Sloped bracing is gable-only; a flat roof emits no FrameList at all.
+        root = self._build_root(roofType="Flat", roofPitch=0)
+        assert root.find("FrameList") is None
+
+
 class TestHipRoofSurfaces:
     """Hip (four-plane) roof surface generation (roofType="Hip").
 

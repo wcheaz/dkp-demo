@@ -164,6 +164,21 @@ TRANSPORT_SPLIT_HEIGHT_M = 2.8  # Part 1 (Base) vertical extent
 # engineering constant, not a configuration knob.
 GABLE_END_STUD_SPACING_M = 0.6
 
+# Sloped bracing constants (metres / degrees). Purlins run perpendicular to
+# the truss span along the roof slope at standard 1.0 m centres, and diagonal
+# wind braces cross the top chords at 45 degrees relative to the truss span
+# (see design.md §"Sloped Bracing System" / spec.md "Roof Slope Bracing").
+# Fixed engineering constants, not configuration knobs.
+PURLIN_SPACING_M = 1.0
+WIND_BRACE_ANGLE_DEG = 45.0
+
+# Functional brace type strings written to the ``EngineeredBrace.braceType``
+# attribute, matching the Pamir reference export
+# (``hidden/Sample_Project/7JULY_Z.mxf``) so MiTek Pamir classifies each
+# generated brace correctly on import.
+BRACE_TYPE_PURLIN = "purlin"
+BRACE_TYPE_WIND_BRACE = "windBrace"
+
 # An MXF transport-split truss part: ``(name, z_base, z_top, members)`` where
 # ``name`` is the Pamir Part label (``"Part 1"`` base / ``"Part 2"`` cap),
 # ``z_base`` / ``z_top`` are the frame-local vertical extents of the part (m),
@@ -174,6 +189,17 @@ MxfTrussPart = tuple[str, float, float, list[MxfChordMember]]
 # axis (m) and the ordered list of parts composing the frame. Short trusses
 # carry a single part; tall trusses carry two (base + cap).
 MxfSplitTrussFrame = tuple[float, list[MxfTrussPart]]
+
+# An MXF engineered brace: ``(brace_type, angle_deg, x, y, member_index)``.
+# ``brace_type`` is the Pamir ``EngineeredBrace.braceType`` attribute
+# (:data:`BRACE_TYPE_PURLIN` / :data:`BRACE_TYPE_WIND_BRACE`); ``angle_deg`` is
+# the brace rotation in degrees (matches the roof pitch for purlins, 45° for
+# wind braces); ``(x, y)`` is the brace anchor in the frame LOCAL coordinate
+# system (metres); and ``member_index`` is the 0-based index of the referenced
+# chord member within its Frame's MemberList (left top chord = 0, right top
+# chord = 1 — matching the order emitted by
+# :meth:`GeometrySolver._gable_full_span_members`).
+MxfBrace = tuple[str, float, float, float, int]
 
 
 class GeometrySolver:
@@ -559,6 +585,98 @@ class GeometrySolver:
             ("Part 1", 0.0, split_z, part1_members),
             ("Part 2", split_z, h, part2_members),
         ]
+
+    def mxf_slope_braces(self) -> list[MxfBrace]:
+        """Return the slope bracing definitions for one gable truss (metres).
+
+        Braces run along the roof slope rather than at ceiling level so MiTek
+        Pamir renders them square to the top chords and the ceiling-level
+        collision warnings documented in proposal.md are avoided. Two brace
+        families are emitted (see design.md §"Sloped Bracing System" / spec.md
+        "Roof Slope Bracing"):
+
+        * **Purlins** (:data:`BRACE_TYPE_PURLIN`) — placed at standard
+          :data:`PURLIN_SPACING_M` (1.0 m) centres along each top chord,
+          stepping up from the eave toward the ridge. The Pamir ``angle``
+          attribute mirrors the roof pitch (``180 - pitch`` on the right
+          chord) so each purlin is rendered square to its slope.
+        * **Diagonal wind braces** (:data:`BRACE_TYPE_WIND_BRACE`) — anchored
+          at the midpoint of each top chord at :data:`WIND_BRACE_ANGLE_DEG`
+          (45°) relative to the truss span, so both roof planes carry a wind
+          brace without crowding the Frame definition.
+
+        The ``member_index`` field of each brace references the chord member
+        it braces: ``0`` for the left top chord and ``1`` for the right top
+        chord, matching the order emitted by :meth:`_gable_full_span_members`
+        (``[TopChord-left, TopChord-right, BottomChord]``) so the
+        ``<MemberLink>`` resolves to the correct chord.
+
+        Non-gable roof types return an empty list because sloped bracing is
+        only implemented for gable roofs in this change.
+
+        Returns:
+            One :class:`MxfBrace` per brace anchor. The list is shared
+            verbatim by every common-truss and gable-end Frame definition
+            because both share the same full-span chord profile (only the
+            stud members differ), so the brace anchors and chord indices are
+            identical.
+        """
+        if self.roof_key != "gable":
+            return []
+
+        w_m = self.width_mm / 1000.0
+        mid = w_m / 2.0
+        ridge = self.truss_height_m
+        pitch_rad = math.radians(self.pitch_deg)
+        cos_p = math.cos(pitch_rad)
+        sin_p = math.sin(pitch_rad)
+
+        # Top-chord length from eaves to ridge (metres). Both chords share
+        # this length by gable symmetry, so the same step count drives both.
+        chord_len = math.sqrt(mid * mid + ridge * ridge)
+
+        braces: list[MxfBrace] = []
+
+        # Purlins along the LEFT top chord at PURLIN_SPACING_M centres. The
+        # loop steps up from the eave (d = spacing) and skips the ridge
+        # endpoint itself when the chord length is an exact multiple of the
+        # spacing (the ridge is the convergence point of the two top chords,
+        # not a free purlin anchor).
+        step_count = int(chord_len / PURLIN_SPACING_M)
+        for i in range(1, step_count + 1):
+            d = i * PURLIN_SPACING_M
+            if d > chord_len - 1e-9:
+                break
+            x = d * cos_p
+            y = d * sin_p
+            braces.append((BRACE_TYPE_PURLIN, self.pitch_deg, x, y, 0))
+
+        # Purlins along the RIGHT top chord. The chord runs from (mid, ridge)
+        # to (width, 0); step from the right eave toward the ridge so the
+        # anchors are symmetric with the left chord. The Pamir ``angle`` is
+        # ``180 - pitch`` so the brace renders square to the right-side
+        # slope.
+        for i in range(1, step_count + 1):
+            d = i * PURLIN_SPACING_M
+            if d > chord_len - 1e-9:
+                break
+            x = w_m - d * cos_p
+            y = d * sin_p
+            braces.append((BRACE_TYPE_PURLIN, 180.0 - self.pitch_deg, x, y, 1))
+
+        # Diagonal wind braces at 45° anchored at the midpoint of each top
+        # chord. The right-side brace uses ``180 - 45`` so its rendered
+        # rotation mirrors the left-side brace across the ridge.
+        half_len = chord_len / 2.0
+        lx = half_len * cos_p
+        ly = half_len * sin_p
+        braces.append((BRACE_TYPE_WIND_BRACE, WIND_BRACE_ANGLE_DEG, lx, ly, 0))
+        rx = w_m - half_len * cos_p
+        braces.append(
+            (BRACE_TYPE_WIND_BRACE, 180.0 - WIND_BRACE_ANGLE_DEG, rx, ly, 1)
+        )
+
+        return braces
 
 
 # ---------------------------------------------------------------------------

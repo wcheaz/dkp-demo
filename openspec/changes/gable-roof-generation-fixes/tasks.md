@@ -60,7 +60,7 @@
     - `rg "def test_gable_end" test/test_mxf_builder.py` exits 0
   - Stop and hand off if: spacing requirements for gable-end vertical studs are missing or contradict configuration options in [design.md](file:///home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/design.md).
 
-- [ ] **Implement roof slope bracing and purlins**
+- [x] **Implement roof slope bracing and purlins**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: Generate engineered braces (purlins and diagonal bracing) running along the roof slope.
   - Done when:
