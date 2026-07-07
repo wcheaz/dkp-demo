@@ -103,13 +103,48 @@
     - the tests in [test_dxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_dxf_builder.py) pass under `pytest`, verifying congruent 2D CAD layout generation based on updated [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py) calculations
   - Stop and hand off if: DXF representation of advanced truss elements (splitting, bracing) cannot be rendered using simple line elements or is not supported by `ezdxf`.
 
-## 5. Final Quality Gates
+## 5. MXF Import and Transport Splitting Fixes
 
-- [x] **Run final integrated quality gates**
+- [x] **Generate `<TimberSectionList>` in the MXF builder**
+  - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
+  - Change: MXF builder generates `<TimberSectionList>` containing valid C24 timber sections to resolve member ID references.
+  - Done when:
+    - `rg "TimberSectionList" agent/src/mxf_builder.py` exits 0
+    - `uv run --project agent ruff check agent/src/mxf_builder.py test/test_mxf_builder.py` exits 0
+    - `uv run --project agent mypy agent/src/mxf_builder.py` exits 0
+    - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_gable_timber_and_plate_lists` exits 0
+  - Stop and hand off if: standard timber IDs are not defined in `design.md` or need dynamic parameterization.
+
+- [ ] **Generate `<PlateTypeList>` in the MXF builder**
+  - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
+  - Change: MXF builder generates `<PlateTypeList>` containing valid M20/M14 connector plates to resolve plate ID references, along with `<PlateTypeQuantityList>` inside the `<Job>`.
+  - Done when:
+    - `rg "PlateTypeList" agent/src/mxf_builder.py` exits 0
+    - `uv run --project agent ruff check agent/src/mxf_builder.py test/test_mxf_builder.py` exits 0
+    - `uv run --project agent mypy agent/src/mxf_builder.py` exits 0
+    - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_gable_timber_and_plate_lists` exits 0
+  - Stop and hand off if: standard plate IDs are not defined in `design.md` or need dynamic parameterization.
+
+- [ ] **Integrate transport-height splitting into the MXF builder**
+  - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
+  - Change: The MXF builder calls `solver.mxf_truss_parts(overhang_m)` to output split frames (with Part 1 base and Part 2 cap elements) instead of `mxf_truss_frames()` when the ridge height exceeds 3.3m.
+  - Done when:
+    - `rg "mxf_truss_parts" agent/src/mxf_builder.py` exits 0
+    - `rg "def test_mxf_builder_splits_tall_truss_in_xml" test/test_mxf_builder.py` exits 0
+    - `uv run --project agent ruff check agent/src/mxf_builder.py test/test_mxf_builder.py` exits 0
+    - `uv run --project agent mypy agent/src/mxf_builder.py` exits 0
+    - `PYTHONPATH=agent/src:agent uv run --project agent pytest test/test_mxf_builder.py -k test_mxf_builder_splits_tall_truss_in_xml` exits 0
+  - Stop and hand off if: the geometry solver's split parts are incompatible with the MXF frame XML generator.
+
+## 6. Final Quality Gates
+
+- [ ] **Run final integrated quality gates**
   - Scope: [.ralph/baselines/](file:///home/ncheaz/git/dkp-demo/.ralph/baselines/), [agent/src/](file:///home/ncheaz/git/dkp-demo/agent/src/), [test/](file:///home/ncheaz/git/dkp-demo/test/)
   - Change: All tests, linting, and typechecking run clean or match pre-flight baselines across the whole repository.
   - Done when:
-    - Baseline classification: `uv run --project agent ruff check agent/src` exits 0, or failures match the pre-flight baseline with no new failures
-    - Baseline classification: `uv run --project agent mypy agent/src` exits 0, or failures match the pre-flight baseline with no new failures
-    - Baseline classification: `PYTHONPATH=agent/src:agent uv run --project agent pytest` exits 0, or failures match the pre-flight baseline with no new failures
+    - Baseline classification: `uv run --project agent ruff check agent/src` exits 0, or failures match the baseline in `.ralph/baselines/gable-roof-generation-fixes-lint.txt`
+    - Baseline classification: `uv run --project agent mypy agent/src` exits 0, or failures match the baseline in `.ralph/baselines/gable-roof-generation-fixes-typecheck.txt`
+    - Baseline classification: `PYTHONPATH=agent/src:agent uv run --project agent pytest` exits 0, or failures match the baseline in `.ralph/baselines/gable-roof-generation-fixes-test.txt`
   - Stop and hand off if: any unexpected test regression is introduced in unrelated modules.
+
+
