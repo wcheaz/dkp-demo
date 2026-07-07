@@ -49,7 +49,7 @@
     - `rg "def test_truss_transport_height_splitting" test/test_mxf_builder.py` exits 0
   - Stop and hand off if: [design.md](file:///home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/design.md) is ambiguous on whether/how the splitting height of 2.8m or maximum transport height of 3.3m can be configured or overridden.
 
-- [ ] **Integrate gable-end panel frames**
+- [x] **Integrate gable-end panel frames**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: The first and last trusses in the layout sequence are designated as `GableEnd` family panels with vertical studs.
   - Done when:

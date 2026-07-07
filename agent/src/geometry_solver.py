@@ -157,6 +157,13 @@ MxfTrussFrame = tuple[float, list[MxfChordMember]]
 TRANSPORT_MAX_HEIGHT_M = 3.3    # trigger threshold: split when truss is taller
 TRANSPORT_SPLIT_HEIGHT_M = 2.8  # Part 1 (Base) vertical extent
 
+# Gable-end panel stud spacing (metres). The first and last trusses in the
+# layout sequence are emitted as ``GableEnd`` family ``PanelFrame`` definitions
+# whose vertical studs run from the bottom chord up to the sloping top chord at
+# standard 600 mm centres (see design.md §"Outer Gable-End Panels"). Fixed
+# engineering constant, not a configuration knob.
+GABLE_END_STUD_SPACING_M = 0.6
+
 # An MXF transport-split truss part: ``(name, z_base, z_top, members)`` where
 # ``name`` is the Pamir Part label (``"Part 1"`` base / ``"Part 2"`` cap),
 # ``z_base`` / ``z_top`` are the frame-local vertical extents of the part (m),
@@ -406,8 +413,9 @@ class GeometrySolver:
         Two sloping ``TopChord`` members meet at the central ridge at
         ``X = width/2``; a single wall-to-wall ``BottomChord`` ties the eaves.
         ``overhang_m`` only lengthens the top chords (rafter tails) past the
-        eaves. Shared by :meth:`mxf_truss_frames` and the non-split path of
-        :meth:`mxf_truss_parts` so both emit identical full-span geometry.
+        eaves. Shared by :meth:`mxf_truss_frames`, the non-split path of
+        :meth:`mxf_truss_parts`, and :meth:`_gable_end_members` so every code
+        path emits identical full-span chord geometry.
         """
         w_m = self.width_mm / 1000.0
         ridge_m = self.truss_height_m
@@ -418,6 +426,101 @@ class GeometrySolver:
             ("TopChord", (mid, ridge_m), (w_m + o, 0.0)),
             ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
         ]
+
+    def mxf_gable_end_frames(
+        self, overhang_m: float = 0.0
+    ) -> list[MxfTrussFrame]:
+        """Return the gable-end panel frames at the outer layout positions (m).
+
+        The first and last truss positions in the layout sequence are emitted
+        as ``GableEnd`` family ``PanelFrame`` definitions: they share the
+        full-span gable chord profile (one wall-to-wall ``BottomChord`` plus
+        two sloping ``TopChord`` members meeting at the ridge) and add vertical
+        ``Stud`` members spaced at the standard 600 mm pitch (see design.md
+        §"Outer Gable-End Panels"). Each stud runs from the bottom chord
+        (``Y = 0``) up to the top-chord height at the stud's ``X`` coordinate;
+        degenerate zero-height studs at the eaves corners (where the top chord
+        meets the bottom chord) are omitted so every emitted stud is a real
+        vertical member.
+
+        Non-gable roof types return an empty list because gable-end panels are
+        only meaningful for gable roofs in this change. A layout with fewer
+        than two truss positions also returns an empty list because gable-end
+        designation requires distinct first/last positions.
+
+        Args:
+            overhang_m: Optional top-chord overhang extension past the outer
+                walls in metres. Applied to the gable-end panel's top chords
+                (rafter tails) so its outer profile matches the neighbouring
+                common trusses; the studs are placed within the building width
+                (``X`` in ``[0, width]``) and are unaffected by the overhang.
+
+        Returns:
+            Two :class:`MxfTrussFrame` entries: the first and last truss
+            positions along the depth axis, each carrying the same gable-end
+            panel member list (chords + studs).
+        """
+        if self.roof_key != "gable" or len(self.positions) < 2:
+            return []
+
+        members = self._gable_end_members(overhang_m)
+        first_y_m = self.positions[0] / 1000.0
+        last_y_m = self.positions[-1] / 1000.0
+        return [(first_y_m, members), (last_y_m, members)]
+
+    def _gable_end_members(self, overhang_m: float) -> list[MxfChordMember]:
+        """Return the chord + stud members for one gable-end panel (metres).
+
+        Combines the standard full-span gable chord profile from
+        :meth:`_gable_full_span_members` (two sloping ``TopChord`` members
+        meeting at the ridge plus one wall-to-wall ``BottomChord``, with the
+        top chords extended by ``overhang_m`` past the outer walls) with the
+        vertical ``Stud`` members from :meth:`_gable_end_studs`. Used by
+        :meth:`mxf_gable_end_frames` so both outer layout positions emit
+        identical gable-end panel geometry.
+        """
+        members = self._gable_full_span_members(overhang_m)
+        members.extend(self._gable_end_studs())
+        return members
+
+    def _gable_end_studs(self) -> list[MxfChordMember]:
+        """Return the vertical Stud members for one gable-end panel (metres).
+
+        Studs are placed at standard 600 mm centres (see
+        :data:`GABLE_END_STUD_SPACING_M`) starting from ``X = 0`` and stepping
+        across the full building width. Each stud runs vertically from the
+        bottom chord (``Y = 0``) up to the sloping top chord at its ``X``
+        coordinate: the top-chord height rises linearly with the roof pitch
+        from the eave to the ridge (``Y = X * tan(pitch)`` for ``X <=
+        width/2``) and then falls symmetrically on the far side (``Y =
+        (width - X) * tan(pitch)`` for ``X > width/2``).
+
+        Degenerate zero-height studs at the eaves corners (``X = 0`` and ``X =
+        width``, where the top chord meets the bottom chord) are skipped so
+        every emitted stud is a real vertical member with positive length.
+        """
+        w_m = self.width_mm / 1000.0
+        tan_pitch = math.tan(math.radians(self.pitch_deg))
+        mid = w_m / 2.0
+        studs: list[MxfChordMember] = []
+        # Step across the width at GABLE_END_STUD_SPACING_M centres. The loop
+        # bound is inclusive of the far wall (X = width) so a width that is an
+        # exact multiple of the spacing still considers that final position
+        # (and skips it as degenerate, matching the near-wall corner).
+        step_count = int(w_m / GABLE_END_STUD_SPACING_M) + 1
+        for i in range(step_count + 1):
+            x = i * GABLE_END_STUD_SPACING_M
+            if x > w_m + 1e-9:
+                break
+            if x <= mid:
+                top_y = x * tan_pitch
+            else:
+                top_y = (w_m - x) * tan_pitch
+            if top_y <= 1e-6:
+                # Degenerate (zero-height) stud at the eaves corner; skip.
+                continue
+            studs.append(("Stud", (x, 0.0), (x, top_y)))
+        return studs
 
     def _gable_split_parts(
         self, h: float, split_z: float

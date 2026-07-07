@@ -665,16 +665,26 @@ class TestGableFullSpanTrusses:
         assert max(ridge_ys) == pytest.approx(expected_ridge_y)
 
     def test_gable_frame_quantity_matches_truss_count(self):
-        # The single Frame definition's quantity must equal the number of
-        # truss positions along the building depth.
+        # The FrameList carries two Frame definitions: a common-truss Frame
+        # whose quantity covers the interior positions (total - 2 gable ends)
+        # and a GableEnd Frame whose quantity is 2 (first + last positions).
+        # The sum of both quantities equals the total truss count.
         root = self._build_root()
-        frame = root.find("FrameList/Frame")
+        frames = root.findall("FrameList/Frame")
         from geometry_solver import GeometrySolver
 
         solver = GeometrySolver(
             self._WIDTH * 1000.0, self._DEPTH * 1000.0, "gable", self._PITCH
         )
-        assert int(frame.attrib["quantity"]) == len(solver.mxf_truss_frames())
+        total = len(solver.mxf_truss_frames())
+        gable_ends = len(solver.mxf_gable_end_frames())
+        expected_common = max(0, total - gable_ends)
+        quantities = {
+            f.attrib["family"]: int(f.attrib["quantity"]) for f in frames
+        }
+        assert quantities.get("Truss", 0) == expected_common
+        assert quantities.get("GableEnd", 0) == gable_ends
+        assert quantities.get("Truss", 0) + quantities.get("GableEnd", 0) == total
 
     def test_gable_full_span_zero_overhang(self):
         # With no overhang the top-chord eave endpoints sit exactly on the
@@ -838,6 +848,139 @@ class TestTrussTransportHeightSplitting:
         )
         assert tall_mono.truss_height_m > 3.3
         assert tall_mono.mxf_truss_parts() == []
+
+
+class TestGableEndPanels:
+    """Gable-end panel frame generation (roofType="Gable").
+
+    Verifies the first and last trusses in the layout sequence are emitted as
+    ``GableEnd`` family ``PanelFrame`` definitions with vertical studs spaced
+    at the standard 600 mm pitch, per design.md §"Outer Gable-End Panels".
+    """
+
+    _WIDTH = 10.0
+    _DEPTH = 15.0
+    _PITCH = 30.0
+    _OVERHANG_M = 0.5
+    _STUD_SPACING_M = 0.6
+
+    def _build_root(self, **overrides):
+        defaults = {
+            "floorPlanDimensions": "10x15m",
+            "roofType": "Gable",
+            "roofPitch": 30,
+            "overhang": "0.5m",
+        }
+        defaults.update(overrides)
+        return _parse(build_mxf(_params(**defaults)))
+
+    def test_gable_end(self):
+        # The MXF must carry a GableEnd PanelFrame Frame definition covering
+        # the two outer (first + last) layout positions, plus vertical Stud
+        # members spaced at 600 mm centres running from the bottom chord up to
+        # the sloping top chord.
+        root = self._build_root()
+        frame_list = root.find("FrameList")
+        assert frame_list is not None, "MXF must emit a <FrameList> for gable roofs"
+
+        gable_frames = [
+            f for f in frame_list.findall("Frame")
+            if f.attrib["family"] == "GableEnd"
+        ]
+        assert len(gable_frames) == 1, (
+            "Expected exactly one GableEnd Frame definition (shared by both "
+            "outer positions via quantity=2)"
+        )
+        gable = gable_frames[0]
+        assert gable.attrib["type"] == "PanelFrame"
+        assert int(gable.attrib["quantity"]) == 2, (
+            "GableEnd Frame must cover the two outer positions (first + last)"
+        )
+
+        # Outer profile preserved: 1 BottomChord + 2 TopChords (same as a
+        # common truss) plus vertical Stud members.
+        members = gable.findall("./PartList/Part/MemberList/WoodMember")
+        bottoms = [m for m in members if m.attrib["type"] == "BottomChord"]
+        tops = [m for m in members if m.attrib["type"] == "TopChord"]
+        studs = [m for m in members if m.attrib["type"] == "Stud"]
+        assert len(bottoms) == 1, "GableEnd panel must keep the wall-to-wall BottomChord"
+        assert len(tops) == 2, "GableEnd panel must keep the two sloping TopChords"
+        assert len(studs) >= 2, "GableEnd panel must add vertical Stud members"
+
+        # Each stud is vertical (start.X == end.X), starts at the bottom chord
+        # (Y=0), and rises above it. Collect X positions for spacing checks.
+        stud_xs: list[float] = []
+        for stud in studs:
+            face = stud.find("./FrontFace/Face")
+            assert face is not None
+            pts = [
+                (float(p.split(",")[0]), float(p.split(",")[1]))
+                for p in face.attrib["polygon"].split(" ")
+            ]
+            start, end = pts[0], pts[1]
+            assert start[0] == pytest.approx(end[0]), (
+                f"Stud at X={start[0]} must be vertical (start.X == end.X)"
+            )
+            assert start[1] == pytest.approx(0.0), (
+                f"Stud at X={start[0]} must start at the bottom chord (Y=0)"
+            )
+            assert end[1] > 0.0, (
+                f"Stud at X={start[0]} must rise above the bottom chord"
+            )
+            stud_xs.append(start[0])
+
+        # Studs are spaced at the standard 600 mm pitch.
+        stud_xs.sort()
+        spacings = [stud_xs[i + 1] - stud_xs[i] for i in range(len(stud_xs) - 1)]
+        assert all(s == pytest.approx(self._STUD_SPACING_M) for s in spacings), (
+            f"Stud spacing must be 600 mm, got {spacings}"
+        )
+
+    def test_gable_end_studs_reach_top_chord(self):
+        # The stud top endpoint (Y) must match the top-chord height at that X.
+        # tan(30°) ~ 0.577; for X <= width/2 the top-chord Y = X * tan(pitch),
+        # and for X > width/2 it falls symmetrically.
+        root = self._build_root()
+        gable = next(
+            f for f in root.findall("FrameList/Frame")
+            if f.attrib["family"] == "GableEnd"
+        )
+        tan_pitch = math.tan(math.radians(self._PITCH))
+        mid = self._WIDTH / 2.0
+        for stud in gable.findall("./PartList/Part/MemberList/WoodMember[@type='Stud']"):
+            face = stud.find("./FrontFace/Face")
+            pts = [
+                (float(p.split(",")[0]), float(p.split(",")[1]))
+                for p in face.attrib["polygon"].split(" ")
+            ]
+            (_sx, _sy), (ex, ey) = pts[0], pts[1]
+            expected_top = ex * tan_pitch if ex <= mid else (self._WIDTH - ex) * tan_pitch
+            assert ey == pytest.approx(expected_top, abs=1e-3), (
+                f"Stud at X={ex} top Y={ey} does not match top chord Y={expected_top}"
+            )
+
+    def test_gable_end_does_not_duplicate_common_truss_positions(self):
+        # total positions == common-truss quantity + gable-end quantity (2).
+        # The gable-end positions replace (not extend) the outer common-truss
+        # positions, so the FrameList quantities must sum to the truss count.
+        from geometry_solver import GeometrySolver
+
+        root = self._build_root()
+        frames = root.findall("FrameList/Frame")
+        solver = GeometrySolver(
+            self._WIDTH * 1000.0, self._DEPTH * 1000.0, "gable", self._PITCH
+        )
+        total = len(solver.mxf_truss_frames())
+        emitted = sum(int(f.attrib["quantity"]) for f in frames)
+        assert emitted == total, (
+            f"FrameList quantities sum to {emitted} but the building has "
+            f"{total} truss positions"
+        )
+
+    def test_flat_roof_emits_no_gable_end_frame(self):
+        # GableEnd panels are gable-only; a flat roof must not emit one.
+        root = self._build_root(roofType="Flat", roofPitch=0)
+        assert root.find("FrameList") is None
 
 
 class TestHipRoofSurfaces:
