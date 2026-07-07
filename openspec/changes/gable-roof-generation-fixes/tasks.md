@@ -73,7 +73,7 @@
 
 ## 4. API and Integration
 
-- [ ] **Export complete structural framing in MXF payload**
+- [x] **Export complete structural framing in MXF payload**
   - Scope: [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [main.py](file:///home/ncheaz/git/dkp-demo/agent/src/main.py), [test_mxf_endpoint.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_endpoint.py)
   - Change: REST API `/api/mxf/generate` includes `<BuildingFrameList>` and `<FrameList>` with all member, plate, and brace definitions in the returned MXF.
   - Done when:

@@ -229,3 +229,58 @@ class TestMxfEndpointRoofSurfaces:
         # Hip => four hip planes plus one floor surface.
         assert roof_ids == ["SR0-0", "SR0-1", "SR0-2", "SR0-3"]
         assert root.find(".//FloorList/Floor") is not None
+
+
+class TestMxfEndpointStructuralFraming:
+    """Verify the REST payload carries the full structural framing XML.
+
+    Per ``openspec/changes/gable-roof-generation-fixes/specs/mxf-generation``
+    the gable MXF response SHALL include a ``<FrameList>`` (root-level Frame
+    definitions carrying member/plate/brace geometry) and a
+    ``<BuildingFrameList>`` under ``<Building>`` positioning each generated
+    frame instance.
+    """
+
+    @pytest.mark.anyio
+    async def test_mxf_endpoint_gable_emits_frame_list_and_building_frame_list(
+        self, client
+    ):
+        resp = await client.post(
+            "/api/mxf/generate",
+            json=_valid_payload(
+                floorPlanDimensions="10x15m",
+                roofType="Gable",
+                roofPitch=30,
+                overhang="0.5m",
+            ),
+        )
+        assert resp.status_code == 200
+        root = ET.fromstring(resp.content)
+
+        # Root-level <FrameList> carrying the Frame definitions.
+        frame_list = root.find("FrameList")
+        assert frame_list is not None, (
+            "/api/mxf/generate must emit a <FrameList> for gable roofs"
+        )
+        frames = frame_list.findall("Frame")
+        assert len(frames) >= 1, (
+            "<FrameList> must carry at least one Frame definition"
+        )
+
+        # <BuildingFrameList> under <Building> positioning each frame instance.
+        building_frame_list = root.find(".//Building/BuildingFrameList")
+        assert building_frame_list is not None, (
+            "/api/mxf/generate must emit a <BuildingFrameList> under <Building> "
+            "for gable roofs"
+        )
+        building_frames = building_frame_list.findall("BuildingFrame")
+        assert len(building_frames) >= 1, (
+            "<BuildingFrameList> must position at least one frame instance"
+        )
+        # Each BuildingFrame references a frameID defined in <FrameList>.
+        defined_ids = {f.attrib["id"] for f in frames}
+        for bf in building_frames:
+            assert bf.attrib["frameID"] in defined_ids, (
+                f"<BuildingFrame frameID={bf.attrib['frameID']!r}> must "
+                f"reference a Frame defined in <FrameList> ({sorted(defined_ids)})"
+            )

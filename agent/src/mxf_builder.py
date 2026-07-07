@@ -19,6 +19,8 @@ from xml.dom import minidom
 
 try:
     from src.geometry_solver import (
+        MXF_EAVES_OFFSET,
+        MXF_ROOF_Z_BASE,
         GeometrySolver,
         floor_surface_polygon,
         parse_dimensions,
@@ -28,6 +30,8 @@ try:
     from src.geometry_solver import MxfBrace, MxfChordMember
 except ImportError:  # pragma: no cover - direct module import in unit tests
     from geometry_solver import (  # type: ignore[no-redef,import-not-found]
+        MXF_EAVES_OFFSET,
+        MXF_ROOF_Z_BASE,
         GeometrySolver,
         floor_surface_polygon,
         parse_dimensions,
@@ -476,6 +480,64 @@ def _emit_engineered_brace_list(
         )
 
 
+def _build_building_frame_list(
+    building: ET.Element,
+    solver: GeometrySolver,
+) -> None:
+    """Emit ``<BuildingFrameList>`` under ``building`` positioning each frame.
+
+    For each truss position along the depth axis, emits one
+    ``<BuildingFrame>`` entry referencing the matching Frame definition in
+    the root-level ``<FrameList>``: the first and last positions reference
+    the gable-end Frame (``F1``) when gable-end panels are emitted, every
+    interior position references the common-truss Frame (``F0``). The
+    ``<Position>`` orients the local frame axes so its X runs along the
+    span (building X), Y points up (building Z), and Z points along the
+    building depth (building Y), matching the Pamir reference export
+    (``hidden/Sample_Project/7JULY_Z.mxf``). Non-gable roofs emit no
+    BuildingFrameList because no FrameList is generated.
+    """
+    frames = solver.mxf_truss_frames(0.0)
+    if not frames:
+        return
+
+    total_count = len(frames)
+    gable_end_count = len(solver.mxf_gable_end_frames(0.0))
+    # When gable-end panels exist, the two outer layout positions (first +
+    # last) reference the gable-end Frame definition; every interior
+    # position references the common-truss Frame. With no gable ends, all
+    # positions reference the common-truss Frame.
+    outer_indices = {0, total_count - 1} if gable_end_count > 0 else set()
+
+    frame_list = ET.SubElement(building, "BuildingFrameList")
+    # Eaves baseline Z (metres). Frames rest on the wall plate top plus the
+    # standard rafter eaves offset so BuildingFrame origins match the
+    # FrameList chord Z reference (3.12 m in the Pamir convention).
+    z_eaves = MXF_ROOF_Z_BASE + MXF_EAVES_OFFSET
+    for index, (y_m, _members) in enumerate(frames):
+        frame_id = (
+            GABLE_END_FRAME_ID if index in outer_indices else COMMON_TRUSS_FRAME_ID
+        )
+        frame = ET.SubElement(
+            frame_list, "BuildingFrame", {"frameID": frame_id}
+        )
+        ET.SubElement(
+            frame,
+            "Position",
+            {
+                # Truss starts at the wall-plate baseline at the position's
+                # Y coordinate along the building depth.
+                "origin": _format_point(0.0, y_m, z_eaves),
+                # Local X axis = building span direction (+X).
+                "xAxis": _format_point(1.0, y_m, z_eaves),
+                # Local Y axis = vertical up (+1 in building Z).
+                "yAxis": _format_point(0.0, y_m, z_eaves + 1.0),
+                # Local Z axis = building depth direction (+1 in building Y).
+                "zAxis": _format_point(0.0, y_m + 1.0, z_eaves),
+            },
+        )
+
+
 def _build_frame_list(
     root: ET.Element,
     solver: GeometrySolver,
@@ -594,6 +656,7 @@ def build_mxf(params: Any) -> bytes:
     )
     _build_building_walls(building, specs)
     _build_walls(root, specs)
+    _build_building_frame_list(building, solver)
     _build_surfaces(root, building, floor_points, roof_polygons)
     _build_frame_list(root, solver, overhang_m, batch_name)
     _build_metadata(root, batch_name)
