@@ -38,7 +38,7 @@
 
 ## 3. Advanced Truss Features
 
-- [ ] **Implement transport height splitting for tall trusses**
+- [x] **Implement transport height splitting for tall trusses**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: Automatically split trusses exceeding 3.3m in height into two horizontal parts (base frame and cap frame).
   - Done when:

@@ -697,6 +697,149 @@ class TestGableFullSpanTrusses:
         assert root.find("FrameList") is None
 
 
+class TestTrussTransportHeightSplitting:
+    """Transport-height splitting for tall gable trusses (ridge > 3.3 m).
+
+    Verifies the unified geometry solver splits trusses exceeding the 3.3 m
+    road transport limit into Part 1 (rectangular base, height <= 2.8 m) and
+    Part 2 (triangular cap) joined by horizontal splice chords at the 2.8 m
+    interface, per design.md §"Transport Limit Detection and Multi-Part
+    Splicing". Tested at the solver level because the MXF builder integration
+    is a later task; the solver is the single source of truth for the split
+    geometry.
+    """
+
+    _TALL_WIDTH_M = 14.0
+    _DEPTH_M = 15.0
+    _PITCH = 30.0
+    _SHORT_WIDTH_M = 10.0
+
+    def test_truss_transport_height_splitting(self):
+        from geometry_solver import (
+            TRANSPORT_MAX_HEIGHT_M,
+            TRANSPORT_SPLIT_HEIGHT_M,
+            GeometrySolver,
+        )
+
+        # 14 m wide gable @ 30° -> ridge = 7.0 * tan(30°) ≈ 4.04 m (> 3.3 m).
+        solver = GeometrySolver(
+            self._TALL_WIDTH_M * 1000.0, self._DEPTH_M * 1000.0, "gable", self._PITCH
+        )
+        assert solver.truss_height_m > TRANSPORT_MAX_HEIGHT_M
+        assert solver.needs_transport_split()
+
+        frames = solver.mxf_truss_parts()
+        assert len(frames) >= 2, "Solver must produce one split frame per truss position"
+
+        expected_ridge_y = solver.truss_height_m
+        expected_mid = self._TALL_WIDTH_M / 2.0
+        tan_pitch = math.tan(math.radians(self._PITCH))
+        expected_x_left = TRANSPORT_SPLIT_HEIGHT_M / tan_pitch
+
+        for y_m, parts in frames:
+            assert len(parts) == 2, (
+                f"Tall truss frame at Y={y_m} must split into 2 parts, got {len(parts)}"
+            )
+
+            # --- Part 1 (Base): rectangular, height <= 2.8 m ---
+            name1, z1_base, z1_top, members1 = parts[0]
+            assert name1 == "Part 1"
+            assert z1_base == pytest.approx(0.0)
+            assert z1_top <= TRANSPORT_SPLIT_HEIGHT_M + 1e-9, (
+                f"Part 1 (Base) height must be <= 2.8 m, got {z1_top}"
+            )
+            assert z1_top == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
+            # Part 1 carries a wall-to-wall BottomChord at Y=0.
+            bottoms1 = [m for m in members1 if m[0] == "BottomChord"]
+            assert len(bottoms1) == 1
+            _, b1_start, b1_end = bottoms1[0]
+            assert b1_start == pytest.approx((0.0, 0.0))
+            assert b1_end == pytest.approx((self._TALL_WIDTH_M, 0.0))
+            # Part 1 carries a flat HORIZONTAL TopChord at Y=2.8 (lower splice).
+            tops1 = [m for m in members1 if m[0] == "TopChord"]
+            assert len(tops1) == 1
+            _, sp_lower_start, sp_lower_end = tops1[0]
+            assert sp_lower_start[1] == pytest.approx(sp_lower_end[1]), (
+                "Part 1 flat top chord (lower splice) must be horizontal"
+            )
+            assert sp_lower_start[1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
+            assert sp_lower_start[0] == pytest.approx(0.0)
+            assert sp_lower_end[0] == pytest.approx(self._TALL_WIDTH_M)
+
+            # --- Part 2 (Cap): triangular, sits on Part 1 ---
+            name2, z2_base, z2_top, members2 = parts[1]
+            assert name2 == "Part 2"
+            assert z2_base == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
+            assert z2_top == pytest.approx(expected_ridge_y)
+            # Part 2 carries a horizontal BottomChord at Y=2.8 (upper splice)
+            # bounded by the top-chord crossings.
+            bottoms2 = [m for m in members2 if m[0] == "BottomChord"]
+            assert len(bottoms2) == 1
+            _, sp_upper_start, sp_upper_end = bottoms2[0]
+            assert sp_upper_start[1] == pytest.approx(sp_upper_end[1]), (
+                "Part 2 bottom chord (upper splice) must be horizontal"
+            )
+            assert sp_upper_start[1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
+            assert sp_upper_start[0] == pytest.approx(expected_x_left)
+            assert sp_upper_end[0] == pytest.approx(
+                self._TALL_WIDTH_M - expected_x_left
+            )
+            # Part 2 carries two TopChords that rise to the central ridge,
+            # preserving the original roof pitch.
+            tops2 = [m for m in members2 if m[0] == "TopChord"]
+            assert len(tops2) == 2
+            ridge_xs: list[float] = []
+            for _mtype, s, e in tops2:
+                for px, py in (s, e):
+                    if py == pytest.approx(expected_ridge_y):
+                        ridge_xs.append(px)
+                # Each cap top chord keeps the roof pitch (slope == tan(pitch)).
+                (sx, sy), (ex, ey) = s, e
+                run = ex - sx
+                rise = ey - sy
+                assert rise / run == pytest.approx(tan_pitch) or (
+                    rise / run == pytest.approx(-tan_pitch)
+                )
+            assert len(ridge_xs) == 2
+            assert all(x == pytest.approx(expected_mid) for x in ridge_xs), (
+                f"Cap top chords must meet at the ridge X={expected_mid}, "
+                f"got {ridge_xs}"
+            )
+
+    def test_truss_transport_short_truss_not_split(self):
+        from geometry_solver import GeometrySolver
+
+        # 10 m wide gable @ 30° -> ridge = 5.0 * tan(30°) ≈ 2.89 m (< 3.3 m).
+        solver = GeometrySolver(
+            self._SHORT_WIDTH_M * 1000.0, self._DEPTH_M * 1000.0, "gable", self._PITCH
+        )
+        assert not solver.needs_transport_split()
+
+        frames = solver.mxf_truss_parts()
+        assert len(frames) >= 2
+        for _y_m, parts in frames:
+            assert len(parts) == 1, "Short truss must NOT be transport-split"
+            name, z_base, z_top, members = parts[0]
+            assert name == "Part 1"
+            assert z_base == pytest.approx(0.0)
+            assert z_top == pytest.approx(solver.truss_height_m)
+            # Single-part geometry matches the full-span frame: 2 TopChords + 1
+            # BottomChord (mirrors TestGableFullSpanTrusses).
+            assert len([m for m in members if m[0] == "TopChord"]) == 2
+            assert len([m for m in members if m[0] == "BottomChord"]) == 1
+
+    def test_truss_transport_non_gable_returns_empty(self):
+        from geometry_solver import GeometrySolver
+
+        # Transport splitting is gable-only in this change; hip/mono/flat
+        # solvers must return an empty part list even when very tall.
+        tall_mono = GeometrySolver(
+            self._TALL_WIDTH_M * 1000.0, self._DEPTH_M * 1000.0, "mono-pitch", 25.0
+        )
+        assert tall_mono.truss_height_m > 3.3
+        assert tall_mono.mxf_truss_parts() == []
+
+
 class TestHipRoofSurfaces:
     """Hip (four-plane) roof surface generation (roofType="Hip").
 

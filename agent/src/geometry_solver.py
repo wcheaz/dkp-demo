@@ -147,6 +147,27 @@ MxfChordMember = tuple[str, tuple[float, float], tuple[float, float]]
 # the ordered list of full-span chord members that compose that single frame.
 MxfTrussFrame = tuple[float, list[MxfChordMember]]
 
+# Transport-split thresholds for tall trusses (metres). A truss whose total
+# height exceeds the road transport limit is split into a rectangular base
+# (Part 1) and a triangular cap (Part 2) joined by horizontal splice chords at
+# the split line. Matches the standard transport restriction and the Pamir
+# reference multi-part truss pattern (see design.md §"Transport Limit
+# Detection and Multi-Part Splicing"). These are fixed engineering constants,
+# not configuration knobs.
+TRANSPORT_MAX_HEIGHT_M = 3.3    # trigger threshold: split when truss is taller
+TRANSPORT_SPLIT_HEIGHT_M = 2.8  # Part 1 (Base) vertical extent
+
+# An MXF transport-split truss part: ``(name, z_base, z_top, members)`` where
+# ``name`` is the Pamir Part label (``"Part 1"`` base / ``"Part 2"`` cap),
+# ``z_base`` / ``z_top`` are the frame-local vertical extents of the part (m),
+# and ``members`` is the ordered chord-member list for that part.
+MxfTrussPart = tuple[str, float, float, list[MxfChordMember]]
+
+# One transport-split MXF truss frame: the truss Y position along the depth
+# axis (m) and the ordered list of parts composing the frame. Short trusses
+# carry a single part; tall trusses carry two (base + cap).
+MxfSplitTrussFrame = tuple[float, list[MxfTrussPart]]
+
 
 class GeometrySolver:
     """Unified structural truss geometry solver (millimetres).
@@ -204,6 +225,22 @@ class GeometrySolver:
     def z_ridge(self) -> float:
         """Z coordinate (mm) of the truss ridge."""
         return WALL_HEIGHT + self.ridge_height
+
+    @property
+    def truss_height_m(self) -> float:
+        """Total truss height in metres (ridge rise above the eaves baseline).
+
+        This is the vertical dimension that must satisfy the road transport
+        limit. It equals the frame-local ridge Y (the eaves baseline sits at
+        ``Y = 0`` in the MXF frame convention), so the existing heel-less
+        gable geometry maps directly to the design's ``H_truss`` transport
+        height.
+        """
+        return self.ridge_height / 1000.0
+
+    def needs_transport_split(self) -> bool:
+        """True when the truss exceeds the 3.3 m road transport height limit."""
+        return self.truss_height_m > TRANSPORT_MAX_HEIGHT_M
 
     def member_segments(self) -> list[list[Segment]]:
         """Return the per-truss chord / web / plate segments (millimetres).
@@ -308,21 +345,117 @@ class GeometrySolver:
         if self.roof_key != "gable":
             return []
 
-        w_m = self.width_mm / 1000.0
-        ridge_m = self.ridge_height / 1000.0
-        mid = w_m / 2.0
-        o = overhang_m
-
         frames: list[MxfTrussFrame] = []
         for y_mm in self.positions:
             y_m = y_mm / 1000.0
-            members: list[MxfChordMember] = [
-                ("TopChord", (-o, 0.0), (mid, ridge_m)),
-                ("TopChord", (mid, ridge_m), (w_m + o, 0.0)),
-                ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
-            ]
-            frames.append((y_m, members))
+            frames.append((y_m, self._gable_full_span_members(overhang_m)))
         return frames
+
+    def mxf_truss_parts(self, overhang_m: float = 0.0) -> list[MxfSplitTrussFrame]:
+        """Return per-truss chord geometry, split for transport when tall (m).
+
+        Each returned frame holds the LOCAL chord coordinates for one truss
+        position. When :meth:`needs_transport_split` is true the frame carries
+        two parts following design.md §"Transport Limit Detection":
+
+        * **Part 1 (Base)** — a rectangular base from ``Y = 0`` to
+          ``Y = TRANSPORT_SPLIT_HEIGHT_M`` (2.8 m) with a wall-to-wall
+          ``BottomChord`` at ``Y = 0`` and a flat horizontal ``TopChord`` at
+          ``Y = 2.8 m`` (the lower splice chord).
+        * **Part 2 (Cap)** — a triangular cap resting on Part 1, from
+          ``Y = 2.8 m`` up to the ridge. Its ``BottomChord`` is the horizontal
+          upper splice chord at the split line; its two ``TopChord`` members
+          are the collinear segments of the original sloping top chords above
+          the split line, so the roof pitch is preserved across the splice.
+
+        When the truss fits within the transport limit the frame carries a
+        single part (``"Part 1"``) spanning the full height, geometrically
+        equivalent to :meth:`mxf_truss_frames`. Non-gable roof types return an
+        empty list because transport splitting is only implemented for gable
+        roofs in this change.
+
+        Args:
+            overhang_m: Optional top-chord overhang extension past the outer
+                walls in metres. Applied to the full-span (non-split) top
+                chords only; transport-split base/cap chords are emitted
+                wall-to-wall so the horizontal splice interface stays clean.
+
+        Returns:
+            One :class:`MxfSplitTrussFrame` per truss position along the depth
+            axis.
+        """
+        if self.roof_key != "gable":
+            return []
+
+        h = self.truss_height_m
+        split_z = TRANSPORT_SPLIT_HEIGHT_M
+
+        frames: list[MxfSplitTrussFrame] = []
+        for y_mm in self.positions:
+            y_m = y_mm / 1000.0
+            if self.needs_transport_split():
+                parts = self._gable_split_parts(h, split_z)
+            else:
+                parts = [("Part 1", 0.0, h, self._gable_full_span_members(overhang_m))]
+            frames.append((y_m, parts))
+        return frames
+
+    def _gable_full_span_members(self, overhang_m: float) -> list[MxfChordMember]:
+        """Return the full-span chord members for one gable truss (metres).
+
+        Two sloping ``TopChord`` members meet at the central ridge at
+        ``X = width/2``; a single wall-to-wall ``BottomChord`` ties the eaves.
+        ``overhang_m`` only lengthens the top chords (rafter tails) past the
+        eaves. Shared by :meth:`mxf_truss_frames` and the non-split path of
+        :meth:`mxf_truss_parts` so both emit identical full-span geometry.
+        """
+        w_m = self.width_mm / 1000.0
+        ridge_m = self.truss_height_m
+        mid = w_m / 2.0
+        o = overhang_m
+        return [
+            ("TopChord", (-o, 0.0), (mid, ridge_m)),
+            ("TopChord", (mid, ridge_m), (w_m + o, 0.0)),
+            ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
+        ]
+
+    def _gable_split_parts(
+        self, h: float, split_z: float
+    ) -> list[MxfTrussPart]:
+        """Return Part 1 (base) and Part 2 (cap) for a transport-split gable truss.
+
+        The original full-span top chords cross ``Y = split_z`` at
+        ``x = split_z / tan(pitch)`` (left) and ``width - split_z / tan(pitch)``
+        (right); those crossings bound the triangular cap's base. The cap's top
+        chords stay collinear with the full-span top chords (same pitch) because
+        they are the upper segments of the same lines. Both parts carry a
+        horizontal chord at ``Y = split_z`` — Part 1's flat ``TopChord`` (lower
+        splice) and Part 2's ``BottomChord`` (upper splice) — which is the
+        structural plate-joint interface called out in design.md.
+
+        Args:
+            h: Total truss height in metres (ridge Y); must exceed ``split_z``.
+            split_z: Base height / splice-line Y in metres (2.8 m).
+        """
+        w_m = self.width_mm / 1000.0
+        mid = w_m / 2.0
+        tan_pitch = math.tan(math.radians(self.pitch_deg))
+        x_left = split_z / tan_pitch
+        x_right = w_m - x_left
+
+        part1_members: list[MxfChordMember] = [
+            ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
+            ("TopChord", (0.0, split_z), (w_m, split_z)),
+        ]
+        part2_members: list[MxfChordMember] = [
+            ("BottomChord", (x_left, split_z), (x_right, split_z)),
+            ("TopChord", (x_left, split_z), (mid, h)),
+            ("TopChord", (mid, h), (x_right, split_z)),
+        ]
+        return [
+            ("Part 1", 0.0, split_z, part1_members),
+            ("Part 2", split_z, h, part2_members),
+        ]
 
 
 # ---------------------------------------------------------------------------
