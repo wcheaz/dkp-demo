@@ -14,7 +14,7 @@
 
 ## 2. Geometry Solver Refactoring
 
-- [ ] **Consolidate structural truss geometry calculations in geometry_solver.py**
+- [x] **Consolidate structural truss geometry calculations in geometry_solver.py**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py)
   - Change: Consolidate truss, web, joint, and support node geometry calculations into a unified module/class.
   - Done when:

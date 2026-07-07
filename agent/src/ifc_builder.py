@@ -21,22 +21,16 @@ import ifcopenshell.guid  # type: ignore[import-not-found]
 
 try:
     from src.geometry_solver import (
+        GeometrySolver,
         WALL_HEIGHT,
-        compute_truss_count,
         parse_dimensions,
-        resolve_pitch,
-        truss_positions,
-        truss_ridge_height,
         wall_corners,
     )
 except ImportError:  # pragma: no cover - direct module import in unit tests
     from geometry_solver import (  # type: ignore[no-redef,import-not-found]
+        GeometrySolver,
         WALL_HEIGHT,
-        compute_truss_count,
         parse_dimensions,
-        resolve_pitch,
-        truss_positions,
-        truss_ridge_height,
         wall_corners,
     )
 
@@ -71,11 +65,10 @@ MEMBER_NAME_PREFIX = "T"
 MEMBER_DESCRIPTION = f"{TIMBER_GRADE} {MEMBER_PROFILE_NAME}"
 
 # Functional roles written to the ``IfcMember.ObjectType`` attribute so BIM
-# viewers and estimating tools can classify timber members.
-ROLE_TOP_CHORD = "TOP_CHORD"
-ROLE_BOTTOM_CHORD = "BOTTOM_CHORD"
-ROLE_WEB = "WEB"
-ROLE_PLATE = "PLATE"
+# viewers and estimating tools can classify timber members. The canonical
+# values live in :mod:`geometry_solver` (``ROLE_TOP_CHORD``,
+# ``ROLE_BOTTOM_CHORD``, ``ROLE_WEB``, ``ROLE_PLATE``) and are emitted by
+# :meth:`geometry_solver.GeometrySolver.member_segments`.
 
 # Truss assembly container metadata. The chords and webs of each generated
 # truss are wrapped in an ``IfcElementAssembly`` so that estimating tools such
@@ -346,59 +339,6 @@ def _add_support_proxy(
     )
 
 
-def _member_segments(
-    width_mm: float,
-    depth_mm: float,
-    roof_key: str,
-    roof_pitch: float | None,
-) -> list[list[tuple[tuple[float, float, float], tuple[float, float, float], str]]]:
-    """Return the truss groups of start/end coordinates and structural roles.
-
-    The outer list contains one entry per truss position (i.e. one
-    ``IfcElementAssembly``); each inner list holds the ``(start, end, role)``
-    segments that make up that single truss frame.
-
-    Mirrors ``dxf_builder._draw_trusses`` exactly, sourcing the truss count,
-    spacing and ridge height from the shared :mod:`geometry_solver` so DXF and
-    IFC outputs stay geometrically congruent. Each segment is paired with a
-    functional role string written to the ``IfcMember.ObjectType`` attribute:
-
-    - ``"TOP_CHORD"`` — sloping rafter running from eave up to the ridge.
-    - ``"BOTTOM_CHORD"`` — horizontal ceiling joist tying the eaves together.
-    - ``"WEB"`` — vertical/inclined strut (e.g. the high-side post of a
-      mono-pitch truss) that transfers load between chords.
-    - ``"PLATE"`` — the single horizontal member of a flat-roof assembly.
-    """
-    count = compute_truss_count(width_mm / 1000, depth_mm / 1000)
-    pitch_deg = resolve_pitch(roof_key, roof_pitch)
-    positions = truss_positions(width_mm, depth_mm, count)
-    ridge_h = truss_ridge_height(width_mm, roof_key, pitch_deg)
-
-    z_eave = WALL_HEIGHT
-    z_ridge = WALL_HEIGHT + ridge_h
-    w = width_mm
-
-    trusses: list[
-        list[tuple[tuple[float, float, float], tuple[float, float, float], str]]
-    ] = []
-    for y in positions:
-        segments: list[
-            tuple[tuple[float, float, float], tuple[float, float, float], str]
-        ] = []
-        if roof_key in ("gable", "hip"):
-            segments.append(((0.0, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
-            segments.append(((w, y, z_eave), (w / 2, y, z_ridge), ROLE_TOP_CHORD))
-            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD))
-        elif roof_key == "mono-pitch":
-            segments.append(((0.0, y, z_eave), (w, y, z_ridge), ROLE_TOP_CHORD))
-            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD))
-            segments.append(((w, y, z_eave), (w, y, z_ridge), ROLE_WEB))
-        else:  # flat roof: single ceiling joist
-            segments.append(((0.0, y, z_eave), (w, y, z_eave), ROLE_PLATE))
-        trusses.append(segments)
-    return trusses
-
-
 def build_ifc(params: DesignParameters) -> bytes:
     """Build a valid IFC2x3 model (as ``bytes``) from design parameters."""
     if params.roofType is None:
@@ -525,9 +465,10 @@ def build_ifc(params: DesignParameters) -> bytes:
 
     # Global running index used to stamp each ``IfcMember`` with a unique
     # serial ``Name`` (e.g. "T1", "T2", ...) in document order.
+    solver = GeometrySolver(width_mm, depth_mm, roof_key, pitch_raw)
     member_index = 0
-    for index, truss_segments in enumerate(
-        _member_segments(width_mm, depth_mm, roof_key, pitch_raw), start=1
+    for index, (truss_segments, truss_bearings) in enumerate(
+        zip(solver.member_segments(), solver.support_bearings()), start=1
     ):
         # Each truss position becomes its own ``IfcElementAssembly`` frame.
         # The assembly placement is an identity transform relative to the
@@ -603,19 +544,19 @@ def build_ifc(params: DesignParameters) -> bytes:
 
         # Emit an IfcBuildingElementProxy at each wall bearing (the two ends
         # of the bottom chord / plate) so Pamir can price the connection
-        # hardware at every support point.
-        for start, end, role in truss_segments:
-            if role in (ROLE_BOTTOM_CHORD, ROLE_PLATE):
-                for bearing_index, bearing in enumerate((start, end), start=1):
-                    proxy = _add_support_proxy(
-                        f,
-                        owner_history,
-                        storey_placement,
-                        bearing,
-                        f"{ASSEMBLY_NAME_PREFIX}{index}-S{bearing_index}",
-                    )
-                    support_proxies.append(proxy)
-                    elements.append(proxy)
+        # hardware at every support point. The bearing coordinates are
+        # sourced from the unified :class:`GeometrySolver` so the IFC and
+        # MXF outputs stay geometrically congruent.
+        for bearing, bearing_index in truss_bearings:
+            proxy = _add_support_proxy(
+                f,
+                owner_history,
+                storey_placement,
+                bearing,
+                f"{ASSEMBLY_NAME_PREFIX}{index}-S{bearing_index}",
+            )
+            support_proxies.append(proxy)
+            elements.append(proxy)
 
     f.createIfcRelContainedInSpatialStructure(
         ifcopenshell.guid.new(),

@@ -105,6 +105,166 @@ def truss_positions(width_mm: float, depth_mm: float, count: int) -> list[float]
 
 
 # ---------------------------------------------------------------------------
+# Unified structural truss solver
+# ---------------------------------------------------------------------------
+# The :class:`GeometrySolver` class consolidates all chord, web, joint, and
+# support-node coordinate calculations shared by :mod:`ifc_builder`,
+# :mod:`mxf_builder`, and :mod:`dxf_builder`. Each builder delegates to a
+# single instance so the 3D IFC, MXF, and 2D CAD outputs stay geometrically
+# congruent without duplicating the per-roof-type segment logic.
+#
+# All inputs and outputs are expressed in **millimetres** to match the
+# existing DXF/IFC helpers above. The MXF-only metre helpers that follow this
+# section are intentionally left as standalone functions because the MXF
+# layout uses a different unit convention.
+
+# Functional roles written to ``IfcMember.ObjectType`` (and mirrored on the
+# structural segment metadata) so BIM viewers and estimating tools such as
+# MiTek Pamir can classify timber members.
+ROLE_TOP_CHORD = "TOP_CHORD"
+ROLE_BOTTOM_CHORD = "BOTTOM_CHORD"
+ROLE_WEB = "WEB"
+ROLE_PLATE = "PLATE"
+
+# A segment is a ``(start, end, role)`` triple of millimetre coordinates
+# describing a single structural member. A bearing is a ``(location, index)``
+# pair marking a wall-plate support point on a truss.
+Segment = tuple[
+    tuple[float, float, float], tuple[float, float, float], str
+]
+Bearing = tuple[tuple[float, float, float], int]
+
+
+class GeometrySolver:
+    """Unified structural truss geometry solver (millimetres).
+
+    Consolidates the chord, web, joint, and support-node coordinate
+    calculations shared by :mod:`ifc_builder` and :mod:`mxf_builder` so both
+    builders emit geometrically congruent structural layouts.
+
+    The solver derives the truss count, ridge height, and per-truss segments
+    from the shared module-level helpers (``compute_truss_count``,
+    ``truss_positions``, ``truss_ridge_height`` ...) so callers do not need to
+    invoke them directly. Each :meth:`member_segments` entry corresponds to
+    one truss position (one ``IfcElementAssembly`` / MXF ``Frame``); each
+    inner segment is paired with a functional role string so the builder can
+    stamp the role on the emitted element without re-deriving the geometry.
+
+    Args:
+        width_mm: Building width in millimetres (the truss span axis).
+        depth_mm: Building depth in millimetres (the truss layout axis).
+        roof_key: Roof-type key (``"gable"``, ``"hip"``, ``"mono-pitch"``,
+            or ``"flat"``).
+        roof_pitch: Optional explicit roof pitch in degrees. When ``None``
+            (or zero) the per-type default from :func:`resolve_pitch` is used.
+
+    Attributes:
+        width_mm, depth_mm, roof_key, roof_pitch: Echo the constructor args.
+        pitch_deg: Resolved effective pitch in degrees.
+        count: Number of trusses along the depth axis.
+        positions: Y coordinates (mm) of each truss position.
+        ridge_height: Rise of the truss ridge above the wall top plate (mm).
+    """
+
+    def __init__(
+        self,
+        width_mm: float,
+        depth_mm: float,
+        roof_key: str,
+        roof_pitch: float | None = None,
+    ) -> None:
+        self.width_mm = width_mm
+        self.depth_mm = depth_mm
+        self.roof_key = roof_key
+        self.roof_pitch = roof_pitch
+        self.pitch_deg = resolve_pitch(roof_key, roof_pitch)
+        self.count = compute_truss_count(width_mm / 1000.0, depth_mm / 1000.0)
+        self.positions = truss_positions(width_mm, depth_mm, self.count)
+        self.ridge_height = truss_ridge_height(width_mm, roof_key, self.pitch_deg)
+
+    @property
+    def z_eave(self) -> float:
+        """Z coordinate (mm) of the wall top plate / eaves baseline."""
+        return WALL_HEIGHT
+
+    @property
+    def z_ridge(self) -> float:
+        """Z coordinate (mm) of the truss ridge."""
+        return WALL_HEIGHT + self.ridge_height
+
+    def member_segments(self) -> list[list[Segment]]:
+        """Return the per-truss chord / web / plate segments (millimetres).
+
+        The outer list contains one entry per truss position (i.e. one
+        ``IfcElementAssembly`` / MXF ``Frame``); each inner list holds the
+        ``(start, end, role)`` segments that make up that single truss frame.
+
+        Segment roles follow the canonical strings exposed at module scope:
+
+        - :data:`ROLE_TOP_CHORD` — sloping rafter running from eave up to the
+          ridge (gable / hip have two, mono-pitch has one).
+        - :data:`ROLE_BOTTOM_CHORD` — horizontal ceiling joist tying the
+          eaves together (gable / hip / mono-pitch).
+        - :data:`ROLE_WEB` — vertical/inclined strut (e.g. the high-side
+          post of a mono-pitch truss) that transfers load between chords.
+        - :data:`ROLE_PLATE` — the single horizontal member of a flat-roof
+          assembly.
+        """
+        z_eave = self.z_eave
+        z_ridge = self.z_ridge
+        w = self.width_mm
+
+        trusses: list[list[Segment]] = []
+        for y in self.positions:
+            segments: list[Segment] = []
+            if self.roof_key in ("gable", "hip"):
+                segments.append(
+                    ((0.0, y, z_eave), (w / 2.0, y, z_ridge), ROLE_TOP_CHORD)
+                )
+                segments.append(
+                    ((w, y, z_eave), (w / 2.0, y, z_ridge), ROLE_TOP_CHORD)
+                )
+                segments.append(
+                    ((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD)
+                )
+            elif self.roof_key == "mono-pitch":
+                segments.append(
+                    ((0.0, y, z_eave), (w, y, z_ridge), ROLE_TOP_CHORD)
+                )
+                segments.append(
+                    ((0.0, y, z_eave), (w, y, z_eave), ROLE_BOTTOM_CHORD)
+                )
+                segments.append(((w, y, z_eave), (w, y, z_ridge), ROLE_WEB))
+            else:  # flat roof: single ceiling joist
+                segments.append(
+                    ((0.0, y, z_eave), (w, y, z_eave), ROLE_PLATE)
+                )
+            trusses.append(segments)
+        return trusses
+
+    def support_bearings(self) -> list[list[Bearing]]:
+        """Return per-truss wall-plate support nodes (millimetres).
+
+        Each truss contributes one ``(location, bearing_index)`` pair per wall
+        bearing — i.e. the two endpoints of the bottom chord (gable / hip /
+        mono-pitch) or the single plate (flat). ``bearing_index`` is 1-based
+        so callers can label the support points ``S1`` / ``S2`` to match the
+        Pamir reference naming.
+        """
+        per_truss: list[list[Bearing]] = []
+        for truss in self.member_segments():
+            bearings: list[Bearing] = []
+            for start, end, role in truss:
+                if role in (ROLE_BOTTOM_CHORD, ROLE_PLATE):
+                    for bearing_index, bearing in enumerate(
+                        (start, end), start=1
+                    ):
+                        bearings.append((bearing, bearing_index))
+            per_truss.append(bearings)
+        return per_truss
+
+
+# ---------------------------------------------------------------------------
 # MXF roof/floor surface geometry
 # ---------------------------------------------------------------------------
 # The helpers below compute 3D surface polygons for the Layout MXF (Pamir)
