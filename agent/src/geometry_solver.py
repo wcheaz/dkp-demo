@@ -134,6 +134,19 @@ Segment = tuple[
 ]
 Bearing = tuple[tuple[float, float, float], int]
 
+# MXF truss frame geometry (metres). An MXF chord member is a
+# ``(member_type, start, end)`` triple where ``member_type`` is the Pamir
+# ``WoodMember`` type attribute (``"TopChord"`` / ``"BottomChord"``) and
+# ``start`` / ``end`` are the ``(x, y)`` endpoints of the chord in the
+# frame's LOCAL coordinate system: X runs along the truss span
+# (0 = left wall, ``width_mm/1000`` = right wall) and Y is the height above
+# the wall-plate / eaves baseline (0 = eaves, rising to the ridge).
+MxfChordMember = tuple[str, tuple[float, float], tuple[float, float]]
+
+# One MXF truss frame: the truss Y position along the building depth (m) and
+# the ordered list of full-span chord members that compose that single frame.
+MxfTrussFrame = tuple[float, list[MxfChordMember]]
+
 
 class GeometrySolver:
     """Unified structural truss geometry solver (millimetres).
@@ -262,6 +275,54 @@ class GeometrySolver:
                         bearings.append((bearing, bearing_index))
             per_truss.append(bearings)
         return per_truss
+
+    def mxf_truss_frames(self, overhang_m: float = 0.0) -> list[MxfTrussFrame]:
+        """Return per-truss full-span gable chord geometry in metres (MXF convention).
+
+        Each returned frame holds the LOCAL chord coordinates for one truss
+        position, ready for direct emission into the Layout MXF
+        ``<FrameList>``. Coordinates use the MXF frame convention: X runs
+        along the span (0 = left wall, ``width_mm/1000`` = right wall) and Y
+        is the height above the wall-plate / eaves baseline (rising to the
+        ridge).
+
+        For gable roofs every frame carries a single full-span ``BottomChord``
+        (wall-to-wall) plus two sloping ``TopChord`` members that meet at the
+        central ridge at ``X = width/2``. This is the structurally valid
+        full-span layout that prevents MiTek Pamir from auto-framing each roof
+        half into split half-span trusses (see proposal.md). Non-gable roof
+        types return an empty list because full-span truss framing is only
+        implemented for gable roofs in this change.
+
+        Args:
+            overhang_m: Optional top-chord overhang extension past the outer
+                walls in metres. The bottom chord always spans exactly
+                wall-to-wall; the overhang only lengthens the top chords
+                (rafter tails) past the eaves.
+
+        Returns:
+            One :class:`MxfTrussFrame` per truss position along the depth
+            axis. Each frame shares the same LOCAL chord layout; only the Y
+            position (first tuple element) differs.
+        """
+        if self.roof_key != "gable":
+            return []
+
+        w_m = self.width_mm / 1000.0
+        ridge_m = self.ridge_height / 1000.0
+        mid = w_m / 2.0
+        o = overhang_m
+
+        frames: list[MxfTrussFrame] = []
+        for y_mm in self.positions:
+            y_m = y_mm / 1000.0
+            members: list[MxfChordMember] = [
+                ("TopChord", (-o, 0.0), (mid, ridge_m)),
+                ("TopChord", (mid, ridge_m), (w_m + o, 0.0)),
+                ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
+            ]
+            frames.append((y_m, members))
+        return frames
 
 
 # ---------------------------------------------------------------------------

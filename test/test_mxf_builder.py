@@ -6,8 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 sys.path.insert(0, "agent/src")
-from geometry_solver import parse_overhang  # noqa: E402
-from mxf_builder import (  # noqa: E402
+from geometry_solver import parse_overhang  # type: ignore[import-not-found]  # noqa: E402
+from mxf_builder import (  # type: ignore[import-not-found]  # noqa: E402
     WALL_HEIGHT,
     WALL_THICKNESS,
     build_mxf,
@@ -556,6 +556,145 @@ class TestGableRoofSurfaces:
         assert float(pts_hi[1][2]) == pytest.approx(self._Z_EAVES)
         # Ridge points reach z_ridge.
         assert float(pts[1][2]) == pytest.approx(z_ridge)
+
+
+class TestGableFullSpanTrusses:
+    """Full-span gable truss frame generation (roofType="Gable").
+
+    Verifies the MXF ``<FrameList>`` contains a full-span common truss: a
+    single wall-to-wall ``BottomChord`` and two sloping ``TopChord`` members
+    meeting at the central ridge at ``X = width/2``, instead of the split
+    half-span trusses that MiTek Pamir auto-frames from layout-only roof
+    surfaces (see proposal.md).
+    """
+
+    _WIDTH = 10.0
+    _DEPTH = 15.0
+    _PITCH = 30.0
+    _OVERHANG_M = 0.5
+
+    def _build_root(self, **overrides):
+        defaults = {
+            "floorPlanDimensions": "10x15m",
+            "roofType": "Gable",
+            "roofPitch": 30,
+            "overhang": "0.5m",
+        }
+        defaults.update(overrides)
+        return _parse(build_mxf(_params(**defaults)))
+
+    @staticmethod
+    def _chord_line(member) -> list[tuple[float, float]]:
+        """Return the ``(start, end)`` chord endpoints from a WoodMember Face.
+
+        The Face polygon's first two points encode the structural chord line;
+        the remaining two points are the perpendicular timber-thickness offset.
+        """
+        face = member.find("./FrontFace/Face")
+        polygon = face.attrib["polygon"]
+        pts = [
+            (float(p.split(",")[0]), float(p.split(",")[1]))
+            for p in polygon.split(" ")
+        ]
+        return pts[:2]
+
+    def test_gable_full_span(self):
+        # The MXF must contain a <FrameList> with one full-span common truss
+        # Frame: a single wall-to-wall BottomChord + two TopChords meeting at
+        # the central ridge at X = width/2.
+        root = self._build_root()
+        frame_list = root.find("FrameList")
+        assert frame_list is not None, "MXF must emit a <FrameList> for gable roofs"
+
+        frame = frame_list.find("Frame")
+        assert frame is not None
+        assert frame.attrib["family"] == "Truss"
+        # quantity reflects the number of common trusses placed along depth.
+        assert int(frame.attrib["quantity"]) >= 2
+
+        members = frame.findall("./PartList/Part/MemberList/WoodMember")
+        bottoms = [m for m in members if m.attrib["type"] == "BottomChord"]
+        tops = [m for m in members if m.attrib["type"] == "TopChord"]
+        # Exactly one full-span BottomChord and exactly two TopChords.
+        assert len(bottoms) == 1, "Gable truss must have a single full-span bottom chord"
+        assert len(tops) == 2, "Gable truss must have two sloping top chords"
+
+        # --- Bottom chord spans wall-to-wall (full span, single member) ---
+        bpts = self._chord_line(bottoms[0])
+        assert bpts[0][0] == pytest.approx(0.0)
+        assert bpts[1][0] == pytest.approx(self._WIDTH)
+        assert bpts[0][1] == pytest.approx(0.0)
+        assert bpts[1][1] == pytest.approx(0.0)
+
+        # --- Two top chords meet at the central ridge at X = width/2 ---
+        ridge_x = self._WIDTH / 2.0
+        ridge_y = ridge_x * math.tan(math.radians(self._PITCH))
+        eave_xs: list[float] = []
+        for top in tops:
+            pts = self._chord_line(top)
+            reaches_ridge = [
+                (p[0] == pytest.approx(ridge_x) and p[1] == pytest.approx(ridge_y))
+                for p in pts
+            ]
+            assert any(reaches_ridge), (
+                f"Top chord does not reach the ridge at "
+                f"({ridge_x}, {ridge_y}): {pts}"
+            )
+            # The other endpoint is the eave (sits on the outer wall + overhang).
+            for p in pts:
+                if not (
+                    p[0] == pytest.approx(ridge_x)
+                    and p[1] == pytest.approx(ridge_y)
+                ):
+                    eave_xs.append(p[0])
+        # The two top chords come from opposite eaves (one left, one right).
+        assert len(eave_xs) == 2
+        assert min(eave_xs) < ridge_x
+        assert max(eave_xs) > ridge_x
+
+    def test_gable_full_span_ridge_height_matches_pitch(self):
+        # The ridge Y coordinate of the top chords == (width/2) * tan(pitch).
+        root = self._build_root()
+        frame = root.find("FrameList/Frame")
+        tops = frame.findall("./PartList/Part/MemberList/WoodMember[@type='TopChord']")
+        expected_ridge_y = (self._WIDTH / 2.0) * math.tan(math.radians(self._PITCH))
+        ridge_ys: list[float] = []
+        for top in tops:
+            for _x, y in self._chord_line(top):
+                ridge_ys.append(y)
+        assert max(ridge_ys) == pytest.approx(expected_ridge_y)
+
+    def test_gable_frame_quantity_matches_truss_count(self):
+        # The single Frame definition's quantity must equal the number of
+        # truss positions along the building depth.
+        root = self._build_root()
+        frame = root.find("FrameList/Frame")
+        from geometry_solver import GeometrySolver
+
+        solver = GeometrySolver(
+            self._WIDTH * 1000.0, self._DEPTH * 1000.0, "gable", self._PITCH
+        )
+        assert int(frame.attrib["quantity"]) == len(solver.mxf_truss_frames())
+
+    def test_gable_full_span_zero_overhang(self):
+        # With no overhang the top-chord eave endpoints sit exactly on the
+        # outer walls (X=0 and X=width) at the eaves baseline.
+        root = self._build_root(overhang=None)
+        frame = root.find("FrameList/Frame")
+        tops = frame.findall("./PartList/Part/MemberList/WoodMember[@type='TopChord']")
+        eave_xs: list[float] = []
+        for top in tops:
+            for x, y in self._chord_line(top):
+                if y == pytest.approx(0.0):
+                    eave_xs.append(x)
+        assert min(eave_xs) == pytest.approx(0.0)
+        assert max(eave_xs) == pytest.approx(self._WIDTH)
+
+    def test_flat_roof_emits_no_frame_list(self):
+        # Only gable roofs emit a full-span FrameList in this task; a flat roof
+        # must not produce one.
+        root = self._build_root(roofType="Flat", roofPitch=0)
+        assert root.find("FrameList") is None
 
 
 class TestHipRoofSurfaces:

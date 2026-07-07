@@ -25,7 +25,7 @@
     - `rg "GeometrySolver" agent/src/ifc_builder.py` exits 0
   - Stop and hand off if: existing geometry calculations in [ifc_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/ifc_builder.py) cannot be consolidated without breaking dependencies not mentioned in [design.md](file:///home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/design.md).
 
-- [ ] **Implement full-span truss geometry calculations for gable roofs**
+- [x] **Implement full-span truss geometry calculations for gable roofs**
   - Scope: [geometry_solver.py](file:///home/ncheaz/git/dkp-demo/agent/src/geometry_solver.py), [mxf_builder.py](file:///home/ncheaz/git/dkp-demo/agent/src/mxf_builder.py), [test_mxf_builder.py](file:///home/ncheaz/git/dkp-demo/test/test_mxf_builder.py)
   - Change: Gable roof type generates standard full-span trusses (spanning from wall-to-wall) instead of split half-spans.
   - Done when:
