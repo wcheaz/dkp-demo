@@ -158,26 +158,28 @@ TRANSPORT_MAX_HEIGHT_M = 3.3    # trigger threshold: split when truss is taller
 TRANSPORT_SPLIT_HEIGHT_M = 2.8  # Part 1 (Base) vertical extent
 
 # Gable-end panel stud spacing (metres). The first and last trusses in the
-# layout sequence are emitted as ``GableEnd`` family ``PanelFrame`` definitions
-# whose vertical studs run from the bottom chord up to the sloping top chord at
-# standard 600 mm centres (see design.md §"Outer Gable-End Panels"). Fixed
-# engineering constant, not a configuration knob.
+# layout sequence are emitted as ``GableEnd`` family ``roof``-type Frame
+# definitions whose vertical studs run from the bottom chord up to the sloping
+# top chord at standard 600 mm centres (see design.md §"Outer Gable-End
+# Panels"). The ``type="roof"`` matches the Pamir reference export
+# (``hidden/Sample_Project/7JULY_Z.mxf``). Fixed engineering constant, not a
+# configuration knob.
 GABLE_END_STUD_SPACING_M = 0.6
 
-# Sloped bracing constants (metres / degrees). Purlins run perpendicular to
-# the truss span along the roof slope at standard 1.0 m centres, and diagonal
-# wind braces cross the top chords at 45 degrees relative to the truss span
+# Sloped bracing constant (metres). Purlins run perpendicular to the truss
+# span along the roof slope at standard 1.0 m centres
 # (see design.md §"Sloped Bracing System" / spec.md "Roof Slope Bracing").
-# Fixed engineering constants, not configuration knobs.
+# Fixed engineering constant, not a configuration knob.
 PURLIN_SPACING_M = 1.0
-WIND_BRACE_ANGLE_DEG = 45.0
 
-# Functional brace type strings written to the ``EngineeredBrace.braceType``
+# Functional brace type string written to the ``EngineeredBrace.braceType``
 # attribute, matching the Pamir reference export
 # (``hidden/Sample_Project/7JULY_Z.mxf``) so MiTek Pamir classifies each
-# generated brace correctly on import.
+# generated brace correctly on import. Only the ``purlin`` token is emitted:
+# every other ``braceType`` value used by the reference
+# (``bottomChordRunner``, ``lateralWebBrace``) is gable-plan specific and is
+# not generated here.
 BRACE_TYPE_PURLIN = "purlin"
-BRACE_TYPE_WIND_BRACE = "windBrace"
 
 # An MXF transport-split truss part: ``(name, z_base, z_top, members)`` where
 # ``name`` is the Pamir Part label (``"Part 1"`` base / ``"Part 2"`` cap),
@@ -192,11 +194,10 @@ MxfSplitTrussFrame = tuple[float, list[MxfTrussPart]]
 
 # An MXF engineered brace: ``(brace_type, angle_deg, x, y, member_index)``.
 # ``brace_type`` is the Pamir ``EngineeredBrace.braceType`` attribute
-# (:data:`BRACE_TYPE_PURLIN` / :data:`BRACE_TYPE_WIND_BRACE`); ``angle_deg`` is
-# the brace rotation in degrees (matches the roof pitch for purlins, 45° for
-# wind braces); ``(x, y)`` is the brace anchor in the frame LOCAL coordinate
-# system (metres); and ``member_index`` is the 0-based index of the referenced
-# chord member within its Frame's MemberList (left top chord = 0, right top
+# (:data:`BRACE_TYPE_PURLIN`); ``angle_deg`` is the brace rotation in degrees
+# (matches the roof pitch so each purlin is rendered square to its slope);
+# ``(x, y)`` is the brace anchor in the frame LOCAL coordinate system (metres);
+# and ``member_index`` is the 0-based index of the referenced chord member within its Frame's MemberList (left top chord = 0, right top
 # chord = 1 — matching the order emitted by
 # :meth:`GeometrySolver._gable_full_span_members`).
 MxfBrace = tuple[str, float, float, float, int]
@@ -239,15 +240,20 @@ class GeometrySolver:
         depth_mm: float,
         roof_key: str,
         roof_pitch: float | None = None,
+        overhang_mm: float = 0.0,
     ) -> None:
         self.width_mm = width_mm
         self.depth_mm = depth_mm
         self.roof_key = roof_key
         self.roof_pitch = roof_pitch
         self.pitch_deg = resolve_pitch(roof_key, roof_pitch)
+        self.overhang_m = overhang_mm / 1000.0
         self.count = compute_truss_count(width_mm / 1000.0, depth_mm / 1000.0)
         self.positions = truss_positions(width_mm, depth_mm, self.count)
-        self.ridge_height = truss_ridge_height(width_mm, roof_key, self.pitch_deg)
+        if roof_key in ("gable", "hip"):
+            self.ridge_height = (width_mm / 2.0 + overhang_mm) * math.tan(self.pitch_deg * math.pi / 180.0)
+        else:
+            self.ridge_height = truss_ridge_height(width_mm, roof_key, self.pitch_deg)
 
     @property
     def z_eave(self) -> float:
@@ -271,7 +277,7 @@ class GeometrySolver:
         """
         return self.ridge_height / 1000.0
 
-    def needs_transport_split(self) -> bool:
+    def needs_transport_split(self, overhang_m: float = 0.0) -> bool:
         """True when the truss exceeds the 3.3 m road transport height limit."""
         return self.truss_height_m > TRANSPORT_MAX_HEIGHT_M
 
@@ -426,8 +432,8 @@ class GeometrySolver:
         frames: list[MxfSplitTrussFrame] = []
         for y_mm in self.positions:
             y_m = y_mm / 1000.0
-            if self.needs_transport_split():
-                parts = self._gable_split_parts(h, split_z)
+            if self.needs_transport_split(overhang_m):
+                parts = self._gable_split_parts(h, split_z, overhang_m)
             else:
                 parts = [("Part 1", 0.0, h, self._gable_full_span_members(overhang_m))]
             frames.append((y_m, parts))
@@ -459,7 +465,7 @@ class GeometrySolver:
         """Return the gable-end panel frames at the outer layout positions (m).
 
         The first and last truss positions in the layout sequence are emitted
-        as ``GableEnd`` family ``PanelFrame`` definitions: they share the
+        as ``GableEnd`` family ``roof``-type Frame definitions: they share the
         full-span gable chord profile (one wall-to-wall ``BottomChord`` plus
         two sloping ``TopChord`` members meeting at the ridge) and add vertical
         ``Stud`` members spaced at the standard 600 mm pitch (see design.md
@@ -506,24 +512,88 @@ class GeometrySolver:
         identical gable-end panel geometry.
         """
         members = self._gable_full_span_members(overhang_m)
-        members.extend(self._gable_end_studs())
+        members.extend(self._gable_end_studs(overhang_m))
         return members
 
-    def _gable_end_studs(self) -> list[MxfChordMember]:
+    def mxf_gable_end_parts(self, overhang_m: float = 0.0) -> list[MxfSplitTrussFrame]:
+        """Return the gable-end panel parts at the outer layout positions (m).
+
+        Coordinates use the MXF frame convention. When needs_transport_split()
+        is true, each panel is split into Part 1 (base) and Part 2 (cap)
+        joined by horizontal splice chords, and vertical Stud members are
+        split at the 2.8m limit.
+        """
+        if self.roof_key != "gable" or len(self.positions) < 2:
+            return []
+
+        h = self.truss_height_m
+        split_z = TRANSPORT_SPLIT_HEIGHT_M
+
+        frames: list[MxfSplitTrussFrame] = []
+        for y_mm in (self.positions[0], self.positions[-1]):
+            y_m = y_mm / 1000.0
+            if self.needs_transport_split(overhang_m):
+                parts = self._gable_end_split_parts(h, split_z, overhang_m)
+            else:
+                parts = [("Part 1", 0.0, h, self._gable_end_members(overhang_m))]
+            frames.append((y_m, parts))
+        return frames
+
+    def _gable_end_split_parts(
+        self, h: float, split_z: float, overhang_m: float
+    ) -> list[MxfTrussPart]:
+        w_m = self.width_mm / 1000.0
+        mid = w_m / 2.0
+        tan_pitch = math.tan(math.radians(self.pitch_deg))
+        x_left = split_z / tan_pitch - overhang_m
+        x_right = w_m + overhang_m - split_z / tan_pitch
+
+        chords_part1 = [
+            ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
+            ("TopChord", (-overhang_m, 0.0), (x_left, split_z)),
+            ("TopChord", (x_right, split_z), (w_m + overhang_m, 0.0)),
+            ("TopChord", (x_left, split_z), (x_right, split_z)),
+        ]
+        chords_part2 = [
+            ("BottomChord", (x_left, split_z), (x_right, split_z)),
+            ("TopChord", (x_left, split_z), (mid, h)),
+            ("TopChord", (mid, h), (x_right, split_z)),
+        ]
+
+        all_studs = self._gable_end_studs(overhang_m)
+        studs_part1: list[MxfChordMember] = []
+        studs_part2: list[MxfChordMember] = []
+
+        for _mtype, (x, y_start), (_, top_y) in all_studs:
+            if top_y <= split_z:
+                studs_part1.append(("Stud", (x, 0.0), (x, top_y)))
+            else:
+                studs_part1.append(("Stud", (x, 0.0), (x, split_z)))
+                studs_part2.append(("Stud", (x, split_z), (x, top_y)))
+
+        return [
+            ("Part 1", 0.0, split_z, chords_part1 + studs_part1),
+            ("Part 2", split_z, h, chords_part2 + studs_part2),
+        ]
+
+    def _gable_end_studs(self, overhang_m: float) -> list[MxfChordMember]:
         """Return the vertical Stud members for one gable-end panel (metres).
 
         Studs are placed at standard 600 mm centres (see
         :data:`GABLE_END_STUD_SPACING_M`) starting from ``X = 0`` and stepping
         across the full building width. Each stud runs vertically from the
         bottom chord (``Y = 0``) up to the sloping top chord at its ``X``
-        coordinate: the top-chord height rises linearly with the roof pitch
-        from the eave to the ridge (``Y = X * tan(pitch)`` for ``X <=
-        width/2``) and then falls symmetrically on the far side (``Y =
-        (width - X) * tan(pitch)`` for ``X > width/2``).
+        coordinate. The top chord is a straight line of slope ``tan(pitch)``
+        passing through the eave edge ``X = -overhang`` (and ``X = width +
+        overhang`` on the far side), so its height at the stud's ``X`` is:
 
-        Degenerate zero-height studs at the eaves corners (``X = 0`` and ``X =
-        width``, where the top chord meets the bottom chord) are skipped so
-        every emitted stud is a real vertical member with positive length.
+          * ``Y = (X + overhang) * tan(pitch)`` for ``X <= width/2``
+          * ``Y = (width + overhang - X) * tan(pitch)`` for ``X > width/2``
+
+        Degenerate zero-height studs (only possible when ``overhang == 0``, at
+        ``X = 0`` and ``X = width`` where the top chord meets the bottom chord)
+        are skipped so every emitted stud is a real vertical member with
+        positive length.
         """
         w_m = self.width_mm / 1000.0
         tan_pitch = math.tan(math.radians(self.pitch_deg))
@@ -531,25 +601,24 @@ class GeometrySolver:
         studs: list[MxfChordMember] = []
         # Step across the width at GABLE_END_STUD_SPACING_M centres. The loop
         # bound is inclusive of the far wall (X = width) so a width that is an
-        # exact multiple of the spacing still considers that final position
-        # (and skips it as degenerate, matching the near-wall corner).
+        # exact multiple of the spacing still considers that final position.
         step_count = int(w_m / GABLE_END_STUD_SPACING_M) + 1
         for i in range(step_count + 1):
             x = i * GABLE_END_STUD_SPACING_M
             if x > w_m + 1e-9:
                 break
             if x <= mid:
-                top_y = x * tan_pitch
+                top_y = (x + overhang_m) * tan_pitch
             else:
-                top_y = (w_m - x) * tan_pitch
+                top_y = (w_m + overhang_m - x) * tan_pitch
             if top_y <= 1e-6:
-                # Degenerate (zero-height) stud at the eaves corner; skip.
+                # Degenerate (zero-height) stud; skip.
                 continue
             studs.append(("Stud", (x, 0.0), (x, top_y)))
         return studs
 
     def _gable_split_parts(
-        self, h: float, split_z: float
+        self, h: float, split_z: float, overhang_m: float
     ) -> list[MxfTrussPart]:
         """Return Part 1 (base) and Part 2 (cap) for a transport-split gable truss.
 
@@ -569,12 +638,14 @@ class GeometrySolver:
         w_m = self.width_mm / 1000.0
         mid = w_m / 2.0
         tan_pitch = math.tan(math.radians(self.pitch_deg))
-        x_left = split_z / tan_pitch
-        x_right = w_m - x_left
+        x_left = split_z / tan_pitch - overhang_m
+        x_right = w_m + overhang_m - split_z / tan_pitch
 
         part1_members: list[MxfChordMember] = [
             ("BottomChord", (0.0, 0.0), (w_m, 0.0)),
-            ("TopChord", (0.0, split_z), (w_m, split_z)),
+            ("TopChord", (-overhang_m, 0.0), (x_left, split_z)),
+            ("TopChord", (x_right, split_z), (w_m + overhang_m, 0.0)),
+            ("TopChord", (x_left, split_z), (x_right, split_z)),
         ]
         part2_members: list[MxfChordMember] = [
             ("BottomChord", (x_left, split_z), (x_right, split_z)),
@@ -586,7 +657,7 @@ class GeometrySolver:
             ("Part 2", split_z, h, part2_members),
         ]
 
-    def mxf_slope_braces(self) -> list[MxfBrace]:
+    def mxf_slope_braces(self, overhang_m: float = 0.0) -> list[MxfBrace]:
         """Return the slope bracing definitions for one gable truss (metres).
 
         Braces run along the roof slope rather than at ceiling level so MiTek
@@ -600,10 +671,12 @@ class GeometrySolver:
           stepping up from the eave toward the ridge. The Pamir ``angle``
           attribute mirrors the roof pitch (``180 - pitch`` on the right
           chord) so each purlin is rendered square to its slope.
-        * **Diagonal wind braces** (:data:`BRACE_TYPE_WIND_BRACE`) — anchored
-          at the midpoint of each top chord at :data:`WIND_BRACE_ANGLE_DEG`
-          (45°) relative to the truss span, so both roof planes carry a wind
-          brace without crowding the Frame definition.
+
+        Only ``purlin`` braces are emitted: the reference Pamir export
+        (``hidden/Sample_Project/7JULY_Z.mxf``) uses no other ``braceType`` on
+        gable common trusses beyond purlins, and emitting an unrecognised
+        token (e.g. a wind-brace type) causes MiTek Pamir to reject the file
+        on import.
 
         The ``member_index`` field of each brace references the chord member
         it braces: ``0`` for the left top chord and ``1`` for the right top
@@ -626,14 +699,13 @@ class GeometrySolver:
 
         w_m = self.width_mm / 1000.0
         mid = w_m / 2.0
-        ridge = self.truss_height_m
         pitch_rad = math.radians(self.pitch_deg)
         cos_p = math.cos(pitch_rad)
         sin_p = math.sin(pitch_rad)
 
-        # Top-chord length from eaves to ridge (metres). Both chords share
+        # Top-chord length from eaves edge to ridge (metres). Both chords share
         # this length by gable symmetry, so the same step count drives both.
-        chord_len = math.sqrt(mid * mid + ridge * ridge)
+        chord_len = (mid + overhang_m) / cos_p
 
         braces: list[MxfBrace] = []
 
@@ -647,7 +719,7 @@ class GeometrySolver:
             d = i * PURLIN_SPACING_M
             if d > chord_len - 1e-9:
                 break
-            x = d * cos_p
+            x = -overhang_m + d * cos_p
             y = d * sin_p
             braces.append((BRACE_TYPE_PURLIN, self.pitch_deg, x, y, 0))
 
@@ -660,21 +732,9 @@ class GeometrySolver:
             d = i * PURLIN_SPACING_M
             if d > chord_len - 1e-9:
                 break
-            x = w_m - d * cos_p
+            x = w_m + overhang_m - d * cos_p
             y = d * sin_p
             braces.append((BRACE_TYPE_PURLIN, 180.0 - self.pitch_deg, x, y, 1))
-
-        # Diagonal wind braces at 45° anchored at the midpoint of each top
-        # chord. The right-side brace uses ``180 - 45`` so its rendered
-        # rotation mirrors the left-side brace across the ridge.
-        half_len = chord_len / 2.0
-        lx = half_len * cos_p
-        ly = half_len * sin_p
-        braces.append((BRACE_TYPE_WIND_BRACE, WIND_BRACE_ANGLE_DEG, lx, ly, 0))
-        rx = w_m - half_len * cos_p
-        braces.append(
-            (BRACE_TYPE_WIND_BRACE, 180.0 - WIND_BRACE_ANGLE_DEG, rx, ly, 1)
-        )
 
         return braces
 

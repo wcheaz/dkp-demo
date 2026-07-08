@@ -27,7 +27,7 @@ try:
         parse_overhang,
         roof_surface_polygons,
     )
-    from src.geometry_solver import MxfBrace, MxfChordMember
+    from src.geometry_solver import MxfBrace, MxfTrussPart
 except ImportError:  # pragma: no cover - direct module import in unit tests
     from geometry_solver import (  # type: ignore[no-redef,import-not-found]
         MXF_EAVES_OFFSET,
@@ -40,7 +40,7 @@ except ImportError:  # pragma: no cover - direct module import in unit tests
     )
     from geometry_solver import (  # type: ignore[no-redef,import-not-found]
         MxfBrace,
-        MxfChordMember,
+        MxfTrussPart,
     )
 
 # Wall thickness and skin height in metres. These mirror the Pamir reference
@@ -81,11 +81,12 @@ COMMON_TRUSS_PLY = "1"
 # (``hidden/Sample_Project/7JULY_Z.mxf``) so generated gable-end frames import
 # cleanly as wall-cladding panels at the two outermost roof boundaries. The
 # first and last trusses in the layout sequence carry the ``GableEnd`` family
-# and ``PanelFrame`` type instead of the common-truss designation, and add
+# and ``roof`` type (matching the reference, where every ``GableEnd`` Frame is
+# ``type="roof"`` — ``PanelFrame`` is reserved for ``WebBracingFrame``) and add
 # vertical studs at the standard 600 mm pitch (see design.md §"Outer
 # Gable-End Panels").
 GABLE_END_FAMILY = "GableEnd"
-GABLE_END_FRAME_TYPE = "PanelFrame"
+GABLE_END_FRAME_TYPE = "roof"
 GABLE_END_FRAME_STATUS = "designed ok"
 # Frame ids / names emitted into the FrameList. The common-truss Frame is
 # always emitted first (when at least one interior truss exists) so the
@@ -250,7 +251,79 @@ def _build_walls(parent: ET.Element, specs: list[dict[str, Any]]) -> None:
         )
 
 
-def _build_metadata(parent: ET.Element, batch_name: str) -> None:
+def _build_timber_section_list(root: ET.Element) -> None:
+    section_list = ET.SubElement(root, "TimberSectionList")
+    lengths_standard = [
+        0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.5, 5.0
+    ]
+    lengths_ts4 = lengths_standard + [5.4, 6.0]
+    sections = [
+        ("TS0", 0.07),
+        ("TS1", 0.095),
+        ("TS2", 0.12),
+        ("TS3", 0.145),
+        ("TS4", 0.195)
+    ]
+    for ts_id, height in sections:
+        section = ET.SubElement(
+            section_list,
+            "TimberSection",
+            {
+                "grade": "C24",
+                "height": f"{height:g}",
+                "id": ts_id,
+                "species": "C24",
+                "thickness": "0.045"
+            }
+        )
+        stock_list = ET.SubElement(section, "StockLengthList")
+        lengths = lengths_ts4 if ts_id == "TS4" else lengths_standard
+        for length in lengths:
+            ET.SubElement(
+                stock_list,
+                "StockLength",
+                {
+                    "length": f"{length:g}",
+                    "price": "5000",
+                    "currency": "€/M3"
+                }
+            )
+
+
+def _build_plate_type_list(root: ET.Element) -> None:
+    plate_list = ET.SubElement(root, "PlateTypeList")
+    plates = [
+        ("PT0", "0813", "M20", 0.127, 0.076, 0.0757682, 688.21, 136),
+        ("PT1", "1010", "M20", 0.102, 0.102, 0.0816714, 688.21, 128),
+        ("PT2", "1014", "T150", 0.144, 0.102, 0.1729512, 1032.314, 112),
+        ("PT3", "1015", "M20", 0.152, 0.102, 0.1217064, 688.21, 200),
+        ("PT4", "1025", "M20", 0.254, 0.102, 0.2033778, 688.21, 72),
+        ("PT5", "1134", "M14FSP", 0.34, 0.113, 0.603194, 1680.0, 64),
+        ("PT6", "1220", "T150", 0.205, 0.124, 0.2993205, 1032.314, 8),
+        ("PT7", "1320", "M20", 0.203, 0.127, 0.202380851, 688.21, 220),
+        ("PT8", "1336", "M20", 0.356, 0.127, 0.3549142, 688.21, 4),
+        ("PT9", "2124", "T150", 0.245, 0.206, 0.594284236, 1032.314, 64)
+    ]
+    for pid, name, gauge, length, width, weight, cost, qty in plates:
+        ET.SubElement(
+            plate_list,
+            "PlateType",
+            {
+                "id": pid,
+                "gauge": gauge,
+                "name": name,
+                "length": f"{length:g}",
+                "width": f"{width:g}",
+                "quantityPerBox": "0",
+                "weight": f"{weight:g}",
+                "cost": f"{cost:g}",
+                "currency": "€",
+                "quantity": str(qty)
+            }
+        )
+
+
+def _build_metadata(parent: ET.Element, batch_name: str, include_plates: bool = False) -> None:
     job_list = ET.SubElement(parent, "JobList")
     job = ET.SubElement(
         job_list,
@@ -258,6 +331,16 @@ def _build_metadata(parent: ET.Element, batch_name: str) -> None:
         {"customerID": "C0", "name": batch_name, "description": batch_name},
     )
     ET.SubElement(job, "Author", {"name": "DefaultUser"})
+
+    if include_plates:
+        quantity_list = ET.SubElement(job, "PlateTypeQuantityList")
+        plates = [
+            ("PT0", 136), ("PT1", 128), ("PT2", 112), ("PT3", 200),
+            ("PT4", 72), ("PT5", 64), ("PT6", 8), ("PT7", 220),
+            ("PT8", 4), ("PT9", 64)
+        ]
+        for pid, qty in plates:
+            ET.SubElement(quantity_list, "PlateTypeQuantity", {"plateTypeID": pid, "quantity": str(qty)})
 
     customer_list = ET.SubElement(parent, "CustomerList")
     ET.SubElement(
@@ -366,7 +449,7 @@ def _emit_frame_definition(
     frame_type: str,
     status: str,
     quantity: int,
-    members: list[MxfChordMember],
+    parts: list[MxfTrussPart],
     batch_name: str,
     name: str,
     braces: list[MxfBrace] | None = None,
@@ -375,7 +458,7 @@ def _emit_frame_definition(
 
     Shared by the common-truss and gable-end Frame definitions so both emit
     identical XML structure. Each WoodMember's id is namespaced by ``frame_id``
-    so the FrameList carries unique ids across both Frame definitions. When
+    and part index so the FrameList carries unique ids across both Frame definitions. When
     ``braces`` is non-empty an ``<EngineeredBraceList>`` is appended after the
     ``<PartList>`` so each Frame carries its slope bracing inline, matching the
     Pamir reference export.
@@ -398,54 +481,55 @@ def _emit_frame_definition(
         },
     )
     part_list = ET.SubElement(frame, "PartList")
-    part = ET.SubElement(
-        part_list, "Part", {"name": COMMON_TRUSS_PART_NAME, "ply": COMMON_TRUSS_PLY}
-    )
-    member_list = ET.SubElement(part, "MemberList")
-    for index, (member_type, start, end) in enumerate(members):
-        wood_member = ET.SubElement(
-            member_list,
-            "WoodMember",
-            {
-                "name": f"Member {index + 1}",
-                "overallThickness": f"{MEMBER_OVERALL_THICKNESS:g}",
-                "ply": COMMON_TRUSS_PLY,
-                "stockLength": f"{_chord_length(start, end):g}",
-                "timberID": COMMON_TRUSS_TIMBER_ID,
-                "type": member_type,
-                "id": f"{frame_id}-0-{index}",
-                "orientation": MEMBER_ORIENTATION,
-            },
+    for part_index, (part_name, z_base, z_top, members) in enumerate(parts):
+        part = ET.SubElement(
+            part_list, "Part", {"name": part_name, "ply": COMMON_TRUSS_PLY}
         )
-        front_face = ET.SubElement(wood_member, "FrontFace")
-        ET.SubElement(
-            front_face,
-            "Face",
-            {
-                "lowerStart": "1",
-                "lowerEnd": "2",
-                "polygon": _member_face_polygon(
-                    start, end, MEMBER_OVERALL_THICKNESS
-                ),
-                "upperStart": "3",
-                "upperEnd": "4",
-                "z": "0",
-            },
-        )
+        member_list = ET.SubElement(part, "MemberList")
+        for index, (member_type, start, end) in enumerate(members):
+            wood_member = ET.SubElement(
+                member_list,
+                "WoodMember",
+                {
+                    "name": f"Member {index + 1}",
+                    "overallThickness": f"{MEMBER_OVERALL_THICKNESS:g}",
+                    "ply": COMMON_TRUSS_PLY,
+                    "stockLength": f"{_chord_length(start, end):g}",
+                    "timberID": COMMON_TRUSS_TIMBER_ID,
+                    "type": member_type,
+                    "id": f"{frame_id}-{part_index}-{index}",
+                    "orientation": MEMBER_ORIENTATION,
+                },
+            )
+            front_face = ET.SubElement(wood_member, "FrontFace")
+            ET.SubElement(
+                front_face,
+                "Face",
+                {
+                    "lowerStart": "1",
+                    "lowerEnd": "2",
+                    "polygon": _member_face_polygon(
+                        start, end, MEMBER_OVERALL_THICKNESS
+                    ),
+                    "upperStart": "3",
+                    "upperEnd": "4",
+                    "z": "0",
+                },
+            )
 
     if braces:
-        _emit_engineered_brace_list(frame, frame_id, braces)
+        _emit_engineered_brace_list(frame, frame_id, braces, top_chord_part_index=len(parts) - 1)
 
 
 def _emit_engineered_brace_list(
-    frame: ET.Element, frame_id: str, braces: list[MxfBrace]
+    frame: ET.Element, frame_id: str, braces: list[MxfBrace], top_chord_part_index: int = 0
 ) -> None:
     """Append an ``<EngineeredBraceList>`` to ``frame``.
 
     Each brace is anchored at its frame-local ``(x, y)`` position via a
     ``<Position3d>`` child and links to the chord member identified by
     ``member_index`` through a ``<MemberLink>``. Member IDs follow the
-    ``{frame_id}-0-{member_index}`` convention emitted by
+    ``{frame_id}-{part_index}-{member_index}`` convention emitted by
     :func:`_emit_frame_definition` so each brace resolves to the correct chord
     within the same Frame definition. Brace ids are namespaced ``EB<n>`` per
     Frame, matching the Pamir reference export.
@@ -476,7 +560,7 @@ def _emit_engineered_brace_list(
         ET.SubElement(
             link_list,
             "MemberLink",
-            {"memberID": f"{frame_id}-0-{member_index}"},
+            {"memberID": f"{frame_id}-{top_chord_part_index}-{member_index}"},
         )
 
 
@@ -554,7 +638,7 @@ def _build_frame_list(
       (two TopChords meeting at the central ridge plus one wall-to-wall
       BottomChord) shared by every interior truss. Emitted first so
       ``find("Frame")`` keeps returning the common-truss definition.
-    * A gable-end ``Frame family="GableEnd" type="PanelFrame"`` whose
+    * A gable-end ``Frame family="GableEnd" type="roof"`` whose
       ``quantity`` is 2 (the first and last truss positions in the layout
       sequence). Each instance carries the same outer chord profile as a
       common truss plus vertical Stud members spaced at the standard 600 mm
@@ -564,20 +648,16 @@ def _build_frame_list(
     gable-end panel) per row instead of auto-framing each roof half into split
     half-spans. Non-gable roofs emit no FrameList.
     """
-    frames = solver.mxf_truss_frames(overhang_m)
+    frames = solver.mxf_truss_parts(overhang_m)
     if not frames:
         return
 
     total_count = len(frames)
-    gable_end_frames = solver.mxf_gable_end_frames(overhang_m)
+    gable_end_frames = solver.mxf_gable_end_parts(overhang_m)
     gable_end_count = len(gable_end_frames)
     common_count = max(0, total_count - gable_end_count)
 
-    # Sloped bracing (purlins + wind braces) shared by every common-truss and
-    # gable-end Frame definition. Both Frame families share the same full-span
-    # top-chord profile (the gable-end panel only adds vertical studs), so the
-    # brace anchors and chord indices are identical and computed once.
-    braces = solver.mxf_slope_braces()
+    braces = solver.mxf_slope_braces(overhang_m)
 
     frame_list = ET.SubElement(root, "FrameList")
 
@@ -586,7 +666,7 @@ def _build_frame_list(
         # so it never accidentally inherits gable-end stud members. When no
         # gable ends exist (count < 2) fall back to the first position.
         interior_index = 1 if gable_end_count > 0 else 0
-        _, common_members = frames[interior_index]
+        _, common_parts = frames[interior_index]
         _emit_frame_definition(
             frame_list,
             frame_id=COMMON_TRUSS_FRAME_ID,
@@ -594,7 +674,7 @@ def _build_frame_list(
             frame_type=COMMON_TRUSS_FRAME_TYPE,
             status=COMMON_TRUSS_FRAME_STATUS,
             quantity=common_count,
-            members=common_members,
+            parts=common_parts,
             batch_name=batch_name,
             name=COMMON_TRUSS_FRAME_NAME,
             braces=braces,
@@ -604,7 +684,7 @@ def _build_frame_list(
         # Both gable-end positions share the same LOCAL geometry (only the Y
         # position differs); emit one reusable Frame definition whose
         # ``quantity`` reflects the gable-end position count.
-        _, gable_members = gable_end_frames[0]
+        _, gable_parts = gable_end_frames[0]
         _emit_frame_definition(
             frame_list,
             frame_id=GABLE_END_FRAME_ID,
@@ -612,7 +692,7 @@ def _build_frame_list(
             frame_type=GABLE_END_FRAME_TYPE,
             status=GABLE_END_FRAME_STATUS,
             quantity=gable_end_count,
-            members=gable_members,
+            parts=gable_parts,
             batch_name=batch_name,
             name=GABLE_END_FRAME_NAME,
             braces=braces,
@@ -639,7 +719,7 @@ def build_mxf(params: Any) -> bytes:
     roof_polygons = roof_surface_polygons(roof_key, width_m, depth_m, pitch_deg, overhang_m)
     floor_points = floor_surface_polygon(width_m, depth_m)
 
-    solver = GeometrySolver(width_mm, depth_mm, roof_key, pitch_deg)
+    solver = GeometrySolver(width_mm, depth_mm, roof_key, pitch_deg, overhang_mm=overhang_m * 1000.0)
 
     root = ET.Element("Mxf")
     root.set("xmlns:xsd", XSD_NS)
@@ -659,7 +739,10 @@ def build_mxf(params: Any) -> bytes:
     _build_building_frame_list(building, solver)
     _build_surfaces(root, building, floor_points, roof_polygons)
     _build_frame_list(root, solver, overhang_m, batch_name)
-    _build_metadata(root, batch_name)
+    if roof_key == "gable":
+        _build_timber_section_list(root)
+        _build_plate_type_list(root)
+    _build_metadata(root, batch_name, include_plates=(roof_key == "gable"))
 
     raw = ET.tostring(root, encoding="utf-8")
     return minidom.parseString(raw).toprettyxml(indent="  ", encoding="utf-8")

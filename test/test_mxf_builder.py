@@ -626,14 +626,19 @@ class TestGableFullSpanTrusses:
         assert bpts[0][1] == pytest.approx(0.0)
         assert bpts[1][1] == pytest.approx(0.0)
 
-        # --- Two top chords meet at the central ridge at X = width/2 ---
+        # --- Two top chords meet at the central ridge at X = width/2. The
+        # ridge Y includes the overhang run so the top chord keeps exactly the
+        # design pitch: ridge = (width/2 + overhang) * tan(pitch). ---
         ridge_x = self._WIDTH / 2.0
-        ridge_y = ridge_x * math.tan(math.radians(self._PITCH))
+        ridge_y = (ridge_x + self._OVERHANG_M) * math.tan(math.radians(self._PITCH))
         eave_xs: list[float] = []
+        # Coordinates are serialized with ``:g`` (6 sig figs), so compare the
+        # ridge point with a 1 mm tolerance.
         for top in tops:
             pts = self._chord_line(top)
             reaches_ridge = [
-                (p[0] == pytest.approx(ridge_x) and p[1] == pytest.approx(ridge_y))
+                (p[0] == pytest.approx(ridge_x, abs=1e-3)
+                 and p[1] == pytest.approx(ridge_y, abs=1e-3))
                 for p in pts
             ]
             assert any(reaches_ridge), (
@@ -643,8 +648,8 @@ class TestGableFullSpanTrusses:
             # The other endpoint is the eave (sits on the outer wall + overhang).
             for p in pts:
                 if not (
-                    p[0] == pytest.approx(ridge_x)
-                    and p[1] == pytest.approx(ridge_y)
+                    p[0] == pytest.approx(ridge_x, abs=1e-3)
+                    and p[1] == pytest.approx(ridge_y, abs=1e-3)
                 ):
                     eave_xs.append(p[0])
         # The two top chords come from opposite eaves (one left, one right).
@@ -653,16 +658,19 @@ class TestGableFullSpanTrusses:
         assert max(eave_xs) > ridge_x
 
     def test_gable_full_span_ridge_height_matches_pitch(self):
-        # The ridge Y coordinate of the top chords == (width/2) * tan(pitch).
+        # The ridge Y coordinate of the top chords == (width/2 + overhang) *
+        # tan(pitch), so the top chord run from the eave edge
+        # (X = -overhang) to the ridge keeps exactly the design pitch and the
+        # truss ridge aligns with the roof-surface ridge.
         root = self._build_root()
         frame = root.find("FrameList/Frame")
         tops = frame.findall("./PartList/Part/MemberList/WoodMember[@type='TopChord']")
-        expected_ridge_y = (self._WIDTH / 2.0) * math.tan(math.radians(self._PITCH))
+        expected_ridge_y = (self._WIDTH / 2.0 + self._OVERHANG_M) * math.tan(math.radians(self._PITCH))
         ridge_ys: list[float] = []
         for top in tops:
             for _x, y in self._chord_line(top):
                 ridge_ys.append(y)
-        assert max(ridge_ys) == pytest.approx(expected_ridge_y)
+        assert max(ridge_ys) == pytest.approx(expected_ridge_y, abs=1e-3)
 
     def test_gable_frame_quantity_matches_truss_count(self):
         # The FrameList carries two Frame definitions: a common-truss Frame
@@ -700,6 +708,33 @@ class TestGableFullSpanTrusses:
         assert min(eave_xs) == pytest.approx(0.0)
         assert max(eave_xs) == pytest.approx(self._WIDTH)
 
+    def test_gable_timber_and_plate_lists(self):
+        root = self._build_root()
+        timber_list = root.find("TimberSectionList")
+        assert timber_list is not None, "MXF must emit a <TimberSectionList> for gable roofs"
+        sections = timber_list.findall("TimberSection")
+        assert len(sections) == 5
+        ts2 = next(s for s in sections if s.attrib["id"] == "TS2")
+        assert ts2.attrib["height"] == "0.12"
+        assert ts2.attrib["thickness"] == "0.045"
+        
+        plate_list = root.find("PlateTypeList")
+        assert plate_list is not None, "MXF must emit a <PlateTypeList> for gable roofs"
+        plates = plate_list.findall("PlateType")
+        assert len(plates) == 10
+        pt1 = next(p for p in plates if p.attrib["id"] == "PT1")
+        assert pt1.attrib["name"] == "1010"
+        
+        # Check Job metadata has PlateTypeQuantityList
+        job = root.find(".//JobList/Job")
+        assert job is not None
+        qty_list = job.find("PlateTypeQuantityList")
+        assert qty_list is not None, "Job metadata must emit a <PlateTypeQuantityList> for gable roofs"
+        qty_elements = qty_list.findall("PlateTypeQuantity")
+        assert len(qty_elements) == 10
+        pt1_qty = next(q for q in qty_elements if q.attrib["plateTypeID"] == "PT1")
+        assert pt1_qty.attrib["quantity"] == "128"
+
     def test_flat_roof_emits_no_frame_list(self):
         # Only gable roofs emit a full-span FrameList in this task; a flat roof
         # must not produce one.
@@ -731,27 +766,33 @@ class TestTrussTransportHeightSplitting:
             GeometrySolver,
         )
 
-        # 14 m wide gable @ 30° -> ridge = 7.0 * tan(30°) ≈ 4.04 m (> 3.3 m).
+        overhang_m = 0.5
+        # 14 m wide gable @ 30° -> ridge = (7.0 + 0.5) * tan(30°) ≈ 4.33 m (> 3.3 m).
         solver = GeometrySolver(
-            self._TALL_WIDTH_M * 1000.0, self._DEPTH_M * 1000.0, "gable", self._PITCH
+            self._TALL_WIDTH_M * 1000.0,
+            self._DEPTH_M * 1000.0,
+            "gable",
+            self._PITCH,
+            overhang_mm=overhang_m * 1000.0,
         )
         assert solver.truss_height_m > TRANSPORT_MAX_HEIGHT_M
-        assert solver.needs_transport_split()
+        assert solver.needs_transport_split(overhang_m)
 
-        frames = solver.mxf_truss_parts()
+        frames = solver.mxf_truss_parts(overhang_m)
         assert len(frames) >= 2, "Solver must produce one split frame per truss position"
 
         expected_ridge_y = solver.truss_height_m
         expected_mid = self._TALL_WIDTH_M / 2.0
         tan_pitch = math.tan(math.radians(self._PITCH))
-        expected_x_left = TRANSPORT_SPLIT_HEIGHT_M / tan_pitch
+        expected_x_left = TRANSPORT_SPLIT_HEIGHT_M / tan_pitch - overhang_m
+        expected_x_right = self._TALL_WIDTH_M + overhang_m - TRANSPORT_SPLIT_HEIGHT_M / tan_pitch
 
         for y_m, parts in frames:
             assert len(parts) == 2, (
                 f"Tall truss frame at Y={y_m} must split into 2 parts, got {len(parts)}"
             )
 
-            # --- Part 1 (Base): rectangular, height <= 2.8 m ---
+            # --- Part 1 (Base): sloped profile, height <= 2.8 m ---
             name1, z1_base, z1_top, members1 = parts[0]
             assert name1 == "Part 1"
             assert z1_base == pytest.approx(0.0)
@@ -765,16 +806,30 @@ class TestTrussTransportHeightSplitting:
             _, b1_start, b1_end = bottoms1[0]
             assert b1_start == pytest.approx((0.0, 0.0))
             assert b1_end == pytest.approx((self._TALL_WIDTH_M, 0.0))
-            # Part 1 carries a flat HORIZONTAL TopChord at Y=2.8 (lower splice).
+            
+            # Part 1 carries three TopChords (left sloped, right sloped, horizontal splice)
             tops1 = [m for m in members1 if m[0] == "TopChord"]
-            assert len(tops1) == 1
-            _, sp_lower_start, sp_lower_end = tops1[0]
-            assert sp_lower_start[1] == pytest.approx(sp_lower_end[1]), (
-                "Part 1 flat top chord (lower splice) must be horizontal"
-            )
-            assert sp_lower_start[1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
-            assert sp_lower_start[0] == pytest.approx(0.0)
-            assert sp_lower_end[0] == pytest.approx(self._TALL_WIDTH_M)
+            assert len(tops1) == 3
+
+            horizontal_splice = [t for t in tops1 if t[1][1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M) and t[2][1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)]
+            assert len(horizontal_splice) == 1
+            _, sp_start, sp_end = horizontal_splice[0]
+            assert min(sp_start[0], sp_end[0]) == pytest.approx(expected_x_left)
+            assert max(sp_start[0], sp_end[0]) == pytest.approx(expected_x_right)
+
+            left_chord = [t for t in tops1 if min(t[1][0], t[2][0]) == pytest.approx(-overhang_m)]
+            assert len(left_chord) == 1
+            _, lc_start, lc_end = left_chord[0]
+            assert lc_start[0] == pytest.approx(-overhang_m) or lc_end[0] == pytest.approx(-overhang_m)
+            assert max(lc_start[0], lc_end[0]) == pytest.approx(expected_x_left)
+            assert max(lc_start[1], lc_end[1]) == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
+
+            right_chord = [t for t in tops1 if max(t[1][0], t[2][0]) == pytest.approx(self._TALL_WIDTH_M + overhang_m)]
+            assert len(right_chord) == 1
+            _, rc_start, rc_end = right_chord[0]
+            assert rc_start[0] == pytest.approx(self._TALL_WIDTH_M + overhang_m) or rc_end[0] == pytest.approx(self._TALL_WIDTH_M + overhang_m)
+            assert min(rc_start[0], rc_end[0]) == pytest.approx(expected_x_right)
+            assert max(rc_start[1], rc_end[1]) == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
 
             # --- Part 2 (Cap): triangular, sits on Part 1 ---
             name2, z2_base, z2_top, members2 = parts[1]
@@ -791,9 +846,7 @@ class TestTrussTransportHeightSplitting:
             )
             assert sp_upper_start[1] == pytest.approx(TRANSPORT_SPLIT_HEIGHT_M)
             assert sp_upper_start[0] == pytest.approx(expected_x_left)
-            assert sp_upper_end[0] == pytest.approx(
-                self._TALL_WIDTH_M - expected_x_left
-            )
+            assert sp_upper_end[0] == pytest.approx(expected_x_right)
             # Part 2 carries two TopChords that rise to the central ridge,
             # preserving the original roof pitch.
             tops2 = [m for m in members2 if m[0] == "TopChord"]
@@ -819,13 +872,18 @@ class TestTrussTransportHeightSplitting:
     def test_truss_transport_short_truss_not_split(self):
         from geometry_solver import GeometrySolver
 
-        # 10 m wide gable @ 30° -> ridge = 5.0 * tan(30°) ≈ 2.89 m (< 3.3 m).
+        overhang_m = 0.5
+        # 10 m wide gable @ 30° -> ridge = (5.0 + 0.5) * tan(30°) ≈ 3.175 m (< 3.3 m).
         solver = GeometrySolver(
-            self._SHORT_WIDTH_M * 1000.0, self._DEPTH_M * 1000.0, "gable", self._PITCH
+            self._SHORT_WIDTH_M * 1000.0,
+            self._DEPTH_M * 1000.0,
+            "gable",
+            self._PITCH,
+            overhang_mm=overhang_m * 1000.0,
         )
-        assert not solver.needs_transport_split()
+        assert not solver.needs_transport_split(overhang_m)
 
-        frames = solver.mxf_truss_parts()
+        frames = solver.mxf_truss_parts(overhang_m)
         assert len(frames) >= 2
         for _y_m, parts in frames:
             assert len(parts) == 1, "Short truss must NOT be transport-split"
@@ -849,12 +907,39 @@ class TestTrussTransportHeightSplitting:
         assert tall_mono.truss_height_m > 3.3
         assert tall_mono.mxf_truss_parts() == []
 
+    def test_mxf_builder_splits_tall_truss_in_xml(self):
+        from mxf_builder import build_mxf
+        class Params:
+            floorPlanDimensions = "14x15m"
+            roofType = "Gable"
+            roofPitch = 30.0
+            overhang = "0.5m"
+            buildingType = "TallGableHouse"
+
+        xml_bytes = build_mxf(Params())
+        import xml.etree.ElementTree as ET
+        root = ET.fromstring(xml_bytes)
+        
+        frame = root.find(".//FrameList/Frame[@id='F0']")
+        assert frame is not None
+        parts = frame.findall("./PartList/Part")
+        assert len(parts) == 2
+        assert parts[0].attrib["name"] == "Part 1"
+        assert parts[1].attrib["name"] == "Part 2"
+        
+        frame_gable = root.find(".//FrameList/Frame[@id='F1']")
+        assert frame_gable is not None
+        parts_gable = frame_gable.findall("./PartList/Part")
+        assert len(parts_gable) == 2
+        assert parts_gable[0].attrib["name"] == "Part 1"
+        assert parts_gable[1].attrib["name"] == "Part 2"
+
 
 class TestGableEndPanels:
     """Gable-end panel frame generation (roofType="Gable").
 
     Verifies the first and last trusses in the layout sequence are emitted as
-    ``GableEnd`` family ``PanelFrame`` definitions with vertical studs spaced
+    ``GableEnd`` family ``roof``-type Frame definitions with vertical studs spaced
     at the standard 600 mm pitch, per design.md §"Outer Gable-End Panels".
     """
 
@@ -875,7 +960,7 @@ class TestGableEndPanels:
         return _parse(build_mxf(_params(**defaults)))
 
     def test_gable_end(self):
-        # The MXF must carry a GableEnd PanelFrame Frame definition covering
+        # The MXF must carry a GableEnd roof-type Frame definition covering
         # the two outer (first + last) layout positions, plus vertical Stud
         # members spaced at 600 mm centres running from the bottom chord up to
         # the sloping top chord.
@@ -892,7 +977,10 @@ class TestGableEndPanels:
             "outer positions via quantity=2)"
         )
         gable = gable_frames[0]
-        assert gable.attrib["type"] == "PanelFrame"
+        assert gable.attrib["type"] == "roof", (
+            "GableEnd Frame must be type=\"roof\", matching the Pamir "
+            "reference export (PanelFrame is reserved for WebBracingFrame)"
+        )
         assert int(gable.attrib["quantity"]) == 2, (
             "GableEnd Frame must cover the two outer positions (first + last)"
         )
@@ -938,8 +1026,9 @@ class TestGableEndPanels:
 
     def test_gable_end_studs_reach_top_chord(self):
         # The stud top endpoint (Y) must match the top-chord height at that X.
-        # tan(30°) ~ 0.577; for X <= width/2 the top-chord Y = X * tan(pitch),
-        # and for X > width/2 it falls symmetrically.
+        # The top chord passes through the eave edge (X = -overhang, Y = 0),
+        # so for X <= width/2 the top-chord Y = (X + overhang) * tan(pitch),
+        # and for X > width/2 it is (width + overhang - X) * tan(pitch).
         root = self._build_root()
         gable = next(
             f for f in root.findall("FrameList/Frame")
@@ -954,7 +1043,10 @@ class TestGableEndPanels:
                 for p in face.attrib["polygon"].split(" ")
             ]
             (_sx, _sy), (ex, ey) = pts[0], pts[1]
-            expected_top = ex * tan_pitch if ex <= mid else (self._WIDTH - ex) * tan_pitch
+            if ex <= mid:
+                expected_top = (ex + self._OVERHANG_M) * tan_pitch
+            else:
+                expected_top = (self._WIDTH + self._OVERHANG_M - ex) * tan_pitch
             assert ey == pytest.approx(expected_top, abs=1e-3), (
                 f"Stud at X={ex} top Y={ey} does not match top chord Y={expected_top}"
             )
@@ -988,11 +1080,10 @@ class TestSlopedBracing:
 
     Verifies the MXF ``<FrameList>`` carries ``<EngineeredBrace>`` elements
     along the roof slope: purlins spaced at 1.0 m intervals along each top
-    chord plus diagonal wind braces at 45 degrees relative to the truss span,
-    per design.md §"Sloped Bracing System" / spec.md "Roof Slope Bracing".
-    Tested at the builder level (rather than the solver alone) because the
-    ``<EngineeredBraceList>`` is emitted inline under each ``<Frame>`` and
-    must reference real chord member ids.
+    chord, per design.md §"Sloped Bracing System" / spec.md "Roof Slope
+    Bracing". Tested at the builder level (rather than the solver alone)
+    because the ``<EngineeredBraceList>`` is emitted inline under each
+    ``<Frame>`` and must reference real chord member ids.
     """
 
     _WIDTH = 10.0
@@ -1000,7 +1091,6 @@ class TestSlopedBracing:
     _PITCH = 30.0
     _OVERHANG_M = 0.5
     _PURLIN_SPACING_M = 1.0
-    _WIND_BRACE_ANGLE_DEG = 45.0
 
     def _build_root(self, **overrides):
         defaults = {
@@ -1032,8 +1122,9 @@ class TestSlopedBracing:
 
     def test_sloped_bracing(self):
         # The MXF must carry <EngineeredBrace> elements along the roof slope:
-        # purlins at 1m centres along each top chord + diagonal wind braces
-        # at 45 degrees relative to the truss span.
+        # purlins at 1m centres along each top chord. Only the "purlin"
+        # braceType is emitted — any other token (e.g. a wind-brace type) is
+        # rejected by MiTek Pamir on import, so assert none slip through.
         root = self._build_root()
         frame_list = root.find("FrameList")
         assert frame_list is not None, "MXF must emit a <FrameList> for gable roofs"
@@ -1048,19 +1139,12 @@ class TestSlopedBracing:
 
         braces = brace_list.findall("EngineeredBrace")
         assert len(braces) > 0, "EngineeredBraceList must contain braces"
+        assert all(
+            b.attrib["braceType"] == "purlin" for b in braces
+        ), "Only the 'purlin' braceType may be emitted (Pamir rejects others)"
 
         purlins = [b for b in braces if b.attrib["braceType"] == "purlin"]
-        wind_braces = [b for b in braces if b.attrib["braceType"] == "windBrace"]
         assert len(purlins) >= 2, "Must emit purlins along both top chords"
-        assert len(wind_braces) >= 2, "Must emit wind braces on both top chords"
-
-        # --- Wind braces carry a 45-degree angle (or 180-45 = 135 for the
-        # right chord, mirroring the left across the ridge). ---
-        for wb in wind_braces:
-            angle = float(wb.attrib["angle"])
-            assert angle == pytest.approx(self._WIND_BRACE_ANGLE_DEG) or angle == (
-                pytest.approx(180.0 - self._WIND_BRACE_ANGLE_DEG)
-            ), f"Wind brace angle must be 45° (or 135°), got {angle}"
 
         # --- Purlins anchor on the top chords; group by linked chord index. ---
         left_purlins = []
@@ -1078,18 +1162,20 @@ class TestSlopedBracing:
         assert len(left_purlins) >= 1, "Left top chord must carry purlins"
         assert len(right_purlins) >= 1, "Right top chord must carry purlins"
 
-        # Each purlin sits ON its top chord line. Left chord rises from (0, 0)
-        # to (mid, ridge): y = x * tan(pitch). Right chord falls from (mid,
-        # ridge) to (width, 0): y = (width - x) * tan(pitch).
+        # Each purlin sits ON its top chord line. The left chord rises from
+        # the eave edge (X = -overhang, Y = 0) to the ridge, so its line is
+        # y = (x + overhang) * tan(pitch); the right chord falls from the
+        # ridge to (X = width + overhang, Y = 0), so its line is
+        # y = (width + overhang - x) * tan(pitch).
         tan_pitch = math.tan(math.radians(self._PITCH))
         mid = self._WIDTH / 2.0
         for x, y in left_purlins:
-            assert y == pytest.approx(x * tan_pitch, abs=1e-3), (
+            assert y == pytest.approx((x + self._OVERHANG_M) * tan_pitch, abs=1e-3), (
                 f"Left purlin at ({x},{y}) is not on the top chord line"
             )
             assert x <= mid + 1e-3, f"Left purlin X={x} must be left of the ridge"
         for x, y in right_purlins:
-            assert y == pytest.approx((self._WIDTH - x) * tan_pitch, abs=1e-3), (
+            assert y == pytest.approx((self._WIDTH + self._OVERHANG_M - x) * tan_pitch, abs=1e-3), (
                 f"Right purlin at ({x},{y}) is not on the top chord line"
             )
             assert x >= mid - 1e-3, f"Right purlin X={x} must be right of the ridge"
@@ -1170,7 +1256,7 @@ class TestSlopedBracing:
     def test_sloped_bracing_emitted_on_gable_end_frame(self):
         # The gable-end Frame shares the same full-span top-chord profile as a
         # common truss (the studs are additional members), so it must also
-        # carry an EngineeredBraceList with purlins + wind braces.
+        # carry an EngineeredBraceList of purlins (and only purlins).
         root = self._build_root()
         gable = next(
             f for f in root.findall("FrameList/Frame")
@@ -1181,10 +1267,12 @@ class TestSlopedBracing:
             "GableEnd Frame must also carry an <EngineeredBraceList>"
         )
         braces = brace_list.findall("EngineeredBrace")
+        assert braces, "GableEnd Frame must carry engineered braces"
+        assert all(
+            b.attrib["braceType"] == "purlin" for b in braces
+        ), "Only the 'purlin' braceType may be emitted on the GableEnd Frame"
         purlins = [b for b in braces if b.attrib["braceType"] == "purlin"]
-        wind_braces = [b for b in braces if b.attrib["braceType"] == "windBrace"]
         assert len(purlins) >= 2
-        assert len(wind_braces) >= 2
 
     def test_sloped_bracing_non_gable_emits_none(self):
         # Sloped bracing is gable-only; a flat roof emits no FrameList at all.
