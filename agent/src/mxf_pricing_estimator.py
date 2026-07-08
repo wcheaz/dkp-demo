@@ -7,7 +7,8 @@ def estimate_mxf_materials_and_price(
     plate_markup: float = 1.0,
     fabrication_markup: float = 0.2878,
     setup_cost_per_type: float = 156.41,
-    exchange_rate: float = 25.9667
+    exchange_rate: float = 25.9667,
+    substitute_real_prices: bool = False
 ) -> dict:
     """Parses any post-processed MXF file and calculates the material volumes, raw costs, and final estimated price."""
     if not os.path.exists(mxf_path):
@@ -16,6 +17,17 @@ def estimate_mxf_materials_and_price(
     tree = ET.parse(mxf_path)
     root = tree.getroot()
     
+    # Slovak priced M20/T150 catalog overrides for unpriced GNA20/T150 placeholder plates
+    substitute_map = {
+        ("0812", "GNA20"): ("0813", "M20", 688.21, 0.0757682),
+        ("0912", "T150"): ("1014", "T150", 1032.314, 0.1729512),
+        ("1010", "GNA20"): ("1010", "M20", 688.21, 0.0816714),
+        ("1010", "T150"): ("1014", "T150", 1032.314, 0.1729512),
+        ("1014", "GNA20"): ("1015", "M20", 688.21, 0.1217064),
+        ("1014", "T150"): ("1014", "T150", 1032.314, 0.1729512),
+        ("1031", "GNA20"): ("1025", "M20", 688.21, 0.2033778)
+    }
+    
     # 1. Load PlateTypeList costs (converted to EUR)
     pt_map = {}
     pt_list = root.find("PlateTypeList")
@@ -23,10 +35,19 @@ def estimate_mxf_materials_and_price(
         for pt in pt_list:
             cost_czk = float(pt.get("cost") or 0.0)
             weight = float(pt.get("weight") or 0.0)
+            name = pt.get("name")
+            gauge = pt.get("gauge")
+            
+            if substitute_real_prices:
+                key = (name, gauge)
+                if key in substitute_map:
+                    new_name, new_gauge, cost_czk, weight = substitute_map[key]
+                    name = new_name
+                    
             pt_map[pt.get("id")] = {
                 "cost_eur": (cost_czk / exchange_rate) * plate_markup,
                 "weight_kg": weight,
-                "name": pt.get("name")
+                "name": name
             }
             
     # 2. Map Timber Sections
