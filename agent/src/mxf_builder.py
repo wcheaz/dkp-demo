@@ -302,7 +302,16 @@ def _build_plate_type_list(root: ET.Element) -> None:
         ("PT6", "1220", "T150", 0.205, 0.124, 0.2993205, 1032.314, 8),
         ("PT7", "1320", "M20", 0.203, 0.127, 0.202380851, 688.21, 220),
         ("PT8", "1336", "M20", 0.356, 0.127, 0.3549142, 688.21, 4),
-        ("PT9", "2124", "T150", 0.245, 0.206, 0.594284236, 1032.314, 64)
+        ("PT9", "2124", "T150", 0.245, 0.206, 0.594284236, 1032.314, 64),
+        
+        # GNA20 and T150 from Slovak auto-framer catalog
+        ("PT10", "0812", "GNA20", 0.122, 0.076, 0.0727852, 688.21, 196),
+        ("PT11", "0912", "T150", 0.124, 0.088, 0.1284888, 1032.314, 4),
+        ("PT12", "1010", "GNA20", 0.102, 0.105, 0.0840735, 688.21, 128),
+        ("PT13", "1010", "T150", 0.102, 0.102, 0.1225071, 1032.314, 4),
+        ("PT14", "1014", "GNA20", 0.143, 0.105, 0.117867753, 688.21, 88),
+        ("PT15", "1014", "T150", 0.144, 0.102, 0.1729512, 1032.314, 144),
+        ("PT16", "1031", "GNA20", 0.307, 0.105, 0.253044754, 688.21, 84)
     ]
     for pid, name, gauge, length, width, weight, cost, qty in plates:
         ET.SubElement(
@@ -337,7 +346,9 @@ def _build_metadata(parent: ET.Element, batch_name: str, include_plates: bool = 
         plates = [
             ("PT0", 136), ("PT1", 128), ("PT2", 112), ("PT3", 200),
             ("PT4", 72), ("PT5", 64), ("PT6", 8), ("PT7", 220),
-            ("PT8", 4), ("PT9", 64)
+            ("PT8", 4), ("PT9", 64),
+            ("PT10", 196), ("PT11", 4), ("PT12", 128), ("PT13", 4),
+            ("PT14", 88), ("PT15", 144), ("PT16", 84)
         ]
         for pid, qty in plates:
             ET.SubElement(quantity_list, "PlateTypeQuantity", {"plateTypeID": pid, "quantity": str(qty)})
@@ -516,6 +527,44 @@ def _emit_frame_definition(
                     "z": "0",
                 },
             )
+
+    if family == "Truss":
+        # Find max X coordinate of BottomChord to get truss span dynamically
+        bottom_chords = [
+            m for part in parts for m in part[3] if m[0] == "BottomChord"
+        ]
+        width_m = 10.0
+        if bottom_chords:
+            width_m = max(max(start[0], end[0]) for _, start, end in bottom_chords)
+            
+        bearing_list = ET.SubElement(frame, "BearingList")
+        left_centre_x = WALL_THICKNESS / 2.0
+        right_centre_x = width_m - left_centre_x
+        
+        # Left bearing centered at half wall thickness
+        ET.SubElement(
+            bearing_list,
+            "Bearing",
+            {
+                "width": f"{WALL_PLATE_WIDTH:g}",
+                "centreX": f"{left_centre_x:g}",
+                "topY": "-0.12",  # top of wall plate is at the bottom of 120mm bottom chord
+                "depth": f"{WALL_PLATE_HEIGHT:g}",
+                "type": "pinned"
+            }
+        )
+        # Right bearing centered at width_m - half wall thickness
+        ET.SubElement(
+            bearing_list,
+            "Bearing",
+            {
+                "width": f"{WALL_PLATE_WIDTH:g}",
+                "centreX": f"{right_centre_x:g}",
+                "topY": "-0.12",
+                "depth": f"{WALL_PLATE_HEIGHT:g}",
+                "type": "pinned"
+            }
+        )
 
     if braces:
         _emit_engineered_brace_list(frame, frame_id, braces, top_chord_part_index=len(parts) - 1)
@@ -744,5 +793,29 @@ def build_mxf(params: Any) -> bytes:
         _build_plate_type_list(root)
     _build_metadata(root, batch_name, include_plates=(roof_key == "gable"))
 
+    # Reorder Building children to match strict sequence
+    building_order = ["BuildingWallList", "BuildingFrameList", "RoofList", "FloorList"]
+    building_order_map = {tag: idx for idx, tag in enumerate(building_order)}
+    building_children = list(building)
+    building_children.sort(key=lambda c: building_order_map.get(c.tag, 999))
+    building[:] = building_children
+
+    # Reorder root Mxf children to match strict sequence
+    mxf_order = [
+        "BuildingList",
+        "FrameList",
+        "WallList",
+        "TimberSectionList",
+        "PlateTypeList",
+        "SurfaceList",
+        "JobList",
+        "CustomerList",
+    ]
+    mxf_order_map = {tag: idx for idx, tag in enumerate(mxf_order)}
+    root_children = list(root)
+    root_children.sort(key=lambda c: mxf_order_map.get(c.tag, 999))
+    root[:] = root_children
+
     raw = ET.tostring(root, encoding="utf-8")
     return minidom.parseString(raw).toprettyxml(indent="  ", encoding="utf-8")
+

@@ -5,6 +5,7 @@ from src.agent import YourState, StateDeps, agent, DesignParameters
 from src.dxf_builder import build_dxf
 from src.ifc_builder import build_ifc
 from src.mxf_builder import build_mxf
+from src.patch_mxf_pricing import patch_mxf_bytes
 import logfire
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -157,10 +158,42 @@ async def mxf_generate(request: Request):
     )
 
 
+async def mxf_patch_pricing(request: Request):
+    try:
+        mxf_bytes = await request.body()
+    except Exception:
+        return JSONResponse(
+            status_code=422,
+            content={"error": "Invalid or missing request body"},
+        )
+
+    logging.info("[mxf patch] request received — %d bytes", len(mxf_bytes))
+
+    try:
+        patched_bytes = patch_mxf_bytes(mxf_bytes)
+    except Exception as exc:
+        logging.error("[mxf patch] patch_mxf_bytes failed: %s", exc)
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc)},
+        )
+
+    logging.info("[mxf patch] response sent — %d bytes", len(patched_bytes))
+
+    return Response(
+        content=patched_bytes,
+        media_type="application/mxf",
+        headers={
+            "Content-Disposition": 'attachment; filename="design_patched.mxf"',
+        },
+    )
+
+
 app.router.add_route("/api/health", health_check, methods=["GET"])
 app.router.add_route("/api/dxf/generate", dxf_generate, methods=["POST"])
 app.router.add_route("/api/ifc/generate", ifc_generate, methods=["POST"])
 app.router.add_route("/api/mxf/generate", mxf_generate, methods=["POST"])
+app.router.add_route("/api/mxf/patch-pricing", mxf_patch_pricing, methods=["POST"])
 
 if __name__ == "__main__":
     import uvicorn

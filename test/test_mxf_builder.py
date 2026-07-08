@@ -721,7 +721,7 @@ class TestGableFullSpanTrusses:
         plate_list = root.find("PlateTypeList")
         assert plate_list is not None, "MXF must emit a <PlateTypeList> for gable roofs"
         plates = plate_list.findall("PlateType")
-        assert len(plates) == 10
+        assert len(plates) == 17
         pt1 = next(p for p in plates if p.attrib["id"] == "PT1")
         assert pt1.attrib["name"] == "1010"
         
@@ -731,7 +731,7 @@ class TestGableFullSpanTrusses:
         qty_list = job.find("PlateTypeQuantityList")
         assert qty_list is not None, "Job metadata must emit a <PlateTypeQuantityList> for gable roofs"
         qty_elements = qty_list.findall("PlateTypeQuantity")
-        assert len(qty_elements) == 10
+        assert len(qty_elements) == 17
         pt1_qty = next(q for q in qty_elements if q.attrib["plateTypeID"] == "PT1")
         assert pt1_qty.attrib["quantity"] == "128"
 

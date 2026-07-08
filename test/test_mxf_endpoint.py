@@ -284,3 +284,46 @@ class TestMxfEndpointStructuralFraming:
                 f"<BuildingFrame frameID={bf.attrib['frameID']!r}> must "
                 f"reference a Frame defined in <FrameList> ({sorted(defined_ids)})"
             )
+
+
+class TestMxfEndpointPatchPricing:
+    @pytest.mark.anyio
+    async def test_mxf_patch_pricing_endpoint_returns_200(self, client):
+        # Create a mini mock MXF XML with a PlateTypeList
+        mxf_xml = """<?xml version="1.0" encoding="utf-8"?>
+        <Mxf version="MXF Version 5.11">
+            <PlateTypeList>
+                <PlateType id="PT0" gauge="GNA20" name="0812" cost="1"/>
+                <PlateType id="PT1" gauge="T150" name="0912" cost="2"/>
+            </PlateTypeList>
+            <FrameList>
+                <Frame id="F0">
+                    <PartList>
+                        <Part>
+                            <MemberFixingList>
+                                <Plate plateTypeID="PT0"/>
+                            </MemberFixingList>
+                        </Part>
+                    </PartList>
+                </Frame>
+            </FrameList>
+        </Mxf>
+        """
+        resp = await client.post("/api/mxf/patch-pricing", content=mxf_xml.encode("utf-8"))
+        assert resp.status_code == 200
+        assert "application/mxf" in resp.headers.get("content-type", "")
+        
+        # Parse output and assert plate costs are updated to realistic values
+        root = ET.fromstring(resp.content)
+        pt_list = root.find("PlateTypeList")
+        assert pt_list is not None
+        pt0 = pt_list.find("./PlateType[@name='0813']") # mapped from 0812 to 0813 M20
+        assert pt0 is not None
+        assert pt0.attrib["gauge"] == "M20"
+        assert pt0.attrib["cost"] == "688.21"
+        
+        pt1 = pt_list.find("./PlateType[@name='1014']") # mapped from 0912 T150 to 1014 T150
+        assert pt1 is not None
+        assert pt1.attrib["gauge"] == "T150"
+        assert pt1.attrib["cost"] == "1032.31" # string format maps to 1032.31 with :g format
+
