@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 # Add the agent folder to the system path to import src
-sys.path.insert(0, str(Path(__file__).resolve().parent / "agent"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "agent"))
 
 try:
     from src.mxf_pricing_estimator import estimate_mxf_materials_and_price

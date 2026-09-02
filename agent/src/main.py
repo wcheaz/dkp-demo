@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from src.agent import YourState, StateDeps, agent, DesignParameters
 from src.dxf_builder import build_dxf
@@ -11,11 +12,14 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+_LOG_FILE = Path(__file__).resolve().parents[2] / "logs" / "backend.log"
+_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     handlers=[
-        logging.FileHandler("/home/ncheaz/git/dkp-demo/logs/backend.log"),
+        logging.FileHandler(_LOG_FILE),
         logging.StreamHandler()
     ]
 )
