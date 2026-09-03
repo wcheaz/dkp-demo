@@ -1,20 +1,15 @@
 [project]
 name = "agent"
 version = "0.1.0"
-description = "Generic PydanticAI Agent Template"
+description = "Truss and roof engineering AI assistant agent"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "llama-index-core",
-    "llama-index-readers-file",
-    "llama-index-embeddings-huggingface",
-    "llama-index-llms-deepseek",
     "uvicorn",
     "fastapi",
-    "pydantic-ai",
+    "pydantic-ai>=1.61,<2",
     "starlette<1.0.0",
     "logfire>=4.19.0",
-    "torch",
     "python-dotenv",
     "httpx",
     "pydantic-ai-skills>=0.10.0",
@@ -23,14 +18,8 @@ dependencies = [
     "ifcopenshell>=0.8.5",
 ]
 
+[dependency-groups]
+dev = ["pytest"]
+
 [tool.uv]
 package = true
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
-[tool.uv.sources]
-torch = [{ index = "pytorch-cpu" }]
-torchvision = [{ index = "pytorch-cpu" }]

@@ -36,10 +36,15 @@ A truss and roof engineering AI assistant powered by PydanticAI and CopilotKit. 
    cp .env.example .env
    ```
 
-   Edit `.env` and set at minimum:
+   The agent defaults to DeepSeek (`deepseek-chat`). Set at minimum:
 
    ```bash
    OPENAI_API_KEY=sk-your-key
+   ```
+
+   To target a different OpenAI-compatible provider, also set:
+
+   ```bash
    OPENAI_BASE_URL=https://api.openai.com/v1
    OPENAI_MODEL=gpt-4
    ```
@@ -81,7 +86,7 @@ docker-compose up --build
 
 Services:
 
-- **Frontend**: <http://localhost:3001>
+- **Frontend**: <http://localhost:3000>
 - **Agent**: <http://localhost:8000>
 
 ## Architecture
@@ -224,3 +229,9 @@ K8s manifests in `k8s/`:
 | `npm run start`         | Start production server               |
 | `npm run lint`          | ESLint                                |
 | `npm run install:agent` | Install Python agent dependencies     |
+
+Run the Python test suite (246 tests) from the repo root:
+
+```bash
+uv run --project agent pytest test/ -q
+```

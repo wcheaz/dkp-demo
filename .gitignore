@@ -77,7 +77,6 @@ agent/data/storage/*
 
 # .vscode
 .vscode/*
-agent/uv.lock
 
 # Kubernetes secrets (should be generated, not committed)
 k8s/secrets.yaml

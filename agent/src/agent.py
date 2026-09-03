@@ -54,6 +54,7 @@ from pydantic_ai.messages import ModelMessage, ModelResponse, TextPart, Thinking
 from pydantic_ai.models import ModelRequestParameters, StreamedResponse
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.settings import ModelSettings
 import os
 from dotenv import load_dotenv
@@ -70,7 +71,8 @@ KNOWLEDGE_BASE_SLOVAK_DIR = (
 
 SKILLS_DIR = Path(__file__).resolve().parent.parent.parent / ".agents" / "skills"
 
-load_dotenv(dotenv_path="../.env")
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(dotenv_path=_REPO_ROOT / ".env")
 
 
 class DeepSeekModel(OpenAIModel):
@@ -155,9 +157,18 @@ class DeepSeekModel(OpenAIModel):
             raise
 
 
+# DeepSeek by default; set OPENAI_BASE_URL + OPENAI_MODEL to target any
+# OpenAI-compatible provider (OpenAI, etc.). OPENAI_BASE_URL was previously
+# ignored — DeepSeekProvider hardcodes the DeepSeek endpoint.
+_base_url = os.getenv("OPENAI_BASE_URL")
+if _base_url:
+    provider = OpenAIProvider(api_key=os.getenv("OPENAI_API_KEY"), base_url=_base_url)
+else:
+    provider = DeepSeekProvider(api_key=os.getenv("OPENAI_API_KEY"))
+
 model = DeepSeekModel(
     os.getenv("OPENAI_MODEL", "deepseek-chat"),
-    provider=DeepSeekProvider(api_key=os.getenv("OPENAI_API_KEY")),
+    provider=provider,
 )
 
 
