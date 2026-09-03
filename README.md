@@ -130,7 +130,6 @@ Browser
   - `reset_design` — removes entries or clears parameters (revision/restart loop)
   - `generate_dxf` / `generate_ifc` / `generate_mxf` — POST parameters to the agent's CAD endpoints, base64-encode the binary response, and store it in shared state (`dxfContent` / `ifcContent` / `mxfContent`)
 - `src/components/design-component.tsx` — Renders the scrollable design gallery with image modal enlargement, plus 2D/3D CAD viewer integration and download buttons.
-- `src/components/add-design-button.tsx` — Dev-only button to append test design entries.
 - `src/lib/types.ts` — TypeScript types: `AgentState` (shared state), `DesignEntry` (id, imageUrl, promptText, status, parameters, price, materialStats, dxfContent, ifcContent, mxfContent).
 
 ### Backend Stack

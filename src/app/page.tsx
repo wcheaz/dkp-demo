@@ -341,7 +341,6 @@ function YourMainContent() {
       parameters: {},
     },
   });
-  console.log("[YourMainContent] rendering with state:", JSON.stringify({ designsCount: state.designs?.length, designs: state.designs?.map(d => ({ id: d.id, dxf: !!d.dxfContent, ifc: !!d.ifcContent, status: d.status })) }));
 
   const { locale } = useLanguage();
 
