@@ -2,6 +2,8 @@
 
 A truss and roof engineering AI assistant powered by PydanticAI and CopilotKit. The agent has access to a knowledge base of 33 construction projects designed by medop strechy s.r.o. and can answer technical questions about truss designs, load calculations, materials, and engineering specifications. The frontend includes a design gallery where the AI agent can create and modify design entries with images and prompt text.
 
+> **Note on language:** The customer is Slovak, so the product is Slovak-first — in production the UI, agent responses, and knowledge base are all Slovak. The English locale exists **only as a developer testing aid** for non-Slovak speakers; it is not a supported product locale. See [Language & locale](#language--locale).
+
 ## Features
 
 - **Knowledge Base Queries** — Ask general or specific questions about truss/roof engineering projects and receive sourced answers from 33 project documents.
@@ -28,7 +30,10 @@ A truss and roof engineering AI assistant powered by PydanticAI and CopilotKit. 
    npm install
    ```
 
-   This automatically runs `npm run install:agent` via the `postinstall` hook, which sets up the Python agent environment.
+   This automatically runs the `postinstall` hook, which:
+   1. Sets up the Python agent environment (`npm run install:agent`)
+   2. Copies CAD viewer worker files into `public/` (`npm run copy-cad-workers`)
+   3. Patches the `three-dxf-loader` package (`scripts/patch-three-dxf-loader.js`)
 
 2. Configure environment:
 
@@ -48,6 +53,12 @@ A truss and roof engineering AI assistant powered by PydanticAI and CopilotKit. 
    OPENAI_BASE_URL=https://api.openai.com/v1
    OPENAI_MODEL=gpt-4
    ```
+
+   Other environment variables (see `.env.example`):
+
+   - `AGENT_URL` — where the frontend reaches the agent (default `http://localhost:8000/`).
+   - `UI_ORIGIN` — allowed CORS origin on the agent; must match where the UI is served (default `http://localhost:3000`). Change this if you run the UI on a different host/port.
+   - `LOGFIRE_TOKEN` — optional Logfire observability token.
 
 3. Populate the knowledge base (required for document queries):
    The agent reads documents from `agent/knowledge/trusses-ai-slovak/` (production locale) and `agent/knowledge/trusses-ai-english/` (developer testing). Each directory must contain a `summary.md` and project subdirectories with markdown files. The `agent/knowledge/` directory is gitignored — populate it separately.
@@ -103,7 +114,7 @@ Browser
         └── Shared state (AgentState via useCoAgent)
               │
               ▼
-        PydanticAI Agent (FastAPI/Starlette)
+        PydanticAI Agent (Starlette/Uvicorn)
               ├── Backend tools: generate_quote, query_knowledge_base, get_knowledge_summary
               ├── Skills: run-generate-design (pydantic-ai-skills, .agents/skills/)
               ├── OpenAI-compatible LLM (DeepSeek default, configurable model/endpoint)
@@ -117,17 +128,21 @@ Browser
 
 ### Frontend Stack
 
-| Layer          | Technology                                                                   | Purpose                                            |
-| -------------- | ---------------------------------------------------------------------------- | -------------------------------------------------- |
-| Framework      | Next.js 16 (App Router, Turbopack)                                           | Server-side rendering, API routing                 |
-| AI Integration | CopilotKit (`@copilotkit/react-core`, `@copilotkit/react-ui`)                | Chat sidebar, frontend tools, shared state         |
-| UI             | React 19, Tailwind CSS 4                                                     | Component rendering, styling                       |
-| File Parsing   | PapaParse, SheetJS (xlsx)                                                    | CSV and Excel file upload handling                 |
+| Layer          | Technology                                                    | Purpose                                                                   |
+| -------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, Turbopack, standalone output)         | Server-side rendering, API routing                                        |
+| AI Integration | CopilotKit (`@copilotkit/react-core`, `@copilotkit/react-ui`) | Chat sidebar, frontend tools, shared state                                |
+| AG-UI          | `@ag-ui/client`                                               | AG-UI `HttpAgent` bridging the CopilotKit runtime to the PydanticAI agent |
+| UI             | React 19, Tailwind CSS 4                                      | Component rendering, styling                                              |
+| CAD Viewing    | three.js, `three-dxf-loader`, `@mlightcad/cad-simple-viewer`  | In-browser 2D and 3D rendering of generated DXF/IFC files                 |
+| i18n           | `next-intl` (`src/i18n/`)                                     | UI translations for `sk`/`en`; language toggle in the UI                  |
+| File Parsing   | PapaParse, SheetJS (xlsx)                                     | CSV and Excel file upload handling                                        |
 
 **Key frontend files:**
 
 - `src/app/layout.tsx` — Root layout wrapping the app in `<CopilotKit>` provider (runtime URL `/api/copilotkit`, agent `my_agent`).
 - `src/app/api/copilotkit/route.ts` — CopilotKit runtime route; proxies to the PydanticAI agent via AG-UI `HttpAgent` (`AGENT_URL`, default `http://localhost:8000/`). Also exposes a GET health check.
+- `src/app/api/serve-image/[filename]/route.ts` — serves design-gallery images from `tmp/downloaded-images/` on the server; image URLs in design entries point here, so the directory must exist and contain the images for the gallery to render them.
 - `src/app/page.tsx` — Main page with `CopilotSidebar`, `YourMainContent`, and `CustomInput`. Registers frontend tools via `useFrontendTool`:
   - `generate_design` — creates a design entry (with simulated "processing" state for demo purposes)
   - `modify_design_entry` — updates image/prompt/price of an entry
@@ -139,12 +154,14 @@ Browser
 
 ### Backend Stack
 
-| Layer           | Technology            | Purpose                                                           |
-| --------------- | --------------------- | ----------------------------------------------------------------- |
-| Agent Framework | PydanticAI            | Tool registration, system prompts, result validation              |
-| Web Server      | Starlette/Uvicorn     | HTTP server, AG-UI protocol endpoint                              |
-| Observability   | Logfire               | Request tracing, instrumentation                                  |
-| LLM             | OpenAI-compatible API | Chat completions (OpenAI, DeepSeek, etc.)                         |
+| Layer           | Technology            | Purpose                                                            |
+| --------------- | --------------------- | ------------------------------------------------------------------ |
+| Agent Framework | PydanticAI            | Tool registration, system prompts, result validation               |
+| Skills          | pydantic-ai-skills    | Loads the `run-generate-design` skill for the design decision loop |
+| Web Server      | Starlette/Uvicorn     | HTTP server, AG-UI protocol endpoint (via `agent.to_ag_ui`)        |
+| Observability   | Logfire               | Request tracing, instrumentation                                   |
+| LLM             | OpenAI-compatible API | Chat completions (OpenAI, DeepSeek, etc.)                          |
+| CAD Generation  | ezdxf, ifcopenshell   | DXF and IFC file compilation from design parameters                |
 
 **Key backend files:**
 
@@ -175,6 +192,22 @@ Browser
    - Agent state (`knowledge_queries`, `last_knowledge_result`) tracks backend query history.
 1. **Frontend tools** are registered in the browser but callable by the agent — the agent decides when to call them, and the handler runs client-side to update React state.
 1. **CAD generation**: after `generate_design` completes with all required parameters, the agent calls `generate_dxf` / `generate_ifc` / `generate_mxf`; each handler POSTs the cleaned parameters to the matching backend endpoint, base64-encodes the binary response, and stores it in the design entry's shared state, where the 2D/3D viewers and download buttons pick it up.
+
+### Language & locale
+
+The customer is a Slovak company, and the product is **Slovak-first**: in production the UI renders in Slovak, the agent responds in Slovak, and knowledge base queries hit the Slovak tree. **English is not a supported product locale** — it exists purely as a testing convenience so developers who don't read Slovak can exercise the app.
+
+How it works:
+
+- **Locale source**: `src/i18n/config.ts` — locales are `sk` and `en`. The default is `en` when `NODE_ENV === "development"` and `sk` otherwise, so `npm run dev` starts in English and production builds start in Slovak.
+- **Toggle**: `src/components/language-toggle.tsx` is rendered **only in development builds** and persists the choice in `localStorage`. In production builds the component returns `null`, so the UI is hard-locked to Slovak with no way to switch.
+- **Agent sync**: `src/app/page.tsx` writes the UI locale into the shared agent state (`AgentState.locale`). The agent reads it to select the response language (appended to the system prompt in `agent/src/agent.py`) and the matching knowledge base: `agent/knowledge/trusses-ai-slovak/` for `sk`, `agent/knowledge/trusses-ai-english/` otherwise.
+
+Practical implications:
+
+- To test in English, run `npm run dev` — the UI defaults to English and the language toggle is visible.
+- To verify the production experience, use `npm run build && npm start` or Docker — everything is Slovak and the toggle is gone.
+- The English knowledge base mirrors the Slovak one for testing only; treat the Slovak tree as authoritative when populating or updating content.
 
 ### Knowledge Base
 
@@ -208,16 +241,20 @@ To deploy to your own cluster:
 
 ### Available Scripts
 
-| Script                  | Description                           |
-| ----------------------- | ------------------------------------- |
-| `npm run dev`           | Start UI + agent concurrently         |
-| `npm run dev:debug`     | Start with debug logging              |
-| `npm run dev:ui`        | Next.js UI only                       |
-| `npm run dev:agent`     | PydanticAI agent only                 |
-| `npm run build`         | Build Next.js for production          |
-| `npm run start`         | Start production server               |
-| `npm run lint`          | ESLint                                |
-| `npm run install:agent` | Install Python agent dependencies     |
+| Script                  | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `npm run dev`           | Start UI + agent concurrently                       |
+| `npm run dev:debug`     | Start with debug logging                            |
+| `npm run dev:ui`        | Next.js UI only                                     |
+| `npm run dev:agent`     | PydanticAI agent only                               |
+| `npm run build`         | Build Next.js for production                        |
+| `npm run start`         | Start production server                             |
+| `npm run start:all`     | Start production server + agent concurrently        |
+| `npm run lint`          | ESLint                                              |
+| `npm run i18n:check`    | Verify `sk`/`en` translation key parity             |
+| `npm run install:agent` | Install Python agent dependencies                   |
+
+`npm install` also triggers the `postinstall` hook, which runs `install:agent`, copies CAD worker files into `public/` (`copy-cad-workers`), and patches `three-dxf-loader`.
 
 Run the Python test suite from the repo root:
 
