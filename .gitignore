@@ -100,3 +100,17 @@ tmp/*
 
 # generated DXF files (build artifacts)
 generated/
+
+# Kilo agent manager state
+.kilo/
+
+# Ralph loop state and baselines
+.ralph/
+
+# AI dev workflow scaffolding (not needed to run the project)
+.agent/
+openspec/
+AGENTS.md
+
+# backup files (may contain generated secrets)
+*.bak
