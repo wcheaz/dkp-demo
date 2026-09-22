@@ -114,3 +114,11 @@ AGENTS.md
 
 # backup files (may contain generated secrets)
 *.bak
+
+# Machine-specific deployment pipeline (Multipass VM + MicroK8s on the original
+# developer's machine) — deleted before handoff. Kept here only so stale copies
+# are never accidentally committed. See the "Deployment" section of the README.
+/deploy-all.sh
+/scripts/deploy/
+/scripts/kubernetes-deployment-setup.sh
+/scripts/setup-vm-docker.sh
