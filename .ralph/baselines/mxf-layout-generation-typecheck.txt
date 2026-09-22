@@ -1,2 +1,0 @@
-npm warn allow-scripts .npmrc: ignoring unparseable entry "@scarf"
-EXIT=0

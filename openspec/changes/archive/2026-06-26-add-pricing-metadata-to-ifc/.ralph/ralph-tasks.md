@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/add-pricing-metadata-to-ifc/tasks.md

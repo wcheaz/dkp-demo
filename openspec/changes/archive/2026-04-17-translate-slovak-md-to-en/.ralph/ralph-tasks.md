@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/translate-slovak-md-to-en/tasks.md

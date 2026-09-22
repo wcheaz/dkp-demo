@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/mxf-layout-generation/tasks.md

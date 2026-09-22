@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/optimize-agent-skill-progressive-disclosure/tasks.md

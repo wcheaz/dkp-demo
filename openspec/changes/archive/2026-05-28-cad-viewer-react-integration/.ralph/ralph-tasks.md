@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/cad-viewer-react-integration/tasks.md

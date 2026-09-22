@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/fix-3d-cad-viewer-ifc-orientation/tasks.md

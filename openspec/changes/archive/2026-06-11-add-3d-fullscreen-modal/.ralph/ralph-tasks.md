@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/add-3d-fullscreen-modal/tasks.md

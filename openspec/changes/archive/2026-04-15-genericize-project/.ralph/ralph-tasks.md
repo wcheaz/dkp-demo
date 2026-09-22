@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/genericize-project/tasks.md

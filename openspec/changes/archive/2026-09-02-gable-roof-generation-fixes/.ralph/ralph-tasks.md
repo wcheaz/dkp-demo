@@ -1,1 +1,0 @@
-/home/ncheaz/git/dkp-demo/openspec/changes/gable-roof-generation-fixes/tasks.md
