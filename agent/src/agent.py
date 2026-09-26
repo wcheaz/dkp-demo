@@ -38,6 +38,7 @@
 
 import functools
 import logging
+import os
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -210,7 +211,8 @@ class YourState(BaseModel):
     last_knowledge_result: Optional[str] = None
     # DEMO-ONLY - designs field for design component; simulated for demo purposes
     designs: List[DesignEntry] = []
-    locale: str = "sk"
+    # None = frontend did not send a locale; falls back to AGENT_DEFAULT_LOCALE (default "sk")
+    locale: Optional[str] = None
 
 
 # ============================================================================
@@ -311,9 +313,16 @@ agent = Agent(
 )
 
 
+def effective_locale(state_locale: Optional[str]) -> str:
+    """Frontend state wins; missing locale falls back to AGENT_DEFAULT_LOCALE (default sk)."""
+    if state_locale:
+        return state_locale
+    return os.getenv("AGENT_DEFAULT_LOCALE", "sk")
+
+
 @agent.system_prompt
 def locale_instruction(ctx: RunContext[StateDeps]) -> str:
-    locale = ctx.deps.state.locale if ctx.deps.state.locale else "sk"
+    locale = effective_locale(ctx.deps.state.locale)
     return _LANGUAGE_INSTRUCTIONS.get(locale, _LANGUAGE_INSTRUCTIONS["sk"])
 
 
@@ -447,7 +456,7 @@ async def query_knowledge_base(ctx: RunContext[StateDeps], query: str) -> str:
     """
     summary_path = KNOWLEDGE_BASE_DIR / "summary.md"
     kb_dir = KNOWLEDGE_BASE_DIR
-    if ctx.deps.state.locale == "sk":
+    if effective_locale(ctx.deps.state.locale) == "sk":
         kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
         summary_path = KNOWLEDGE_BASE_SLOVAK_DIR / "summary.md"
     try:
@@ -536,7 +545,7 @@ async def get_knowledge_summary(ctx: RunContext[StateDeps]) -> str:
         Summary of knowledge base contents organized by subdirectory
     """
     kb_dir = KNOWLEDGE_BASE_DIR
-    if ctx.deps.state.locale == "sk":
+    if effective_locale(ctx.deps.state.locale) == "sk":
         kb_dir = KNOWLEDGE_BASE_SLOVAK_DIR
     summary_path = kb_dir / "summary.md"
     try:

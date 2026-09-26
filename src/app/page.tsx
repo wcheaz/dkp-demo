@@ -344,13 +344,15 @@ function YourMainContent() {
 
   const { locale } = useLanguage();
 
+  const stateLocale = state.locale;
+
   useEffect(() => {
     if (latestStateRef.current.locale !== locale) {
       const newState = { ...latestStateRef.current, locale };
       setState(newState);
       latestStateRef.current = newState;
     }
-  }, [locale]);
+  }, [locale, stateLocale]);
 
   const designs = useMemo(() => {
     const d = state.designs ?? [];
