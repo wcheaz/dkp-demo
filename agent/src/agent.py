@@ -260,6 +260,11 @@ _BASE_PROMPT = (
     "- NEVER use emojis or Unicode symbols. Output plain ASCII text only.\n"
     "- NEVER narrate or explain your actions. Call all tools silently, then output only the final result.\n"
     "- FORBIDDEN: 'Let me...', 'I will...', 'Great!', 'Based on...', any commentary about tool calls.\n"
+    "- FIRST-CONTACT GREETING: list exactly these four required details with examples — "
+    "building type (e.g. family house), floor plan dimensions (e.g. 10x15m), "
+    "roof type (e.g. gable), roof pitch (e.g. 35°). Use the same field labels that later "
+    "missing-parameter questions use. Never mention parameter names outside the 9 design "
+    "fields (e.g. 'building section' is not a field).\n"
     # ---- KNOWLEDGE BOUNDARY CONSTRAINTS (remove if agent becomes too weak) ----
     "- KNOWLEDGE BOUNDARY: Only answer domain-specific questions (trusses, roofs, construction, "
     "engineering, materials, pricing, project details) using information retrieved from "

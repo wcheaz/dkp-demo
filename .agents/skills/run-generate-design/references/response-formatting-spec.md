@@ -63,7 +63,69 @@ The system SHALL produce exactly one of: (1) a clean design summary with grouped
 
 #### Scenario: Missing parameter question output
 - **WHEN** a design was triggered but desirable fields are missing
-- **THEN** output SHALL be a single concise question listing only the missing desirable fields (building_type, floor_plan_dimensions, roof_type, roof_pitch)
+- **THEN** output SHALL be a single concise question listing only the missing desirable fields (building_type, floor_plan_dimensions, roof_type, roof_pitch), each with an example value as required by the "Missing parameter questions include examples" requirement below
+
+### Requirement: Missing parameter questions include examples
+Every missing-parameter question SHALL list each missing desirable field as a bullet with the locale label followed by an em-dash and example values drawn from the valid parameter values in parameter-extraction-spec.md. Bare field names without examples are not allowed.
+
+#### Scenario: English missing-parameter question with examples
+- **WHEN** locale is `en` and desirable fields are missing
+- **THEN** the output SHALL follow this template, listing only the actually missing fields:
+
+```
+To complete the design I still need:
+
+- Building type — e.g. family house, garage
+- Roof pitch — e.g. 35°
+```
+
+Field examples (locale `en`):
+
+- Building type — e.g. family house, garage
+- Floor plan dimensions — e.g. 10x15m
+- Roof type — e.g. gable, hip
+- Roof pitch — e.g. 35°
+
+#### Scenario: Slovak missing-parameter question with examples
+- **WHEN** locale is `sk` and desirable fields are missing
+- **THEN** the output SHALL follow this template, listing only the actually missing fields:
+
+```
+Na dokončenie návrhu potrebujem ešte:
+
+- Typ budovy — napr. rodinný dom, garáž
+- Sklon strechy — napr. 35°
+```
+
+Field examples (locale `sk`):
+
+- Typ budovy — napr. rodinný dom, garáž
+- Rozmery pôdorysu — napr. 10x15m
+- Typ strechy — napr. štítová, valbová
+- Sklon strechy — napr. 35°
+
+### Requirement: Greeting lists exactly the four desirable fields
+The first-contact greeting SHALL list exactly the four desirable fields (`building_type`, `floor_plan_dimensions`, `roof_type`, `roof_pitch`) using the locale labels from parameter-extraction-spec.md, each with an example value. The greeting SHALL NOT mention any parameter name that is not one of the 9 parameter fields (for example "building section" / "sekcia budovy"), and SHALL use the same labels that later missing-parameter questions use.
+
+#### Scenario: English greeting
+- **WHEN** locale is `en` and the user opens the conversation
+- **THEN** the greeting SHALL follow this template:
+
+```
+Hello! I can help you design a roof truss structure. To get started I need:
+Building type (e.g. family house), floor plan dimensions (e.g. 10x15m),
+roof type (e.g. gable), and roof pitch (e.g. 35°).
+```
+
+#### Scenario: Slovak greeting
+- **WHEN** locale is `sk` and the user opens the conversation
+- **THEN** the greeting SHALL follow this template:
+
+```
+Ahoj! Pomôžem vám navrhnúť strešnú konštrukciu. Na začiatok potrebujem:
+typ budovy (napr. rodinný dom), rozmery pôdorysu (napr. 10x15m),
+typ strechy (napr. štítová) a sklon strechy (napr. 35°).
+```
 
 #### Scenario: Direct answer output
 - **WHEN** the intent was a knowledge query or general question
